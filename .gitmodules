@@ -1,0 +1,3 @@
+[submodule "tools/sotn-decomp"]
+	path = tools/sotn-decomp
+	url = https://github.com/Xeeynamo/sotn-decomp.git

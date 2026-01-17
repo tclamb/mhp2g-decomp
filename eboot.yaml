@@ -1,0 +1,121 @@
+name: cod
+sha1: de96bd007ef69b59af9188bee5e7de53987ea2b6
+options:
+  basename: eboot.bin
+  target_path: eboot.bin
+  base_path: .
+  platform: psp
+  compiler: MWCCPS2
+
+  asm_path: asm
+  src_path: src
+  build_path: build
+  extensions_path: tools/splat_ext
+
+  ld_script_path: build/eboot.bin.ld
+  ld_generate_symbol_per_data_segment: True
+
+  create_asm_dependencies: True
+  create_undefined_funcs_auto: True
+  create_undefined_syms_auto: True
+  undefined_funcs_auto_path: undefined_funcs_auto.txt
+  undefined_syms_auto_path: undefined_syms_auto.txt
+
+  find_file_boundaries: True
+
+  o_as_suffix: True
+
+  symbol_addrs_path:
+    - symbol_addrs.txt
+  reloc_addrs_path:
+    - reloc_addrs.txt
+
+  extensions_path: tools/splat_ext
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+  add_set_gp_64: false
+  pair_rodata_to_text: True
+  suggestion_rodata_section_start: True
+  
+  global_vram_start: 0x08000000
+  global_vram_end:   0x09ffffff
+  
+  named_regs_for_c_funcs: False
+  migrate_rodata_to_functions: True
+  ld_bss_is_noload: True
+  disassemble_all: True
+  
+  section_order:
+    - .text
+    - .rodata
+    - .data
+    - .bss
+segments:
+  - [0x0, bin, elf_header]
+  - name: main
+    type: code
+    start: 0x25b4
+    vram: 0x08804000
+    bss_size: 0x163949F
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x25b4, asm, cod/08804000]
+      - [0x109e94, asm, cod/sceStub]
+      - [0x10a7a4, rodata, cod/0890c1f0]
+      - [0x10a7a8, rodata, cod/0890c1f4]
+      - [0x10a7b8, rodata, cod/0890c204]
+      - [0x10a7bc, rodata, cod/0890c208]
+      - [0x10a7c0, rodata, cod/0890c20c]
+      - [0x10aa54, rodata, cod/0890c4a0]
+      - [0x10aa58, rodata, cod/0890c4a4]
+      - [0x10aa8c, rodata, cod/0890c4d8]
+      - [0x10ad50, rodata, cod/0890c79c]
+      - [0x10b940, data, cod/0890d38c]
+      - [0x12e9bc, lit4, cod/08930408]
+      - [0x12ed94, data, cod/089307e0]
+      - [0x137254, int4, cod/08938ca0]
+      - [0x13726c, data, cod/08938cb8]
+      - [0x1372b0, int4, cod/08938cfc]
+      - [0x1372c8, data, cod/08938d10]
+      - [0x1752a8, int4, cod/08976cf4]
+      - [0x1752b4, data, cod/08976d00]
+      - [0x1987c8, int4, cod/0899a214]
+      - [0x1987ec, data, cod/0899a238]
+      - [0x1a169c, int4, cod/089a30e8]
+      - [0x1a16b4, data, cod/089a3100]
+      - [0x1a3fc4, int4, cod/089a5a10]
+      - [0x1a3fe8, data, cod/089a5a34]
+      - [0x1a8744, int4, cod/089aa190]
+      - [0x1a878c, lit4, cod/089aa1d8]
+      - [0x1a87e4, data, cod/089aa230]
+      - [0x1a8a74, int4, cod/089aa4c0]
+      - [0x1a8a80, data, cod/089aa4cc]
+      - [0x1ada60, lit4, cod/089af4ac]
+      - [0x1adab4, data, cod/089af500]
+      - [0x1ade88, int4, cod/089af8d4]
+      - [0x1adea0, data, cod/089af8ec]
+      - [0x1ae0b8, int4, cod/089afb04]
+      - [0x1ae0d0, data, cod/089afb1c]
+      - [0x1ae1ac, int4, cod/089afbf8]
+      - [0x1ae20c, data, cod/089afc58]
+      - [0x1ae690, int4, cod/088c9384]
+      - [0x1aeabc, int4, cod/089b0508]
+      - [0x1aead4, data, cod/089b0520]
+      - [0x1aed6c, int4, cod/089b07b8]
+      - [0x1aed9c, data, cod/089b07e8]
+      - [0x1afcac, int4, cod/089b16f8]
+      - [0x1afcd0, data, cod/089b171c]
+      - [0x1b1cf0, int4, cod/088fa274]
+      - [0x1b1d2c, data, cod/089b3778]
+      - [0x1b280c, int4, cod/089b4258]
+      - [0x1b2818, int4, cod/089b4264]
+      - [0x1b2824, data, cod/089b4270]
+      - [0x1b28b4, int4, cod/089092e4]
+      - [0x1b28c0, int4, cod/089093cc]
+      - [0x1b28cc, data, cod/089b4318]
+  - [0x1cb1f4, bin, elf_footer]
+  - [0x1cd5ec]

@@ -1,0 +1,33 @@
+Submodule tools/sotn-decomp contains modified content
+diff --git a/tools/sotn-decomp/tools/pspas/src/main.rs b/tools/sotn-decomp/tools/pspas/src/main.rs
+index fa0f816d4..ba9be7084 100644
+--- a/tools/sotn-decomp/tools/pspas/src/main.rs
++++ b/tools/sotn-decomp/tools/pspas/src/main.rs
+@@ -12,7 +12,8 @@ fn should_patch(op: &str) -> bool {
+         "vrot","vmov","vone","vzero","vs2i","vi2f","vadd","lv","sv","vcst","vmul","vsin","vcos",
+         "vf2id","vf2iz","vf2in","vf2iu","vsub","vdiv","vscl","vtfm4","vmax","vmin","vdot","vcrsp",
+         "vfad","vavg","vcmp","vsgn","vrsq","vcmovt","vsqrt","vcmovf","vfim","vocp","vuc2ifs",
+-        "vi2uc","mtv","mfv","vpfxs","vpfxt","bvtl","vpfxd",
++        "vi2uc","mtv","mfv","vpfxs","vpfxt","bvtl","vpfxd","bvfl","bvt","vabs","vasin","vcrs",
++        "vexp2","vidt","vlog2","vmidt","vmmov","vmmul","vneg","vqmul","vrcp","vsocp","vtfm3",
+     ];
+     OPS.contains(&op)
+ }
+@@ -66,7 +67,7 @@ fn main() {
+         .collect::<Vec<_>>()
+         .join("\n") + "\n";
+ 
+-    let mut proc = match Command::new("bin/allegrex-as")
++    let mut proc = match Command::new("mipsel-linux-gnu-as")
+         .args(env::args().skip(1))
+         .envs(env::vars())
+         .stdin(Stdio::piped())
+@@ -76,7 +77,7 @@ fn main() {
+     {
+         Ok(c) => c,
+         Err(e) => {
+-            println!("failed to run bin/allegrex-as: {}", e);
++            println!("failed to run mipsel-linux-gnu-as: {}", e);
+             std::process::exit(1)
+         },
+     };

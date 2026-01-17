@@ -1,0 +1,13 @@
+*.iso
+*.bin
+*.bin.ld
+build/
+assets/
+asm/
+.ninja_log
+.splache
+build.ninja
+**/__pycache__/
+include/
+undefined_funcs_auto.txt
+undefined_syms_auto.txt
