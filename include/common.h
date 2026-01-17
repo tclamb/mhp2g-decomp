@@ -1,9 +1,14 @@
-typedef signed char s8;
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
+typedef signed char int8_t;
+typedef unsigned char uint8_t;
+typedef signed short int16_t;
+typedef unsigned short uint16_t;
+typedef signed int int32_t;
+typedef unsigned int uint32_t;
+typedef signed long int64_t;
+typedef unsigned long uint64_t;
+
+#include <psptypes.h>
+#include <pspkerneltypes.h>
 
 typedef struct data_loader_vtable data_loader_vtable;
 typedef struct data_loader data_loader;
@@ -39,7 +44,7 @@ struct data_loader_vtable {
     void *unknown_0x38;
     s32 (*data_loader__is_loaded)(data_loader*, u16);
     void *unknown_0x40;
-    /* SceUID */ u32 (*data_loader__load_sce_font_library)(data_loader*, u32, u32);
+    SceUID (*data_loader__load_sce_font_library)(data_loader*, u32, u32);
     void *unknown_0x48;
 };
 
@@ -49,7 +54,7 @@ struct data_loader {
     u32 request_read_index;
     u32 request_write_index;
     u32 thread_state;
-    /* SceUID */ u32 file_descriptor;
+    SceUID file_descriptor;
     u32 unknown_0x1014;
     u32 data_file_stat_private0;
     u16 unknown_0x101c[129];
@@ -65,15 +70,15 @@ struct data_loader {
     void *ge_edram_end;
     u32 unknown_0x29208;
     u32 unknown_0x2920c[4];
-    /* SceUID */ u32 data_loader_semaphore;
+    SceUID data_loader_semaphore;
     u32 unknown_0x29220[8];
     s32 file_position;
-    /* SceUID */ u32 data_loader_thread;
+    SceUID data_loader_thread;
     u32 unknown_0x29248[6629];
     load_request *decrypting_request;
     u32 unknown_0x2f9e0[2];
-    /* SceUID */ u32 decryption_event_flag;
-    /* SceUID */ u32 decryption_thread;
+    SceUID decryption_event_flag;
+    SceUID decryption_thread;
     load_request *blocking_request;
     u8 is_data_file_encrypted;
     u8 unknown_0x2f9f5[3];
@@ -84,6 +89,6 @@ struct data_loader {
     u8 unknown_0x2fa05[3];
     u32 unknown_0x2fa08;
     u32 unknown_0x2fa0c;
-    /* SceUID */ u32 transfer_event_flag;
-    /* SceUID */ u32 transfer_thread;
+    SceUID transfer_event_flag;
+    SceUID transfer_thread;
 };

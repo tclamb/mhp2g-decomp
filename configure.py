@@ -26,7 +26,7 @@ PRE_ELF_PATH = f"build/{BASENAME}.elf"
 
 COMMON_INCLUDES = "-Iinclude"
 
-COMMON_COMPILE_FLAGS = "-O3 -Iinclude -nolink" # "-O2 -G0 $g"
+COMMON_COMPILE_FLAGS = "-O3 -gccinc -Iinclude -nolink -Iinclude/pspsdk -maxerrors 3 -w nocmdline" # "-O2 -G0 $g"
 
 GAME_GCC_CMD = f"./bin/mwccpsp.exe -c {COMMON_INCLUDES} {COMMON_COMPILE_FLAGS} $in"
 
