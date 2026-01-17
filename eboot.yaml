@@ -16,8 +16,8 @@ options:
   ld_generate_symbol_per_data_segment: True
 
   create_asm_dependencies: True
-  create_undefined_funcs_auto: True
-  create_undefined_syms_auto: True
+  create_undefined_funcs_auto: False
+  create_undefined_syms_auto: False
   undefined_funcs_auto_path: undefined_funcs_auto.txt
   undefined_syms_auto_path: undefined_syms_auto.txt
 
