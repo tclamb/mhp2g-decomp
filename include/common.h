@@ -79,8 +79,8 @@ struct data_loader {
     u8 is_data_file_encrypted;
     u8 unknown_0x2f9f5[3];
     u32 blocking_position;
-    s32 key_lower;
-    s32 key_upper;
+    u32 key_lower;
+    u32 key_upper;
     u8 unknown_0x2fa04;
     u8 unknown_0x2fa05[3];
     u32 unknown_0x2fa08;
