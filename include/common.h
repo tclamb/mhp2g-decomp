@@ -9,7 +9,6 @@ typedef struct data_loader_vtable data_loader_vtable;
 typedef struct data_loader data_loader;
 typedef struct load_request load_request;
 
-
 struct load_request {
     u16 status;
     u16 file_id;

@@ -65,6 +65,8 @@ segments:
     subalign: 4
     subsegments:
       - [0x25b4, asm, 08804000]
+      - [0x4cf14, c, io/data_loader__decrypt_buffer]
+      - [0x4cff8, asm, 0884ea44]
       - [0x4d134, c, io/data_loader__set_decryption_key]
       - [0x4d1a4, c, io/data_loader__next_decryption_key]
       - [0x4d21c, asm, 0884ebf0]
@@ -87,6 +89,8 @@ segments:
       - [0x1372c8, data, 08938d10]
       - [0x1752a8, int4, 08976cf4]
       - [0x1752b4, data, 08976d00]
+      - [0x19567c, bytetable, io/data_loader__decrypt_table]
+      - [0x19577c, data, 089971c8]
       - [0x1987c8, int4, 0899a214]
       - [0x1987ec, data, 0899a238]
       - [0x1a169c, int4, 089a30e8]
