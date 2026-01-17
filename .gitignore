@@ -1,4 +1,5 @@
 *.iso
+*.elf
 *.bin
 *.bin.ld
 build/

@@ -16,7 +16,7 @@ ROOT = Path(__file__).parent.resolve()
 TOOLS_DIR = ROOT / "tools"
 BIN_DIR = ROOT / "bin"
 
-BASENAME = "eboot.bin"
+BASENAME = "eboot.elf"
 YAML_FILE = ROOT / "eboot.yaml"
 
 LD_PATH = f"build/{BASENAME}.ld"
@@ -107,7 +107,7 @@ def build_stuff(linker_entries: List[LinkerEntry]):
     ninja.rule(
         "sha1sum",
         description="sha1sum $in",
-        command="sha1sum -c $in && touch $out",
+        command="cp $in build/ && cd build && sha1sum -c $in && touch ../$out",
     )
 
     ninja.rule(
@@ -170,7 +170,7 @@ def build_stuff(linker_entries: List[LinkerEntry]):
     ninja.build(
         ELF_PATH + ".ok",
         "sha1sum",
-        f"eboot.bin.sha1",
+        f"{BASENAME}.sha1",
         implicit=[ELF_PATH],
     )
 
