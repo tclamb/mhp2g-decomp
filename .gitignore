@@ -9,4 +9,4 @@ asm/
 .splache
 build.ninja
 **/__pycache__/
-include/
+**/*.asmproc.d

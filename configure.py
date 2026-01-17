@@ -24,11 +24,11 @@ ELF_PATH = f"build/{BASENAME}"
 MAP_PATH = f"build/{BASENAME}.map"
 PRE_ELF_PATH = f"build/{BASENAME}.elf"
 
-COMMON_INCLUDES = "-Iinclude -isystem include/sdk/ee -isystem include/gcc"
+COMMON_INCLUDES = "-Iinclude"
 
-COMMON_COMPILE_FLAGS = "-O2 -G0 $g"
+COMMON_COMPILE_FLAGS = "-O3 -Iinclude -nolink" # "-O2 -G0 $g"
 
-GAME_GCC_CMD = f"{BIN_DIR}/mwccpsp.exe -c {COMMON_INCLUDES} {COMMON_COMPILE_FLAGS} $in"
+GAME_GCC_CMD = f"./bin/mwccpsp.exe -c {COMMON_INCLUDES} {COMMON_COMPILE_FLAGS} $in"
 
 # GAME_COMPILE_CMD = f"{GAME_GCC_CMD} -S -o - | {TOOLS_DIR}/masps2.py | {GAME_CC_DIR}/ee/bin/as {COMMON_COMPILE_FLAGS} -EL -mabi=eabi"
 
@@ -86,11 +86,11 @@ def build_stuff(linker_entries: List[LinkerEntry]):
         command=f"cat $in | ./tools/sotn-decomp/tools/pspas/target/release/pspas -EL -I include/ -G0 -march=allegrex -mabi=eabi -no-pad-sections -o $out",
     )
 
-    # ninja.rule(
-    #     "cc",
-    #     description="cc $in",
-    #     command=f"{GAME_COMPILE_CMD} -o $out && {cross}strip $out -N dummy-symbol-name",
-    # )
+    ninja.rule(
+        "cc",
+        description="cc $in",
+        command=f"{GAME_GCC_CMD} -o $out && {cross}strip $out -N dummy-symbol-name",
+    )
 
     # ninja.rule(
     #     "libcc",

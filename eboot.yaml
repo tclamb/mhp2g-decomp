@@ -65,6 +65,8 @@ segments:
     subalign: 4
     subsegments:
       - [0x25b4, asm, 08804000]
+      - [0x4d134, c, io/data_loader__set_decryption_key]
+      - [0x4d1a4, asm, 0884ebf0]
       - [0x109e94, asm, sceStub]
       - [0x10a7a4, rodata, 0890c1f0]
       - [0x10a7a8, rodata, 0890c1f4]
