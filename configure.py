@@ -150,7 +150,7 @@ def build_stuff(linker_entries: List[LinkerEntry]):
             build(entry.object_path, entry.src_paths, "as")
         elif isinstance(seg, splat.segtypes.common.bin.CommonSegBin):
             build(entry.object_path, entry.src_paths, "cppsp")
-        elif seg.type == "bytetable":
+        elif seg.type in ("bytetable", "cstring"):
             build(entry.object_path, entry.src_paths, "cc")
         else:
             print(f"ERROR: Unsupported build segment type {seg.type}")
