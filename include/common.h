@@ -68,9 +68,9 @@ struct data_loader {
     u32 unknown_0x291f4[3];
     void *ge_edram_start;
     void *ge_edram_end;
-    u32 unknown_0x29208;
+    u32 unknown_flags;
     u32 unknown_0x2920c[4];
-    SceUID data_loader_semaphore;
+    SceUID fake_rofs_semaphore;
     u32 unknown_0x29220[8];
     s32 file_position;
     SceUID data_loader_thread;
