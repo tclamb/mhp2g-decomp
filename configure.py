@@ -26,7 +26,7 @@ PRE_ELF_PATH = f"build/{BASENAME}.elf"
 
 COMMON_INCLUDES = "-Iinclude"
 
-COMMON_COMPILE_FLAGS = "-O3 -gccinc -Iinclude -nolink -Iinclude/pspsdk -maxerrors 3 -w nocmdline" # "-O2 -G0 $g"
+COMMON_COMPILE_FLAGS = "-flag explicit_zero_data -O3 -gccinc -Iinclude -nolink -Iinclude/pspsdk -maxerrors 3 -w nocmdline -lang=c++" # "-O2 -G0 $g"
 
 GAME_GCC_CMD = f"./bin/mwccpsp.exe -c {COMMON_INCLUDES} {COMMON_COMPILE_FLAGS} $in"
 
@@ -84,6 +84,12 @@ def build_stuff(linker_entries: List[LinkerEntry]):
         "as",
         description="as $in",
         command=f"cat $in | ./tools/sotn-decomp/tools/pspas/target/release/pspas -EL -I include/ -G0 -march=allegrex -mabi=eabi -no-pad-sections -o $out",
+    )
+
+    ninja.rule(
+        "as.target",
+        description="as $in",
+        command=f"cat include/macro.inc $in | ./tools/sotn-decomp/tools/pspas/target/release/pspas -EL -I include/ -G0 -march=allegrex -mabi=eabi -no-pad-sections -o $out",
     )
 
     ninja.rule(
@@ -150,7 +156,7 @@ def build_stuff(linker_entries: List[LinkerEntry]):
             build(entry.object_path, entry.src_paths, "as")
         elif isinstance(seg, splat.segtypes.common.bin.CommonSegBin):
             build(entry.object_path, entry.src_paths, "cppsp")
-        elif seg.type in ("bytetable", "cstring"):
+        elif seg.type in ("bytetable", "cstring", "sha1digests"):
             build(entry.object_path, entry.src_paths, "cc")
         else:
             print(f"ERROR: Unsupported build segment type {seg.type}")

@@ -1,8 +1,9 @@
 #include "common.h"
 
-extern u8 data_loader__decrypt_table[];
+extern "C" u8 data_loader__decrypt_table[];
+extern "C" u32 data_loader__next_decryption_key(volatile data_loader *);
 
-void data_loader__decrypt_buffer(volatile data_loader *self, u8 *data, s32 size) {
+extern "C" void data_loader__decrypt_buffer(volatile data_loader *self, u8 *data, s32 size) {
     u8 *var_s4;
     u8 *var_s3;
     u8 *var_s2;
