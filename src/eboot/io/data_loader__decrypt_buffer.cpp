@@ -1,4 +1,4 @@
-#include "common.h"
+#include "io.hpp"
 
 extern "C" u8 data_loader__decrypt_table[];
 extern "C" u32 data_loader__next_decryption_key(volatile data_loader *);

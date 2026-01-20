@@ -38,7 +38,7 @@ class PSPSegBytetable(CommonSegCodeSubsegment):
         return ".data"
 
     def out_path(self) -> Path:
-        return options.opts.asset_path / self.dir / f"{self.name}.bytearray.inc.c"
+        return options.opts.asset_path / self.dir / f"{self.name}.bytearray.inc.cpp"
     
     def scan(self, rom_bytes: bytes):
         self.file_text = self.disassemble_data(rom_bytes)

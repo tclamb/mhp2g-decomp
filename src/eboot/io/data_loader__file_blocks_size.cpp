@@ -1,4 +1,4 @@
-#include "common.h"
+#include "io.hpp"
 
 extern "C" u32 data_loader__file_blocks_size(volatile data_loader *self, u32 file_id) {
   u32 uVar1;

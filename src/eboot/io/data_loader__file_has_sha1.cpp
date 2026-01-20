@@ -1,4 +1,4 @@
-#include "common.h"
+#include "io.hpp"
 
 extern "C" u8 data_loader__file_sha1_digests[][20];
 extern "C" u8 data_loader__null_sha1_digest[];

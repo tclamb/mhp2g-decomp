@@ -1,4 +1,4 @@
-#include "common.h"
+#include "io.hpp"
 
 extern "C" void data_loader__set_decryption_key(volatile data_loader *self, u32 key) {
     self->key_lower = key & 0xffff;

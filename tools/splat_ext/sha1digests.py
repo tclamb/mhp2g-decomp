@@ -38,7 +38,7 @@ class PSPSegSha1digests(CommonSegCodeSubsegment):
         return ".data"
 
     def out_path(self) -> Path:
-        return options.opts.asset_path / self.dir / f"{self.name}.sha1digests.inc.c"
+        return options.opts.asset_path / self.dir / f"{self.name}.sha1digests.inc.cpp"
     
     def scan(self, rom_bytes: bytes):
         self.file_text = self.disassemble_data(rom_bytes)

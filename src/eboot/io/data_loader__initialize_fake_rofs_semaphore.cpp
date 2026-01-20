@@ -1,4 +1,4 @@
-#include "common.h"
+#include "io.hpp"
 
 #include <pspge.h>
 #include <pspthreadman.h>

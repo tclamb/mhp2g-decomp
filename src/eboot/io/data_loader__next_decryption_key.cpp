@@ -1,4 +1,4 @@
-#include "common.h"
+#include "io.hpp"
 
 extern "C" u32 data_loader__next_decryption_key(volatile data_loader *self) {
     u32 next_upper;

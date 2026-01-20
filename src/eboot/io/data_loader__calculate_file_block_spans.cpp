@@ -1,4 +1,4 @@
-#include "common.h"
+#include "io.hpp"
 
 extern "C" int data_loader__file_has_sha1(data_loader *, u32);
 
