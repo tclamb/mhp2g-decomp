@@ -61,11 +61,12 @@ struct data_loader : data_loader_base {
     void decrypt_buffer(u8 *data, s32 size) volatile;
     void set_decryption_key(u32 key) volatile;
     void initialize_fake_rofs_semaphore() volatile;
+    void initialize_load_request_queue();
 
-    load_request request_ringbuf[128];
-    u32 request_read_index;
-    u32 request_write_index;
-    u32 thread_state;
+    load_request load_request_ringbuf[128];
+    u32 load_request_load_head;
+    u32 load_request_write_head;
+    u32 load_thread_status;
     SceUID file_descriptor;
     u32 unknown_0x1014;
     u32 data_file_stat_private0;
