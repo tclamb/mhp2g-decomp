@@ -11,3 +11,9 @@ typedef unsigned long uint64_t;
 
 #include <psptypes.h>
 #include <pspkerneltypes.h>
+
+extern "C" {
+  void sceKernelDcacheWritebackRange(const void *p, unsigned int size);
+  void sceKernelDcacheWritebackInvalidateRange(const void *p, unsigned int size);
+  void sceKernelDcacheInvalidateRange(const void *p, unsigned int size);
+}

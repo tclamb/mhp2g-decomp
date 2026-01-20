@@ -1,6 +1,6 @@
 #include "io.hpp"
 
-void data_loader::decrypt_buffer(u8 *data, s32 size) volatile {
+void data_loader::decrypt_buffer(u8 *data, s32 size, s32 prevSize) volatile {
     u8 *var_s4;
     u8 *var_s3;
     u8 *var_s2;

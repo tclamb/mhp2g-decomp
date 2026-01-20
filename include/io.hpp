@@ -51,26 +51,37 @@ struct data_loader : data_loader_base {
     static u8 file_sha1_digests[][20];
     static u8 null_sha1_digest[];
     static char fake_rofs_semaphore_name[];
-    static char data_bin_path[];
+    static char data_bin_path_string[];
+    static char umd_disc_drive_name[];
+    static char loader_thread_name[];
+    static char sha1_event_flag_name[];
+    static char sha1_thread_name[];
+    static char transfer_event_flag_name[];
+    static char transfer_thread_name[];
 
+    virtual void start_threads();
     virtual u32 file_blocks_size(u32 file_id);
 
     void calculate_file_block_spans();
     int file_has_sha1(u32 file_id);
     u32 next_decryption_key() volatile;
-    void decrypt_buffer(u8 *data, s32 size) volatile;
+    void decrypt_buffer(u8 *data, s32 size, s32 prevSize) volatile;
     void set_decryption_key(u32 key) volatile;
     void initialize_fake_rofs_semaphore() volatile;
     void initialize_load_request_queue();
+    char *data_bin_path();
 
     load_request load_request_ringbuf[128];
     u32 load_request_load_head;
     u32 load_request_write_head;
     u32 load_thread_status;
     SceUID file_descriptor;
-    u32 unknown_0x1014;
-    u32 data_file_stat_private0;
-    u16 unknown_0x101c[129];
+    u8 unused_flag_0x1014;
+    u8 padding_0x1015[3];
+    u32 data_bin_first_sector;
+    char sce_font_module_path[256];
+    u8 blocking_access_flag;
+    u8 padding_0x111d;
     u16 blocking_read_index;
     u32 unknown_0x1120[8];
     u8 data_index_2[0x1960];
@@ -86,13 +97,13 @@ struct data_loader : data_loader_base {
     SceUID fake_rofs_semaphore;
     u32 unknown_0x29220[8];
     s32 file_position;
-    SceUID data_loader_thread;
+    volatile SceUID loader_thread_id;
     block_span file_id_to_block_span[6602];
     u32 unknown_0x[27];
     load_request *decrypting_request;
     u32 unknown_0x2f9e0[2];
-    SceUID decryption_event_flag;
-    SceUID decryption_thread;
+    volatile SceUID sha1_event_flag_id;
+    volatile SceUID sha1_thread_id;
     load_request *blocking_request;
     u8 is_data_file_encrypted;
     u8 unknown_0x2f9f5[3];
@@ -103,6 +114,6 @@ struct data_loader : data_loader_base {
     u8 unknown_0x2fa05[3];
     u32 unknown_0x2fa08;
     u32 unknown_0x2fa0c;
-    SceUID transfer_event_flag;
-    SceUID transfer_thread;
+    volatile SceUID transfer_event_flag_id;
+    volatile SceUID transfer_thread_id;
 };
