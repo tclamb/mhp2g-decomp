@@ -26,16 +26,16 @@ struct data_loader_base {
     virtual void unknown_0x8();
     virtual void start_threads();
     virtual void unknown_0x10();
-    virtual s32 file_blocks_size(u16);
-    virtual s32 file_size(u16);
+    virtual u32 file_blocks_size(u16);
+    virtual u32 file_size(u16);
     virtual void unknown_0x20();
     virtual void unknown_0x24();
     virtual void unknown_0x28();
     virtual void unknown_0x2c();
     virtual void unknown_0x30();
-    virtual s32 load_async(void*, u32, u8, void*, u8);
+    virtual u32 load_async(void*, u32, u8, void*, u8);
     virtual void unknown_0x38();
-    virtual s32 is_loaded(u16);
+    virtual int is_loaded(u16);
     virtual void unknown_0x40();
     virtual SceUID load_sce_font_library(u32, u32);
     virtual void unknown_0x48();
@@ -47,6 +47,21 @@ struct block_span {
 };
 
 struct data_loader : data_loader_base {
+    static u8 decrypt_table[];
+    static u8 file_sha1_digests[][20];
+    static u8 null_sha1_digest[];
+    static char fake_rofs_semaphore_name[];
+    static char data_bin_path[];
+
+    virtual u32 file_blocks_size(u32 file_id);
+
+    void calculate_file_block_spans();
+    int file_has_sha1(u32 file_id);
+    u32 next_decryption_key() volatile;
+    void decrypt_buffer(u8 *data, s32 size) volatile;
+    void set_decryption_key(u32 key) volatile;
+    void initialize_fake_rofs_semaphore() volatile;
+
     load_request request_ringbuf[128];
     u32 request_read_index;
     u32 request_write_index;
