@@ -1,6 +1,6 @@
 #include "io.hpp"
 
-void data_loader::set_decryption_key(u32 key) volatile {
+void data_loader::set_decryption_key(u32 key) {
     key_lower = key & 0xffff;
     key_upper = (key >> 0x10) & 0xffff;
     if (key_lower == 0) {

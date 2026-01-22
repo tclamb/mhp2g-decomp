@@ -86,10 +86,10 @@ struct data_loader : data_loader_base {
 
     void calculate_file_block_spans();
     int file_has_sha1(u32 file_id);
-    u32 next_decryption_key() volatile;
-    void decrypt_buffer(u8 *data, s32 size, s32 prevSize) volatile;
-    void set_decryption_key(u32 key) volatile;
-    void initialize_fake_rofs_semaphore() volatile;
+    u32 next_decryption_key();
+    void decrypt_buffer(u8 *data, s32 size, s32 prevSize);
+    void set_decryption_key(u32 key);
+    void initialize_fake_rofs_semaphore();
     void initialize_load_request_queue();
     char *data_bin_path();
 
@@ -111,8 +111,8 @@ struct data_loader : data_loader_base {
     u32 file_id_to_first_block[6603];
     u8 unknown_0x91ec[20];
     u8 read_buffer[0x20000];
-    void *ge_edram_start;
-    void *ge_edram_end;
+    volatile void *ge_edram_start;
+    volatile void *ge_edram_end;
     u32 unknown_flags;
     u32 unknown_0x2920c[4];
     SceUID fake_rofs_semaphore;
@@ -132,8 +132,8 @@ struct data_loader : data_loader_base {
     u8 is_data_file_encrypted;
     u8 unknown_0x2f9f5[3];
     u32 blocking_position;
-    u32 key_lower;
-    u32 key_upper;
+    volatile u32 key_lower;
+    volatile u32 key_upper;
     u8 unknown_0x2fa04;
     u8 unknown_0x2fa05[3];
     u32 unknown_0x2fa08;

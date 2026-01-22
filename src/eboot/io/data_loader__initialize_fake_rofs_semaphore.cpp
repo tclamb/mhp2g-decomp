@@ -3,7 +3,7 @@
 #include <pspge.h>
 #include <pspthreadman.h>
 
-void data_loader::initialize_fake_rofs_semaphore() volatile {
+void data_loader::initialize_fake_rofs_semaphore() {
     ge_edram_start = sceGeEdramGetAddr();
     ge_edram_end = (void*)((u32)ge_edram_start + sceGeEdramGetSize());
     unknown_flags = 0;
