@@ -54,14 +54,14 @@ loop_8:
     sceKernelDcacheWritebackRange(file_id_to_first_block, 0x6740);
     set_decryption_key(0);
     decrypt_buffer((u8*)file_id_to_first_block, 0x672C, 0);
-    sceKernelDcacheInvalidateRange(data_index_2, 0x1980);
+    sceKernelDcacheInvalidateRange(file_size_pairs, 0x1980);
 loop_13:
-    if (sceIoRead(file_descriptor, data_index_2, 0x1960) < 0) {
+    if (sceIoRead(file_descriptor, file_size_pairs, 0x1960) < 0) {
         sceKernelDelayThreadCB(10000);
         goto loop_13;
     }
-    sceKernelDcacheWritebackRange(data_index_2, 0x1980);
-    decrypt_buffer((u8*)data_index_2, 0x1960, 0x672c);
+    sceKernelDcacheWritebackRange(file_size_pairs, 0x1980);
+    decrypt_buffer((u8*)file_size_pairs, 0x1960, 0x672c);
 loop_18:
     if (sceIoGetstat(data_bin_path(), &sp.sp10) < 0) {
         sceKernelDelayThreadCB(10000);

@@ -24,28 +24,33 @@ struct load_request {
 };
 
 struct data_loader_base {
-    virtual void unknown_0x4();
-    virtual void unknown_0x8();
-    virtual void start_threads();
-    virtual void unknown_0x10();
-    virtual u32 file_blocks_size(u16);
-    virtual u32 file_size(u16);
-    virtual void unknown_0x20();
-    virtual void unknown_0x24();
-    virtual void unknown_0x28();
-    virtual void unknown_0x2c();
-    virtual void unknown_0x30();
-    virtual u32 load_async(void*, u32, u8, void*, u8);
-    virtual void unknown_0x38();
-    virtual int is_loaded(u16);
-    virtual void unknown_0x40();
-    virtual SceUID load_sce_font_library(u32, u32);
-    virtual void unknown_0x48();
+    virtual void unknown_0x4() = 0;
+    virtual void unknown_0x8() = 0;
+    virtual void start_threads() = 0;
+    virtual void unknown_0x10() = 0;
+    virtual u32 file_blocks_size(u32) = 0;
+    virtual u32 file_size(u32) = 0;
+    virtual void unknown_0x20() = 0;
+    virtual void unknown_0x24() = 0;
+    virtual void unknown_0x28() = 0;
+    virtual void unknown_0x2c() = 0;
+    virtual void unknown_0x30() = 0;
+    virtual u32 load_async(void*, u32, u8, void*, u8) = 0;
+    virtual void unknown_0x38() = 0;
+    virtual int is_loaded(u16) = 0;
+    virtual void unknown_0x40() = 0;
+    virtual SceUID load_sce_font_library(u32, u32) = 0;
+    virtual void unknown_0x48() = 0;
 };
 
 struct block_span {
     u16 first_block;
     u16 num_blocks;
+};
+
+struct file_size_pair {
+    u32 file_id;
+    u32 size;
 };
 
 struct data_loader : data_loader_base {
@@ -61,8 +66,23 @@ struct data_loader : data_loader_base {
     static char transfer_event_flag_name[];
     static char transfer_thread_name[];
 
+    virtual void unknown_0x4() = 0;
+    virtual void unknown_0x8() = 0;
     virtual void start_threads();
-    virtual u32 file_blocks_size(u32 file_id);
+    virtual void unknown_0x10() = 0;
+    virtual u32 file_blocks_size(u32);
+    virtual u32 file_size(u32);
+    virtual void unknown_0x20() = 0;
+    virtual void unknown_0x24() = 0;
+    virtual void unknown_0x28() = 0;
+    virtual void unknown_0x2c() = 0;
+    virtual void unknown_0x30() = 0;
+    virtual u32 load_async(void*, u32, u8, void*, u8) = 0;
+    virtual void unknown_0x38() = 0;
+    virtual int is_loaded(u16) = 0;
+    virtual void unknown_0x40() = 0;
+    virtual SceUID load_sce_font_library(u32, u32) = 0;
+    virtual void unknown_0x48() = 0;
 
     void calculate_file_block_spans();
     int file_has_sha1(u32 file_id);
@@ -86,12 +106,11 @@ struct data_loader : data_loader_base {
     u8 padding_0x111d;
     u16 blocking_read_index;
     u32 unknown_0x1120[8];
-    u8 data_index_2[0x1960];
+    file_size_pair file_size_pairs[812];
     u32 unknown_0x2aa0[8];
     u32 file_id_to_first_block[6603];
-    u32 unknown_0x91ec[2];
+    u8 unknown_0x91ec[20];
     u8 read_buffer[0x20000];
-    u32 unknown_0x291f4[3];
     void *ge_edram_start;
     void *ge_edram_end;
     u32 unknown_flags;
@@ -101,7 +120,10 @@ struct data_loader : data_loader_base {
     s32 file_position;
     volatile SceUID loader_thread_id;
     block_span file_id_to_block_span[6602];
-    u32 unknown_0x[27];
+    u8 sha1[20];
+    u32 unknown_0x2f984;
+    u32 sha1_state[8];
+    u8 unknown_0x2f988[52];
     load_request *decrypting_request;
     u32 unknown_0x2f9e0[2];
     volatile SceUID sha1_event_flag_id;

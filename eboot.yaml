@@ -71,7 +71,7 @@ segments:
       - [0x4cff8, asm, 0884ea44]
       - [0x4d134, cpp, io/data_loader__set_decryption_key]
       - [0x4d1a4, cpp, io/data_loader__next_decryption_key]
-      - [0x4d21c, asm, 0884ebf0]
+      - [0x4d21c, cpp, io/data_loader__file_size]
       - [0x4d28c, cpp, io/data_loader__file_blocks_size]
       - [0x4d2c0, asm, 0884ed0c]
       - [0x4d8f4, cpp, io/data_loader__file_has_sha1]
