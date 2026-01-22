@@ -17,3 +17,5 @@ extern "C" {
   void sceKernelDcacheWritebackInvalidateRange(const void *p, unsigned int size);
   void sceKernelDcacheInvalidateRange(const void *p, unsigned int size);
 }
+
+#include "io.hpp"

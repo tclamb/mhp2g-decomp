@@ -1,6 +1,7 @@
 import struct
 from pathlib import Path
 from typing import Dict, List, Optional, Union
+import subprocess
 
 from ...util import options, log
 
@@ -32,7 +33,7 @@ class PSPSegSha1digests(CommonSegCodeSubsegment):
         self.data_only = isinstance(yaml, dict) and yaml.get("data_only", False)
 
     def format_sym_name(self, sym) -> str:
-        return sym.name
+        return subprocess.run(["cwdemangle", sym.name], capture_output=True, text=True).stdout
 
     def get_linker_section(self) -> str:
         return ".data"

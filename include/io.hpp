@@ -1,3 +1,5 @@
+#pragma once
+
 #include "common.h"
 
 typedef struct data_loader_vtable data_loader_vtable;
