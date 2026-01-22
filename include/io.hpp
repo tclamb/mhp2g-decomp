@@ -5,7 +5,7 @@
 typedef struct data_loader_vtable data_loader_vtable;
 typedef struct data_loader data_loader;
 typedef struct load_request load_request;
-typedef struct block_span block_span;
+typedef struct block_offset block_offset;
 
 struct load_request {
     u16 status;
@@ -43,9 +43,9 @@ struct data_loader_base {
     virtual void unknown_0x48() = 0;
 };
 
-struct block_span {
-    u16 first_block;
-    u16 num_blocks;
+struct block_offset {
+    u16 block_number;
+    u16 offset;
 };
 
 struct file_size_pair {
@@ -84,7 +84,7 @@ struct data_loader : data_loader_base {
     virtual SceUID load_sce_font_library(u32, u32) = 0;
     virtual void unknown_0x48() = 0;
 
-    void calculate_file_block_spans();
+    void calculate_file_block_offsets();
     int file_has_sha1(u32 file_id);
     u32 next_decryption_key();
     void decrypt_buffer(u8 *data, s32 size, s32 prevSize);
@@ -119,7 +119,7 @@ struct data_loader : data_loader_base {
     u32 unknown_0x29220[8];
     s32 file_position;
     volatile SceUID loader_thread_id;
-    block_span file_id_to_block_span[6602];
+    block_offset file_id_to_block_offset[6602];
     u8 sha1[20];
     u32 unknown_0x2f984;
     u32 sha1_state[8];

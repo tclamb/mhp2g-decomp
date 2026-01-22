@@ -68,7 +68,7 @@ loop_18:
         goto loop_18;
     }
     data_bin_first_sector = sp.sp10.st_private[1];
-    calculate_file_block_spans();
+    calculate_file_block_offsets();
     unused_flag_0x1014 = 3;
     initialize_load_request_queue();
     blocking_access_flag = 0;

@@ -1,17 +1,17 @@
 #include "io.hpp"
 
-void data_loader::calculate_file_block_spans() {
+void data_loader::calculate_file_block_offsets() {
   u32 s16;
   s32 iVar1;
   u32 wVar2;
   u32 wVar3;
   u32 uVar5;
-  block_span *pdVar5;
+  block_offset *pdVar5;
   u32 uVar4;
 
   wVar3 = 0;
   uVar5 = 0;
-  pdVar5 = file_id_to_block_span;
+  pdVar5 = file_id_to_block_offset;
   for (uVar4 = 0; uVar4 < 0x19ca; uVar4++) {
     s16 = file_has_sha1(uVar4 & 0xffff);
     if (s16 != 0) {
@@ -22,12 +22,12 @@ void data_loader::calculate_file_block_spans() {
         wVar3 = (u16) wVar3;
       }
       wVar2 = (uVar5 >> 0xb);
-      pdVar5->first_block = wVar3;
-      pdVar5->num_blocks = wVar2;
+      pdVar5->block_number = wVar3;
+      pdVar5->offset = wVar2;
       uVar5 = uVar5 + iVar1;
     } else {
-      pdVar5->first_block = 0xffff;
-      pdVar5->num_blocks = 0;
+      pdVar5->block_number = 0xffff;
+      pdVar5->offset = 0;
     }
     pdVar5 = pdVar5 + 1;
   }

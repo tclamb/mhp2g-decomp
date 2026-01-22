@@ -75,7 +75,7 @@ segments:
       - [0x4d28c, cpp, io/data_loader__file_blocks_size]
       - [0x4d2c0, asm, 0884ed0c]
       - [0x4d8f4, cpp, io/data_loader__file_has_sha1]
-      - [0x4d938, cpp, io/data_loader__calculate_file_block_spans]
+      - [0x4d938, cpp, io/data_loader__calculate_file_block_offsets]
       - [0x4da08, asm, 0884f454]
       - [0x4dd64, cpp, io/data_loader__data_bin_path]
       - [0x4dd70, asm, 0884f7bc]
