@@ -48,6 +48,12 @@ options:
   migrate_rodata_to_functions: True
   ld_bss_is_noload: True
   disassemble_all: True
+  auto_decompile_empty_functions: true
+  make_full_disasm_for_code: True
+
+  asm_inc_header: |
+    .set noat      /* allow manual use of $at */
+    .set noreorder /* don't insert nops after branches */
   
   section_order:
     - .text

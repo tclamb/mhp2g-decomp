@@ -4,6 +4,7 @@ import argparse
 import os
 import shutil
 import sys
+import json
 from pathlib import Path
 from typing import Dict, List, Set, Union
 
@@ -16,7 +17,8 @@ ROOT = Path(__file__).parent.resolve()
 TOOLS_DIR = ROOT / "tools"
 BIN_DIR = ROOT / "bin"
 
-BASENAME = "eboot.elf"
+MODULE = "eboot"
+BASENAME = f"{MODULE}.elf"
 YAML_FILE = ROOT / "eboot.yaml"
 
 LD_PATH = f"build/{BASENAME}.ld"
@@ -48,7 +50,9 @@ def clean():
 
 
 def build_stuff(linker_entries: List[LinkerEntry]):
-    built_objects: Set[Path] = set()
+    built_objects: Dict[String,Set[Path]] = dict()
+    built_units: Dict[String,List[Path]] = dict()
+    built_categories: Set[String] = set()
 
     def build(
         object_paths: Union[Path, List[Path]],
@@ -64,7 +68,8 @@ def build_stuff(linker_entries: List[LinkerEntry]):
 
         for object_path in object_paths:
             if object_path.suffix == ".o":
-                built_objects.add(object_path)
+                module = object_path.parts[2] # build / category / module / ...
+                built_objects.setdefault(module, []).append(object_path)
             ninja.build(
                 outputs=object_strs,
                 rule=task,
@@ -72,6 +77,26 @@ def build_stuff(linker_entries: List[LinkerEntry]):
                 variables=variables,
                 implicit_outputs=implicit_outputs,
             )
+
+    def add_unit(target_path, base_path, src_path = None, is_complete = False):
+        if target_path:
+            unit_path = target_path.relative_to('build/asm').with_suffix('')
+        elif base_path:
+            unit_path = base_path.relative_to('build/assets').with_suffix('')
+        unit_categories = [str(parent) for parent in unit_path.parents][:-1] # / ["."]
+        for c in unit_categories:
+            built_categories.add(c)
+        module = str(unit_categories[-1])
+        built_units.setdefault(module, []).append({
+            "name": str(unit_path),
+            "target_path": target_path and str(target_path) or str(base_path),
+            "base_path": base_path and str(base_path),
+            "metadata": {
+                "progress_categories": unit_categories,
+                "source_path": str(src_path),
+                "complete": is_complete,
+            }
+        })
 
     ninja = ninja_syntax.Writer(open(str(ROOT / "build.ninja"), "w"), width=9999)
 
@@ -95,13 +120,13 @@ def build_stuff(linker_entries: List[LinkerEntry]):
     ninja.rule(
         "cc",
         description="cc $in",
-        command=f"{GAME_GCC_CMD} -o $out && {cross}strip $out -N dummy-symbol-name",
+        command=f"{GAME_GCC_CMD} -o $out",
     )
 
     # ninja.rule(
     #     "libcc",
     #     description="cc $in",
-    #     command=f"{LIB_COMPILE_CMD} $in -o $out && {cross}strip $out -N dummy-symbol-name",
+    #     command=f"{LIB_COMPILE_CMD} $in -o $out",
     # )
 
     ninja.rule(
@@ -141,6 +166,7 @@ def build_stuff(linker_entries: List[LinkerEntry]):
             seg, splat.segtypes.common.data.CommonSegData
         ):
             build(entry.object_path, entry.src_paths, "as")
+            add_unit(entry.object_path, None)
         elif isinstance(seg, splat.segtypes.common.c.CommonSegC):
             if any(
                 str(src_path).startswith("src/lib/") for src_path in entry.src_paths
@@ -151,13 +177,23 @@ def build_stuff(linker_entries: List[LinkerEntry]):
                     g = ""
                 else:
                     g = "-g"
-                build(entry.object_path, entry.src_paths, "cc", variables={"g": g})
+                base_path = entry.object_path
+                target_path = 'build/asm' / base_path.relative_to('build/src')
+                build(
+                    target_path,
+                    ['asm' / p.relative_to('src').with_suffix('.s') for p in entry.src_paths],
+                    "as")
+                build(base_path, entry.src_paths, "cc", variables={"g": g})
+
+                add_unit(target_path, base_path, src_path=entry.src_paths[0])
         elif isinstance(seg, splat.segtypes.common.databin.CommonSegDatabin):
             build(entry.object_path, entry.src_paths, "as")
         elif isinstance(seg, splat.segtypes.common.bin.CommonSegBin):
             build(entry.object_path, entry.src_paths, "cppsp")
         elif seg.type in ("bytetable", "cstring", "sha1digests"):
-            build(entry.object_path, entry.src_paths, "cc")
+            base_path = entry.object_path
+            build(base_path, entry.src_paths, "cc")
+            add_unit(None, base_path, src_path=entry.src_paths[0], is_complete=True)
         else:
             print(f"ERROR: Unsupported build segment type {seg.type}")
             sys.exit(1)
@@ -166,7 +202,8 @@ def build_stuff(linker_entries: List[LinkerEntry]):
         PRE_ELF_PATH,
         "ld",
         LD_PATH,
-        implicit=[str(obj) for obj in built_objects],
+        implicit=[str(obj) for obj in built_objects[MODULE]],
+        variables={"map": f"-Map {MAP_PATH}"},
     )
 
     ninja.build(
@@ -181,6 +218,20 @@ def build_stuff(linker_entries: List[LinkerEntry]):
         f"{BASENAME}.sha1",
         implicit=[ELF_PATH],
     )
+
+    with open("objdiff.json", "w") as o:
+        json.dump({
+            "$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
+            "custom_make": "ninja",
+            "build_target": True,
+            "build_base": True,
+            "units": built_units[MODULE],
+            "progress_categories": [{"id": c, "name": c} for c in built_categories],
+            "ignore_patterns": [
+                "build/**/*",
+                "tools/**/*",
+            ]
+        }, o)
 
 
 if __name__ == "__main__":

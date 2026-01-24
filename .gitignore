@@ -10,3 +10,4 @@ asm/
 build.ninja
 **/__pycache__/
 **/*.asmproc.d
+objdiff.json
