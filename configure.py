@@ -26,11 +26,11 @@ ELF_PATH = f"build/{BASENAME}"
 MAP_PATH = f"build/{BASENAME}.map"
 PRE_ELF_PATH = f"build/{BASENAME}.elf"
 
-COMMON_INCLUDES = "-Iinclude"
+COMMON_INCLUDES = "-Iinclude -Iinclude/pspsdk "
 
-COMMON_COMPILE_FLAGS = "-flag explicit_zero_data -O3 -gccinc -Iinclude -nolink -Iinclude/pspsdk -maxerrors 3 -w nocmdline -lang=c++ -RTTI off -sdatathreshold 0"
+COMMON_COMPILE_FLAGS = "-flag no-opt_unroll_loops -flag explicit_zero_data -O4,p -gccinc -maxerrors 3 -w nocmdline -lang=c++ -RTTI off -sdatathreshold 0"
 
-GAME_GCC_CMD = f"./bin/mwccpsp.exe -c {COMMON_INCLUDES} {COMMON_COMPILE_FLAGS} $in"
+GAME_GCC_CMD = f"./bin/mwccpsp.exe {COMMON_COMPILE_FLAGS} -c {COMMON_INCLUDES} $in"
 
 # GAME_COMPILE_CMD = f"{GAME_GCC_CMD} -S -o - | {TOOLS_DIR}/masps2.py | {GAME_CC_DIR}/ee/bin/as {COMMON_COMPILE_FLAGS} -EL -mabi=eabi"
 
@@ -166,7 +166,8 @@ def build_stuff(linker_entries: List[LinkerEntry]):
             seg, splat.segtypes.common.data.CommonSegData
         ):
             build(entry.object_path, entry.src_paths, "as")
-            add_unit(entry.object_path, None)
+            if not isinstance(seg, splat.segtypes.common.bss.CommonSegBss):
+                add_unit(entry.object_path, None)
         elif isinstance(seg, splat.segtypes.common.c.CommonSegC):
             if any(
                 str(src_path).startswith("src/lib/") for src_path in entry.src_paths

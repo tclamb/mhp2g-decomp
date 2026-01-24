@@ -2,25 +2,46 @@
 
 #include "common.h"
 
+#include <pspge.h>
+#include <pspthreadman.h>
+#include <pspthreadman_kernel.h>
+#include <pspmodulemgr.h>
+#include <pspthreadman_kernel.h>
+#include <pspumd.h>
+#include <pspiofilemgr_stat.h>
+
+extern "C" {
+    //#include <pspiofilemgr.h> # sceIoLseek needs to take 64-bit offset for byte-matching
+    int sceIoLseek(SceUID fd, unsigned long long offset, int whence);
+    int sceIoRead(SceUID fd, void *data, SceSize size);
+    SceUID sceIoOpen(const char *file, int flags, SceMode mode);
+    int sceIoClose(SceUID fd);
+    int sceIoGetstat(const char *file, SceIoStat *stat);
+
+    int memcmp(const void*, const void*, long unsigned int);
+    void *memset(void*, int,  long unsigned int);
+    int sprintf(char*, const char*, ...);
+}
+
 typedef struct data_loader_vtable data_loader_vtable;
 typedef struct data_loader data_loader;
 typedef struct load_request load_request;
 typedef struct block_offset block_offset;
 
 struct load_request {
-    u16 status;
+    u16 state;
     u16 file_id;
-    void *dst;
-    u32 len;
+    void *buf;
+    u32 block_len;
     u32 block_offset;
-    u32 start_offset;
-    s32 *unknown_0x14;
-    u8 unknown0x18;
-    u8 want_key;
-    u8 is_last_block;
-    u8 want_decryption;
-    u8 want_checksum;
-    u8 unknown_0x1d[3];
+    u32 file_len;
+    u32 *is_cancelled_ptr;
+    u8 unknown_flag;
+    u8 needs_seed;
+    u8 is_final_block;
+    u8 needs_decryption;
+    u8 needs_hashing;
+    u8 padding[3];
 };
 
 struct data_loader_base {
@@ -30,21 +51,21 @@ struct data_loader_base {
     virtual void unknown_0x10() = 0;
     virtual u32 file_blocks_size(u32) = 0;
     virtual u32 file_size(u32) = 0;
-    virtual void unknown_0x20() = 0;
-    virtual void unknown_0x24() = 0;
-    virtual void unknown_0x28() = 0;
-    virtual void unknown_0x2c() = 0;
-    virtual void unknown_0x30() = 0;
-    virtual u32 load_async(void*, u32, u8, void*, u8) = 0;
+    virtual SceSize load_file_blocking(s32, u8*, SceSize) = 0;
+    virtual void movie_open(u16) = 0;
+    virtual void movie_read(u8*, SceSize) = 0;
+    virtual void movie_close() = 0;
+    virtual void movie_seek(int) = 0;
+    virtual int load_file_async(s32, u8*, SceSize, u8, u32*, u8) = 0;
     virtual void unknown_0x38() = 0;
     virtual int is_loaded(u16) = 0;
     virtual void unknown_0x40() = 0;
-    virtual SceUID load_sce_font_library(u32, u32) = 0;
+    virtual SceUID load_libfont(u32, SceUID) = 0;
     virtual void unknown_0x48() = 0;
 };
 
-struct block_offset {
-    u16 block_number;
+struct install_block_offset {
+    u16 block;
     u16 offset;
 };
 
@@ -65,6 +86,10 @@ struct data_loader : data_loader_base {
     static char sha1_thread_name[];
     static char transfer_event_flag_name[];
     static char transfer_thread_name[];
+    static char null_utility_message_dialog_header[];
+    static char install_block_path_format[];
+    static char lba_umd_access_path_format[];
+    static char install_folder_path[];
 
     virtual void unknown_0x4() = 0;
     virtual void unknown_0x8() = 0;
@@ -72,19 +97,19 @@ struct data_loader : data_loader_base {
     virtual void unknown_0x10() = 0;
     virtual u32 file_blocks_size(u32);
     virtual u32 file_size(u32);
-    virtual void unknown_0x20() = 0;
-    virtual void unknown_0x24() = 0;
-    virtual void unknown_0x28() = 0;
-    virtual void unknown_0x2c() = 0;
-    virtual void unknown_0x30() = 0;
-    virtual u32 load_async(void*, u32, u8, void*, u8) = 0;
+    virtual SceSize load_file_blocking(s32, u8*, SceSize);
+    virtual void movie_open(u16);
+    virtual void movie_read(u8*, SceSize);
+    virtual void movie_close();
+    virtual void movie_seek(int);
+    virtual int load_file_async(s32, u8*, SceSize, u8, u32*, u8);
     virtual void unknown_0x38() = 0;
     virtual int is_loaded(u16) = 0;
     virtual void unknown_0x40() = 0;
-    virtual SceUID load_sce_font_library(u32, u32) = 0;
+    virtual SceUID load_libfont(u32, SceUID);
     virtual void unknown_0x48() = 0;
 
-    void calculate_file_block_offsets();
+    void calculate_install_block_offsets();
     int file_has_sha1(u32 file_id);
     u32 next_decryption_key();
     void decrypt_buffer(u8 *data, s32 size, s32 prevSize);
@@ -97,14 +122,14 @@ struct data_loader : data_loader_base {
     u32 load_request_load_head;
     u32 load_request_write_head;
     u32 load_thread_status;
-    SceUID file_descriptor;
+    volatile SceUID file_descriptor;
     u8 unused_flag_0x1014;
     u8 padding_0x1015[3];
     u32 data_bin_first_sector;
-    char sce_font_module_path[256];
-    u8 blocking_access_flag;
+    char libfont_path[256];
+    u8 is_playing_movie;
     u8 padding_0x111d;
-    u16 blocking_read_index;
+    u16 movie_file_id;
     u32 unknown_0x1120[8];
     file_size_pair file_size_pairs[812];
     u32 unknown_0x2aa0[8];
@@ -117,9 +142,9 @@ struct data_loader : data_loader_base {
     u32 unknown_0x2920c[4];
     SceUID fake_rofs_semaphore;
     u32 unknown_0x29220[8];
-    s32 file_position;
+    s32 movie_pos;
     volatile SceUID loader_thread_id;
-    block_offset file_id_to_block_offset[6602];
+    install_block_offset file_id_to_install_block_offset[6602];
     u8 sha1[20];
     u32 unknown_0x2f984;
     u32 sha1_state[8];
@@ -131,7 +156,7 @@ struct data_loader : data_loader_base {
     load_request *blocking_request;
     u8 is_data_file_encrypted;
     u8 unknown_0x2f9f5[3];
-    u32 blocking_position;
+    u32 movie_open_pos;
     volatile u32 key_lower;
     volatile u32 key_upper;
     u8 unknown_0x2fa04;
