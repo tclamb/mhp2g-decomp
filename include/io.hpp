@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MHP2G_DECOMP__IO_HPP
+#define MHP2G_DECOMP__IO_HPP
 
 #include "common.h"
 
@@ -23,7 +24,6 @@ extern "C" {
     int sprintf(char*, const char*, ...);
 }
 
-typedef struct data_loader_vtable data_loader_vtable;
 typedef struct data_loader data_loader;
 typedef struct load_request load_request;
 typedef struct block_offset block_offset;
@@ -166,3 +166,5 @@ struct data_loader : data_loader_base {
     volatile SceUID transfer_event_flag_id;
     volatile SceUID transfer_thread_id;
 };
+
+#endif

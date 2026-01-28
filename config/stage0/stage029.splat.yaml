@@ -1,0 +1,66 @@
+name: stage029
+options:
+  add_set_gp_64: false
+  asm_inc_header: |-
+    .set noat
+    .set noreorder
+  asm_path: asm/stage0/stage029
+  asset_path: assets/stage0/stage029
+  auto_decompile_empty_functions: true
+  base_path: ../..
+  basename: stage029.ovl
+  build_path: build
+  compiler: MWCCPS2
+  create_asm_dependencies: true
+  create_undefined_funcs_auto: true
+  create_undefined_syms_auto: true
+  data_string_encoding: SHIFT_JIS
+  data_string_guesser_level: 0
+  disassemble_all: true
+  extensions_path: tools/splat_ext
+  find_file_boundaries: true
+  global_vram_end: 0x09ffffff
+  global_vram_start: 0x08000000
+  ld_bss_is_noload: true
+  ld_generate_symbol_per_data_segment: true
+  ld_script_path: build/modules/stage0/stage029.ovl.ld
+  make_full_disasm_for_code: true
+  migrate_rodata_to_functions: true
+  named_regs_for_c_funcs: false
+  o_as_suffix: true
+  pair_rodata_to_text: true
+  platform: psp
+  reloc_addrs_path:
+  - config/stage0/stage029.reloc_addrs.txt
+  rodata_string_guesser_level: 0
+  src_path: src/stage0/stage029
+  string_encoding: SHIFT_JIS
+  suggestion_rodata_section_start: true
+  symbol_addrs_path:
+  - config/stage0/stage029.symbol_addrs.txt
+  target_path: modules/stage0/stage029.ovl
+  undefined_funcs_auto_path: build/config/stage0/stage029.undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/config/stage0/stage029.undefined_syms_auto.txt
+segments:
+- align: 4
+  name: stage029.ovl_header
+  start: 0x0
+  subalign: 4
+  subsegments:
+  - [0x0, data]
+  type: code
+  vram: 0x09d5df80
+- align: 4
+  bss_size: 0x500
+  name: stage029
+  start: 0x40
+  subalign: 4
+  subsegments:
+  - [0x40, pad]
+  - [0x80, asm]
+  - [0x2b8, int4]
+  - [0x500, bss]
+  type: code
+  vram: 0x09d5dfc0
+- - 0x500
+sha1: 471cea979b1a94957900af894c4db307ae9887ec

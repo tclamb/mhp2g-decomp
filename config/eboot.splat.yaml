@@ -1,0 +1,168 @@
+name: eboot
+sha1: de96bd007ef69b59af9188bee5e7de53987ea2b6
+options:
+  basename: eboot.elf
+  target_path: modules/eboot.elf
+  base_path: ..
+  platform: psp
+  compiler: MWCCPS2
+
+  asm_path: asm/eboot
+  src_path: src/eboot
+  asset_path: assets/eboot
+  build_path: build
+  extensions_path: tools/splat_ext
+
+  ld_script_path: build/modules/eboot.elf.ld
+  ld_generate_symbol_per_data_segment: True
+
+  create_asm_dependencies: True
+  create_undefined_funcs_auto: True
+  create_undefined_syms_auto: True
+  undefined_funcs_auto_path: build/config/eboot.undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/config/eboot.undefined_syms_auto.txt
+
+  find_file_boundaries: True
+
+  o_as_suffix: True
+
+  symbol_addrs_path:
+    - config/eboot.symbol_addrs.txt
+  reloc_addrs_path:
+    - config/eboot.reloc_addrs.txt
+
+  extensions_path: tools/splat_ext
+
+  string_encoding: SHIFT_JIS
+  data_string_encoding: SHIFT_JIS
+  rodata_string_guesser_level: 0
+  data_string_guesser_level: 0
+  add_set_gp_64: false
+  pair_rodata_to_text: True
+  suggestion_rodata_section_start: True
+
+  global_vram_start: 0x08000000
+  global_vram_end:   0x09ffffff
+
+  named_regs_for_c_funcs: False
+  migrate_rodata_to_functions: True
+  ld_bss_is_noload: True
+  disassemble_all: True
+  auto_decompile_empty_functions: true
+  make_full_disasm_for_code: True
+
+  asm_inc_header: |
+    .set noat      /* allow manual use of $at */
+    .set noreorder /* don't insert nops after branches */
+
+  section_order:
+    - .text
+    - .rodata
+    - .data
+    - .bss
+segments:
+  - [0x0, bin, elf_header]
+  - name: eboot
+    type: code
+    start: 0x25b4
+    vram: 0x08804000
+    bss_size: 0x163949F
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x25b4, asm, 08804000]
+      - [0x4bd30, cpp, io/data_loader__start_threads]
+      - [0x4c060, asm, 0884daac]
+      - [0x4cf14, cpp, io/data_loader__decrypt_buffer]
+      - [0x4cff8, asm, 0884ea44]
+      - [0x4d134, cpp, io/data_loader__set_decryption_key]
+      - [0x4d1a4, cpp, io/data_loader__next_decryption_key]
+      - [0x4d21c, cpp, io/data_loader__file_size]
+      - [0x4d28c, cpp, io/data_loader__file_blocks_size]
+      - [0x4d2c0, cpp, io/data_loader__load_file_blocking]
+      - [0x4d404, cpp, io/data_loader__load_file_async]
+      - [0x4d5d0, cpp, io/data_loader__movie_open]
+      - [0x4d688, cpp, io/data_loader__movie_read]
+      - [0x4d73c, cpp, io/data_loader__movie_seek]
+      - [0x4d7c4, cpp, io/data_loader__movie_close]
+      - [0x4d7d8, cpp, io/data_loader__load_libfont]
+      - [0x4d8f4, cpp, io/data_loader__file_has_sha1]
+      - [0x4d938, cpp, io/data_loader__calculate_install_block_offsets]
+      - [0x4da08, asm, 0884f454]
+      - [0x4dd64, cpp, io/data_loader__data_bin_path]
+      - [0x4dd70, asm, 0884f7bc]
+      - [0xb9894, cpp, io/data_loader__initialize_fake_rofs_semaphore]
+      - [0xb9918, cpp, io/data_loader__initialize_load_request_queue]
+      - [0xb9944, asm, 088bb390]
+      - [0x109e94, asm, sceStub]
+      - [0x10a7a4, rodata, 0890c1f0]
+      - [0x10a7a8, rodata, 0890c1f4]
+      - [0x10a7b8, rodata, 0890c204]
+      - [0x10a7bc, rodata, 0890c208]
+      - [0x10a7c0, rodata, 0890c20c]
+      - [0x10aa54, rodata, 0890c4a0]
+      - [0x10aa58, rodata, 0890c4a4]
+      - [0x10aa8c, rodata, 0890c4d8]
+      - [0x10ad50, rodata, 0890c79c]
+      - [0x10b940, data, 0890d38c]
+      - [0x12e9bc, lit4, 08930408]
+      - [0x12ed94, data, 089307e0]
+      - [0x137254, int4, 08938ca0]
+      - [0x13726c, data, 08938cb8]
+      - [0x1372b0, int4, 08938cfc]
+      - [0x1372c8, data, 08938d10]
+      - [0x1752a8, int4, 08976cf4]
+      - [0x1752b4, sha1digests, io/data_loader__file_sha1_digests]
+      - [0x19567c, bytetable, io/data_loader__decrypt_table]
+      - [0x19577c, cstring, io/data_loader__umd_disc_drive_name]
+      - [0x195784, cstring, io/data_loader__loader_thread_name]
+      - [0x195794, cstring, io/data_loader__sha1_event_flag_name]
+      - [0x1957a4, cstring, io/data_loader__sha1_thread_name]
+      - [0x1957b0, cstring, io/data_loader__transfer_event_flag_name]
+      - [0x1957c4, cstring, io/data_loader__transfer_thread_name]
+      - [0x1957d4, cstring, io/data_loader__null_utility_message_dialog_header]
+      - [0x1957d8, cstring, io/data_loader__install_block_path_format]
+      - [0x195800, cstring, io/data_loader__lba_umd_access_path_format]
+      - [0x19581c, cstring, io/data_loader__install_folder_path]
+      - [0x195840, cstring, io/data_loader__data_bin_path]
+      - [0x195860, data, 089972ac]
+      - [0x198214, int2, 08999c60]
+      - [0x198250, data, 08999c9c]
+      - [0x1987c8, int4, 0899a214]
+      - [0x1987ec, data, 0899a238]
+      - [0x1a169c, int4, 089a30e8]
+      - [0x1a16b4, data, 089a3100]
+      - [0x1a3fc4, int4, 089a5a10]
+      - [0x1a3fe8, data, 089a5a34]
+      - [0x1a8744, int4, 089aa190]
+      - [0x1a878c, lit4, 089aa1d8]
+      - [0x1a87e4, data, 089aa230]
+      - [0x1a8a74, int4, 089aa4c0]
+      - [0x1a8a80, data, 089aa4cc]
+      - [0x1ada60, lit4, 089af4ac]
+      - [0x1adab4, data, 089af500]
+      - [0x1ade88, int4, 089af8d4]
+      - [0x1adea0, data, 089af8ec]
+      - [0x1ae0b8, int4, 089afb04]
+      - [0x1ae0d0, cstring, io/data_loader__fake_rofs_semaphore_name]
+      - [0x1ae0e0, data, 089afb2c]
+      - [0x1ae1ac, int4, 089afbf8]
+      - [0x1ae20c, data, 089afc58]
+      - [0x1ae690, int4, 088c9384]
+      - [0x1aeabc, int4, 089b0508]
+      - [0x1aead4, data, 089b0520]
+      - [0x1aed6c, int4, 089b07b8]
+      - [0x1aed9c, data, 089b07e8]
+      - [0x1afcac, int4, 089b16f8]
+      - [0x1afcd0, data, 089b171c]
+      - [0x1b1cf0, int4, 088fa274]
+      - [0x1b1d2c, data, 089b3778]
+      - [0x1b280c, int4, 089b4258]
+      - [0x1b2818, int4, 089b4264]
+      - [0x1b2824, data, 089b4270]
+      - [0x1b28b4, int4, 089092e4]
+      - [0x1b28c0, int4, 089093cc]
+      - [0x1b28cc, data, 089b4318]
+      - {start: 0x1c5114, type: bss, vram: 0x089c6b60, name: bss}
+  - [0x1c5114, bin, elf_footer]
+  - [0x1cd740]

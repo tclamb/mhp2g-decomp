@@ -11,3 +11,14 @@ build.ninja
 **/__pycache__/
 **/*.asmproc.d
 objdiff.json
+
+
+tools/data-extractor
+
+bin/*
+!bin/pspdecrypt.sha1
+!bin/mwccpsp_219.tar.gz.sha256
+
+disks/*
+!disks/ULJM-05500.sha1
+modules/
