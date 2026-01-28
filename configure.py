@@ -457,6 +457,11 @@ def build_stuff(linker_entries: List[LinkerEntry]):
             "build_base": True,
             "units": built_units,
             "progress_categories": [{"id": c, "name": c} for c in built_categories],
+            "scratch": {
+                "platform": "psp",
+                "compiler": "mwccpsp_3.0.1_219",
+                "c_flags": COMMON_COMPILE_FLAGS,
+            },
             "ignore_patterns": [
                 "build/**/*",
                 "tools/**/*",
