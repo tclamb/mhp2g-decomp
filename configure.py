@@ -234,6 +234,8 @@ def download_pspdecrypt():
     finally:
         os.remove(archive_filename)
 
+    PSP_DECRYPT_PATH.chmod(0o755)
+
 def decrypt_eboot():
     if EBOOT_MODULE.module_path().exists() and sha1sum_check(EBOOT_CHECKSUM_PATH, throw_on_failure=False):
         return

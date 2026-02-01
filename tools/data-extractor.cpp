@@ -9,7 +9,7 @@
 #include <sstream>
 #include <iomanip>
 #include <memory.h>
-#include <printf.h>
+#include <stdio.h>
 
 #define MHP2G_DECOMP__GAME_HPP
 #define MHP2G_DECOMP__IO_HPP
