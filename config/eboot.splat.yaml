@@ -107,13 +107,41 @@ segments:
       - [0x4da08, asm, io/base_data_loader.3]
       - [0x4dd64, cpp, io/data_loader__data_bin_path]
       - [0x4dd70, asm, global_089c7508] # string manager?
-      - [0x505f4, asm]
+      - [0x574c8, asm, global_08a5dd10]
+      - [0x57fb8, asm, allocator] # linked list or some kind of arena?
+      - [0x581e8, asm]
+      # global_08a5dd20
+      # global_08a5dd24
+      # global_08a5dd28
+      # global_08a5dd2c
+      # global_08a5dd30
+      # global_08a5dd34
+      # global_08a5dd4c
+      # global_08a5dd84
+      # global_08a5de5c
+      # global_08a5e270
+      # global_08a5e278
+      # global_08a862b8
+      # global_09a07280
+      # global_09a07284
+      # global_09a1982c
+      # global_09a1bb18
+      # global_09a4099c
+      # global_09a4adac
+      # global_09a4ae1c
+      - [0x8dff0, asm, main]
+      - [0x8e2dc, asm, check_exit_game]
+      - [0x8e33c, asm, rng]
+      - [0x8e400, asm, load_overlay_async]
+      - [0x8e49c, asm, load_overlay_status]
+      - [0x8e540, asm, is_active_overlay]
+      - [0x8e564, asm]
       - [0x95238, asm, state/base_state.2]
       - [0x95338, asm, libsas]
       - [0x95d70, asm, libwave]
       - [0x975ac, asm, libfpu]
       - [0x97914, asm, libvfpu]
-      - [0x99254, asm, user_main]
+      - [0x99254, asm, eabi/__start]
       - [0x99294, asm, io/data_loader.dtor]
       - [0x99310, asm, global_08a5e270.dtor]
       - [0x99788, asm, global_09a4099c.ctor]
@@ -140,6 +168,17 @@ segments:
       - [0xb9894, cpp, io/data_loader__initialize_fake_rofs_semaphore]
       - [0xb9918, cpp, io/data_loader__initialize_load_request_queue]
       - [0xb9944, asm]
+      - [0x107898, asm, state/movie_state]
+      - [0x107a88, asm, module_start]
+      - [0x107b9c, asm, user_main]
+      - [0x107e2c, asm, module_stop]
+      - [0x10828c, asm, eabi/NMWException]
+      - [0x1082e4, asm, eabi/StaticInitializers]
+      - [0x1083cc, asm, eabi/__ptmf]
+      - [0x108450, asm, eabi/CompressedNumber]
+      - [0x108588, asm, eabi/ExceptionHandler]
+      - [0x1099b8, asm, eabi/ExceptionHandlerTS]
+      - [0x109df8, asm, eabi/mwUtils_PSP]
       - [0x109e94, asm, sceStub]
       - [0x10a7a4, rodata, 0890c1f0]
       - [0x10a7a8, rodata, 0890c1f4]
@@ -153,6 +192,7 @@ segments:
       - [0x10b940, int4]
       - [0x12dacc, int4, libwave]
       - [0x12db0c, int4]
+      - [0x12e884, data, eabi/ExceptionHandler]
       - [0x12e9bc, lit4, libm]
       - [0x12edb4, data, libc]
       - [0x12f664, int4]
@@ -173,6 +213,8 @@ segments:
       - [0x195860, int4]
       - [0x1ae0d0, cstring, io/data_loader__fake_rofs_semaphore_name]
       - [0x1ae0e0, int4]
+      - [0x1b28b4, int4]
+      - [0x1b28cc, data, eabi/NMWException]
       - [0x1b2938, int4, static_initializers]
       - [0x1b40d0, int4, static_initializer_list]
       # vtables start here
@@ -203,7 +245,7 @@ segments:
       - [0x1b44a8, int4, unknown_vtable_8]
       - [0x1b4524, int4, unknown_vtable_9]
       - [0x1b4534, int4, state/install_state]
-      - [0x1b4548, int4, state/movie_state]
+      - [0x1b4548, int4, state/movie_state.vtable]
       - [0x1b455c, int4, std__exception]
       - [0x1b456c, int4, std__bad_exception]
       # referenced from edit_task.ovl
