@@ -11,7 +11,7 @@ build.ninja
 **/__pycache__/
 **/*.asmproc.d
 objdiff.json
-
+venv/
 
 tools/data-extractor
 
