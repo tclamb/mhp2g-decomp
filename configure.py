@@ -52,7 +52,7 @@ ALL_MODULES_CHECKSUM_PATH = BUILD_DIR / "config" / "modules.sha1"
 
 COMMON_INCLUDES = "-Iinclude -Iinclude/pspsdk"
 
-COMMON_COMPILE_FLAGS = "-flag no-opt_unroll_loops -flag explicit_zero_data -O4,p -gccinc -maxerrors 3 -w nocmdline -lang=c++ -RTTI off -sdatathreshold 0"
+COMMON_COMPILE_FLAGS = "-Cpp_exceptions off -flag no-opt_unroll_loops -flag explicit_zero_data -O4,p -gccinc -maxerrors 3 -w nocmdline -lang=c++ -RTTI off -sdatathreshold 0"
 
 GAME_GCC_CMD = f"./bin/mwccpsp.exe {COMMON_COMPILE_FLAGS} -c {COMMON_INCLUDES} $in"
 

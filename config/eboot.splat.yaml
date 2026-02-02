@@ -108,7 +108,7 @@ segments:
       - [0x4dd64, cpp, io/data_loader__data_bin_path]
       - [0x4dd70, asm, global_089c7508] # string manager?
       - [0x574c8, asm, global_08a5dd10]
-      - [0x57fb8, asm, allocator] # linked list or some kind of arena?
+      - [0x57fb8, cpp, cache]
       - [0x581e8, asm]
       # global_08a5dd20
       # global_08a5dd24
