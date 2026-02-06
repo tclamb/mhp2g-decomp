@@ -1,0 +1,53 @@
+name: Build and report progress
+
+on:
+  push:
+    branches:
+      - development
+    paths-ignore:
+      - '*.md'
+      - '**/*.md'
+    pull_request_target:
+      paths-ignore:
+        - '*.md'
+        - '**/*.md'
+    workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.job }}-${{ github.event_name }}-${{ github.number }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-test:
+    # Building and testing cannot work if the repository owner is not tclamb
+    # due to the missing secrets to clone the CI dependencies
+    if: github.repository == 'tclamb/mhp2g-decomp'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone main repo
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.ref }}
+          submodules: true
+      - name: Install packages
+        run: sudo apt-get install gcc-mipsel-linux-gnu cargo python3 ninja-build
+      - name: Install cwdemangle
+        run: cargo install cwdemangle-bin
+      - name: Make python venv
+        run: python3 -m venv .venv
+      - name: Install python requirements
+        run: .venv/bin/python3 -m pip install -r requirements.txt
+      - name: Get dependencies
+        uses: ./.github/actions/get-dependencies
+        with:
+          token: ${{ secrets.MHP2G_DECOMP_DEPENDENCIES_TOKEN }}
+      - name: Configure build
+        run: .venv/bin/python3 configure.py --github-workflow
+      - name: Build binaries and check if they match
+        run: ninja
+      - name: Upload progress report
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ULJM_05500_report
+          path: build/report.json

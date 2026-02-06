@@ -1,0 +1,39 @@
+name: 'Get Dependencies'
+description: 'Retrieve and extract mhp2g-decomp-dependencies with caching'
+
+inputs:
+  token:
+    description: 'GitHub token for cloning the private dependencies repository'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Get dependencies (cached)
+      uses: actions/cache@v5
+      id: cache-deps
+      with:
+        path: 'dependencies'
+        key: mhp2g-deps
+
+    - name: Get dependencies (uncached)
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        repository: tclamb/mhp2g-decomp-dependencies
+        ref: main
+        fetch-depth: 1
+        token: ${{ inputs.token }}
+        path: 'dependencies'
+
+    - name: Cache dependencies
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v5
+      with:
+        path: 'dependencies'
+        key: mhp2g-deps
+
+    - name: Copy dependencies
+      shell: bash
+      working-directory: dependencies
+      run: 7z x -o.. mhp2g.7z

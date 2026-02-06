@@ -45,6 +45,10 @@ DATA_ISO_PATH = '/PSP_GAME/USRDIR/DATA.BIN'
 PSPDECRYPT_URL = 'https://github.com/John-K/pspdecrypt/releases/download/1.0/pspdecrypt-1.0-windows.zip'
 PSPDECRYPT_PATH = BIN_DIR / "pspdecrypt.exe"
 PSPDECRYPT_CHECKSUM_PATH = BIN_DIR / "pspdecrypt.sha1"
+OBJDIFF_CLI_URL = 'https://github.com/encounter/objdiff/releases/download/v3.6.1/objdiff-cli-windows-x86.exe'
+OBJDIFF_CLI_PATH = BIN_DIR / "objdiff-cli-windows-x86.exe"
+OBJDIFF_CLI_CHECKSUM_PATH = BIN_DIR / "objdiff-cli-windows-x86.sha1"
+OBJDIFF_REPORT_PATH = BUILD_DIR / 'report.json'
 DATA_EXTRACTOR_PATH = TOOLS_DIR / "data-extractor"
 EBOOT_CHECKSUM_PATH = CONFIG_DIR / "eboot.sha1"
 OVERLAYS_CHECKSUM_PATH = CONFIG_DIR / "overlays.sha1"
@@ -54,7 +58,11 @@ COMMON_INCLUDES = "-Iinclude -Iinclude/pspsdk"
 
 COMMON_COMPILE_FLAGS = "-Cpp_exceptions off -flag no-opt_unroll_loops -flag explicit_zero_data -O4,p -gccinc -maxerrors 3 -w nocmdline -lang=c++ -RTTI off -sdatathreshold 0"
 
-GAME_GCC_CMD = f"./bin/mwccpsp.exe {COMMON_COMPILE_FLAGS} -c {COMMON_INCLUDES} $in"
+GAME_GCC_CMD = f"./bin/mwccpsp.exe {COMMON_COMPILE_FLAGS} -c {COMMON_INCLUDES} $in -o $out"
+WIBO_GAME_GCC_CMD = f"./bin/wibo {GAME_GCC_CMD}"
+
+OBJDIFF_CLI_CMD = "./bin/objdiff-cli-windows-x86.exe report generate -o $out"
+GITHUB_ACTION_OBJDIFF_CLI_CMD = OBJDIFF_CLI_CMD.replace('windows-x86.exe', 'linux-x86_64', 1)
 
 @dataclasses.dataclass
 class ModuleInfo:
@@ -203,6 +211,9 @@ def sha1sum_check(checksum_path, throw_on_failure=True):
     return result.returncode == 0
 
 def extract_iso():
+    if all([sha1sum_check(p.relative_to(ROOT), throw_on_failure=False) for p in [EBOOT_CHECKSUM_PATH, OVERLAYS_CHECKSUM_PATH]]):
+        return
+
     if not DISK_PATH.exists():
         print(f"UMD image not found; copy your backup to '{str(DISK_PATH.relative_to(ROOT))}'")
         exit(-1)
@@ -234,8 +245,18 @@ def download_pspdecrypt():
     finally:
         os.remove(archive_filename)
 
-    PSP_DECRYPT_PATH.chmod(0o755)
+    PSPDECRYPT_PATH.chmod(0o755)
 
+def download_objdiff_cli():
+    urllib.request.urlretrieve(OBJDIFF_CLI_URL, filename = OBJDIFF_CLI_PATH)
+    sha1sum_check(OBJDIFF_CLI_CHECKSUM_PATH)
+    OBJDIFF_CLI_PATH.chmod(0o755)
+
+def ensure_objdiff_cli():
+    if not (OBJDIFF_CLI_PATH.exists() and sha1sum_check(OBJDIFF_CLI_CHECKSUM_PATH, throw_on_failure=False)):
+        download_objdiff_cli()
+
+# using wibo with pspdecrypt.exe segfaults; TODO: download & use the macos and linux binaries as appropriate
 def decrypt_eboot():
     if EBOOT_MODULE.module_path().exists() and sha1sum_check(EBOOT_CHECKSUM_PATH, throw_on_failure=False):
         return
@@ -262,7 +283,7 @@ def extract_overlays(generate_config=False):
         overlay_bar.set_description(f"Extracting {overlay.name}")
         overlay.extract(generate_config=generate_config)
 
-def build_stuff(linker_entries: List[LinkerEntry]):
+def build_stuff(linker_entries: List[LinkerEntry], github_workflow=False):
     built_objects: Dict[String,Set[Path]] = dict()
     built_units: List[Path] = []
     built_categories: Set[String] = set()
@@ -288,6 +309,7 @@ def build_stuff(linker_entries: List[LinkerEntry]):
             outputs=[str(o) for o in object_paths],
             rule=task,
             inputs=[str(s) for s in src_paths],
+            implicit=["./bin/pspas"] if task.startswith("as") else [],
             variables=variables,
             implicit_outputs=implicit_outputs,
         )
@@ -319,19 +341,35 @@ def build_stuff(linker_entries: List[LinkerEntry]):
     ninja.rule(
         "as",
         description="as $in",
-        command=f"cat $in | ./tools/sotn-decomp/tools/pspas/target/release/pspas -EL -I include/ -G0 -march=allegrex -mabi=eabi -no-pad-sections -o $out",
+        command=f"cat $in | ./bin/pspas -EL -I include/ -G0 -march=allegrex -mabi=eabi -no-pad-sections -o $out",
     )
 
     ninja.rule(
         "as.target",
         description="as $in",
-        command=f"cat include/macro.inc $in | ./tools/sotn-decomp/tools/pspas/target/release/pspas -EL -I include/ -G0 -march=allegrex -mabi=eabi -no-pad-sections -o $out",
+        command=f"cat include/macro.inc $in | ./bin/pspas -EL -I include/ -G0 -march=allegrex -mabi=eabi -no-pad-sections -o $out",
     )
 
     ninja.rule(
         "cc",
         description="cc $in",
-        command=f"{GAME_GCC_CMD} -o $out",
+        command=WIBO_GAME_GCC_CMD if github_workflow else GAME_GCC_CMD,
+    )
+
+    ninja.rule(
+        "objdiff-report",
+        description="objdiff-cli report generate",
+        command=GITHUB_ACTION_OBJDIFF_CLI_CMD if github_workflow else OBJDIFF_CLI_CMD,
+    )
+
+    deinit = "git submodule deinit -f tools/sotn-decomp"
+    init = "git submodule update --init tools/sotn-decomp"
+    apply = "git apply $in"
+    cargobuild = "cargo build --release"
+    cpout = "cp ./tools/sotn-decomp/tools/pspas/target/release/pspas $out"
+    ninja.rule(
+        "pspas",
+        command=f"{deinit} && {init} && {apply} && cd ./tools/sotn-decomp/tools/pspas && {cargobuild} && cd ../../../.. && {cpout} && {deinit}"
     )
 
     ninja.rule(
@@ -451,6 +489,19 @@ def build_stuff(linker_entries: List[LinkerEntry]):
             }
         )
 
+    ninja.build(
+        "bin/pspas",
+        "pspas",
+        "sotn-decomp-pspas.patch"
+    )
+
+    ninja.build(
+        str(OBJDIFF_REPORT_PATH.relative_to(ROOT)),
+        "objdiff-report",
+        "objdiff.json",
+        implicit = [str(module.build_path().relative_to(ROOT)) + ".ok" for module in all_modules],
+    )
+
     with open("objdiff.json", "w") as o:
         json.dump({
             "$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
@@ -481,14 +532,22 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-g",
-        "--generate_overlay_config",
+        "--generate-overlay-config",
         help="Generate fresh splat configuration files for overlays",
+        action="store_true"
+    )
+    parser.add_argument(
+        "--github-workflow",
+        help="Enable hacks to build the GitHub workflow",
         action="store_true"
     )
     args = parser.parse_args()
 
     if args.clean:
         clean()
+
+    if not args.github_workflow:
+        ensure_objdiff_cli()
 
     all_linker_entries = []
     def split_module(module):
@@ -505,4 +564,4 @@ if __name__ == "__main__":
     extract_overlays(generate_config=args.generate_overlay_config)
     for overlay in all_overlays:
         split_module(overlay)
-    build_stuff(all_linker_entries)
+    build_stuff(all_linker_entries, github_workflow=args.github_workflow)
