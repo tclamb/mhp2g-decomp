@@ -518,7 +518,11 @@ def build_stuff(linker_entries: List[LinkerEntry], github_workflow=False):
             "ignore_patterns": [
                 "build/**/*",
                 "tools/**/*",
-            ]
+            ],
+            "options": {
+                "mips.abi": "eabi32",
+                "mips.instrCategory": "r4000allegrex",
+            },
         }, o)
 
 
