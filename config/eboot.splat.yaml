@@ -70,18 +70,18 @@ segments:
     align: 4
     subalign: 4
     subsegments:
-      - [0x25b4, asm, crt0]
-      - [0x2c2c, asm, vblank_interrupt]
-      - [0x2c94, asm, libm]
-      - [0x7d24, asm, libc]
+      - [0x25b4, asm, lib/crt0]
+      - [0x2c2c, asm, lib/kernel_bridge]
+      - [0x2c94, asm, lib/libm]
+      - [0x7d24, asm, lib/libc]
       - [0x10ff8, asm, global_089c6cb0]
       - [0x11cac, asm, global_089c6cb4]
       - [0x15610, asm, global_089c6cb8]
-      - [0x15dd4, asm, global_089c6cbc] # player?
+      - [0x15dd4, asm, global_089c6cbc]
       - [0x4943c, asm, state/cont_state.1]
       - [0x494c8, asm, state/base_state.1]
       - [0x49510, asm, state/cont_state.2]
-      - [0x49654, asm, global_089c70cc]
+      - [0x49654, asm, global_089c70cc] # utility for creating display lists
       - [0x4b524, asm, state/edit_state]
       - [0x4b714, asm, state/unknown_state_1.1]
       - [0x4bc0c, asm, state/loading_state]
@@ -107,41 +107,39 @@ segments:
       - [0x4da08, asm, io/base_data_loader.3]
       - [0x4dd64, cpp, io/data_loader__data_bin_path]
       - [0x4dd70, asm, global_089c7508] # string manager?
-      - [0x574c8, asm, global_08a5dd10]
+      - [0x574c8, asm, global_08a5dd10] # tmh parsing (gim fork?); owns screen buffers & ge calls
       - [0x57fb8, cpp, cache]
-      - [0x581e8, asm]
-      # global_08a5dd20
-      # global_08a5dd24
-      # global_08a5dd28
-      # global_08a5dd2c
-      # global_08a5dd30
-      # global_08a5dd34
-      # global_08a5dd4c
-      # global_08a5dd84
-      # global_08a5de5c
-      # global_08a5e270
-      # global_08a5e278
-      # global_08a862b8
-      # global_09a07280
-      # global_09a07284
-      # global_09a1982c
-      # global_09a1bb18
-      # global_09a4099c
-      # global_09a4adac
-      # global_09a4ae1c
-      - [0x8dff0, asm, main]
-      - [0x8e2dc, asm, check_exit_game]
-      - [0x8e33c, asm, rng]
-      - [0x8e400, asm, load_overlay_async]
-      - [0x8e49c, asm, load_overlay_status]
-      - [0x8e540, asm, is_active_overlay]
-      - [0x8e564, asm]
+      - [0x581e8, asm, toast_notification]
+      - [0x58f40, asm, state/start_state]
+      - [0x5924c, asm, global_08a5dd20]
+      - [0x5ade8, asm, global_08a5dd24]
+      - [0x5ddf4, asm, object_089b5bd4] # skeleton joint?
+      - [0x5ed14, asm, global_08a5dd28]
+      - [0x5fa88, asm, object_089b5be4] # base class for object_089b5c10, stage objects
+      - [0x5fb90, asm, object_089b5c00] # pmo parsing (simplified gmo?); base class for 089b5be4
+      - [0x62304, asm, skeleton] # skeleton?
+      - [0x629ec, asm, object_089b5c10] # base class for em & player
+      - [0x64864, asm, global_08a5dd2c]
+      - [0x66fa0, asm, global_08a5dd30]
+      - [0x674b8, asm, global_08a5dd34] # input
+      - [0x679d0, asm, global_08a5dd4c]
+      - [0x726d0, asm, global_08a5dd84]
+      - [0x7d71c, asm, state/demo]
+      - [0x7da4c, asm, global_08a5de54]
+      - [0x7e6b4, asm, global_08a5de5c]
+      - [0x84038, asm, global_08a5de60]
+      - [0x84634, asm, global_08a5de64] # music?
+      - [0x84b64, asm, global_089c6cb4_b0] # initializes every stage load
+      - [0x8dff0, asm, global_08a5e270] # main game loop
+      - [0x8e84c, asm, global_08a5e278]
+      - [0x935d0, asm, global_08a862b8] # owns state objects, calls update logic of active state once per frame, unloads & loads new states
+      - [0x93f38, asm, global_089c6cbc_10fc]
       - [0x95238, asm, state/base_state.2]
-      - [0x95338, asm, libsas]
-      - [0x95d70, asm, libwave]
-      - [0x975ac, asm, libfpu]
-      - [0x97914, asm, libvfpu]
-      - [0x99254, asm, eabi/__start]
+      - [0x95338, asm, lib/libsas]
+      - [0x95d70, asm, lib/libwave]
+      - [0x975ac, asm, lib/libfpu]
+      - [0x97914, asm, lib/libvfpu]
+      - [0x99254, asm, main]
       - [0x99294, asm, io/data_loader.dtor]
       - [0x99310, asm, global_08a5e270.dtor]
       - [0x99788, asm, global_09a4099c.ctor]
@@ -162,40 +160,84 @@ segments:
       - [0x998e0, asm, global_08a5dd34.ctor]
       - [0x998f0, asm, global_08a862b8.ctor]
       - [0x99948, asm, global_08a5dd10.ctor]
-      - [0x99958, asm, global_08a5e270.ctor]
+      - [0x99958, asm, global_08a5e270.ctor] # root object for application, most globals are its members
       - [0x99968, asm, global_09a07280.ctor]
-      - [0x99978, asm]
+      - [0x999c8, asm, global_09a07280] # typed cache
+      - [0x99d24, asm, global_09a07284] # netplay layer 3
+      - [0x9fc80, asm, csepsp] # "Capcom Sound Engine for [PSP] Ver1.8", "Capcom Sound Engine CORE Ver2.0"
+      - [0xa8424, asm, state/lobby_state]
+      - [0xa8728, asm, global_09a1982c] # netplay layer 2
+      - [0xad494, asm, global_09a1bb18] # netplay layer 1
+      - [0xae444, asm] # loose netcode
+      - [0xb92a8, asm] # weird angle functions
+      - [0xb96c0, asm, state/option_state]
       - [0xb9894, cpp, io/data_loader__initialize_fake_rofs_semaphore]
       - [0xb9918, cpp, io/data_loader__initialize_load_request_queue]
-      - [0xb9944, asm]
+      - [0xb9944, asm, data_loader] # virtual base class methods, pac parsing at 0xb9cf4
+      - [0xbab08, asm, state/game_state]
+      - [0xbae58, asm, state/initial_state]
+      - [0xbb0f4, asm, state/gallery_state]
+      - [0xbb408, asm, state/download_state]
+      - [0xbb5ec, asm, global_09a4099c] # player data?
+      - [0xc4034, asm, global_09a4ada0] # stage manager
+      - [0xc8710, asm, object_089b5bf4] # stage base class
+      - [0xcd454, asm, lib/crti] # _init
+      - [0xcd45c, asm, lib/crtn] # _fini
+      - [0xcd464, asm, state/arcade]
+      - [0xcd724, asm, global_09a4adac] # quest?
+      - [0xcef58, asm, object_089b5e78] # base player model
+      - [0xdbe14, asm, global_09a4ae04] # multiplayer state?
+      - [0xdde38, asm, object_089b5ef4] # multiplayer models?
+      - [0xde2e8, asm, lib/libccc]
+      - [0xdf060, asm, global_09a4ae1c] # file cache?
+      - [0xe00a0, asm, lib/libjpeg] # JPEG_LIB_VERSION=62, only decoder, used by download_task.ovl
+      - [0xf0ff8, asm, jpg_create]
+      - [0xf1264, asm, utility_osk]
+      - [0xf14b0, asm, object_089b5f70] # derived class of joint? (089b5bd4)
+      - [0xf1814, asm, global_09a4e178]
+      - [0x104a18, asm, state/install_state]
+      - [0x104be8, asm, lib/libsha1]
+      - [0x1054a4, asm, lib/libgcc]
       - [0x107898, asm, state/movie_state]
-      - [0x107a88, asm, module_start]
-      - [0x107b9c, asm, user_main]
-      - [0x107e2c, asm, module_stop]
-      - [0x10828c, asm, eabi/NMWException]
-      - [0x1082e4, asm, eabi/StaticInitializers]
-      - [0x1083cc, asm, eabi/__ptmf]
-      - [0x108450, asm, eabi/CompressedNumber]
-      - [0x108588, asm, eabi/ExceptionHandler]
-      - [0x1099b8, asm, eabi/ExceptionHandlerTS]
-      - [0x109df8, asm, eabi/mwUtils_PSP]
-      - [0x109e94, asm, sceStub]
-      - [0x10a7a4, rodata, 0890c1f0]
-      - [0x10a7a8, rodata, 0890c1f4]
-      - [0x10a7b8, rodata, 0890c204]
-      - [0x10a7bc, rodata, 0890c208]
-      - [0x10a7c0, rodata, 0890c20c]
-      - [0x10aa54, rodata, 0890c4a0]
-      - [0x10aa58, rodata, 0890c4a4]
-      - [0x10aa8c, rodata, 0890c4d8]
-      - [0x10ad50, rodata, 0890c79c]
-      - [0x10b940, int4]
-      - [0x12dacc, int4, libwave]
-      - [0x12db0c, int4]
-      - [0x12e884, data, eabi/ExceptionHandler]
-      - [0x12e9bc, lit4, libm]
-      - [0x12edb4, data, libc]
-      - [0x12f664, int4]
+      - [0x107a88, asm, lib/crt0_elf]
+      - [0x10828c, asm, lib/runtime/NMWException]
+      - [0x1082e4, asm, lib/runtime/StaticInitializers]
+      - [0x1083cc, asm, lib/runtime/__ptmf]
+      - [0x108450, asm, lib/runtime/CompressedNumber]
+      - [0x108588, asm, lib/runtime/ExceptionHandler]
+      - [0x1099b8, asm, lib/runtime/ExceptionHandlerTS]
+      - [0x109df8, asm, lib/runtime/mwUtils_PSP]
+      - [0x109e94, asm, lib/sceStub]
+      - [0x10a7a4, rodata, psp_module_info] # exports: .lib.ent.top, .lib.ent, .lib.ent.btm
+      - [0x10a7c0, rodata, stub]            # imports: .lib.stub.top, .lib.stub, .lib.stub.btm
+      - [0x10aa58, rodata, sceModuleInfo]   # .rodata.sceModuleInfo
+      - [0x10aa8c, rodata, sceResident]     # .rodata.sceResident: nids of exported symbols, followed by their addresses
+      - [0x10ad50, rodata, sceNid]          # .rodata.sceNid
+      - [0x10b940, data]
+      - [0x12dacc, data, lib/libwave]
+      - [0x12db0c, data, global_09a07284]
+      - [0x12dba4, data, csepsp]
+      - [0x12dc58, data, global_09a1982c]
+      - [0x12ddb0, data]
+      - [0x12de7c, data, state/gallery_state]
+      - [0x12de98, data, global_09a4099c]
+      - [0x12dfec, data, object_089b5bf4]
+      - [0x12e03c, data, global_09a4adac]
+      - [0x12e06c, data, object_089b5e78]
+      - [0x12e158, data, global_09a4ae04]
+      - [0x12e178, data, lib/libjpeg]
+      - [0x12e5c0, data, jpg_create]
+      - [0x12e5c8, data, global_09a4e178]
+      - [0x12e70c, data, lib/libsha1]
+      - [0x12e720, data, lib/libgcc]
+      - [0x12e83c, data, lib/crt0_elf] # _start, _main, _exit
+      - [0x12e884, data, lib/runtime/ExceptionHandler]
+      - [0x12e9bc, data, lib/libm]
+      - [0x12edb4, data, lib/libc]
+      - [0x12f664, data, global_089c6cb4]
+      - [0x1372b0, data, state/edit_state]
+      - [0x1372c8, data, global_08a5dd24]
+      - [0x1752a8, data, state/loading_state]
       # TODO: refactor these all into io/base_data_loader
       - [0x1752b4, sha1digests, io/data_loader__file_sha1_digests]
       - [0x19567c, bytetable, io/data_loader__decrypt_table]
@@ -210,24 +252,42 @@ segments:
       - [0x195800, cstring, io/data_loader__lba_umd_access_path_format]
       - [0x19581c, cstring, io/data_loader__install_folder_path]
       - [0x195840, cstring, io/data_loader__data_bin_path]
-      - [0x195860, int4]
+      - [0x195860, data]
+      - [0x1983e8, data, global_08a5dd10]
+      - [0x198764, data, toast_notification]
+      - [0x1987c8, int4, state/start_state]
+      - [0x1987ec, int4]
+      - [0x1ad5bc, int4, csepsp] # plenty of debug strings
+      - [0x1ade88, int4]
       - [0x1ae0d0, cstring, io/data_loader__fake_rofs_semaphore_name]
       - [0x1ae0e0, int4]
-      - [0x1b28b4, int4]
-      - [0x1b28cc, data, eabi/NMWException]
-      - [0x1b2938, int4, static_initializers]
-      - [0x1b40d0, int4, static_initializer_list]
-      # vtables start here
+      - [0x1b15d8, int4, jpg_create]
+      - [0x1b15e8, data, arcade_unknown]
+      - [0x1b1930, int4, object_09a4e178]
+      - [0x1b280c, int4, state/install_state]
+      - [0x1b2824, int4, sndPrxLoader] # inline binary file with magic bytes "SPUMAPDT"?
+      - [0x1b28b4, int4, state/movie_state]
+      - [0x1b28cc, data, lib/runtime/NMWException]
+      # each translation unit with should emit a symbol like __sinit_FileName.cpp
+      - [0x1b2938, int4, __sinit_Unit1.cpp]
+      - [0x1b2988, int4, __sinit_Unit2.cpp]
+      - [0x1b29a4, int4, __sinit_Unit3.cpp]
+      - [0x1b2bd8, int4, __sinit_Unit4.cpp]
+      - [0x1b2c14, int4, __sinit_Unit5.cpp]
+      - [0x1b4058, int4, __sinit_Unit6.cpp]
+      - [0x1b4094, int4, __sinit_Unit7.cpp]
+      - [0x1b40d0, int4, static_initializer_list] # __static_init and __static_init_end symbols
+      # vtables start here, symbols like __vt__16MangledClassName
+      # similarly, constructors and destructors are like __{ct,dt}__16MangledClassNameFv
       - [0x1b40ec, int4, state/cont_state]
       - [0x1b4100, int4, state/edit_state]
       - [0x1b4114, int4, state/unknown_state_1]
       - [0x1b4128, int4, io/base_data_loader.4]
       - [0x1b4174, int4, state/unknown_state_2]
-      - [0x1b4188, int4, unknown_vtable_1]
-      - [0x1b4198, int4, unknown_vtable_2]
-      - [0x1b41a8, int4, unknown_vtable_3]
-      - [0x1b41b4, int4, unknown_vtable_4]
-      - [0x1b41c4, int4, unknown_vtable_5]
+      - [0x1b4188, int4, object_089b5bd4]
+      - [0x1b4198, int4, object_089b5be4]
+      - [0x1b41b4, int4, object_089b5c00]
+      - [0x1b41c4, int4, object_089b5c10]
       - [0x1b4204, int4, state/demo_state_1]
       - [0x1b4218, int4, state/base_state]
       - [0x1b422c, int4, io/data_loader]
@@ -239,15 +299,15 @@ segments:
       - [0x1b4314, int4, state/gallery_state]
       - [0x1b4328, int4, state/download_state]
       - [0x1b433c, int4, unknown_vtable_6]
-      - [0x1b435c, int4, stage/base_stage]
+      - [0x1b435c, int4, object_089b5da8]
       - [0x1b4418, int4, state/arcade_state]
-      - [0x1b442c, int4, unknown_vtable_7]
-      - [0x1b44a8, int4, unknown_vtable_8]
-      - [0x1b4524, int4, unknown_vtable_9]
-      - [0x1b4534, int4, state/install_state]
+      - [0x1b442c, int4, object_089b5e78] # base player type
+      - [0x1b44a8, int4, object_089b5ef4] # cont_task.ovl player type
+      - [0x1b4524, int4, object_089b5f70]
+      - [0x1b4534, int4, state/install_state.vtable]
       - [0x1b4548, int4, state/movie_state.vtable]
-      - [0x1b455c, int4, std__exception]
-      - [0x1b456c, int4, std__bad_exception]
+      - [0x1b455c, int4, lib/runtime/std__exception]
+      - [0x1b456c, int4, lib/runtime/std__bad_exception]
       # referenced from edit_task.ovl
       - [0x1b457c, int4, edit/unknown_vtable_1]
       - [0x1b458c, int4, edit/unknown_vtable_2]
@@ -286,37 +346,38 @@ segments:
       - [0x1b4ad4, int4, game/unknown_vtable_07]
       - [0x1b4afc, int4, game/unknown_vtable_08]
       # game_task.ovl, emXX.ovl
-      - [0x1b4b24, int4, game/unknown_em83_vtable]
-      - [0x1b4c20, int4, game/unknown_em82_vtable]
-      - [0x1b4d1c, int4, game/unknown_em75_vtable]
-      - [0x1b4e18, int4, game/unknown_em40_vtable]
-      - [0x1b4f14, int4, game/unknown_em33_vtable]
-      - [0x1b5010, int4, game/unknown_em21_vtable]
-      - [0x1b510c, int4, game/unknown_em20_vtable]
-      - [0x1b5208, int4, game/unknown_em17_vtable]
-      - [0x1b5304, int4, game/unknown_em15_vtable]
-      - [0x1b5400, int4, game/unknown_em14_vtable]
-      - [0x1b54fc, int4, game/unknown_em01_vtable]
+      # conspicuously absent is em32 (poogie)
+      - [0x1b4b24, int4, game/unknown_em83_vtable] # em83
+      - [0x1b4c20, int4, game/unknown_em82_vtable] # em82
+      - [0x1b4d1c, int4, game/unknown_em75_vtable] # em75, 76, 81, 88
+      - [0x1b4e18, int4, game/unknown_em40_vtable] # em40, 78
+      - [0x1b4f14, int4, game/unknown_em33_vtable] # em33
+      - [0x1b5010, int4, game/unknown_em21_vtable] # em21, 46
+      - [0x1b510c, int4, game/unknown_em20_vtable] # em06, 20, 38, 39
+      - [0x1b5208, int4, game/unknown_em17_vtable] # em17, 22, 47
+      - [0x1b5304, int4, game/unknown_em15_vtable] # em15, 45
+      - [0x1b5400, int4, game/unknown_em14_vtable] # em14, 26, 43, 44
+      - [0x1b54fc, int4, game/unknown_em01_vtable] # em01, 11, 37, 41, 42, 49
       # game_task.ovl
-      - [0x1b55f8, int4, game/unknown_vtable_09]
-      - [0x1b56f4, int4, game/unknown_vtable_10]
-      - [0x1b57f0, int4, game/unknown_vtable_11]
-      - [0x1b58ec, int4, game/unknown_vtable_12]
-      - [0x1b59e8, int4, game/unknown_vtable_13]
-      - [0x1b5ae4, int4, game/unknown_vtable_14]
-      - [0x1b5be0, int4, game/unknown_vtable_15]
-      - [0x1b5cdc, int4, game/unknown_vtable_16]
-      - [0x1b5dd8, int4, game/unknown_vtable_17]
-      - [0x1b5ed4, int4, game/unknown_vtable_18]
-      - [0x1b5fd0, int4, game/unknown_vtable_19]
-      - [0x1b60cc, int4, game/unknown_vtable_20]
-      - [0x1b61c8, int4, game/unknown_vtable_21]
-      - [0x1b62c4, int4, game/unknown_vtable_22]
-      - [0x1b63c0, int4, game/unknown_vtable_23]
-      - [0x1b64bc, int4, game/unknown_vtable_24]
-      - [0x1b65b8, int4, game/unknown_vtable_25]
-      - [0x1b66b4, int4, game/unknown_vtable_26]
-      - [0x1b67b0, int4, game/unknown_vtable_27]
+      - [0x1b55f8, int4, game/base_emmodel]
+      - [0x1b56f4, int4, game/unknown_vtable_10] # em03, 69
+      - [0x1b57f0, int4, game/unknown_vtable_11] # em04, 05
+      - [0x1b58ec, int4, game/unknown_vtable_12] # em08, 34
+      - [0x1b59e8, int4, game/unknown_vtable_13] # em09, 23
+      - [0x1b5ae4, int4, game/unknown_vtable_14] # em10
+      - [0x1b5be0, int4, game/unknown_vtable_15] # em12, 25, 70
+      - [0x1b5cdc, int4, game/unknown_vtable_16] # em13, 16, 30, 35
+      - [0x1b5dd8, int4, game/unknown_vtable_17] # em18
+      - [0x1b5ed4, int4, game/unknown_vtable_18] # em19, 24, 80
+      - [0x1b5fd0, int4, game/unknown_vtable_19] # em27, 28, 31, 77
+      - [0x1b60cc, int4, game/unknown_vtable_20] # em29
+      - [0x1b61c8, int4, game/unknown_vtable_21] # em48, 66, 67, 73, 86, 87
+      - [0x1b62c4, int4, game/unknown_vtable_22] # em51, 52, 53, 61, 62, 84, 85, 89
+      - [0x1b63c0, int4, game/unknown_vtable_23] # em56
+      - [0x1b64bc, int4, game/unknown_vtable_24] # em57, 79
+      - [0x1b65b8, int4, game/unknown_vtable_25] # em63
+      - [0x1b66b4, int4, game/unknown_vtable_26] # em68
+      - [0x1b67b0, int4, game/unknown_vtable_27] # em74
       - [0x1b68ac, int4, game/unknown_vtable_28]
       - [0x1b68bc, int4, game/unknown_vtable_29]
       - [0x1b68cc, int4, game/unknown_vtable_30]
@@ -439,11 +500,11 @@ segments:
       - [0x1b7cf0, int4, gsub/unknown_vtable_83]
       - [0x1b7d10, int4, gsub/unknown_vtable_84]
       # em02.ovl, game_task.ovl
-      - [0x1b7d30, int4, em/unknown_em02_vtable_1]
-      - [0x1b7e2c, int4, em/unknown_em02_vtable_2]
+      - [0x1b7d30, int4, game/unknown_em02_vtable] # em02, 36, 71
+      - [0x1b7e2c, int4, em/unknown_em02_vtable]
       # em07.ovl, game_task.ovl
-      - [0x1b7e70, int4, em/unknown_em07_vtable_1]
-      - [0x1b7f6c, int4, em/unknown_em07_vtable_2]
+      - [0x1b7e70, int4, game/unknown_em07_vtable] # em07, 50
+      - [0x1b7f6c, int4, em/unknown_em07_vtable]
       # em14.ovl, game_task.ovl
       - [0x1b7fb0, int4, em/unknown_em14_vtable]
       # em15.ovl, game_task.ovl
@@ -467,19 +528,19 @@ segments:
       - [0x1b8254, int4, em/unknown_em54_vtable_2]
       - [0x1b8298, int4, em/unknown_em54_vtable_3]
       - [0x1b82dc, int4, em/unknown_em54_vtable_4]
-      - [0x1b8320, int4, em/unknown_em54_vtable_5]
-      - [0x1b841c, int4, em/unknown_em54_vtable_6]
+      - [0x1b8320, int4, game/unknown_em54_vtable] # em54, 60, 64, 65
+      - [0x1b841c, int4, em/unknown_em54_vtable_5]
       # em55.ovl, game_task.ovl
-      - [0x1b8444, int4, em/unknown_em55_vtable_1]
-      - [0x1b8488, int4, em/unknown_em55_vtable_2]
+      - [0x1b8444, int4, em/unknown_em55_vtable]
+      - [0x1b8488, int4, game/unknown_em55_vtable] # em55
       # em58.ovl, game_task.ovl
-      - [0x1b8584, int4, em/unknown_em58_vtable_1]
-      - [0x1b8680, int4, em/unknown_em58_vtable_2]
-      - [0x1b86c4, int4, em/unknown_em58_vtable_3]
-      - [0x1b86ec, int4, em/unknown_em58_vtable_4]
+      - [0x1b8584, int4, game/unknown_em58_vtable] # em58
+      - [0x1b8680, int4, em/unknown_em58_vtable_1]
+      - [0x1b86c4, int4, em/unknown_em58_vtable_2]
+      - [0x1b86ec, int4, em/unknown_em58_vtable_3]
       # em59.ovl, game_task.ovl
-      - [0x1b8714, int4, em/unknown_em59_vtable_1]
-      - [0x1b8758, int4, em/unknown_em59_vtable_2]
+      - [0x1b8714, int4, em/unknown_em59_vtable]
+      - [0x1b8758, int4, game/unknown_em59_vtable] # em59, the extra special case (yama tsukami)
       # em75.ovl, game_task.ovl
       - [0x1b8854, int4, em/unknown_em75_vtable_01]
       - [0x1b887c, int4, em/unknown_em75_vtable_02]
@@ -716,8 +777,8 @@ segments:
       - [0x1c2548, int4, stage2/stage208]
       - [0x1c2604, int4, stage2/stage209]
       - [0x1c26c0, int4, stage2/stage210]
-      - [0x1c277c, int4, stage2/stage210/unknown_vtable_1]
-      - [0x1c279c, int4, stage2/stage210/unknown_vtable_2]
+      - [0x1c277c, int4, stage2/stage210/unknown_vtable_1] # stage210 is the waterfall cave in the old jungle
+      - [0x1c279c, int4, stage2/stage210/unknown_vtable_2] # the invincible lobsters?
       - [0x1c27ac, int4, stage2/stage210/unknown_vtable_3]
       - [0x1c27cc, int4, stage2/stage211]
       - [0x1c2888, int4, stage2/stage212]

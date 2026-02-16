@@ -469,7 +469,6 @@ def build_stuff(linker_entries: List[LinkerEntry], github_workflow=False):
                         [
                             module.undefined_syms_auto_path(),
                             module.undefined_funcs_auto_path(),
-                            *module.symbol_addrs_paths(),
                         ]
                 ])),
             },
