@@ -54,12 +54,7 @@ EBOOT_CHECKSUM_PATH = CONFIG_DIR / "eboot.sha1"
 OVERLAYS_CHECKSUM_PATH = CONFIG_DIR / "overlays.sha1"
 ALL_MODULES_CHECKSUM_PATH = BUILD_DIR / "config" / "modules.sha1"
 
-COMMON_INCLUDES = "-Iinclude -Iinclude/pspsdk"
-
-COMMON_COMPILE_FLAGS = "-Cpp_exceptions off -flag no-opt_unroll_loops -flag explicit_zero_data -O4,p -gccinc -maxerrors 3 -w nocmdline -lang=c++ -RTTI off -sdatathreshold 0"
-
-GAME_GCC_CMD = f"./bin/mwccpsp.exe {COMMON_COMPILE_FLAGS} -c {COMMON_INCLUDES} $in -o $out"
-WIBO_GAME_GCC_CMD = f"./bin/wibo {GAME_GCC_CMD}"
+COMMON_COMPILE_FLAGS = "-Cpp_exceptions off -flag no-opt_unroll_loops -flag explicit_zero_data -O4,p -gccinc -maxerrors 3 -w nocmdline -lang=c++ -RTTI off -sdatathreshold 0 -c -Iinclude -Iinclude/pspsdk"
 
 OBJDIFF_CLI_CMD = "./bin/objdiff-cli-windows-x86.exe report generate -o $out"
 GITHUB_ACTION_OBJDIFF_CLI_CMD = OBJDIFF_CLI_CMD.replace('windows-x86.exe', 'linux-x86_64', 1)
@@ -309,7 +304,7 @@ def build_stuff(linker_entries: List[LinkerEntry], github_workflow=False):
             outputs=[str(o) for o in object_paths],
             rule=task,
             inputs=[str(s) for s in src_paths],
-            implicit=["./bin/pspas"] if task.startswith("as") else [],
+            implicit=["./bin/pspas"],
             variables=variables,
             implicit_outputs=implicit_outputs,
         )
@@ -353,7 +348,15 @@ def build_stuff(linker_entries: List[LinkerEntry], github_workflow=False):
     ninja.rule(
         "cc",
         description="cc $in",
-        command=WIBO_GAME_GCC_CMD if github_workflow else GAME_GCC_CMD,
+        command=".venv/bin/python3 ./tools/mwccgap/mwccgap.py $in $out"
+            " --mwcc-path=./bin/mwccpsp.exe"
+            f"{" --use-wibo" if github_workflow else ""}"
+            " --wibo-path=./bin/wibo"
+            " --as-path=./bin/pspas"
+            " --as-march=allegrex"
+            " --as-mabi=32"
+            " --macro-inc-path=./include/macro.inc"
+            f" {COMMON_COMPILE_FLAGS}",
     )
 
     ninja.rule(

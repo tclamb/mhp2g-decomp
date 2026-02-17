@@ -113,7 +113,7 @@ segments:
       - [0x58f40, asm, state/start_state]
       - [0x5924c, asm, global_08a5dd20]
       - [0x5ade8, asm, global_08a5dd24]
-      - [0x5ddf4, asm, object_089b5bd4] # skeleton joint?
+      - [0x5ddf4, cpp, bone]
       - [0x5ed14, asm, global_08a5dd28]
       - [0x5fa88, asm, object_089b5be4] # base class for object_089b5c10, stage objects
       - [0x5fb90, asm, object_089b5c00] # pmo parsing (simplified gmo?); base class for 089b5be4
@@ -284,7 +284,7 @@ segments:
       - [0x1b4114, int4, state/unknown_state_1]
       - [0x1b4128, int4, io/base_data_loader.4]
       - [0x1b4174, int4, state/unknown_state_2]
-      - [0x1b4188, int4, object_089b5bd4]
+      - [0x1b4188, int4, bone]
       - [0x1b4198, int4, object_089b5be4]
       - [0x1b41b4, int4, object_089b5c00]
       - [0x1b41c4, int4, object_089b5c10]
