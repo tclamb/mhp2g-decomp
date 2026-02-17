@@ -3,4 +3,4 @@
 	url = https://github.com/Xeeynamo/sotn-decomp.git
 [submodule "tools/mwccgap"]
 	path = tools/mwccgap
-	url = https://github.com/tclamb/mwccgap.git
+	url = https://github.com/mkst/mwccgap.git
