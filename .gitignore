@@ -16,8 +16,8 @@ venv/
 tools/data-extractor
 
 bin/*
-!bin/pspdecrypt.sha1
-!bin/mwccpsp_219.tar.gz.sha256
+!bin/*.sha1
+!bin/*.sha256
 
 disks/*
 !disks/ULJM-05500.sha1
