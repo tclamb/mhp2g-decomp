@@ -170,8 +170,8 @@ int sceUmdActivate(int unit, const char *drive) { return 0; }
 int sceUmdGetErrorStat(void) { return 0; }
 
 int main(int argc, char** argv) {
-    if (argc != 4) {
-        std::cerr << "incorrect number of args\n\nusage: data-extractor data.bin id out\n\n";
+    if (argc != 3 && argc != 4) {
+        std::cerr << "incorrect number of args\n\nusage: data-extractor data.bin id [out]\n\n";
         return -1;
     }
     SceMock::get()->set_data_bin_path(argv[1]);
@@ -179,7 +179,12 @@ int main(int argc, char** argv) {
     short file_id;
     std::stringstream{argv[2]} >> file_id;
 
-    std::ofstream out = std::ofstream{argv[3], std::ios_base::binary};
+    std::ostream *out;
+    if (argc == 4) {
+        out = new std::ofstream{argv[3], std::ios_base::binary};
+    } else {
+        out = &std::cout;
+    }
 
     data_loader loader;
     loader.start_threads();
@@ -187,8 +192,8 @@ int main(int argc, char** argv) {
     u32 len = loader.file_size(file_id);
     auto buf = std::vector<u8>(len);
     loader.load_file_blocking(file_id, buf.data(), len);
-    out.write((char*)buf.data(), len);
-    out.flush();
+    out->write((char*)buf.data(), len);
+    out->flush();
 
     return 0;
 }
