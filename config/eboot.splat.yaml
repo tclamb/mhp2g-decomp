@@ -210,7 +210,7 @@ segments:
       - [0x108588, asm, lib/runtime/ExceptionHandler]
       - [0x1099b8, asm, lib/runtime/ExceptionHandlerTS]
       - [0x109df8, asm, lib/runtime/mwUtils_PSP]
-      - [0x109e94, asm, lib/sceStub]
+      - [0x109e94, cpp, lib/sceStub]
       - [0x10a7a4, rodata, psp_module_info] # exports: .lib.ent.top, .lib.ent, .lib.ent.btm
       - [0x10a7c0, rodata, stub]            # imports: .lib.stub.top, .lib.stub, .lib.stub.btm
       - [0x10aa58, rodata, sceModuleInfo]   # .rodata.sceModuleInfo
