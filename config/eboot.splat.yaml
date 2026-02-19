@@ -165,8 +165,7 @@ segments:
       - [0x998f0, asm, global_08a862b8.ctor]
       - [0x99948, asm, global_08a5dd10.ctor]
       - [0x99958, asm, global_08a5e270.ctor] # root object for application, most globals are its members
-      - [0x99968, asm, global_09a07280.ctor]
-      - [0x999c8, asm, global_09a07280] # typed cache
+      - [0x99968, cpp, tagged_cache]
       - [0x99d24, asm, global_09a07284] # netplay layer 3
       - [0x9fc80, asm, csepsp] # "Capcom Sound Engine for [PSP] Ver1.8", "Capcom Sound Engine CORE Ver2.0"
       - [0xa8424, asm, state/lobby_state]

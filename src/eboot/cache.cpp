@@ -1,30 +1,8 @@
 #include "common.h"
 
-struct slab_node {
-    struct slab_node *next;
-    struct slab_node *prev;
-    struct slab_node *next_partial;
-    struct slab_node *prev_partial;
-};
+#include "cache.hpp"
 
-struct slab : slab_node {
-    u32 free_block_start;
-    u32 free_blocks;
-    u32 remainder;
-};
-
-struct cache {
-    u32 len;
-    slab *first;
-    slab_node head;
-
-    void reset(u8 *slab, u32 len);
-    void clear();
-    u8 *alloc(u32 size, u32 align);
-    void free(u8* buf);
-};
-
-void cache::reset(u8 *s, u32 l) {
+void cache::reset(void *s, u32 l) {
     len = l;
     first = (slab*)s;
     clear();
@@ -45,7 +23,7 @@ inline u32 dummy(u32 x) {
     return x;
 }
 
-u8 *cache::alloc(u32 size, u32 align) {
+void *cache::alloc(u32 size, u32 align) {
     if (!size) {
         return 0;
     }
@@ -110,12 +88,12 @@ u8 *cache::alloc(u32 size, u32 align) {
     return 0;
 }
 
-void cache::free(u8* memory) {
+void cache::free(void* memory) {
     if (!memory) {
         return;
     }
 
-    slab *cur = (slab*)(memory - 0x20);
+    slab *cur = (slab*)((u8*)memory - 0x20);
 
     slab *prev = (slab*)cur->prev;
     if (!prev) {
