@@ -2,177 +2,179 @@
 
 extern "C" {
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c5a80);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5A80);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c5ac8);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5AC8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c5b18);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5B18);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c5bd8);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5BD8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c5c30);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5C30);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c5c6c);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5C6C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c5cac);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5CAC);
 
-void z_un_088c5d28(void) {
+void func_eboot_088C5D28(void) {
     // empty
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c5d30);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5D30);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c5da8);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5DA8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c5de4);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5DE4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c5e64);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5E64);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c5e94);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5E94);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c5f88);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5F88);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c6090);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6090);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c6198);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6198);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c6290);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6290);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c63ac);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C63AC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c64a4);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C64A4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c659c);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C659C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c6730);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6730);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c6860);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6860);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c6958);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6958);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c6a50);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6A50);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c6b48);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6B48);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c6ca4);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6CA4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c6d9c);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6D9C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c6e94);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6E94);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c6f8c);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6F8C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c7084);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7084);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c718c);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C718C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c7284);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7284);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c7404);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7404);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c74fc);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C74FC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c75f4);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C75F4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c76dc);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C76DC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c77d4);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C77D4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c78cc);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C78CC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c79c4);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C79C4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c7abc);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7ABC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c7bb4);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7BB4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c7cac);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7CAC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c7dc4);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7DC4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c7ebc);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7EBC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c7fb4);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7FB4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c80ac);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C80AC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c81d4);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C81D4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c82dc);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C82DC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c83d4);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C83D4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c84bc);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C84BC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c85f4);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C85F4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c86ec);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C86EC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c87e4);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C87E4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c892c);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C892C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c8a44);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C8A44);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c8b7c);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C8B7C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c8ca4);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C8CA4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c8d9c);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C8D9C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c8e84);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C8E84);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c8f7c);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C8F7C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9064);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9064);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9194);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9194);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c928c);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C928C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9384);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9384);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c93d8);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C93D8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9410);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9410);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c941c);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C941C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9424);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9424);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9440);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9440);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c94cc);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C94CC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9514);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9514);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9674);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9674);
 
 // load stage package
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9740);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9740);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c99ac);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C99AC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9a20);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9A20);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9a78);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9A78);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9acc);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9ACC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9b74);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9B74);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9bc8);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9BC8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", func_088C9BE0);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9BE0);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9d6c);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9BF8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088c9f1c);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9D6C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088ca0ac);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9F1C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088ca0bc);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088CA0AC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", z_un_088ca120);
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088CA0BC);
+
+INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088CA120);
 
 }

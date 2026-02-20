@@ -1,0 +1,12 @@
+func_eboot_08872E24 = 0x08872E24; // type:func
+func_eboot_088C6290 = 0x088C6290; // type:func
+func_eboot_088C659C = 0x088C659C; // type:func
+func_eboot_088C6CA4 = 0x088C6CA4; // type:func
+func_eboot_088CA15C = 0x088CA15C; // type:func
+func_eboot_088CA1E4 = 0x088CA1E4; // type:func
+func_eboot_088CD614 = 0x088CD614; // type:func
+func_eboot_088CD94C = 0x088CD94C; // type:func
+__register_global_object = 0x08909D80; // type:func
+D_eboot_089BF4AC = 0x089BF4AC;
+D_eboot_08A5DD4C = 0x08A5DD4C;
+D_eboot_09A4ADA0 = 0x09A4ADA0;

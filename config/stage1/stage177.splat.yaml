@@ -21,9 +21,10 @@ options:
   find_file_boundaries: true
   global_vram_end: 0x09ffffff
   global_vram_start: 0x08000000
+  gp_value: 0x089ceb50
   ld_bss_is_noload: true
   ld_generate_symbol_per_data_segment: true
-  ld_script_path: build/modules/stage1/stage177.ovl.ld
+  ld_script_path: build/config/stage1/stage177.ld
   make_full_disasm_for_code: true
   migrate_rodata_to_functions: true
   named_regs_for_c_funcs: false
@@ -33,23 +34,27 @@ options:
   reloc_addrs_path:
   - config/stage1/stage177.reloc_addrs.txt
   rodata_string_guesser_level: 0
+  section_order:
+  - .text
+  - .data
+  - .rodata
+  - .init
+  - .ctor
+  - .bss
   src_path: src/stage1/stage177
   string_encoding: SHIFT_JIS
   suggestion_rodata_section_start: true
   symbol_addrs_path:
   - config/stage1/stage177.symbol_addrs.txt
+  symbol_name_format: stage177_$VRAM
+  symbol_name_format_no_rom: $VRAM
   target_path: modules/stage1/stage177.ovl
   undefined_funcs_auto_path: build/config/stage1/stage177.undefined_funcs_auto.txt
   undefined_syms_auto_path: build/config/stage1/stage177.undefined_syms_auto.txt
 segments:
-- align: 4
-  name: stage177.ovl_header
-  start: 0x0
-  subalign: 4
-  subsegments:
-  - [0x0, data]
-  type: code
-  vram: 0x09d5df80
+- - 0
+  - bin
+  - omit_ovl_header
 - align: 4
   bss_size: 0x480
   name: stage177
@@ -57,9 +62,12 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm]
-  - [0x200, int4]
-  - [0x500, bss]
+  - [0x80, asm, stage177]
+  - [0x200, data, stage177]
+  - [0x480, init, stage177]
+  - [0x4c0, ctor, stage177]
+  - [0x4c4, pad]
+  - [0x500, bss, stage177]
   type: code
   vram: 0x09d5dfc0
 - - 0x500

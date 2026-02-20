@@ -21,9 +21,10 @@ options:
   find_file_boundaries: true
   global_vram_end: 0x09ffffff
   global_vram_start: 0x08000000
+  gp_value: 0x089ceb50
   ld_bss_is_noload: true
   ld_generate_symbol_per_data_segment: true
-  ld_script_path: build/modules/sub/game_sub.ovl.ld
+  ld_script_path: build/config/sub/game_sub.ld
   make_full_disasm_for_code: true
   migrate_rodata_to_functions: true
   named_regs_for_c_funcs: false
@@ -33,23 +34,27 @@ options:
   reloc_addrs_path:
   - config/sub/game_sub.reloc_addrs.txt
   rodata_string_guesser_level: 0
+  section_order:
+  - .text
+  - .data
+  - .rodata
+  - .init
+  - .ctor
+  - .bss
   src_path: src/sub/game_sub
   string_encoding: SHIFT_JIS
   suggestion_rodata_section_start: true
   symbol_addrs_path:
   - config/sub/game_sub.symbol_addrs.txt
+  symbol_name_format: game_sub_$VRAM
+  symbol_name_format_no_rom: $VRAM
   target_path: modules/sub/game_sub.ovl
   undefined_funcs_auto_path: build/config/sub/game_sub.undefined_funcs_auto.txt
   undefined_syms_auto_path: build/config/sub/game_sub.undefined_syms_auto.txt
 segments:
-- align: 4
-  name: game_sub.ovl_header
-  start: 0x0
-  subalign: 4
-  subsegments:
-  - [0x0, data]
-  type: code
-  vram: 0x09c14280
+- - 0
+  - bin
+  - omit_ovl_header
 - align: 4
   bss_size: 0x1ea00
   name: game_sub
@@ -57,9 +62,13 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm]
-  - [0xb5e78, int4]
-  - [0xe2480, bss]
+  - [0x80, asm, game_sub]
+  - [0xb5e78, pad]
+  - [0xb5e80, data, game_sub]
+  - [0xe2280, init, game_sub]
+  - [0xe23f0, ctor, game_sub]
+  - [0xe2410, pad]
+  - [0xe2480, bss, game_sub]
   type: code
   vram: 0x09c142c0
 - - 0xe2480

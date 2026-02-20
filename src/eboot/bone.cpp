@@ -1,18 +1,24 @@
 #include "common.h"
 
-struct bar {
-    ScePspFMatrix4 f0x0;
-    ScePspFMatrix3 f0x40;
+#include "vfpu.h"
+
+struct bind_pose {
+    ScePspFMatrix4 transform;
+    ScePspFVector3 scale;
+    ScePspFVector3 rotation;
+    ScePspFVector3 position;
     u16 f0x64[14];
 };
 
-struct foo {
-    void *vtable;
+struct bone {
+    virtual ~bone();
+    virtual void update(ScePspFMatrix4 *, ScePspFMatrix4 *, float x, float y, float z);
+
     ScePspFVector3 f0x4;
     ScePspFMatrix4 f0x10;
     ScePspFMatrix4 f0x50;
-    ScePspFMatrix4 f0x90;
-    ScePspFMatrix4 f0xd0;
+    ScePspFMatrix4 localPose; // these might be swapped
+    ScePspFMatrix4 globalPose;
     u16 f0x110;
     u16 f0x112;
     u16 key;
@@ -20,39 +26,27 @@ struct foo {
     float f0x118;
     float f0x11c;
     ScePspFMatrix3 f0x120;
-    foo *parent;
-    foo *sibling;
-    foo *child;
-    bar f0x150;
-    bar f0x1d0;
-};
+    bone *parent;
+    bone *sibling;
+    bone *child;
+    bind_pose bind;
+    bind_pose alt_bind;
 
-inline void vsub_q(ScePspFVector4 *out, ScePspFVector4 *a, ScePspFVector4 *b) {
-#if defined(__MWERKS__)
-    __asm__ (
-        "lv.q C000, %1"
-        "lv.q C010, %2"
-        "vsub.q C000, C000, C010"
-        "sv.q C000, %0"
-        : "=m"(*out)
-        : "m"(*a), "m"(*b)
-    );
-#else
-    out->x = a->x - b->x;
-    out->y = a->y - b->y;
-    out->z = a->z - b->z;
-    out->w = a->w - b->w;
-#endif
-}
+    bone *func_eboot_0885F920(bone *arg1, u32 arg2);
+    void func_eboot_0885FFB4(ScePspFVector4 *arg1, s32 arg2, float arg3, float arg4);
+
+    static void operator delete(void *);
+    static void *operator new(u32, void *);
+};
 
 extern "C" {
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_0885f840);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885F840);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_0885f8e0);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885F8E0);
 
-foo *z_un_0885f920(foo *this_, foo *arg1, u32 arg2) {
-    foo *temp = arg1;
+bone *bone::func_eboot_0885F920(bone *arg1, u32 arg2) {
+    bone *temp = arg1;
     while (true) {
         if (arg1->key == arg2 || arg2 == -1) {
             return arg1;
@@ -79,25 +73,25 @@ foo *z_un_0885f920(foo *this_, foo *arg1, u32 arg2) {
     return arg1;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_0885f998);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885F998);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_0885fa04);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FA04);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_0885fb4c);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FB4C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_0885fbac);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FBAC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_0885fbec);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FBEC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_0885fc94);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FC94);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_0885fe3c);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FE3C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_0885ff54);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FF54);
 
-void z_un_088633c4(ScePspFMatrix4*, ScePspFMatrix3*, ScePspFMatrix3*, ScePspFMatrix4*, u16*, float);
+void func_eboot_088633C4(ScePspFMatrix4*, ScePspFMatrix3*, ScePspFMatrix3*, ScePspFMatrix4*, u16*, float);
 
-void z_un_0885ffb4(foo *this_, ScePspFVector4 *arg1, s32 arg2, float arg3, float arg4) {
+void bone::func_eboot_0885FFB4(ScePspFVector4 *arg1, s32 arg2, float arg3, float arg4) {
     struct {
         ScePspFMatrix4 b;
         ScePspFMatrix4 a;
@@ -106,17 +100,17 @@ void z_un_0885ffb4(foo *this_, ScePspFVector4 *arg1, s32 arg2, float arg3, float
     } s;
     ScePspFMatrix3 *new_var3;
     ScePspFVector4 *new_var, *new_var2;
-    bar *pafVar2;
+    bind_pose *pafVar2;
 
     if (arg2 == 0) {
-        pafVar2 = &this_->f0x150;
+        pafVar2 = &bind;
     } else {
-        pafVar2 = &this_->f0x1d0;
+        pafVar2 = &alt_bind;
     }
-    new_var3 = &this_->f0x120;
-    z_un_088633c4(&pafVar2->f0x0, new_var3, &s.c, &s.a, &pafVar2->f0x64[4], arg3);
-    new_var3 = &this_->f0x120;
-    z_un_088633c4(&pafVar2->f0x0, new_var3, &s.c, &s.b, &pafVar2->f0x64[4], arg4);
+    new_var3 = &f0x120;
+    func_eboot_088633C4(&pafVar2->transform, new_var3, &s.c, &s.a, &pafVar2->f0x64[4], arg3);
+    new_var3 = &f0x120;
+    func_eboot_088633C4(&pafVar2->transform, new_var3, &s.c, &s.b, &pafVar2->f0x64[4], arg4);
 
     new_var2 = &s.b.w;
     new_var = &s.a.w;
@@ -125,26 +119,55 @@ void z_un_0885ffb4(foo *this_, ScePspFVector4 *arg1, s32 arg2, float arg3, float
     arg1->w = 0.0f;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_08860054);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_08860054);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_08860254);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_08860254);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_08860320);
+void bone::update(ScePspFMatrix4 *parentGlobalPose, ScePspFMatrix4 *parentLocalPose, float x, float y, float z) {
+    float sx, sy, sz;
+    ScePspFMatrix4 invScale;
+    sx = bind.scale.x * x;
+    sy = bind.scale.y * y;
+    sz = bind.scale.z * z;
+    scaleMatrix(&localPose, sx, sy, sz);
+    vmidt_q(&invScale);
+    invScale.x.x = 1.0f / x;
+    invScale.y.y = 1.0f / y;
+    invScale.z.z = 1.0f / z;
+    invScale.w.x = bind.transform.w.x;
+    invScale.w.y = bind.transform.w.y;
+    invScale.w.z = bind.transform.w.z;
+    vmmul_t(&localPose, &bind.transform);
+    vmmul_q(&localPose, &invScale);
+    vmmul_q(&globalPose, &localPose, parentGlobalPose);
+    vmmul_q(&localPose, parentLocalPose);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_08860534);
+    if (child) {
+        child->update(&globalPose, &localPose, sx, sy, sz);
+    }
+    if (sibling) {
+        sibling->update(parentGlobalPose, parentLocalPose, x, y, z);
+    }
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_08860640);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_08860534);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_088606c8);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_08860640);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_088606d8);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_088606C8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_08860700);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_088606D8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_08860708);
+INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_08860700);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", z_un_08860750);
+bone::~bone() {}
 
-void z_un_08860758() {}
+void *bone::operator new(u32 size, void *p) {
+    return p;
+}
+
+void bone::operator delete(void *p) {
+    return;
+}
 
 }

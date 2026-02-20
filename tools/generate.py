@@ -2,6 +2,7 @@ import yaml
 from pathlib import Path
 from hashlib import sha1
 from itertools import repeat
+import struct
 
 ROOT = Path(__file__).parent.parent.resolve()
 BUILD_DIR = Path(__file__).parent.parent / "build"
@@ -33,29 +34,42 @@ def generate_overlay_config(overlay, header, bytes):
     if header.text_size > 0x40:
         code_subsegments.extend([
             [HexInt(0x40), "pad"],
-            [HexInt(0x80), "asm"],
+            [HexInt(0x80), "asm", overlay.stem()],
         ])
     data_offset = 0x40 + header.text_size
-    if header.data_size > 0:
+    aligned_data_offset = ((data_offset + 0x7f) >> 7) << 7
+    if aligned_data_offset > data_offset:
         code_subsegments.append(
-            [HexInt(data_offset), "int4"]
+            [HexInt(data_offset), "pad"]
         )
+    if header.data_size > aligned_data_offset - data_offset:
+        code_subsegments.append(
+            [HexInt(aligned_data_offset), "data", overlay.stem()]
+        )
+
+    if header.static_initializers_start_address != header.static_initializers_end_address:
+        ctor_offset = header.static_initializers_start_address - header.load_address
+        init_address, = struct.unpack("<I", bytes[ctor_offset:ctor_offset + 4])
+        init_offset = init_address - header.load_address
+        code_subsegments.extend([
+            [HexInt(init_offset), "init", overlay.stem()],
+            [HexInt(ctor_offset), "ctor", overlay.stem()],
+        ])
+
     bss_offset = data_offset + header.data_size
+    ctor_end_offset = header.static_initializers_end_address - header.load_address
+    if ctor_end_offset != bss_offset:
+        code_subsegments.append(
+            [HexInt(ctor_end_offset), "pad"]
+        )
+
     if header.bss_size > 0:
         code_subsegments.append(
-            [HexInt(0x40 + header.text_size + header.data_size), "bss"]
+            [HexInt(0x40 + header.text_size + header.data_size), "bss", overlay.stem()]
         )
 
     segments = [
-        {
-            "name": out_file.stem + ".ovl_header",
-            "type": "code",
-            "start": HexInt(0),
-            "vram": AddressInt(header.load_address),
-            "align": 4,
-            "subalign": 4,
-            "subsegments": [FlowSequence([HexInt(0), "data"])],
-        },
+        [0x0, "bin", "omit_ovl_header"]
     ]
     if len(code_subsegments) > 0:
         segments.append({
@@ -90,6 +104,9 @@ def generate_overlay_config(overlay, header, bytes):
             "undefined_funcs_auto_path": overlay.undefined_funcs_auto_path(),
             "undefined_syms_auto_path": overlay.undefined_syms_auto_path(),
             "ld_generate_symbol_per_data_segment": True,
+            "gp_value": AddressInt(0x089ceb50),
+            "symbol_name_format": f'{stem}_$VRAM',
+            "symbol_name_format_no_rom": '$VRAM',
             "create_asm_dependencies": True,
             "create_undefined_funcs_auto": True,
             "create_undefined_syms_auto": True,
@@ -112,7 +129,15 @@ def generate_overlay_config(overlay, header, bytes):
             "disassemble_all": True,
             "auto_decompile_empty_functions": True,
             "make_full_disasm_for_code": True,
-            "asm_inc_header": LiteralString(".set noat\n.set noreorder")
+            "asm_inc_header": LiteralString(".set noat\n.set noreorder"),
+            "section_order": [
+                ".text",
+                ".data",
+                ".rodata",
+                ".init",
+                ".ctor",
+                ".bss",
+            ],
         },
-        "segments": segments
+        "segments": segments,
     }, default_flow_style=False))

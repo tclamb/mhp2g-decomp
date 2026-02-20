@@ -1,86 +1,143 @@
 #include "common.h"
 
+#include "vfpu.h"
 
 extern "C" {
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088615DC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_088615dc);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088615FC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_088615fc);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08861674);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08861674);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_0886168C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_0886168c);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08861714);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08861714);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08861C74);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08861c74);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08861D74);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08861d74);
+static int log2table[257] = {
+    [0 ... 256] =  0xff,
+    [1] = 0,
+    [2] = 1,
+    [4] = 2,
+    [8] = 3,
+    [16] = 4,
+    [32] = 5,
+    [64] = 6,
+    [128] = 7,
+    [256] = 8,
+};
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08861e94);
+void world_matrix (
+    ScePspFVector3 *scale,
+    ScePspFVector3 *angle,
+    ScePspFVector3 *position,
+    int mode,
+    ScePspFMatrix4 *out)
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_0886234c);
+{
+    ScePspFVector4 pos;
+    pos.x = position->x;
+    pos.y = position->y;
+    pos.z = position->z;
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_088623d4);
+    scaleMatrix(out, scale->x, scale->y, scale->z);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08862508);
-
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08862510);
-
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_088626c8);
-
-void z_un_088626d4(void) {
-    // empty
+    float x, y, z, w;
+    switch (mode & 0xffff) {
+    case 6:
+        rotateXYZ(out, angle);
+        break;
+    case 7:
+        rotateZXY(out, angle);
+        break;
+    case 4:
+        rotateX(out, angle->x);
+        rotateY(out, angle->y);
+        break;
+    case 5:
+        rotateZ(out, angle->z);
+        rotateY(out, angle->y);
+        break;
+    case 1:
+        rotateX(out, angle->x);
+        break;
+    case 2:
+        rotateY(out, angle->y);
+        break;
+    case 3:
+        rotateZ(out, angle->z);
+        break;
+    default:
+        break;
+    }
+    out->w.x = pos.x;
+    out->w.y = pos.y;
+    out->w.z = pos.z;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_088626dc);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_0886234C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08862708);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088623D4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08862714);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862508);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08862724);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862510);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08862740);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088626C8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08862760);
+void func_eboot_088626D4(void) {
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_088627a4);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088626DC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_088627ac);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862708);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_088627f8);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862714);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_088629d4);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862724);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08862bb0);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862740);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08862d2c);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862760);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08862da4);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088627A4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08862df8);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088627AC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08862e4c);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088627F8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08862e5c);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088629D4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08862fd8);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862BB0);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_088630c8);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862D2C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08863190);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862DA4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_088632d0);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862DF8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_088633c4);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862E4C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08863644);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862E5C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08863660);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862FD8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_088637bc);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088630C8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", z_un_08863b68);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08863190);
 
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088632D0);
+
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088633C4);
+
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08863644);
+
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08863660);
+
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088637BC);
+
+INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08863B68);
 }

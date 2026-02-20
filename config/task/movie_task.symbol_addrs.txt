@@ -1,0 +1,17 @@
+func_eboot_0888FE4C = 0x0888FE4C; // type:func
+func_eboot_0888FEE8 = 0x0888FEE8; // type:func
+func_eboot_0888FF00 = 0x0888FF00; // type:func
+func_eboot_0888FF8C = 0x0888FF8C; // type:func
+__ptmf_test = 0x08909E80; // type:func
+sceKernelSetEventFlag = 0x0890BA00; // type:func
+D_eboot_089C7508 = 0x089C7508;
+D_eboot_08A5DD3C = 0x08A5DD3C;
+instance__4game = 0x08A5E270;
+ptmf_movie_task_09A5AA00 = 0x09A5AA00; // type:PTMF size:0xC
+ptmf_movie_task_09A5AA10 = 0x09A5AA10; // type:PTMF size:0xC
+ptmf_movie_task_09A5AA20 = 0x09A5AA20; // type:PTMF size:0xC
+func_demo_sub_09C15390 = 0x09C15390; // type:func
+func_demo_sub_09C15418 = 0x09C15418; // type:func
+func_demo_sub_09C15450 = 0x09C15450; // type:func
+func_demo_sub_09C154A0 = 0x09C154A0; // type:func
+D_demo_sub_09C17148 = 0x09C17148;

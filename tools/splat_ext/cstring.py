@@ -40,11 +40,11 @@ class PSPSegCstring(CommonSegCodeSubsegment):
         return ".data"
 
     def out_path(self) -> Path:
-        return options.opts.asset_path / self.dir / f"{self.name}.cstring.inc.cpp"
-    
+        return options.opts.asset_path / self.dir / f"{self.name}.cstring.inc.hpp"
+
     def scan(self, rom_bytes: bytes):
         self.file_text = self.disassemble_data(rom_bytes)
-    
+
     def disassemble_data(self, rom_bytes) -> str:
         assert isinstance(self.rom_start, int)
         assert isinstance(self.rom_end, int)
@@ -65,7 +65,7 @@ class PSPSegCstring(CommonSegCodeSubsegment):
 
         if not self.data_only:
             lines.append(f"char {self.format_sym_name(sym)}[{length}] = ")
-        
+
         lines.append(json.dumps(s.decode('shift_jis')))
 
         if not self.data_only:
@@ -74,7 +74,7 @@ class PSPSegCstring(CommonSegCodeSubsegment):
         # enforce newline at end of file
         lines.append("")
         return "\n".join(lines)
-    
+
     def split(self, rom_bytes: bytes):
         if self.file_text and self.out_path():
             self.out_path().parent.mkdir(parents=True, exist_ok=True)
@@ -83,11 +83,11 @@ class PSPSegCstring(CommonSegCodeSubsegment):
                 f.write(self.file_text)
 
     def should_scan(self) -> bool:
-        return options.opts.is_mode_active("cstring")
+        return True
 
     def should_split(self) -> bool:
-        return self.extract and options.opts.is_mode_active("cstring")
-    
+        return True
+
     @staticmethod
     def estimate_size(yaml: Union[Dict, List]) -> Optional[int]:
         if isinstance(yaml, dict) and "length" in yaml:

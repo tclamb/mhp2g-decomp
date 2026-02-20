@@ -21,9 +21,10 @@ options:
   find_file_boundaries: true
   global_vram_end: 0x09ffffff
   global_vram_start: 0x08000000
+  gp_value: 0x089ceb50
   ld_bss_is_noload: true
   ld_generate_symbol_per_data_segment: true
-  ld_script_path: build/modules/task/show_select_task.ovl.ld
+  ld_script_path: build/config/task/show_select_task.ld
   make_full_disasm_for_code: true
   migrate_rodata_to_functions: true
   named_regs_for_c_funcs: false
@@ -33,22 +34,26 @@ options:
   reloc_addrs_path:
   - config/task/show_select_task.reloc_addrs.txt
   rodata_string_guesser_level: 0
+  section_order:
+  - .text
+  - .data
+  - .rodata
+  - .init
+  - .ctor
+  - .bss
   src_path: src/task/show_select_task
   string_encoding: SHIFT_JIS
   suggestion_rodata_section_start: true
   symbol_addrs_path:
   - config/task/show_select_task.symbol_addrs.txt
+  symbol_name_format: show_select_task_$VRAM
+  symbol_name_format_no_rom: $VRAM
   target_path: modules/task/show_select_task.ovl
   undefined_funcs_auto_path: build/config/task/show_select_task.undefined_funcs_auto.txt
   undefined_syms_auto_path: build/config/task/show_select_task.undefined_syms_auto.txt
 segments:
-- align: 4
-  name: show_select_task.ovl_header
-  start: 0x0
-  subalign: 4
-  subsegments:
-  - [0x0, data]
-  type: code
-  vram: 0x09a5a580
+- - 0
+  - bin
+  - omit_ovl_header
 - - 0x80
 sha1: 614ed861cdb4bfcd8169a75f588734fbbda033a9

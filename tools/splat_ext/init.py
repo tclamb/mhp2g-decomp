@@ -8,6 +8,9 @@ from splat.util import options
 class PSPSegInit(CommonSegAsm):
     """Segment that contains static initializer code"""
 
+    def is_text(self) -> bool:
+        return False
+
     def get_linker_section(self) -> str:
         return ".init"
 

@@ -39,11 +39,11 @@ class PSPSegSha1digests(CommonSegCodeSubsegment):
         return ".data"
 
     def out_path(self) -> Path:
-        return options.opts.asset_path / self.dir / f"{self.name}.sha1digests.inc.cpp"
-    
+        return options.opts.asset_path / self.dir / f"{self.name}.sha1digests.inc.hpp"
+
     def scan(self, rom_bytes: bytes):
         self.file_text = self.disassemble_data(rom_bytes)
-    
+
     def disassemble_data(self, rom_bytes) -> str:
         assert isinstance(self.rom_start, int)
         assert isinstance(self.rom_end, int)
@@ -63,7 +63,7 @@ class PSPSegSha1digests(CommonSegCodeSubsegment):
 
         if not self.data_only:
             lines.append(f"u8 {self.format_sym_name(sym)}[{length // 20}][20] = {{")
-        
+
         for i in range(0, length, 20):
             digest = ", ".join([f"0x{b:02X}" for b in data[i:i+20]])
             lines.append(f"{{{digest}}},")
@@ -74,7 +74,7 @@ class PSPSegSha1digests(CommonSegCodeSubsegment):
         # enforce newline at end of file
         lines.append("")
         return "\n".join(lines)
-    
+
     def split(self, rom_bytes: bytes):
         if self.file_text and self.out_path():
             self.out_path().parent.mkdir(parents=True, exist_ok=True)
@@ -83,11 +83,11 @@ class PSPSegSha1digests(CommonSegCodeSubsegment):
                 f.write(self.file_text)
 
     def should_scan(self) -> bool:
-        return options.opts.is_mode_active("sha1digests")
+        return True
 
     def should_split(self) -> bool:
-        return self.extract and options.opts.is_mode_active("sha1digests")
-    
+        return True
+
     @staticmethod
     def estimate_size(yaml: Union[Dict, List]) -> Optional[int]:
         if isinstance(yaml, dict) and "length" in yaml:

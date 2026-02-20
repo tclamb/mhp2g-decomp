@@ -41,6 +41,20 @@ struct file_size_pair {
 struct data_loader
 {
     static u8 decrypt_table[];
+    static u8 file_sha1_digests[][20];
+    static u8 null_sha1_digest[];
+    static char fake_rofs_semaphore_name[];
+    static char data_bin_path_string[];
+    static char umd_disc_drive_name[];
+    static char loader_thread_name[];
+    static char sha1_event_flag_name[];
+    static char sha1_thread_name[];
+    static char transfer_event_flag_name[];
+    static char transfer_thread_name[];
+    static char null_utility_message_dialog_header[];
+    static char install_block_path_format[];
+    static char lba_umd_access_path_format[];
+    static char install_folder_path[];
 
     char *data_bin_path() { return nullptr; }
     void calculate_install_block_offsets() {}
@@ -86,7 +100,6 @@ char sha1_thread_name[] = {};
 char sha1_event_flag_name[] = {};
 char umd_disc_drive_name[] = {};
 
-#include "../assets/eboot/io/data_loader__decrypt_table.bytearray.inc.cpp"
 #include "../src/eboot/io/data_loader__start_threads.cpp"
 #include "../src/eboot/io/data_loader__next_decryption_key.cpp"
 #include "../src/eboot/io/data_loader__file_blocks_size.cpp"

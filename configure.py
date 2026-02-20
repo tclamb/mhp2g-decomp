@@ -6,7 +6,7 @@ import shutil
 import sys
 import json
 from pathlib import Path
-from typing import Dict, List, Set, Union
+from typing import Dict, List, Set, Union, Optional
 import subprocess
 import struct
 from itertools import count, repeat, chain, starmap
@@ -53,8 +53,10 @@ DATA_EXTRACTOR_PATH = TOOLS_DIR / "data-extractor"
 EBOOT_CHECKSUM_PATH = CONFIG_DIR / "eboot.sha1"
 OVERLAYS_CHECKSUM_PATH = CONFIG_DIR / "overlays.sha1"
 ALL_MODULES_CHECKSUM_PATH = BUILD_DIR / "config" / "modules.sha1"
+LCF_PATH = BUILD_DIR / "ULJM-05500.lcf"
+DUMMY_OBJECT_PATH = BUILD_DIR / "dummy.o"
 
-COMMON_COMPILE_FLAGS = "-Cpp_exceptions off -flag no-opt_unroll_loops -flag explicit_zero_data -O4,p -gccinc -maxerrors 3 -w nocmdline -lang=c++ -RTTI off -sdatathreshold 0 -c -Iinclude -Iinclude/pspsdk"
+COMMON_COMPILE_FLAGS = "-Cpp_exceptions off -flag no-opt_unroll_loops -flag explicit_zero_data -O4,p -gccinc -maxerrors 3 -w nocmdline -lang=c++ -RTTI off -sdatathreshold 0 -c -Iinclude -Iinclude/pspsdk -inline level=8"
 
 OBJDIFF_CLI_CMD = "./bin/objdiff-cli-windows-x86.exe report generate -o $out"
 GITHUB_ACTION_OBJDIFF_CLI_CMD = OBJDIFF_CLI_CMD.replace('windows-x86.exe', 'linux-x86_64', 1)
@@ -104,7 +106,7 @@ class ModuleInfo:
         return self.artifact_path(SRC_DIR, "")
 
     def ld_script_path(self):
-        return self.build_path().parent / (self.name + ".ld")
+        return self.artifact_path(UNDEFINED_SYMS_DIR, ".ld")
 
 @dataclasses.dataclass
 class OverlayHeader:
@@ -164,6 +166,17 @@ class OverlayInfo(ModuleInfo):
         if generate_config:
             generate_overlay_config(self, header, bytes)
 
+    def load_address(self):
+        if self.name.endswith("_task.ovl"):
+            return 0x09a5a580
+        if self.name.endswith("_sub.ovl"):
+            return 0x09c14280
+        if self.name.startswith("em"):
+            return 0x09d15100
+        if self.name.startswith("stage"):
+            return 0x09d5df80
+        assert False
+
 TASK_OVERLAY_FIRST_ID = 43
 TASK_OVERLAY_NAMES = [
     f"{s}_task.ovl" for s in [
@@ -180,12 +193,20 @@ STAGE_OVERLAY_FIRST_ID = 5490
 STAGE_OVERLAY_NAMES = [
     f"stage{i:03d}.ovl" for i in range(267)
 ]
-all_overlays = list(starmap(OverlayInfo, chain.from_iterable([
-    zip(TASK_OVERLAY_NAMES,  repeat("task"),                            count(TASK_OVERLAY_FIRST_ID)),
-    zip(SUB_OVERLAY_NAMES,   repeat("sub"),                             count(SUB_OVERLAY_FIRST_ID)),
-    zip(EM_OVERLAY_NAMES,    repeat("em"),                              count(EM_OVERLAY_FIRST_ID)),
-    zip(STAGE_OVERLAY_NAMES, map(lambda x: x[:6], STAGE_OVERLAY_NAMES), count(STAGE_OVERLAY_FIRST_ID)),
-])))
+task_overlays = list(starmap(OverlayInfo,
+    zip(TASK_OVERLAY_NAMES,  repeat("task"),                            count(TASK_OVERLAY_FIRST_ID))))
+sub_overlays = list(starmap(OverlayInfo,
+    zip(SUB_OVERLAY_NAMES,   repeat("sub"),                             count(SUB_OVERLAY_FIRST_ID))))
+em_overlays = list(starmap(OverlayInfo,
+    zip(EM_OVERLAY_NAMES,    repeat("em"),                              count(EM_OVERLAY_FIRST_ID))))
+stage_overlays = list(starmap(OverlayInfo,
+    zip(STAGE_OVERLAY_NAMES, map(lambda x: x[:6], STAGE_OVERLAY_NAMES), count(STAGE_OVERLAY_FIRST_ID))))
+all_overlays = ([]
+    + task_overlays
+    + sub_overlays
+    + em_overlays
+    + stage_overlays
+)
 EBOOT_MODULE = ModuleInfo("eboot.elf", ".")
 all_modules = [EBOOT_MODULE] + all_overlays
 
@@ -278,10 +299,13 @@ def extract_overlays(generate_config=False):
         overlay_bar.set_description(f"Extracting {overlay.name}")
         overlay.extract(generate_config=generate_config)
 
-def build_stuff(linker_entries: List[LinkerEntry], github_workflow=False):
+def build_stuff(linker_entries_by_module_name: Dict[str, List[LinkerEntry]], github_workflow=False):
     built_objects: Dict[String,Set[Path]] = dict()
     built_units: List[Path] = []
     built_categories: Set[String] = set()
+    linker_entries = []
+    for module_linker_entries in linker_entries_by_module_name.values():
+        linker_entries.extend(module_linker_entries)
 
     def build(
         object_paths: Union[Path, List[Path]],
@@ -336,13 +360,7 @@ def build_stuff(linker_entries: List[LinkerEntry], github_workflow=False):
     ninja.rule(
         "as",
         description="as $in",
-        command=f"cat $in | ./bin/pspas -EL -I include/ -G0 -march=allegrex -mabi=eabi -no-pad-sections -o $out",
-    )
-
-    ninja.rule(
-        "as.target",
-        description="as $in",
-        command=f"cat include/macro.inc $in | ./bin/pspas -EL -I include/ -G0 -march=allegrex -mabi=eabi -no-pad-sections -o $out",
+        command=f"cat $in | ./bin/pspas -EL -I include/ -G0 -march=allegrex -mabi=eabi -no-pad-sections -o $out && .venv/bin/python ./tools/fixup_elf.py $out",
     )
 
     ninja.rule(
@@ -376,33 +394,33 @@ def build_stuff(linker_entries: List[LinkerEntry], github_workflow=False):
     )
 
     ninja.rule(
-        "ld",
-        description="link $out",
-        command=f"{cross}ld -EL -Map $map $ldscripts -T $in -o $out",
-    )
-
-    ninja.rule(
         "sha1sum",
         description="sha1sum $in",
         command="cd build && fgrep '$module' ../$in | sha1sum -c - && touch ../$out",
     )
 
     ninja.rule(
-        "elf",
-        description="elf $out",
-        command=f"{cross}objcopy -O binary --gap-fill=0x00 --strip-section-headers $in $out",
-    )
-
-    ninja.rule(
-        "cppsp",
-        description="cppsp $in $out",
-        command=f"{cross}ld --oformat elf32-tradlittlemips -r -b binary -o $out $in",
-    )
-
-    ninja.rule(
         "concat",
         description="cat $in > $out",
         command="cat $in > $out",
+    )
+
+    ninja.rule(
+        "dummy",
+        description="ld dummy.o",
+        command=f"{cross}ld --oformat elf32-tradlittlemips -r -b binary -o $out /dev/null",
+    )
+
+    ninja.rule(
+        "mwldpsp",
+        description="mwldpsp -o $out build/ULJM-05500.lcf",
+        command="MWIncludes=./bin ./bin/wibo ./bin/mwldpsp.exe -m _start -map closure -o $out $in $args",
+    )
+
+    ninja.rule(
+        "elffixup",
+        description="elffixup.exe -o $out $in",
+        command="touch $out && ./bin/wibo ./bin/elffixup.exe -o $out $in",
     )
 
     for entry in linker_entries:
@@ -439,8 +457,8 @@ def build_stuff(linker_entries: List[LinkerEntry], github_workflow=False):
         elif isinstance(seg, splat.segtypes.common.databin.CommonSegDatabin):
             build(entry.object_path, entry.src_paths, "as")
         elif isinstance(seg, splat.segtypes.common.bin.CommonSegBin):
-            build(entry.object_path, entry.src_paths, "cppsp")
-        elif seg.type in ("bytetable", "cstring", "sha1digests"):
+            pass
+        elif seg.type in ("bytetable", "cstring", "sha1digests", "moduleinfo"):
             base_path = entry.object_path
 
             build(base_path, entry.src_paths, "cc")
@@ -460,27 +478,33 @@ def build_stuff(linker_entries: List[LinkerEntry], github_workflow=False):
     for module in all_modules:
         target = str(module.build_path().relative_to(ROOT))
 
-        ninja.build(
-            target + ".elf",
-            "ld",
-            target + ".ld",
-            implicit=built_objects[module.stem()],
-            variables={
-                "map": target + ".map",
-                "ldscripts": "".join(set([
-                    f" -T {str(path.relative_to(ROOT))}" for path in
-                        [
-                            module.undefined_syms_auto_path(),
-                            module.undefined_funcs_auto_path(),
-                        ]
-                ])),
-            },
-        )
-        ninja.build(
-            target,
-            "elf",
-            target + ".elf",
-        )
+        if module is EBOOT_MODULE:
+            ninja.build(
+                target,
+                "elffixup",
+                target + ".elf",
+            )
+
+
+            all_objects = [
+                str(entry.object_path)
+                    for entry in linker_entries
+                    if entry.segment.type[0] != '.' and entry.object_path
+            ]
+            all_objects.append(str(DUMMY_OBJECT_PATH.relative_to(ROOT)))
+            overlay_targets = [str(overlay.build_path().relative_to(ROOT)) for overlay in all_overlays]
+            ld_args = generate_lcf(linker_entries_by_module_name)
+            ninja.build(
+                target + ".elf",
+                "mwldpsp",
+                str(LCF_PATH.relative_to(ROOT)),
+                implicit=all_objects,
+                variables={
+                    "args": ld_args,
+                },
+                implicit_outputs=overlay_targets
+            )
+
         ninja.build(
             target + ".ok",
             "sha1sum",
@@ -490,6 +514,11 @@ def build_stuff(linker_entries: List[LinkerEntry], github_workflow=False):
                 "module": str(module.module_path().relative_to(ROOT)),
             }
         )
+
+    ninja.build(
+        str(DUMMY_OBJECT_PATH.relative_to(ROOT)),
+        "dummy",
+    )
 
     ninja.build(
         "bin/pspas",
@@ -527,6 +556,306 @@ def build_stuff(linker_entries: List[LinkerEntry], github_workflow=False):
             },
         }, o)
 
+def generate_lcf(linker_entries_by_module_name: Dict[str, List[LinkerEntry]]):
+    def overlay_memory(overlay, previous_sections):
+        section_name = f"    {overlay.name}".ljust(27)
+        origin = f"ORIGIN = AFTER({previous_sections}),".ljust(45)
+        outpath = overlay.build_path().relative_to(EBOOT_MODULE.build_path().parent)
+        outpath.parent.mkdir(parents=True, exist_ok=True)
+        return f"{section_name} (RWXO)  : {origin} LENGTH = 0x0    > {outpath}"
+
+    task_overlays_by_name = {overlay.name: overlay for overlay in task_overlays}
+    ordered_task_overlays = [
+        task_overlays_by_name[name] for name in [
+            "demo_task.ovl",
+            "edit_task.ovl",
+            "movie_task.ovl",
+            "install_task.ovl",
+            "arcade_task.ovl",
+            "show_select_task.ovl",
+            "lobby_task.ovl",
+            "download_task.ovl",
+            "gallery_task.ovl",
+            "game_task.ovl",
+            "option_task.ovl",
+            "cont_task.ovl",
+        ]
+    ]
+    def all_overlay_memories(previous_sections):
+        memories = []
+        for overlay_group in [ordered_task_overlays, sub_overlays, em_overlays, stage_overlays]:
+            memories.extend([overlay_memory(overlay, previous_sections) for overlay in overlay_group])
+            previous_sections = ", ".join([overlay.name for overlay in overlay_group])
+        return "\n".join(memories)
+
+    def overlay_section(overlay):
+        return ("""
+    .{stem}   :
+    {{
+        _{stem}_segment_start = .;
+
+        _{stem}_text_size = 0;
+        _{stem}_data_size = 0;
+        _{stem}_bss_size = 0;
+        _{stem}_static_init = 0;
+        _{stem}_static_init_end = 0;
+
+        WRITEW 0x336F574D; # MWo3 magic bytes
+        WRITEW OVERLAYID(.{stem});
+        WRITEW ADDR(.{stem});
+        WRITEW _{stem}_text_size;
+        WRITEW _{stem}_data_size;
+        WRITEW _{stem}_bss_size;
+        WRITEW _{stem}_static_init;
+        WRITEW _{stem}_static_init_end;
+        WRITES ("{name}");
+        . = ALIGN(0x20);
+
+        _{stem}_text_start = .;
+        . = ALIGN(0x80);
+        ALIGNALL(0x8);
+        GROUP ({name}) (.text)
+        _{stem}_text_end = .;
+        _{stem}_text_size = _{stem}_text_end - _{stem}_text_start;
+
+        _{stem}_data_start = .;
+        . = ALIGN(0x80);
+        ALIGNALL(0x8);
+        GROUP ({name}) (.data)
+
+        . = ALIGN(0x80);
+        ALIGNALL(0x8);
+        GROUP ({name}) (.rodata)
+
+        . = ALIGN(0x10);
+        ALIGNALL(0x4);
+        GROUP ({name}) (.init)
+
+        . = ALIGN(0x10);
+        _{stem}_static_init = .;
+        ALIGNALL(0x4);
+        GROUP ({name}) (.ctor)
+        _{stem}_static_init_end = .;
+
+        . = ALIGN(0x80);
+        _{stem}_data_end = .;
+        _{stem}_data_size = _{stem}_data_end - _{stem}_data_start;
+        _{stem}_bss_start = .;
+        . = ALIGN(0x80);
+        ALIGNALL(0x8);
+        GROUP ({name}) (.bss)
+
+        . = ALIGN(0x80);
+        _{stem}_bss_end = .;
+        _{stem}_bss_size = _{stem}_bss_end - _{stem}_bss_start;
+    }}   > {name}
+""").format(stem=overlay.stem(), name=overlay.name)
+
+    lcf = ("""
+MEMORY
+{
+    .text                   (RX)    : ORIGIN = 0x08804000,                          LENGTH = 0x0
+    .sceStub.text           (RX)    : ORIGIN = AFTER(.text),                        LENGTH = 0x0
+    .lib.ent.top            (R)     : ORIGIN = AFTER(.sceStub.text),                LENGTH = 0x0
+    .lib.ent                (R)     : ORIGIN = AFTER(.lib.ent.top),                 LENGTH = 0x0
+    .lib.ent.btm            (R)     : ORIGIN = AFTER(.lib.ent),                     LENGTH = 0x0
+    .lib.stub.top           (R)     : ORIGIN = AFTER(.lib.ent.btm),                 LENGTH = 0x0
+    .lib.stub               (R)     : ORIGIN = AFTER(.lib.stub.top),                LENGTH = 0x0
+    .lib.stub.btm           (R)     : ORIGIN = AFTER(.lib.stub),                    LENGTH = 0x0
+    .rodata.sceModuleInfo   (R)     : ORIGIN = AFTER(.lib.stub.btm),                LENGTH = 0x0
+    .rodata.sceResident     (R)     : ORIGIN = AFTER(.rodata.sceModuleInfo),        LENGTH = 0x0
+    .rodata.sceNid          (R)     : ORIGIN = AFTER(.rodata.sceResident),          LENGTH = 0x0
+    .rodata.sceVstub        (R)     : ORIGIN = AFTER(.rodata.sceNid),               LENGTH = 0x0
+    .data                   (RW)    : ORIGIN = AFTER(.rodata.sceVstub),             LENGTH = 0x0
+    .bss                    (RW)    : ORIGIN = AFTER(.data),                        LENGTH = 0x0
+""" + all_overlay_memories(".bss") + """
+    debug.elf               (RWXO)  : ORIGIN = 0x09d60380,                          LENGTH = 0x0 > debug.elf
+
+}
+
+KEEP_SECTION
+{
+    .sceStub.text,
+    .lib.ent.top,
+    .lib.ent,
+    .lib.ent.btm,
+    .lib.stub.top,
+    .lib.stub,
+    .lib.stub.btm,
+    .rodata.sceModuleInfo,
+    .rodata.sceResident,
+    .rodata.sceNid,
+    .rodata.sceVstub,
+    .ctor
+}
+
+SECTIONS
+{
+    .text   :
+    {
+        _ftext = .;
+        ALIGNALL(0x4);
+        GROUP (ROOT) (.text)
+    }   > .text
+
+    .sceStub.text   :
+    {
+        * (.sceStub.text)
+        _etext = .;
+        etext = .;
+    }   > .sceStub.text
+
+    .lib.ent.top    :
+    {
+        * (.lib.ent.top)
+    }   > .lib.ent.top
+
+    .lib.ent    :
+    {
+        * (.lib.ent)
+    }   > .lib.ent
+
+    .lib.ent.btm    :
+    {
+        * (.lib.ent.btm)
+    }   > .lib.ent.btm
+
+    .lib.stub.top    :
+    {
+        * (.lib.stub.top)
+    }   > .lib.stub.top
+
+    .lib.stub    :
+    {
+        * (.lib.stub)
+    }   > .lib.stub
+
+    .lib.stub.btm    :
+    {
+        * (.lib.stub.btm)
+    }   > .lib.stub.btm
+
+    .rodata.sceModuleInfo   :
+    {
+        * (.rodata.sceModuleInfo)
+    }   > .rodata.sceModuleInfo
+
+    .rodata.sceResident :
+    {
+        * (.rodata.sceResident)
+        . = ALIGN(0x4);
+    }   > .rodata.sceResident
+
+    .rodata.sceNid :
+    {
+        * (.rodata.sceNid)
+    }   > .rodata.sceNid
+
+    .rodata.sceVstub :
+    {
+        * (.rodata.sceVstub)
+    }   > .rodata.sceVstub
+
+    .data   :
+    {
+        . = ALIGN(0x10);
+        _fdata = .;
+        GROUP (ROOT) (.rodata)
+        GROUP (ROOT) (.data)
+        GROUP (ROOT) (.init)
+        __static_init = .;
+        GROUP (ROOT) (.ctor)
+        __static_init_end = .;
+        * (.vtables)
+
+        _demo_task_segment_start = 0;
+        _demo_sub_segment_start = 0;
+        _em01_segment_start = 0;
+        _stage000_segment_start = 0;
+        _debug_segment_start = 0;
+
+        . = ALIGN(0x10);
+        __exception_table_start__ = .;
+        __exception_table_end__ = .;
+        _overlay_group_addresses = .;
+        WRITEW ADDR(.text);
+        WRITEW _demo_task_segment_start;
+        WRITEW _demo_sub_segment_start;
+        WRITEW _em01_segment_start;
+        WRITEW _stage000_segment_start;
+        WRITEW _debug_segment_start;
+
+        . = ALIGN(0x10);
+        _gp = . + 0x7FF0;
+        _edata = .;
+        edata = .;
+    }   > .data
+
+    .bss    :
+    {
+        _fbss = .;
+        GROUP (ROOT) (.bss)
+
+        . = ALIGN(0x80);
+        _end = .;
+        end = .;
+    }   > .bss
+
+""" + "".join([overlay_section(overlay) for overlay in all_overlays]) + """
+
+    .debug  :
+    {
+        _debug_segment_start = .;
+        WRITEW 0x0;
+        . = ALIGN(0x80);
+    }   > debug.elf
+
+}
+""")
+
+    objects_by_module_name: Dict[str, List[str]] = dict()
+    for module_name, linker_entries in linker_entries_by_module_name.items():
+        seen = set()
+        for entry in linker_entries:
+            if entry.segment.type[0] == ".":
+                continue
+
+            if entry.object_path is None:
+                continue
+
+            objects = objects_by_module_name.setdefault(module_name, [])
+            o = str(entry.object_path)
+            if not o in seen:
+                objects.append(o)
+            seen.add(o)
+
+    def append_overlay_targets(overlay, args):
+        objects = objects_by_module_name.get(overlay.name, [])
+        args.extend(["-overlay", overlay.name])
+        if len(objects) > 0:
+            args.extend(objects_by_module_name[overlay.name])
+        else:
+            args.extend([str(DUMMY_OBJECT_PATH.relative_to(ROOT))])
+
+    args = []
+    args += objects_by_module_name["eboot.elf"]
+    args += ["-overlaygroup", "task,0x09a5a580"]
+    for overlay in task_overlays:
+        append_overlay_targets(overlay, args)
+    args += ["-overlaygroup", "sub,0x09c14280"]
+    for overlay in sub_overlays:
+        append_overlay_targets(overlay, args)
+    args += ["-overlaygroup", "em,0x09d15100"]
+    for overlay in em_overlays:
+        append_overlay_targets(overlay, args)
+    args += ["-overlaygroup", "stage,0x09d5df80"]
+    for overlay in stage_overlays:
+        append_overlay_targets(overlay, args)
+
+    LCF_PATH.write_text(lcf)
+
+    return args
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Configure the project")
@@ -555,14 +884,17 @@ if __name__ == "__main__":
     if not args.github_workflow:
         ensure_objdiff_cli()
 
-    all_linker_entries = []
+    linker_entries_by_module_name = {}
     def split_module(module):
         # ensure splat uses a fresh context
         # otherwise, symbols in previously disassembled modules
         # will not be emitted to undefined_syms/funcs_auto.txt
+        symbols.reset_symbols()
         symbols.spim_context = spimdisasm.common.Context()
         split.main([module.splat_yaml_path()], modes="all", verbose=False)
-        all_linker_entries.extend(split.linker_writer.entries)
+        linker_entries = [entry for entry in split.linker_writer.entries if not entry.segment.name.startswith('omit_')]
+        linker_entries_by_module_name[module.name] = linker_entries
+
 
     extract_iso()
     decrypt_eboot()
@@ -570,4 +902,4 @@ if __name__ == "__main__":
     extract_overlays(generate_config=args.generate_overlay_config)
     for overlay in all_overlays:
         split_module(overlay)
-    build_stuff(all_linker_entries, github_workflow=args.github_workflow)
+    build_stuff(linker_entries_by_module_name, github_workflow=args.github_workflow)

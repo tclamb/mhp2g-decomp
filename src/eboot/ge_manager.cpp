@@ -44,7 +44,7 @@ static ge_command INITIALIZE_GE_DISPLAY_LIST[221] = {
     0x01000000, // VADDR: 000000 => 00000000
     0x02000000, // IADDR: 000000 => 00000000
     0x10000000, // BASE: high=00
-    0x12000000, // SetVertexType: none
+    0x12000000, // SetVertexType: e
     0x13000000, // OffsetAddr: 000000 (offset=00000000)
     0x15000000, // Region Rate: 0 0
     0x16043ddf, // Region BR: 479 271
@@ -288,13 +288,13 @@ void ge_manager::initialize() {
 }
 
 extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", z_un_08858fd0);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08858FD0);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", z_un_08859094);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08859094);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", z_un_088590a8);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_088590A8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", z_un_08859138);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08859138);
 }
 
 void ge_manager::swap_buffers() {
@@ -305,7 +305,7 @@ void ge_manager::swap_buffers() {
 }
 
 extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", z_un_088591c8);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_088591C8);
 }
 
 static ge_command FINISH_END_DISPLAY_LIST[2] = {
@@ -331,9 +331,9 @@ void ge_manager::clear_display_list() {
 #pragma opt_unroll_loops reset
 
 extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", z_un_088593a0);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_088593A0);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", z_un_088595e8);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_088595E8);
 }
 
 void ge_manager::render() {
@@ -378,11 +378,11 @@ void ge_manager::spinlock_until_ge_end() {
 }
 
 extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", z_un_0885971c);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_0885971C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", z_un_0885972c);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_0885972C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", z_un_0885973c);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_0885973C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", z_un_08859768);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08859768);
 }

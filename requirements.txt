@@ -4,3 +4,4 @@ splat64[mips]>=0.27.0
 ninja_syntax
 tqdm
 pycdlib>=1.14.0
+pyelftools

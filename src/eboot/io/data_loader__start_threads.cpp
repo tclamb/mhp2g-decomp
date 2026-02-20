@@ -4,6 +4,20 @@ extern "C" int fake_rofs_loader(SceSize, void*);
 extern "C" int sha1_thread(SceSize, void*);
 extern "C" int transfer_thread(SceSize, void*);
 
+#include "../../../assets/eboot/io/data_loader__file_sha1_digests.sha1digests.inc.hpp"
+#include "../../../assets/eboot/io/data_loader__decrypt_table.bytearray.inc.hpp"
+#include "../../../assets/eboot/io/data_loader__umd_disc_drive_name.cstring.inc.hpp"
+#include "../../../assets/eboot/io/data_loader__loader_thread_name.cstring.inc.hpp"
+#include "../../../assets/eboot/io/data_loader__sha1_event_flag_name.cstring.inc.hpp"
+#include "../../../assets/eboot/io/data_loader__sha1_thread_name.cstring.inc.hpp"
+#include "../../../assets/eboot/io/data_loader__transfer_event_flag_name.cstring.inc.hpp"
+#include "../../../assets/eboot/io/data_loader__transfer_thread_name.cstring.inc.hpp"
+#include "../../../assets/eboot/io/data_loader__null_utility_message_dialog_header.cstring.inc.hpp"
+#include "../../../assets/eboot/io/data_loader__install_block_path_format.cstring.inc.hpp"
+#include "../../../assets/eboot/io/data_loader__lba_umd_access_path_format.cstring.inc.hpp"
+#include "../../../assets/eboot/io/data_loader__install_folder_path.cstring.inc.hpp"
+#include "../../../assets/eboot/io/data_loader__data_bin_path.cstring.inc.hpp"
+
 void data_loader::start_threads() {
     struct {
         SceIoStat sp10;
