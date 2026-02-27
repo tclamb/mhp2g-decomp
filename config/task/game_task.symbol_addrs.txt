@@ -1,5 +1,4 @@
 
-D_game_task_09BB3DE4 = 0X09BB3DE4; // type:EmDefinition size:0xA204
 memcpy = 0x0880CD4C; // type:func
 memset = 0x0880D1C0; // type:func
 sprintf = 0x0880F6B0; // type:func
@@ -915,8 +914,7 @@ ptmf_game_task_09BB3A70 = 0x09BB3A70; // type:PTMF size:0xC
 ptmf_game_task_09BB3A80 = 0x09BB3A80; // type:PTMF size:0xC
 ptmf_game_task_09BB3A90 = 0x09BB3A90; // type:PTMF size:0xC
 ptmf_game_task_09BB3C08 = 0x09BB3C08; // type:PTMF size:0xC
-D_game_task_09BB3C74 = 0x09BB3C74;
-D_game_task_09BB3D2C = 0x09BB3D2C;
+D_game_task_09BB3C20 = 0x09BB3C20; // type:EmChunk size:0xA320
 D_game_task_09BC3670 = 0x09BC3670;
 D_game_task_09BC3672 = 0x09BC3672;
 D_game_task_09BC3674 = 0x09BC3674;
