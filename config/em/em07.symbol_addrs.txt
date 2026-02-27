@@ -92,4 +92,7 @@ func_em07_09D1F7E0 = 0x09D1F7E0; // type:func
 func_em07_09D1F7F0 = 0x09D1F7F0; // type:func
 func_em07_09D1F800 = 0x09D1F800; // type:func
 func_em07_09D1F810 = 0x09D1F810; // type:func
+D_em07_09D1FFA8 = 0x09D1FFA8;
+D_em07_09D202B8 = 0x09D202B8;
+D_em07_09D202D8 = 0x09D202D8;
 D_em07_09D20940 = 0x09D20940;
