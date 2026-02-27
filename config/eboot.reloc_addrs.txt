@@ -7206,3 +7206,6 @@ rom:0x434e4 reloc:MIPS_26 symbol:func_em17_09D19660
 rom:0x43518 reloc:MIPS_26 symbol:func_em83_09D24628
 
 rom:0xc75fc reloc:MIPS_26 symbol:func_stage210_09D5E510
+
+rom:0x64304 reloc:MIPS_HI16 symbol:D_game_task_09BB3C20 addend:0x54
+rom:0x64308 reloc:MIPS_LO16 symbol:D_game_task_09BB3C20 addend:0x54

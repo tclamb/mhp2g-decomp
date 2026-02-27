@@ -1657,7 +1657,6 @@ func_game_task_09B9A408 = 0x09B9A408; // type:func
 func_game_task_09B9A418 = 0x09B9A418; // type:func
 func_game_task_09B9A430 = 0x09B9A430; // type:func
 D_game_task_09BB3C20 = 0x09BB3C20;
-D_game_task_09BB3C74 = 0x09BB3C74;
 D_game_task_09BC3670 = 0x09BC3670;
 D_game_task_09BC3672 = 0x09BC3672;
 D_game_task_09BC3674 = 0x09BC3674;
