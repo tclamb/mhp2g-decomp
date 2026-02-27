@@ -38,6 +38,7 @@ D_eboot_08A5DE5C = 0x08A5DE5C;
 D_eboot_08A5E278 = 0x08A5E278;
 D_eboot_09A4099C = 0x09A4099C;
 D_eboot_09A4AE04 = 0x09A4AE04;
+on_load__10cont_stateFv = 0x09A5A600; // type:func
 ptmf_cont_task_09A5AF80 = 0x09A5AF80; // type:PTMF size:0xC
 func_demo_sub_09C14488 = 0x09C14488; // type:func
 func_demo_sub_09C146A0 = 0x09C146A0; // type:func

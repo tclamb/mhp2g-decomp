@@ -97,7 +97,7 @@ segments:
       - [0x11cac, asmtu, global_089c6cb4]
       - [0x15610, asmtu, global_089c6cb8]
       - [0x15dd4, asmtu, global_089c6cbc]
-      - [0x4943c, asmtu, state/cont_state] # includes base ~state()
+      - [0x4943c, cpp, state/cont_state]
       - [0x49654, asmtu, global_089c70cc] # utility for creating display lists
       - [0x4b524, asmtu, state/edit_state]
       - [0x4b714, asmtu, state/loading_state]
@@ -149,7 +149,7 @@ segments:
       - [0x8e84c, asmtu, global_08a5e278]
       - [0x935d0, asmtu, global_08a862b8] # owns state objects, calls update logic of active state once per frame, unloads & loads new states
       - [0x93f38, asmtu, global_089c6cbc_10fc]
-      - [0x95238, asmtu, state/base_state]
+      - [0x95238, cpp, state/base_state]
       - [0x95338, asm, lib/libsas]
       - [0x95d70, asmtu, lib/libwave]
       - [0x975ac, asm, lib/libfpu]
