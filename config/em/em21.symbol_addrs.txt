@@ -123,7 +123,6 @@ func_game_sub_09C92118 = 0x09C92118; // type:func
 D_game_sub_09CDFF78 = 0x09CDFF78;
 D_game_sub_09CE0190 = 0x09CE0190;
 D_game_sub_09D146E0 = 0x09D146E0;
-func_emXX_09D15180 = 0x09D15180; // type:func
 func_em21_09D25940 = 0x09D25940; // type:func
 func_em21_09D25950 = 0x09D25950; // type:func
 func_em21_09D25960 = 0x09D25960; // type:func

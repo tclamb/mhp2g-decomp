@@ -1018,3 +1018,5 @@ rom:0x1745b4 reloc:MIPS_32 symbol:D_em75_09D55500
 rom:0x1745b8 reloc:MIPS_32 symbol:D_em82_09D2E050
 rom:0x1745bc reloc:MIPS_32 symbol:D_em83_09D29E68
 rom:0x1745d0 reloc:MIPS_32 symbol:D_em75_09D558D8
+rom:0x1064e8 reloc:MIPS_26 symbol:func_em55_09D15180
+rom:0x106e00 reloc:MIPS_26 symbol:func_em59_09D15180

@@ -734,6 +734,7 @@ D_eboot_09A4E178 = 0x09A4E178;
 ptmf_eboot_09A5A4CC = 0x09A5A4CC;
 func_lobby_task_09A5E4D0 = 0x09A5E4D0; // type:func
 func_lobby_task_09A5E4E0 = 0x09A5E4E0; // type:func
+func_lobby_task_09A69688 = 0x09A69688; // type:func
 ptmf_lobby_task_09AFDB60 = 0x09AFDB60; // type:PTMF size:0xC
 ptmf_lobby_task_09AFDB70 = 0x09AFDB70; // type:PTMF size:0xC
 ptmf_lobby_task_09AFDB80 = 0x09AFDB80; // type:PTMF size:0xC

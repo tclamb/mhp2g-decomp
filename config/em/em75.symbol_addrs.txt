@@ -254,7 +254,6 @@ D_game_sub_09CDFF78 = 0x09CDFF78;
 D_game_sub_09CE0190 = 0x09CE0190;
 D_game_sub_09D146E0 = 0x09D146E0;
 D_game_sub_09D14FE0 = 0x09D14FE0;
-func_emXX_09D15180 = 0x09D15180; // type:func
 func_em75_09D47908 = 0x09D47908; // type:func
 func_em75_09D47918 = 0x09D47918; // type:func
 func_em75_09D47928 = 0x09D47928; // type:func

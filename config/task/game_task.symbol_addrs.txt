@@ -1380,4 +1380,3 @@ D_game_sub_09CF6B70 = 0x09CF6B70;
 D_game_sub_09CF6BA8 = 0x09CF6BA8;
 D_game_sub_09D146E0 = 0x09D146E0;
 D_game_sub_09D14FE0 = 0x09D14FE0;
-func_emXX_09D15180 = 0x09D15180; // type:func
