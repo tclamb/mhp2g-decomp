@@ -10,7 +10,7 @@ struct tagged_cache {
     u8 slab[0x83C000];
     struct index_entry {
         int tag;
-        void *address;
+        u8 *address;
         u32 size;
     } index[0x200];
 
@@ -18,10 +18,10 @@ struct tagged_cache {
     ~tagged_cache();
 
     void reset(u32 size);
-    void *alloc(int tag, u32 size);
+    u8 *alloc(int tag, u32 size);
     void free_all(int tag);
     void free(void *addr);
-    void *find(int tag);
+    u8 *find(int tag);
 
 private:
     int next_empty_index();

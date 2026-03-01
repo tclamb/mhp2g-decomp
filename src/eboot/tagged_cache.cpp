@@ -25,7 +25,7 @@ void tagged_cache::reset(u32 size) {
     }
 }
 
-void *tagged_cache::alloc(int tag, u32 size) {
+u8 *tagged_cache::alloc(int tag, u32 size) {
     s32 i = next_empty_index();
     if (i != -1) {
         index[i].address = cache.alloc(size, 0x10);
@@ -72,7 +72,7 @@ int tagged_cache::next_empty_index() {
     return -1;
 }
 
-void *tagged_cache::find(int tag) {
+u8 *tagged_cache::find(int tag) {
     int i = 0;
     while (i < 0x200) {
         if (index[i].tag == tag) {
