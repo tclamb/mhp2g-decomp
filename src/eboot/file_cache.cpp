@@ -10,6 +10,8 @@ extern "C" {
 
 #define NUM_ENTRIES 0x2b
 
+#undef ALLOW_NONMATCHING
+
 enum language_id {
     LANGUAGE_DEFAULT,
     LANGUAGE_ENGLISH,
@@ -135,11 +137,17 @@ inline void file_cache::clear_entries() {
     reset_pointers();
 }
 
+#ifdef ALLOW_NONMATCHING
 void file_cache::clear() {
     clear_entries();
     f0x216_flag = true;
     loading_flag = false;
 }
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/matchings/file_cache", clear__10file_cacheFv);
+}
+#endif
 
 extern "C" {
     extern data_loader *D_eboot_089C7504;
@@ -155,6 +163,7 @@ inline void file_cache::cancel_middle_entries_inner() {
     func_eboot_088BB548(D_eboot_089C7504, true);
 }
 
+#ifdef ALLOW_NONMATCHING
 #pragma opt_unroll_loops on
 void file_cache::cancel_middle_entries() {
     if (loading_flag) {
@@ -166,6 +175,11 @@ void file_cache::cancel_middle_entries() {
     clear_entries();
 }
 #pragma opt_unroll_loops reset
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/matchings/file_cache", cancel_middle_entries__10file_cacheFv);
+}
+#endif
 
 extern "C" {
     struct global_089C7508 {
@@ -181,6 +195,7 @@ extern "C" {
     extern struct global_089C7508 *D_eboot_089C7508;
 }
 
+#ifdef ALLOW_NONMATCHING
 #pragma opt_unroll_loops on
 void file_cache::update() {
     if (f0x216_flag) {
@@ -206,7 +221,13 @@ void file_cache::update() {
     }
 }
 #pragma opt_unroll_loops reset
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/matchings/file_cache", update__10file_cacheFv);
+}
+#endif
 
+#ifdef ALLOW_NONMATCHING
 void file_cache::load(s32 index, u16 file_id, u32 size) {
     u32 load_size = D_eboot_089C7504->file_blocks_size(file_id);
     if (size != 0) {
@@ -231,6 +252,11 @@ void file_cache::load(s32 index, u16 file_id, u32 size) {
     entries[index].flags |= 1;
     entries[index].file_id = file_id;
 }
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/matchings/file_cache", load__10file_cacheFiUsUi);
+}
+#endif
 
 void file_cache::duplicate(s32 destination_index, s32 source_index) {
     entry &destination = entries[destination_index];
@@ -271,6 +297,7 @@ extern "C" {
     extern struct global_08a5dd4c *D_eboot_08A5DD4C;
 }
 
+#ifdef ALLOW_NONMATCHING
 void file_cache::cache_emmodel(u8 em_id) {
     int offset = 0;
     for (; offset < 4; ++offset) {
@@ -305,6 +332,11 @@ void file_cache::cache_emmodel(u8 em_id) {
     }
     duplicate(count + 9, offset + 0x16);
 }
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/matchings/file_cache", cache_emmodel__10file_cacheFUc);
+}
+#endif
 
 bool file_cache::is_loaded(s32 index) {
     u16 flags = entries[index].flags;
@@ -317,6 +349,7 @@ void file_cache::free(s32 index) {
     e.reset();
 }
 
+#ifdef ALLOW_NONMATCHING
 u8 *file_cache::emmodel_pac(u8 em_id) {
     for (int i = 0; i < 4; ++i) {
         entry &e = entries[i + 9];
@@ -326,6 +359,11 @@ u8 *file_cache::emmodel_pac(u8 em_id) {
     }
     return 0;
 }
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/matchings/file_cache", emmodel_pac__10file_cacheFUc);
+}
+#endif
 
 bool file_cache::is_emmodel_cached(u8 em_id) {
     return find_middle_entries(em_id + 0x17AB) != -1;
@@ -341,6 +379,7 @@ s32 file_cache::find_middle_entries(u16 file_id) {
     return -1;
 }
 
+#ifdef ALLOW_NONMATCHING
 s32 file_cache::find_emmodel(u8 em_id) {
     for (s32 i = 0; i < 4; ++i) {
         entry &e = entries[i + 9];
@@ -350,7 +389,13 @@ s32 file_cache::find_emmodel(u8 em_id) {
     }
     return -1;
 }
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/matchings/file_cache", find_emmodel__10file_cacheFUc);
+}
+#endif
 
+#ifdef ALLOW_NONMATCHING
 void file_cache::load_emmodel(u8 em_id, u32 size, s32 index) {
     if (index == -1) {
         u8 *pac = emmodel_pac(em_id);
@@ -377,6 +422,11 @@ void file_cache::load_emmodel(u8 em_id, u32 size, s32 index) {
     }
     load(index + 9, em_id + 0x17AB, size);
 }
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/matchings/file_cache", load_emmodel__10file_cacheFUcUii);
+}
+#endif
 
 extern "C" {
     struct sound_effect_file_ids {
@@ -395,6 +445,7 @@ void file_cache::load_em_with_sfx(u8 em_id, int n) {
     load(n + 0x1A, D_game_task_09BC3670[em_id].tsb_file_id, 0);
 }
 
+#ifdef ALLOW_NONMATCHING
 void file_cache::load_emmodel(u8 em_id) {
     u8 *pac = emmodel_pac(em_id);
     if (pac == 0) {
@@ -415,7 +466,13 @@ void file_cache::load_emmodel(u8 em_id) {
         }
     }
 }
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/matchings/file_cache", load_emmodel__10file_cacheFUc);
+}
+#endif
 
+#ifdef ALLOW_NONMATCHING
 void file_cache::free_emmodel(u8 em_id) {
     for (int i = 0; i < 4; ++i) {
         entry &e = entries[i + 9];
@@ -424,7 +481,13 @@ void file_cache::free_emmodel(u8 em_id) {
         }
     }
 }
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/matchings/file_cache", free_emmodel__10file_cacheFUc);
+}
+#endif
 
+#ifdef ALLOW_NONMATCHING
 void file_cache::free_all_emmodels() {
     for (int i = 0; i < 4; ++i) {
         if (entries[i + 9].flags & 3) {
@@ -432,7 +495,13 @@ void file_cache::free_all_emmodels() {
         }
     }
 }
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/matchings/file_cache", free_all_emmodels__10file_cacheFv);
+}
+#endif
 
+#ifdef ALLOW_NONMATCHING
 SceBool file_cache::allocate_volatile_memory() {
     volatile_memory_size = 0;
     volatile_memory = 0;
@@ -444,6 +513,11 @@ SceBool file_cache::allocate_volatile_memory() {
     remaining_bytes = volatile_memory_size;
     return success;
 }
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/matchings/file_cache", allocate_volatile_memory__10file_cacheFv);
+}
+#endif
 
 void file_cache::release_volatile_memory() {
     sceKernelVolatileMemUnlock(0);
@@ -453,6 +527,7 @@ void file_cache::release_volatile_memory() {
 extern "C"
 void func_eboot_0884EA44(data_loader *);
 
+#ifdef ALLOW_NONMATCHING
 #pragma opt_unroll_loops on
 void on_power_down(int error, event_t event, file_cache *cache) {
     if (event == POWER_SUSPENDING || event == POWER_STANDBY) {
@@ -474,7 +549,13 @@ void on_power_down(int error, event_t event, file_cache *cache) {
     }
 }
 #pragma op_unroll_loops reset
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/matchings/file_cache", on_power_down__Fi7event_tP10file_cache);
+}
+#endif
 
+#ifdef ALLOW_NONMATCHING
 void on_power_up(int error, event_t event, file_cache *cache) {
     if (event == POWER_RESUME_COMPLETE) {
         D_eboot_089C7508->flag_0x2A &= 0xF0;
@@ -482,6 +563,11 @@ void on_power_up(int error, event_t event, file_cache *cache) {
         cache->ready_flag = true;
     }
 }
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/matchings/file_cache", on_power_up__Fi7event_tP10file_cache);
+}
+#endif
 
 extern "C" {
     struct short_pair {
@@ -506,64 +592,4 @@ void file_cache::cache_stage(u16 st_id) {
 
 bool file_cache::some_test() {
     return D_eboot_089C7508->flag_0x6ADDD && !D_eboot_089C7508->flag_f0x480;
-}
-
-extern "C" {
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E0AAC);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E0AC0);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E0AD0);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E0B20);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E0B50);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E0B90);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E0C04);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E0D2C);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E0EC0);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E0FDC);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E1084);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E1108);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E11F8);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E1238);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E127C);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E12D0);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E12FC);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E1348);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E13A0);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E1514);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E15C0);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E16BC);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E1740);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E17A4);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E1808);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E1848);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E1988);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E19D4);
-
-INCLUDE_ASM("/home/tclamb/mhp2g-decomp/asm/eboot/nonmatchings/file_cache", func_eboot_088E1AB0);
 }

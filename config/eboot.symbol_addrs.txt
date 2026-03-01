@@ -166,6 +166,7 @@ is_emmodel_cached__10file_cacheFUc = 0x088E12D0; // type:func
 find_middle_entries__10file_cacheFUs = 0x088E12FC; // type:func
 find_emmodel__10file_cacheFUc = 0x088E1348; // type:func
 load_emmodel__10file_cacheFUcUii = 0x088E13A0; // type:func
+load_em_with_sfx__10file_cacheFUci = 0x088E1514; // type:func
 load_emmodel__10file_cacheFUc = 0x088E15C0; // type:func
 free_emmodel__10file_cacheFUc = 0x088E16BC; // type:func
 free_all_emmodels__10file_cacheFv = 0x088E1740; // type:func
