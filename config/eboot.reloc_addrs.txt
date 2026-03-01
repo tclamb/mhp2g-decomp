@@ -7919,14 +7919,14 @@ rom:0x83890 reloc:MIPS_HI16 symbol:D_game_task_09BC3670
 rom:0x83898 reloc:MIPS_LO16 symbol:D_game_task_09BC3670
 rom:0xDFAFC reloc:MIPS_HI16 symbol:D_game_task_09BC3670
 rom:0xDFB00 reloc:MIPS_LO16 symbol:D_game_task_09BC3670
-rom:0x70734 reloc:MIPS_HI16 symbol:D_game_task_09BC3672
-rom:0x70738 reloc:MIPS_LO16 symbol:D_game_task_09BC3672
-rom:0xDFB1C reloc:MIPS_HI16 symbol:D_game_task_09BC3672
-rom:0xDFB20 reloc:MIPS_LO16 symbol:D_game_task_09BC3672
-rom:0x70748 reloc:MIPS_HI16 symbol:D_game_task_09BC3674
-rom:0x7074C reloc:MIPS_LO16 symbol:D_game_task_09BC3674
-rom:0xDFB3C reloc:MIPS_HI16 symbol:D_game_task_09BC3674
-rom:0xDFB40 reloc:MIPS_LO16 symbol:D_game_task_09BC3674
+rom:0x70734 reloc:MIPS_HI16 symbol:D_game_task_09BC3670 addend:0x2
+rom:0x70738 reloc:MIPS_LO16 symbol:D_game_task_09BC3670 addend:0x2
+rom:0xDFB1C reloc:MIPS_HI16 symbol:D_game_task_09BC3670 addend:0x2
+rom:0xDFB20 reloc:MIPS_LO16 symbol:D_game_task_09BC3670 addend:0x2
+rom:0x70748 reloc:MIPS_HI16 symbol:D_game_task_09BC3670 addend:0x4
+rom:0x7074C reloc:MIPS_LO16 symbol:D_game_task_09BC3670 addend:0x4
+rom:0xDFB3C reloc:MIPS_HI16 symbol:D_game_task_09BC3670 addend:0x4
+rom:0xDFB40 reloc:MIPS_LO16 symbol:D_game_task_09BC3670 addend:0x4
 rom:0x40428 reloc:MIPS_HI16 symbol:D_game_task_09C0D430
 rom:0x4042C reloc:MIPS_LO16 symbol:D_game_task_09C0D430
 rom:0x4163C reloc:MIPS_HI16 symbol:D_game_task_09C0D430

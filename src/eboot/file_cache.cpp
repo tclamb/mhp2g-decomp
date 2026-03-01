@@ -102,13 +102,19 @@ void file_cache::reset() {
     ready_flag = true;
 }
 
-typedef void (*callback)(int, int, void *);
+enum event_t {
+    POWER_SUSPENDING = 1,
+    POWER_STANDBY,
+    POWER_RESUME_COMPLETE = 4,
+};
+
+typedef void (*callback)(int, event_t, file_cache *);
 
 extern "C"
 void func_eboot_088AFDFC(callback, void *);
 
-void on_power_down(int, int, void*);
-void on_power_up(int, int, void*);
+void on_power_down(int, event_t, file_cache *);
+void on_power_up(int, event_t, file_cache *);
 
 void file_cache::register_power_callbacks() {
     func_eboot_088AFDFC(on_power_down, this);
@@ -383,7 +389,7 @@ extern "C" {
 }
 
 void file_cache::load_em_with_sfx(u8 em_id, int n) {
-    cache_emmodel(em_id);
+    load_emmodel(em_id);
     load(n + 0x1E, D_game_task_09BC3670[em_id].phd_file_id, 0);
     load(n + 0x22, D_game_task_09BC3670[em_id].bd_file_id, 0);
     load(n + 0x1A, D_game_task_09BC3670[em_id].tsb_file_id, 0);
@@ -443,12 +449,6 @@ void file_cache::release_volatile_memory() {
     sceKernelVolatileMemUnlock(0);
     reset_pointers();
 }
-
-enum event_t {
-    POWER_SUSPENDING = 1,
-    POWER_STANDBY,
-    POWER_RESUME_COMPLETE = 4,
-};
 
 extern "C"
 void func_eboot_0884EA44(data_loader *);
