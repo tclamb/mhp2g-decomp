@@ -23,7 +23,7 @@ inline u32 dummy(u32 x) {
     return x;
 }
 
-void *cache::alloc(u32 size, u32 align) {
+u8 *cache::alloc(u32 size, u32 align) {
     if (!size) {
         return 0;
     }

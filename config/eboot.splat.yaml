@@ -184,7 +184,7 @@ segments:
       - [0xdbe14, asmtu, global_09a4ae04] # game player state?
       - [0xdde38, asmtu, object_089b5ef4] # multiplayer models?
       - [0xde2e8, asm, lib/libccc]
-      - [0xdf060, asm, global_09a4ae1c] # file cache?
+      - [0xdf060, cpp, file_cache]
       - [0xe00a0, asmtu, lib/libjpeg] # JPEG_LIB_VERSION=62, only decoder, used by download_task.ovl
       - [0xf0ff8, asmtu, jpg_create]
       - [0xf1264, asm, utility_osk]

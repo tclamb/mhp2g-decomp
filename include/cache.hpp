@@ -22,6 +22,6 @@ struct cache {
 
     void reset(void *slab, u32 len);
     void clear();
-    void *alloc(u32 size, u32 align);
+    u8 *alloc(u32 size, u32 align);
     void free(void* buf);
 };
