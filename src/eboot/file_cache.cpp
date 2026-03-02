@@ -8,9 +8,9 @@ extern "C" {
     #include <pspsdk/pspdmac.h>
 }
 
-#define NUM_ENTRIES 0x2b
-
-#undef ALLOW_NONMATCHING
+#define NUM_ENTRIES 0x2B
+#pragma opt_unroll_loops on
+//#define ALLOW_NONMATCHING 1
 
 enum language_id {
     LANGUAGE_DEFAULT,
@@ -21,19 +21,43 @@ enum language_id {
     LANGUAGE_ITALIAN,
 };
 
+enum event_t {
+    POWER_SUSPENDING = 1,
+    POWER_STANDBY,
+    POWER_RESUME_COMPLETE = 4,
+};
+
+template<typename T, int N>
+struct array {
+    T data[N];
+
+    template<typename F>
+    inline void for_each(F f) {
+        T *t = &data[0];
+        for (int i = 0; i < N; ++i) {
+            f(*t);
+            ++t;
+        }
+    }
+
+    inline T &operator[](int i) {
+        return data[i];
+    }
+
+};
+
+
 struct file_cache {
     struct entry {
         u16 flags;
         u16 file_id;
         u8 *buffer;
         u32 was_cancelled;
-
-        void reset();
     };
 
     static file_cache *INSTANCE;
 
-    entry entries[NUM_ENTRIES];
+    array<entry, NUM_ENTRIES> entries;
     int volatile_memory_size;
     u8 *volatile_memory;
     u8 *write_head;
@@ -54,38 +78,47 @@ struct file_cache {
     void reset();
     void register_power_callbacks();
     void clear();
-    void cancel_middle_entries();
+    void clear_pacs();
     void update();
-    void load(s32 slot, u16 file_id, u32 size);
+    void load(s32 slot, s32 file_id, u32 size);
     void duplicate(s32 dst_slot, s32 src_slot);
     u32 copy(void *dst, s32 src_slot, u32 size);
     void cache_emmodel(u8 em_id);
     bool is_loaded(s32 index);
     void free(s32 index);
     u8 *emmodel_pac(u8 em_id);
-    bool is_emmodel_cached(u8 em_id);
-    s32 find_middle_entries(u16 file_id);
-    s32 find_emmodel(u8 em_id);
+    bool is_pac_cached(u8 em_id);
+    s32 find_pac(u16 file_id);
+    s8 find_emmodel(u8 em_id);
     void load_emmodel(u8 em_id, u32 size, s32 index);
     void load_em_with_sfx(u8 em_id, int n);
     void load_emmodel(u8 em_id);
     void free_emmodel(u8 em_id);
     void free_all_emmodels();
-    SceBool allocate_volatile_memory();
+    bool allocate_volatile_memory();
     void release_volatile_memory();
     void cache_stage(u16 st_id);
     bool some_test();
 
+    friend int on_power_down(int, event_t, file_cache*);
+    friend int on_power_up(int, event_t, file_cache*);
+
 private:
     inline void clear_entries();
     inline void reset_pointers();
-    inline void cancel_middle_entries_inner();
+    inline void clear_pacs_inner();
+    inline s32 next_emmodel_index();
+    inline s32 next_pac_index();
 };
 
-void file_cache::entry::reset() {
-    flags = 0;
-    file_id = -1;
-    buffer = 0;
+void reset_entry(file_cache::entry &e) {
+    e.flags = 0;
+    e.file_id = -1;
+    e.buffer = 0;
+}
+
+inline void clear_flag_1(file_cache::entry &e) {
+    e.flags &= ~(1 << 1);
 }
 
 file_cache::file_cache() {
@@ -104,19 +137,10 @@ void file_cache::reset() {
     ready_flag = true;
 }
 
-enum event_t {
-    POWER_SUSPENDING = 1,
-    POWER_STANDBY,
-    POWER_RESUME_COMPLETE = 4,
-};
-
-typedef void (*callback)(int, event_t, file_cache *);
+typedef int (*callback)(int, event_t, file_cache *);
 
 extern "C"
 void func_eboot_088AFDFC(callback, void *);
-
-void on_power_down(int, event_t, file_cache *);
-void on_power_up(int, event_t, file_cache *);
 
 void file_cache::register_power_callbacks() {
     func_eboot_088AFDFC(on_power_down, this);
@@ -130,56 +154,43 @@ inline void file_cache::reset_pointers() {
     remaining_bytes = volatile_memory_size;
 }
 
+
 inline void file_cache::clear_entries() {
-    for (int i = 0; i < NUM_ENTRIES; ++i) {
-        entries[i].reset();
-    }
+    entries.for_each(reset_entry);
     reset_pointers();
 }
 
-#ifdef ALLOW_NONMATCHING
 void file_cache::clear() {
     clear_entries();
     f0x216_flag = true;
     loading_flag = false;
 }
-#else
-extern "C" {
-INCLUDE_ASM("asm/eboot/matchings/file_cache", clear__10file_cacheFv);
-}
-#endif
 
 extern "C" {
     extern data_loader *D_eboot_089C7504;
     void func_eboot_088BB548(data_loader *, bool);
 }
 
-inline void file_cache::cancel_middle_entries_inner() {
+inline void file_cache::clear_pacs_inner() {
     remaining_bytes = volatile_memory_size;
     write_head = volatile_memory;
-    for (int i = 0x15; i < 0x24; ++i) {
-        entries[i].flags &= ~2;
+
+    for (int i = 0x15; i <= NUM_ENTRIES - 1; ++i) {
+        clear_flag_1(entries[i]);
     }
+
     func_eboot_088BB548(D_eboot_089C7504, true);
 }
 
-#ifdef ALLOW_NONMATCHING
-#pragma opt_unroll_loops on
-void file_cache::cancel_middle_entries() {
+void file_cache::clear_pacs() {
     if (loading_flag) {
         loading_flag = false;
-        cancel_middle_entries_inner();
+        clear_pacs_inner();
         release_volatile_memory();
     }
     f0x216_flag = false;
     clear_entries();
 }
-#pragma opt_unroll_loops reset
-#else
-extern "C" {
-INCLUDE_ASM("asm/eboot/matchings/file_cache", cancel_middle_entries__10file_cacheFv);
-}
-#endif
 
 extern "C" {
     struct global_089C7508 {
@@ -195,68 +206,60 @@ extern "C" {
     extern struct global_089C7508 *D_eboot_089C7508;
 }
 
-#ifdef ALLOW_NONMATCHING
-#pragma opt_unroll_loops on
 void file_cache::update() {
     if (f0x216_flag) {
         if (!D_eboot_089C7508->flag_f0x480) {
             if (ready_flag && !loading_flag && allocate_volatile_memory()) {
                 loading_flag = true;
-                cancel_middle_entries_inner();
+                clear_pacs_inner();
             }
         }
     }
     for (int i = 0; i < NUM_ENTRIES; ++i) {
         u16 flags = entries[i].flags;
         if (((flags & 1) != 0)
-         && ((flags & 2) == 0)
-         && !D_eboot_089C7504->is_loaded(entries[i].file_id)) {
-            if (entries[i].was_cancelled) {
-                entries[i].flags = 0;
-            } else {
+          && ((flags & 2) == 0)
+          && !D_eboot_089C7504->is_loaded(entries[i].file_id)) {
+            if (entries[i].was_cancelled != 1) {
                 entries[i].flags &= ~1;
                 entries[i].flags |= 2;
+            } else {
+                entries[i].flags = 0;
             }
         }
     }
 }
-#pragma opt_unroll_loops reset
-#else
-extern "C" {
-INCLUDE_ASM("asm/eboot/matchings/file_cache", update__10file_cacheFv);
-}
-#endif
 
-#ifdef ALLOW_NONMATCHING
-void file_cache::load(s32 index, u16 file_id, u32 size) {
+void file_cache::load(s32 index, s32 file_id, u32 size) {
     u32 load_size = D_eboot_089C7504->file_blocks_size(file_id);
     if (size != 0) {
         load_size = size;
     }
+    entry &e = entries[index];
     bool notify_on_cancel;
     if (index >= 0x15 && 0x2a >= index) {
-        if (load_size >= remaining_bytes) {
-            entries[index].buffer = 0;
+        u8 *buf;
+        if (remaining_bytes >= load_size) {
+            remaining_bytes -= load_size;
+            write_head += load_size;
+            buf = write_head - load_size;
+        } else {
+            buf = 0;
+        }
+        e.buffer = buf;
+        if (e.buffer == 0) {
             return;
         }
-        remaining_bytes -= load_size;
-        write_head += load_size;
-        entries[index].buffer = write_head - load_size;
         notify_on_cancel = true;
     } else {
-        entries[index].buffer = tagged_cache::INSTANCE->alloc(0x14, load_size);
+        e.buffer = tagged_cache::INSTANCE->alloc(0x14, load_size);
         notify_on_cancel = false;
     }
-    entries[index].was_cancelled = false;
-    D_eboot_089C7504->load_file_async(file_id, entries[index].buffer, -1, notify_on_cancel, &entries[index].was_cancelled, true);
-    entries[index].flags |= 1;
-    entries[index].file_id = file_id;
+    e.was_cancelled = false;
+    D_eboot_089C7504->load_file_async(file_id, e.buffer, -1, notify_on_cancel, &e.was_cancelled, true);
+    e.flags |= 1;
+    e.file_id = file_id;
 }
-#else
-extern "C" {
-INCLUDE_ASM("asm/eboot/matchings/file_cache", load__10file_cacheFiUsUi);
-}
-#endif
 
 void file_cache::duplicate(s32 destination_index, s32 source_index) {
     entry &destination = entries[destination_index];
@@ -283,60 +286,77 @@ u32 file_cache::copy(void *dst, s32 source_index, u32 size) {
 }
 
 extern "C" {
+    struct mission_target {
+        typedef void *target_definition;
+        target_definition definitions[5];
+        s8 em_ids_0x14[5];
+        u8 bytes_0x19[5];
+        volatile s8 count_0x1e;
+        u8 unknown_0x1f[11];
+    };
+
     struct global_08a5dd4c {
-        u8 padding_0x0[0x77C];
-        u8 byte_0x77C;
-        u8 padding_0x77D[0x786 - 0x77D];
-        u8 byte_0x786;
-        u8 padding_0x787[0x7a8 - 0x787];
-        u8 byte_0x7A8;
-        u8 padding_0x7a9[0x7b2 - 0x7a9];
-        u8 byte_0x7B2;
+        u8 padding_0x0[0x768];
+        mission_target targets[2];
     };
 
     extern struct global_08a5dd4c *D_eboot_08A5DD4C;
 }
 
-#ifdef ALLOW_NONMATCHING
-void file_cache::cache_emmodel(u8 em_id) {
-    int offset = 0;
-    for (; offset < 4; ++offset) {
-        entry &e = entries[offset + 0x16];
-        if (e.flags & 2 != 0 && e.file_id == 6059 + em_id) {
+inline s32 large_em_count(global_08a5dd4c &global, int target_0_count) {
+    s32 result = 0;
+    if (target_0_count > 0) {
+        result += 1;
+    }
+    if ((global.targets[1].count_0x1e > 0) && (global.targets[0].em_ids_0x14[0] != global.targets[1].em_ids_0x14[0])) {
+        result += 1;
+    }
+    return result;
+}
+
+inline s32 file_cache::next_emmodel_index() {
+    s32 offset;
+
+    global_08a5dd4c &global = *D_eboot_08A5DD4C;
+    int target_0_count = global.targets[0].count_0x1e;
+
+    entry *e = &entries[large_em_count(global, target_0_count) + 9];
+    for (offset = large_em_count(global, target_0_count); offset < 4; ++offset) {
+        if ((e->flags & 3) == 0) {
             break;
         }
+        e++;
     }
-    u32 count = 0;
-    if (0 < D_eboot_08A5DD4C->byte_0x786) {
-        count++;
-    }
-    if (0 < D_eboot_08A5DD4C->byte_0x7B2 && D_eboot_08A5DD4C->byte_0x77C != D_eboot_08A5DD4C->byte_0x7A8) {
-        count++;
-    }
-    entry &e = entries[offset + count + 9];
+    return offset;
+}
 
-    count = 0;
-    if (0 < D_eboot_08A5DD4C->byte_0x786) {
-        count++;
-    }
-    if (0 < D_eboot_08A5DD4C->byte_0x7B2 && D_eboot_08A5DD4C->byte_0x77C != D_eboot_08A5DD4C->byte_0x7A8) {
-        count++;
-    }
-
-    if (count < 4) {
-        for (; count < 4; count++) {
-            if (entries[offset + count + 9].flags & 3 == 0) {
-                break;
-            }
+inline s32 file_cache::next_pac_index() {
+    global_08a5dd4c &global = *D_eboot_08A5DD4C;
+    int target_0_count = global.targets[0].count_0x1e;
+    entry *e = &entries[large_em_count(global, target_0_count) + 9];
+    for (s32 offset = large_em_count(global, target_0_count); offset < 4; ++offset) {
+        if ((e->flags & 3) == 0) {
+            return offset;
         }
+        e++;
     }
-    duplicate(count + 9, offset + 0x16);
+    return 4;
 }
-#else
-extern "C" {
-INCLUDE_ASM("asm/eboot/matchings/file_cache", cache_emmodel__10file_cacheFUc);
+
+void file_cache::cache_emmodel(u8 em_id) {
+    entry* src = &entries[0x16];
+    int src_offset = 0;
+    for (; src_offset < 4; ++src_offset) {
+        u16 file_id = 0x17AB + em_id;
+        if ((src->flags & 2) != 0 && (src->file_id == file_id)) {
+            break;
+        }
+        src++;
+    }
+
+    s32 dst = next_emmodel_index();
+    duplicate(9 + dst, 0x16 + src_offset);
 }
-#endif
 
 bool file_cache::is_loaded(s32 index) {
     u16 flags = entries[index].flags;
@@ -346,87 +366,75 @@ bool file_cache::is_loaded(s32 index) {
 void file_cache::free(s32 index) {
     entry &e = entries[index];
     tagged_cache::INSTANCE->free(e.buffer);
-    e.reset();
+    reset_entry(e);
 }
 
-#ifdef ALLOW_NONMATCHING
 u8 *file_cache::emmodel_pac(u8 em_id) {
+    entry *e = &entries[9];
     for (int i = 0; i < 4; ++i) {
-        entry &e = entries[i + 9];
-        if (e.flags & 2 && e.file_id == 0x17AB + em_id) {
-            return e.buffer;
+        u16 file_id = 0x17AB + em_id;
+        if (e->flags & 2 && e->file_id == file_id) {
+            return e->buffer;
         }
+        ++e;
     }
     return 0;
 }
-#else
-extern "C" {
-INCLUDE_ASM("asm/eboot/matchings/file_cache", emmodel_pac__10file_cacheFUc);
-}
-#endif
 
-bool file_cache::is_emmodel_cached(u8 em_id) {
-    return find_middle_entries(em_id + 0x17AB) != -1;
+bool file_cache::is_pac_cached(u8 em_id) {
+    return find_pac(em_id + 0x17AB) != -1;
 }
 
-s32 file_cache::find_middle_entries(u16 file_id) {
-    for (s32 i = 0x15; i <= 0x2a; ++i) {
-        entry &e = entries[i];
-        if (e.flags & 2 && e.file_id == file_id) {
+s32 file_cache::find_pac(u16 file_id) {
+    entry *e = &entries[0x15];
+    for (s32 i = 0x15; i <= NUM_ENTRIES - 1; ++i) {
+        if ((e->flags & 2) != 0 && e->file_id == file_id) {
             return i;
         }
+        ++e;
     }
     return -1;
 }
 
-#ifdef ALLOW_NONMATCHING
-s32 file_cache::find_emmodel(u8 em_id) {
-    for (s32 i = 0; i < 4; ++i) {
-        entry &e = entries[i + 9];
-        if (e.flags & 2 && e.file_id == em_id + 0x17AB) {
+s8 file_cache::find_emmodel(u8 em_id) {
+    entry *e = &entries[9];
+    for (s8 i = 0; i < 4; ++i) {
+        u16 file_id = 0x17AB + em_id;
+        if ((e->flags & 2) != 0 && e->file_id == file_id) {
             return i;
         }
+        ++e;
     }
     return -1;
 }
-#else
-extern "C" {
-INCLUDE_ASM("asm/eboot/matchings/file_cache", find_emmodel__10file_cacheFUc);
-}
-#endif
 
-#ifdef ALLOW_NONMATCHING
 void file_cache::load_emmodel(u8 em_id, u32 size, s32 index) {
     if (index == -1) {
-        u8 *pac = emmodel_pac(em_id);
-        if (pac == 0) {
-            u32 count = 0 < D_eboot_08A5DD4C->byte_0x786;
-            if (0 < D_eboot_08A5DD4C->byte_0x7B2 && D_eboot_08A5DD4C->byte_0x77C != D_eboot_08A5DD4C->byte_0x7A8) {
-                count++;
-            }
-            int i = count + 9;
-            count = 0 < D_eboot_08A5DD4C->byte_0x786;
-            if (0 < D_eboot_08A5DD4C->byte_0x7B2 && D_eboot_08A5DD4C->byte_0x77C != D_eboot_08A5DD4C->byte_0x7A8) {
-                count++;
-            }
-            for (; count < 4; ++count) {
-                if (!(entries[i].flags & 3)) {
-                    load(count + 9, em_id + 0x17AB, size);
+        if (emmodel_pac(em_id) == 0) {
+            global_08a5dd4c &global = *D_eboot_08A5DD4C;
+            int target_0_count = global.targets[0].count_0x1e;
+            entry *e = &entries[large_em_count(global, target_0_count) + 9];
+            for (s32 offset = large_em_count(global, target_0_count); offset < 4; ++offset) {
+                if ((e->flags & 3) == 0) {
+                    u16 file_id = em_id + 0x17AB;
+                    load(offset + 9, file_id, size);
                     return;
                 }
+                e++;
             }
         }
-        return;
-    } else if (entries[index + 9].flags & 2 && entries[index + 9].file_id == em_id + 0x17AB) {
-        return;
+    } else {
+        entry *e = &entries[index + 9];
+        if ((e->flags & 2) != 0) {
+            u16 file_id = em_id + 0x17AB;
+            if (e->file_id == file_id) {
+                return;
+            }
+        }
+        u16 file_id = em_id + 0x17AB;
+        load(index + 9, file_id, size);
     }
-    load(index + 9, em_id + 0x17AB, size);
 }
-#else
-extern "C" {
-INCLUDE_ASM("asm/eboot/matchings/file_cache", load_emmodel__10file_cacheFUcUii);
-}
-#endif
 
 extern "C" {
     struct sound_effect_file_ids {
@@ -445,79 +453,65 @@ void file_cache::load_em_with_sfx(u8 em_id, int n) {
     load(n + 0x1A, D_game_task_09BC3670[em_id].tsb_file_id, 0);
 }
 
-#ifdef ALLOW_NONMATCHING
 void file_cache::load_emmodel(u8 em_id) {
     u8 *pac = emmodel_pac(em_id);
     if (pac == 0) {
-        u32 count = 0 < D_eboot_08A5DD4C->byte_0x786;
-        if (0 < D_eboot_08A5DD4C->byte_0x7B2 && D_eboot_08A5DD4C->byte_0x77C != D_eboot_08A5DD4C->byte_0x7A8) {
-            count++;
-        }
-        int i = count + 0x16;
-        count = 0 < D_eboot_08A5DD4C->byte_0x786;
-        if (0 < D_eboot_08A5DD4C->byte_0x7B2 && D_eboot_08A5DD4C->byte_0x77C != D_eboot_08A5DD4C->byte_0x7A8) {
-            count++;
-        }
-        for (; count < 4; ++count) {
-            if (!(entries[i].flags & 3)) {
-                load(count + 0x16, em_id + 0x17AB, 0);
+
+        global_08a5dd4c &global = *D_eboot_08A5DD4C;
+        int target_0_count = global.targets[0].count_0x1e;
+
+        entry *e = &entries[large_em_count(global, target_0_count) + 0x16];
+        for (s32 offset = large_em_count(global, target_0_count); offset < 4; ++offset) {
+            if ((e->flags & 3) == 0) {
+                u16 file_id = em_id + 0x17AB;
+                load(offset + 0x16, file_id, 0);
                 return;
             }
+            e++;
         }
     }
 }
-#else
-extern "C" {
-INCLUDE_ASM("asm/eboot/matchings/file_cache", load_emmodel__10file_cacheFUc);
-}
-#endif
 
 #ifdef ALLOW_NONMATCHING
 void file_cache::free_emmodel(u8 em_id) {
+    entry *e = &entries[9];
     for (int i = 0; i < 4; ++i) {
-        entry &e = entries[i + 9];
-        if (e.flags & 3 && e.file_id == em_id + 0x17AB) {
+        if ((e->flags & 3) != 0 && em_id + 0x17AB == e->file_id) {
             free(i + 9);
         }
+        ++e;
     }
 }
 #else
-extern "C" {
-INCLUDE_ASM("asm/eboot/matchings/file_cache", free_emmodel__10file_cacheFUc);
-}
+extern "C"
+INCLUDE_ASM("asm/eboot/nonmatchings/file_cache", free_emmodel__10file_cacheFUc)
+
 #endif
 
-#ifdef ALLOW_NONMATCHING
 void file_cache::free_all_emmodels() {
+    entry *e = &entries[9];
     for (int i = 0; i < 4; ++i) {
-        if (entries[i + 9].flags & 3) {
+        if (e->flags & 3) {
             free(i + 9);
         }
+        ++e;
     }
 }
-#else
-extern "C" {
-INCLUDE_ASM("asm/eboot/matchings/file_cache", free_all_emmodels__10file_cacheFv);
-}
-#endif
 
-#ifdef ALLOW_NONMATCHING
-SceBool file_cache::allocate_volatile_memory() {
+bool file_cache::allocate_volatile_memory() {
     volatile_memory_size = 0;
     volatile_memory = 0;
-    SceBool success = sceKernelVolatileMemLock(0, (void**)&volatile_memory, &volatile_memory_size);
-    if (success < 0) {
+    int error = sceKernelVolatileMemLock(0, (void**)&volatile_memory, &volatile_memory_size);
+    if (error < 0) {
         volatile_memory_size = 0;
     }
     write_head = volatile_memory;
     remaining_bytes = volatile_memory_size;
-    return success;
+    if (error == 0) {
+        return true;
+    }
+    return false;
 }
-#else
-extern "C" {
-INCLUDE_ASM("asm/eboot/matchings/file_cache", allocate_volatile_memory__10file_cacheFv);
-}
-#endif
 
 void file_cache::release_volatile_memory() {
     sceKernelVolatileMemUnlock(0);
@@ -527,52 +521,37 @@ void file_cache::release_volatile_memory() {
 extern "C"
 void func_eboot_0884EA44(data_loader *);
 
-#ifdef ALLOW_NONMATCHING
-#pragma opt_unroll_loops on
-void on_power_down(int error, event_t event, file_cache *cache) {
-    if (event == POWER_SUSPENDING || event == POWER_STANDBY) {
-        D_eboot_089C7508->flag_0x2A |= 1;
-        cache->ready_flag = false;
-        if (cache->loading_flag) {
-            func_eboot_0884EA44(D_eboot_089C7504);
-            int handle = sceKernelSuspendDispatchThread();
-            cache->loading_flag = false;
-            cache->remaining_bytes = cache->volatile_memory_size;
-            cache->write_head = cache->volatile_memory;
-            for (int i = 0; i < 16; ++i) {
-                cache->entries[0x15 + i].flags &= ~3;
-            }
-            func_eboot_088BB548(D_eboot_089C7504, true);
-            cache->release_volatile_memory();
-            sceKernelResumeDispatchThread(handle);
-        }
+int on_power_down(int error, event_t event, file_cache *cache) {
+    if (event != POWER_STANDBY && event != POWER_SUSPENDING) {
+        return 0;
     }
+    D_eboot_089C7508->flag_0x2A |= 1;
+    cache->ready_flag = false;
+    if (cache->loading_flag != 0) {
+        func_eboot_0884EA44(D_eboot_089C7504);
+        u32 handle = sceKernelSuspendDispatchThread();
+        cache->loading_flag = false;
+        cache->clear_pacs_inner();
+        cache->release_volatile_memory();
+        sceKernelResumeDispatchThread(handle);
+    }
+    return 0;
 }
-#pragma op_unroll_loops reset
-#else
-extern "C" {
-INCLUDE_ASM("asm/eboot/matchings/file_cache", on_power_down__Fi7event_tP10file_cache);
-}
-#endif
 
-#ifdef ALLOW_NONMATCHING
-void on_power_up(int error, event_t event, file_cache *cache) {
-    if (event == POWER_RESUME_COMPLETE) {
-        D_eboot_089C7508->flag_0x2A &= 0xF0;
-        D_eboot_089C7508->flag_0x6AF0C = true;
-        cache->ready_flag = true;
+int on_power_up(int error, event_t event, file_cache *cache) {
+    if (event != POWER_RESUME_COMPLETE) {
+        return 0;
     }
+    D_eboot_089C7508->flag_0x2A &= 0xF0;
+    D_eboot_089C7508->flag_0x6AF0C = true;
+    cache->ready_flag = true;
+    return 0;
 }
-#else
-extern "C" {
-INCLUDE_ASM("asm/eboot/matchings/file_cache", on_power_up__Fi7event_tP10file_cache);
-}
-#endif
 
 extern "C" {
     struct short_pair {
-        short left;
-        short right;
+        u16 left;
+        u16 right;
     };
 
     extern struct short_pair D_game_sub_09CDF7B8[267];
@@ -582,8 +561,8 @@ extern "C" {
 }
 
 void file_cache::cache_stage(u16 st_id) {
-    load(0x15, st_id + 0x167C, 0); // st pac
-    load(0x29, st_id + 0x1572, 0); // st ovl
+    load(0x15, (u16)(st_id + 0x167C), 0); // st pac
+    load(0x29, (u16)(st_id + 0x1572), 0); // st ovl
     func_eboot_088711B8(D_eboot_08A5DD4C, st_id);
     load(0x26, D_game_sub_09CDF7B8[st_id].left, 0);
     load(0x27, D_eboot_089A6470[st_id].left, 0);
