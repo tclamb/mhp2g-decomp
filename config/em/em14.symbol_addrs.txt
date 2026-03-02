@@ -1,8 +1,8 @@
 
 func_eboot_08813D50 = 0x08813D50; // type:func
 func_eboot_0884FA7C = 0x0884FA7C; // type:func
-func_eboot_08862740 = 0x08862740; // type:func
-func_eboot_08862760 = 0x08862760; // type:func
+mesh_material_count__10pmo_headerFUi = 0x08862740; // type:func
+material_remap__10pmo_headerFUiUi = 0x08862760; // type:func
 func_eboot_08864214 = 0x08864214; // type:func
 func_eboot_08864340 = 0x08864340; // type:func
 func_eboot_08864400 = 0x08864400; // type:func

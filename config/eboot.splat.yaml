@@ -130,9 +130,7 @@ segments:
       - [0x5ade8, asmtu, global_08a5dd24]
       - [0x5ddf4, cpp, bone]
       - [0x5ed14, asmtu, global_08a5dd28]
-      - [0x5fa88, asmtu, object_089b5be4] # base class for object_089b5c10, stage objects
-      - [0x5fb90, cpp, model] # pmo parsing emitted here (header?); base class for 089b5be4
-      - [0x62304, asm, skeleton] # skeleton?
+      - [0x5fa88, cpp, model]
       - [0x629ec, asmtu, object_089b5c10] # base class for em & player
       - [0x64864, asmtu, global_08a5dd2c]
       - [0x66fa0, asmtu, global_08a5dd30]
@@ -331,8 +329,8 @@ segments:
       - [0x1b4128, .vtables, io/base_data_loader.1]
       - [0x1b4174, .vtables, state/start_state]
       - [0x1b4188, .vtables, bone] # FIXME
-      - [0x1b4198, .vtables, object_089b5be4]
-      - [0x1b41b4, .vtables, object_089b5c10]
+      - [0x1b4198, .vtables, model]
+      - [0x1b41c4, .vtables, object_089b5c10]
       - [0x1b4204, .vtables, state/demo_state]
       - [0x1b4218, .vtables, state/base_state]
       - [0x1b422c, .vtables, main]
