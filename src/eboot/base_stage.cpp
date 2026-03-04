@@ -145,7 +145,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x90__10base_stageFP3pmo
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x94__10base_stageFv);
 }
 
-void base_stage::vtable_0x98(::pmo *, void *) {
+void base_stage::vtable_0x98(pmo *, void *) {
     // empty
 }
 
