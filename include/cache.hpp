@@ -19,6 +19,7 @@ struct cache {
     u32 len;
     slab *first;
     slab_node head;
+    u32 padding;
 
     void reset(void *slab, u32 len);
     void clear();

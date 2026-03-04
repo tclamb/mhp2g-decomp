@@ -172,8 +172,8 @@ segments:
       - [0xbb0f4, asmtu, state/gallery_state]
       - [0xbb408, asmtu, state/download_state]
       - [0xbb5ec, asmtu, global_09a4099c] # player data?
-      - [0xc4034, asmtu, stage_manager] # likely same TU as stage base class
-      - [0xc8710, asmtu, object_089b5bf4] # stage base class
+      - [0xc4034, cpp, stage_manager]
+      - [0xc8710, cpp, base_stage]
       - [0xcd454, asmtu, lib/crti] # _init
       - [0xcd45c, asm, lib/crtn] # _fini
       - [0xcd464, asmtu, state/arcade_state]
@@ -230,7 +230,7 @@ segments:
       - [0x12de28, .rodata, global_09a1bb18_3]
       - [0x12de7c, .rodata, state/gallery_state]
       - [0x12de98, .rodata, global_09a4099c]
-      - [0x12dfec, .rodata, object_089b5bf4] # base stage vtable
+      - [0x12dfec, .rodata, base_stage]
       - [0x12e03c, .rodata, global_09a4adac]
       - [0x12e06c, .rodata, object_089b5e78]
       - [0x12e158, .rodata, global_09a4ae04]
@@ -295,7 +295,7 @@ segments:
       - [0x1ae1f4, .int4, state/download_state]
       - [0x1ae20c, .data, global_09a4099c]
       - [0x1ae690, .data, stage_manager]
-      - [0x1aeabc, .int4, object_089b5bf4]
+      - [0x1aeabc, .data, base_stage]
       - [0x1aead4, .data, lib/crti]
       - [0x1aeaf0, .data, state/arcade_state] # some unencapsulated tables here before the ptmfs
       - [0x1aed84, .data, global_09a4adac]
@@ -342,7 +342,7 @@ segments:
       - [0x1b4314, .vtables, state/gallery_state]
       - [0x1b4328, .vtables, state/download_state]
       - [0x1b433c, .vtables, stage_manager]
-      - [0x1b435c, .vtables, object_089b5bf4]
+      - [0x1b435c, .vtables, base_stage]
       - [0x1b4418, .vtables, state/arcade_state]
       - [0x1b442c, .vtables, object_089b5e78] # base player type
       - [0x1b44a8, .vtables, object_089b5ef4] # cont_task.ovl player type
@@ -878,6 +878,8 @@ segments:
       - [0x1c5030, vtables, stage2/stage266]
       - [0x1c50ec, pad]
       - [0x1c50f4, bin, omit_overlay_addresses]
-      - {start: 0x1c5114, type: bss, vram: 0x089c6b60, name: bss}
+      - {start: 0x1c5114, type: .bss, vram: 0x089c6b60, name: lib/crt0} # FIXME: split bss into translation units
+      - {start: 0x1c5114, type: .bss, vram: 0x09a409a0, name: stage_manager}
+      - {start: 0x1c5114, type: .bss, vram: 0x09a4ada4, name: lib/crt0_elf}
   - [0x1c5114, bin, omit_elf_footer]
   - [0x1cd740]

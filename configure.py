@@ -414,7 +414,7 @@ def build_stuff(linker_entries_by_module_name: Dict[str, List[LinkerEntry]], git
     ninja.rule(
         "mwldpsp",
         description="mwldpsp -o $out build/ULJM-05500.lcf",
-        command="MWIncludes=./bin ./bin/wibo ./bin/mwldpsp.exe -m _start -map closure -o $out $in $args",
+        command="MWIncludes=./bin ./bin/wibo ./bin/mwldpsp.exe -m _start -map -nofail -noinhibit-exec -o $out $in $args",
     )
 
     ninja.rule(

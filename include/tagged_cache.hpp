@@ -6,7 +6,7 @@ struct tagged_cache {
     static tagged_cache *INSTANCE;
 
     cache cache;
-    u32 padding[6];
+    u32 padding[5];
     u8 slab[0x83C000];
     struct index_entry {
         int tag;

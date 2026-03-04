@@ -1,180 +1,884 @@
-#include "common.h"
+
+#pragma opt_unroll_loops on
+
+#include "stage_manager.hpp"
+
+#include "stage_table.inc.cpp"
+
+stage_manager global_stage_manager;
+stage_manager *stage_manager::INSTANCE;
+
+stage_manager::stage_manager() {
+    INSTANCE = this;
+    vram_start = 0;
+    vram_transfer_size = 0;
+    unknown_0xA2B4 = 0;
+    unknown_0xA2B8 = 0;
+    unknown_0x28A = -1;
+}
+
+stage_manager::~stage_manager() {
+    if (this != 0) {
+        INSTANCE = 0;
+    }
+}
 
 extern "C" {
+    extern void *D_eboot_089C6CB0;
+    extern void func_eboot_08812F04(void *, s32, s32, s32);
+    extern u8 *func_eboot_088133D0(void *, u32);
+    extern void func_eboot_08813024(void *, u32);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5A80);
+void stage_manager::reset() {
+    cache.reset(slab, sizeof(slab));
+    unknown_0xA2B8 = 0;
+    func_eboot_08812F04(D_eboot_089C6CB0, 6, 0x4e200, -1);
+    vram_start = func_eboot_088133D0(D_eboot_089C6CB0, 6);
+    vram_transfer_size = 0;
+    unknown_0x28A = -1;
+    unknown_0xA2C8 = 0;
+    prop_list = 0;
+    flag_0xA3E8 = 0;
+    unknown_0xA3E9 = 1;
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5AC8);
+void stage_manager::unload() {
+    tagged_cache::INSTANCE->free_all(1);
+    unknown_0xA2B8 = 0;
+    func_eboot_08813024(D_eboot_089C6CB0, 6);
+    vram_transfer_size = 0;
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5B18);
+void stage_manager::call_stage_vtable_0x14() {
+    if (stage != 0 && stage->model_pmo.header != 0) {
+        stage->vtable_0x14();
+    }
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5BD8);
+extern "C" {
+    extern void *D_eboot_089C70CC;
+    extern void func_eboot_0884CA28(void *, int, model *, bool);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5C30);
+void stage_manager::call_0884ca28_with_stage() {
+    if (stage != 0 && stage->model_pmo.header != 0) {
+        func_eboot_0884CA28(D_eboot_089C70CC, 3, stage, true);
+    }
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5C6C);
+void stage_manager::call_prop_list_vtable_0x10() {
+    base_prop *prop = prop_list;
+    while (prop != 0) {
+        prop->vtable_0x10();
+        prop = prop->next;
+    }
+    if (stage != 0 && unknown_0xA3E9 == true) {
+        stage->unknown_0x3D4 = true;
+    }
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5CAC);
 
-void func_eboot_088C5D28(void) {
+void base_prop::vtable_0x10() {
     // empty
 }
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5D30);
+void stage_manager::call_prop_list_ptmf() {
+    base_prop *prop = prop_list;
+    while (prop != 0) {
+        prop->call_ptmf();
+        base_prop *next = prop->next;
+        bool done = prop->unknown_0x4 & 1;
+        if (done == 0) {
+            free(prop);
+        }
+        prop = next;
+    }
+}
+
+void base_prop::call_ptmf() {
+    if (ptmf_0x1C != 0) {
+        (this->*ptmf_0x1C)();
+    }
+}
+
+
+void stage_manager::destroy_prop_list() {
+    base_prop *prop = prop_list;
+    while (prop != 0) {
+        base_prop *next = prop->next;
+        delete prop;
+        cache.free(prop);
+        prop = next;
+    }
+    prop_list = 0;
+}
+
+base_prop::~base_prop() {
+    // empty
+}
+
+#define DECLARE_DUMMY_PROP(name, size, id)      \
+    struct name : base_prop {                   \
+        u8 padding[size - sizeof(base_prop)];   \
+        inline name() {                         \
+            unknown_0x18 = id;                  \
+        }                                       \
+        virtual void draw();                    \
+        virtual void vtable_0x10();             \
+        virtual void setup();                   \
+        virtual void update();                  \
+        virtual void vtable_0x1C();             \
+    }
+#define DECLARE_DUMMY_PROP_INIT_CONSTRUCTOR(name, size, id) \
+    struct name : base_prop {                       \
+        u8 padding[size - sizeof(base_prop)];       \
+        name();                                     \
+        virtual void draw();                        \
+        virtual void vtable_0x10();                 \
+        virtual void setup();                       \
+        virtual void update();                      \
+        virtual void vtable_0x1C();                 \
+    }
+
+DECLARE_DUMMY_PROP(prop_089B927C, 0x3C, 0);
+DECLARE_DUMMY_PROP(prop_089B92BC, 0x50, 1);
+DECLARE_DUMMY_PROP(prop_089B92DC, 0x60, 2);
+DECLARE_DUMMY_PROP(prop_089B92FC, 0x50, 3);
+DECLARE_DUMMY_PROP_INIT_CONSTRUCTOR(prop_089B931C, 0x70, 4);
+DECLARE_DUMMY_PROP(prop_089B933C, 0x60, 5);
+DECLARE_DUMMY_PROP(prop_089B935C, 0x60, 6);
+DECLARE_DUMMY_PROP(prop_089B937C, 0x54, 7);
+DECLARE_DUMMY_PROP(prop_089B939C, 0x60, 8);
+DECLARE_DUMMY_PROP(prop_089B93BC, 0x70, 9);
+DECLARE_DUMMY_PROP(prop_089B93DC, 0x50, 10);
+DECLARE_DUMMY_PROP(prop_089B93FC, 0x60, 11);
+DECLARE_DUMMY_PROP(prop_089B941C, 0x70, 12);
+DECLARE_DUMMY_PROP(prop_089B943C, 0xA0, 13);
+DECLARE_DUMMY_PROP(prop_089B945C, 0x60, 14);
+DECLARE_DUMMY_PROP(prop_089B947C, 0x60, 15);
+DECLARE_DUMMY_PROP(prop_089B949C, 0x3C, 16);
+DECLARE_DUMMY_PROP(prop_089B94BC, 0x50, 17);
+DECLARE_DUMMY_PROP(prop_089B94DC, 0x60, 18);
+DECLARE_DUMMY_PROP(prop_089B94FC, 0x70, 19);
+DECLARE_DUMMY_PROP(prop_089B951C, 0x50, 20);
+DECLARE_DUMMY_PROP(prop_089B953C, 0xC0, 21);
+DECLARE_DUMMY_PROP(prop_089B955C, 0x50, 22);
+DECLARE_DUMMY_PROP(prop_089B957C, 0x70, 23);
+DECLARE_DUMMY_PROP(prop_089B959C, 0x3C, 24);
+DECLARE_DUMMY_PROP(prop_089B95BC, 0x70, 25);
+DECLARE_DUMMY_PROP(prop_089B95DC, 0x60, 26);
+DECLARE_DUMMY_PROP(prop_089B95FC, 0x60, 27);
+DECLARE_DUMMY_PROP(prop_089B961C, 0x50, 28);
+DECLARE_DUMMY_PROP(prop_089B963C, 0x60, 29);
+DECLARE_DUMMY_PROP(prop_089B965C, 0x40, 30);
+DECLARE_DUMMY_PROP(prop_089B6208, 0x3C, 31);
+DECLARE_DUMMY_PROP(prop_089B967C, 0x60, 32);
+DECLARE_DUMMY_PROP(prop_089B969C, 0x80, 33);
+DECLARE_DUMMY_PROP(prop_089B6258, 0x70, 34);
+DECLARE_DUMMY_PROP(prop_089B96BC, 0x70, 35);
+DECLARE_DUMMY_PROP(prop_089B6278, 0x5A0, 36);
+DECLARE_DUMMY_PROP(prop_089B6298, 0xE0, 37);
+DECLARE_DUMMY_PROP(prop_089B62B8, 0x50, 38);
+DECLARE_DUMMY_PROP(prop_089B62D8, 0x70, 39);
+DECLARE_DUMMY_PROP(prop_089B62F8, 0x90, 40);
+DECLARE_DUMMY_PROP(prop_089B6318, 0x90, 41);
+DECLARE_DUMMY_PROP(prop_089B6338, 0xA0, 42);
+DECLARE_DUMMY_PROP(prop_089B6358, 0xA0, 43);
+DECLARE_DUMMY_PROP(prop_089B96DC, 0x50, 44);
+DECLARE_DUMMY_PROP(prop_089B96FC, 0x50, 45);
+DECLARE_DUMMY_PROP(prop_089C41C8, 0x50, 46);
+DECLARE_DUMMY_PROP(prop_089B971C, 0x50, 47); // oops
+DECLARE_DUMMY_PROP(prop_089B973C, 0x70, 48);
+DECLARE_DUMMY_PROP(prop_089B975C, 0xA0, 49);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5DA8);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5DE4);
+extern "C" void func_game_sub_09CB54D8(prop_089B927C *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5E64);
+void stage_manager::push_prop_089B927C(prop_params *params) {
+    prop_089B927C *prop = alloc_and_push_prop<prop_089B927C>();
+    link_model(prop, true);
+    func_game_sub_09CB54D8(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5E94);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C5F88);
+extern "C" void func_game_sub_09CB5C20(prop_089B92BC *prop, prop_params *params, u32 arg3);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6090);
+void stage_manager::push_prop_089B92BC(prop_params *params, u32 arg3) {
+    prop_089B92BC *prop = alloc_and_push_prop<prop_089B92BC>();
+    link_model(prop, true);
+    func_game_sub_09CB5C20(prop, params, arg3);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6198);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6290);
+extern "C" void func_game_sub_09CB6468(prop_089B92DC *prop, prop_params *params, u32 arg3);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C63AC);
+void stage_manager::push_prop_089B92DC(prop_params *params, u32 arg3) {
+    prop_089B92DC *prop = alloc_and_push_prop<prop_089B92DC>();
+    link_model(prop, true);
+    func_game_sub_09CB6468(prop, params, arg3);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C64A4);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C659C);
+extern "C" void func_game_sub_09CB6968(prop_089B92FC *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6730);
+void stage_manager::push_prop_089B92FC(prop_params *params) {
+    prop_089B92FC *prop = alloc_and_push_prop<prop_089B92FC>();
+    link_model(prop, true);
+    func_game_sub_09CB6968(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6860);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6958);
+#ifdef BUILD_NONMATCHING
+extern "C" void func_game_sub_09CB7008(prop_089B931C *prop, prop_params *params, u32 arg3, u16 arg4, u16 arg5, u32 arg6, u16 arg7);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6A50);
+void stage_manager::push_prop_089B931C(prop_params *params, u32 arg3, u16 arg4, u16 arg5, u32 arg6, u16 arg7) {
+    prop_089B931C *prop = alloc_prop<prop_089B931C>();
+    push(prop);
+    link_model(prop, true);
+    func_game_sub_09CB7008(prop, params, arg3, arg4, arg5, arg6, arg7);
+}
+#else
+extern "C"
+INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", push_prop_089B931C__13stage_managerFP11prop_paramsUiUsUsUiUs);
+#endif
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6B48);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6CA4);
+extern "C" void func_game_sub_09CB76E0(prop_089B933C *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6D9C);
+void stage_manager::push_prop_089B933C(prop_params *params) {
+    prop_089B933C *prop = alloc_and_push_prop<prop_089B933C>();
+    link_model(prop, true);
+    func_game_sub_09CB76E0(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6E94);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C6F8C);
+extern "C" void func_game_sub_09CB8110(prop_089B935C *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7084);
+void stage_manager::push_prop_089B935C(prop_params *params) {
+    prop_089B935C *prop = alloc_and_push_prop<prop_089B935C>();
+    link_model(prop, true);
+    func_game_sub_09CB8110(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C718C);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7284);
+extern "C" void func_game_sub_09CB8DF0(prop_089B937C *prop, prop_params *params, u32 arg3, u32 arg4, u8 arg5, u16 arg6, u16 arg7, u16 arg8, u32 arg9, u32 arg10);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7404);
+void stage_manager::push_prop_089B937C(int pmo_index, prop_params *params, u32 arg3, u32 arg4, u8 arg5, u16 arg6, u16 arg7, u16 arg8, u32 arg9, u32 arg10) {
+    prop_089B937C *prop = alloc_and_push_prop<prop_089B937C>();
+    link_model(prop, pmo_index);
+    func_game_sub_09CB8DF0(prop, params, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C74FC);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C75F4);
+extern "C" void func_game_sub_09CB97E8(prop_089B939C *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C76DC);
+void stage_manager::push_prop_089B939C(prop_params *params, int pmo_index) {
+    prop_089B939C *prop = alloc_and_push_prop<prop_089B939C>();
+    link_model(prop, pmo_index);
+    func_game_sub_09CB97E8(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C77D4);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C78CC);
+extern "C" void func_game_sub_09CB9FD8(prop_089B93BC *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C79C4);
+void stage_manager::push_prop_089B93BC(prop_params *params) {
+    prop_089B93BC *prop = alloc_and_push_prop<prop_089B93BC>();
+    link_model(prop, true);
+    func_game_sub_09CB9FD8(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7ABC);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7BB4);
+extern "C" void func_game_sub_09CBA820(prop_089B93DC *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7CAC);
+void stage_manager::push_prop_089B93DC(prop_params *params) {
+    prop_089B93DC *prop = alloc_and_push_prop<prop_089B93DC>();
+    link_model(prop, true);
+    func_game_sub_09CBA820(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7DC4);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7EBC);
+extern "C" void func_game_sub_09CBACF0(prop_089B93FC *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C7FB4);
+void stage_manager::push_prop_089B93FC(prop_params *params) {
+    prop_089B93FC *prop = alloc_and_push_prop<prop_089B93FC>();
+    link_model(prop, true);
+    func_game_sub_09CBACF0(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C80AC);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C81D4);
+extern "C" void func_game_sub_09CBB398(prop_089B941C *prop, prop_params *params, u32 arg3, u32 arg4, u32 arg5, u32 *arg6, u16 arg7, u32 arg8, u32 arg9, u32 arg10, u16 arg11);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C82DC);
+void stage_manager::push_prop_089B941C(prop_params *params, u32 arg3, u32 arg4, u32 arg5, u32 *arg6, u16 arg7, u32 arg8, u32 arg9, u32 arg10, u16 arg11) {
+    prop_089B941C *prop = alloc_and_push_prop<prop_089B941C>();
+    func_game_sub_09CBB398(prop, params, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C83D4);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C84BC);
+extern "C" void func_game_sub_09CBBB48(prop_089B943C *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C85F4);
+void stage_manager::push_prop_089B943C(prop_params *params) {
+    prop_089B943C *prop = alloc_and_push_prop<prop_089B943C>();
+    link_model(prop, true);
+    func_game_sub_09CBBB48(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C86EC);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C87E4);
+extern "C" void func_game_sub_09CBD1F0(prop_089B945C *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C892C);
+void stage_manager::push_prop_089B945C(prop_params *params) {
+    prop_089B945C *prop = alloc_and_push_prop<prop_089B945C>();
+    link_model(prop, true);
+    func_game_sub_09CBD1F0(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C8A44);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C8B7C);
+extern "C" void func_game_sub_09CBD950(prop_089B947C *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C8CA4);
+void stage_manager::push_prop_089B947C(prop_params *params) {
+    prop_089B947C *prop = alloc_and_push_prop<prop_089B947C>();
+    link_model(prop, true);
+    func_game_sub_09CBD950(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C8D9C);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C8E84);
+extern "C" void func_game_sub_09CBE478(prop_089B949C *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C8F7C);
+void stage_manager::push_prop_089B949C(prop_params *params) {
+    prop_089B949C *prop = alloc_and_push_prop<prop_089B949C>();
+    link_model(prop, false);
+    func_game_sub_09CBE478(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9064);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9194);
+extern "C" void func_game_sub_09CBE7F8(prop_089B94BC *prop, prop_params *params, u32 arg3);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C928C);
+void stage_manager::push_prop_089B94BC(prop_params *params, u32 arg3) {
+    prop_089B94BC *prop = alloc_and_push_prop<prop_089B94BC>();
+    link_model(prop, true);
+    func_game_sub_09CBE7F8(prop, params, arg3);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9384);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C93D8);
+extern "C" void func_game_sub_09CBECB8(prop_089B94DC *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9410);
+void stage_manager::push_prop_089B94DC(prop_params *params) {
+    prop_089B94DC *prop = alloc_and_push_prop<prop_089B94DC>();
+    link_model(prop, true);
+    func_game_sub_09CBECB8(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C941C);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9424);
+extern "C" void func_game_sub_09CBF188(prop_089B94FC *prop, prop_params *params, u32 *arg3, u32 arg4, u32 arg5, u8 arg6, u16 arg7);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9440);
+void stage_manager::push_prop_089B94FC(prop_params *params, u32 *arg3, u32 arg4, u32 arg5, u8 arg6, u16 arg7, int pmo_index) {
+    prop_089B94FC *prop = alloc_and_push_prop<prop_089B94FC>();
+    link_model(prop, pmo_index);
+    func_game_sub_09CBF188(prop, params, arg3, arg4, arg5, arg6, arg7);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C94CC);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9514);
+extern "C" void func_game_sub_09CBFDF0(prop_089B951C *prop, u8 arg2);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9674);
+void stage_manager::push_prop_089B951C(u8 arg2) {
+    prop_089B951C *prop = alloc_and_push_prop<prop_089B951C>();
+    link_model(prop, true);
+    func_game_sub_09CBFDF0(prop, arg2);
+}
 
-// load stage package
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9740);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C99AC);
+extern "C" void func_game_sub_09CC0890(prop_089B953C *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9A20);
+void stage_manager::push_prop_089B953C(prop_params *params) {
+    prop_089B953C *prop = alloc_and_push_prop<prop_089B953C>();
+    link_model(prop, true);
+    func_game_sub_09CC0890(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9A78);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9ACC);
+extern "C" void func_game_sub_09CC11F0(prop_089B955C *prop);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9B74);
+void stage_manager::push_prop_089B955C() {
+    prop_089B955C *prop = alloc_and_push_prop<prop_089B955C>();
+    link_model(prop, true);
+    func_game_sub_09CC11F0(prop);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9BC8);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9BE0);
+extern "C" void func_game_sub_09CC1A90(prop_089B957C *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9BF8);
+void stage_manager::push_prop_089B957C(prop_params *params) {
+    prop_089B957C *prop = alloc_and_push_prop<prop_089B957C>();
+    link_model(prop, true);
+    func_game_sub_09CC1A90(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9D6C);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088C9F1C);
+extern "C" void func_game_sub_09CC2370(prop_089B959C *prop, prop_params *params);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088CA0AC);
+void stage_manager::push_prop_089B959C(prop_params *params) {
+    prop_089B959C *prop = alloc_and_push_prop<prop_089B959C>();
+    link_model(prop, true);
+    func_game_sub_09CC2370(prop, params);
+}
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088CA0BC);
 
-INCLUDE_ASM("asm/eboot/matchings/stage_manager", func_eboot_088CA120);
+extern "C" void func_game_sub_09CC2B88(prop_089B95BC *prop, prop_params *params);
 
+void stage_manager::push_prop_089B95BC(prop_params *params) {
+    prop_089B95BC *prop = alloc_and_push_prop<prop_089B95BC>();
+    link_model(prop, true);
+    func_game_sub_09CC2B88(prop, params);
+}
+
+
+extern "C" void func_game_sub_09CC33F8(prop_089B95DC *prop, prop_params *params);
+
+void stage_manager::push_prop_089B95DC(prop_params *params) {
+    prop_089B95DC *prop = alloc_and_push_prop<prop_089B95DC>();
+    link_model(prop, true);
+    func_game_sub_09CC33F8(prop, params);
+}
+
+
+extern "C" void func_game_sub_09CC4130(prop_089B95FC *prop, prop_params *params);
+
+void stage_manager::push_prop_089B95FC(prop_params *params) {
+    prop_089B95FC *prop = alloc_and_push_prop<prop_089B95FC>();
+    link_model(prop, true);
+    func_game_sub_09CC4130(prop, params);
+}
+
+
+extern "C" void func_game_sub_09CC4AA0(prop_089B961C *prop, prop_params *params);
+
+void stage_manager::push_prop_089B961C(prop_params *params) {
+    prop_089B961C *prop = alloc_and_push_prop<prop_089B961C>();
+    link_model(prop, true);
+    func_game_sub_09CC4AA0(prop, params);
+}
+
+
+extern "C" void func_game_sub_09CC5088(prop_089B963C *prop, prop_params *params, u16 arg3, u16 arg4);
+
+void stage_manager::push_prop_089B963C(prop_params *params, u16 arg3, u16 arg4) {
+    prop_089B963C *prop = alloc_and_push_prop<prop_089B963C>();
+    link_model(prop, true);
+    func_game_sub_09CC5088(prop, params, arg3, arg4);
+}
+
+
+extern "C" void func_game_sub_09CC5530(prop_089B965C *prop, prop_params *params);
+
+void stage_manager::push_prop_089B965C(prop_params *params) {
+    prop_089B965C *prop = alloc_and_push_prop<prop_089B965C>();
+    link_model(prop, true);
+    func_game_sub_09CC5530(prop, params);
+}
+
+
+extern "C" void func_lobby_task_09AF2C38(prop_089B6208 *prop, prop_params *params);
+
+void stage_manager::push_prop_089B6208(prop_params *params) {
+    prop_089B6208 *prop = alloc_and_push_prop<prop_089B6208>();
+    link_model(prop, true);
+    func_lobby_task_09AF2C38(prop, params);
+}
+
+
+extern "C" void func_game_sub_09CC5D10(prop_089B967C *prop, prop_params *params);
+
+void stage_manager::push_prop_089B967C(prop_params *params) {
+    prop_089B967C *prop = alloc_and_push_prop<prop_089B967C>();
+    link_model(prop, true);
+    func_game_sub_09CC5D10(prop, params);
+}
+
+
+extern "C" void func_game_sub_09CC6950(prop_089B969C *prop, prop_params *params, u16 arg3, u32 *arg4, u32 *arg5);
+
+void stage_manager::push_prop_089B969C(prop_params *params, u16 arg3, u32 *arg4, u32 *arg5) {
+    prop_089B969C *prop = alloc_and_push_prop<prop_089B969C>();
+    link_model(prop, true);
+    func_game_sub_09CC6950(prop, params, arg3, arg4, arg5);
+}
+
+
+extern "C" void func_lobby_task_09AF3160(prop_089B6258 *prop, prop_params *params, u32 arg3);
+
+void stage_manager::push_prop_089B6258(prop_params *params, u32 arg3) {
+    prop_089B6258 *prop = alloc_and_push_prop<prop_089B6258>();
+    link_model(prop, true);
+    func_lobby_task_09AF3160(prop, params, arg3);
+}
+
+
+extern "C" void func_game_sub_09CC7180(prop_089B96BC *prop, prop_params *params);
+
+void stage_manager::push_prop_089B96BC(prop_params *params) {
+    prop_089B96BC *prop = alloc_and_push_prop<prop_089B96BC>();
+    link_model(prop, true);
+    func_game_sub_09CC7180(prop, params);
+}
+
+
+extern "C" void func_lobby_task_09AF3F58(prop_089B6278 *prop);
+
+void stage_manager::push_prop_089B6278() {
+    prop_089B6278 *prop = alloc_and_push_prop<prop_089B6278>();
+    link_model(prop, true);
+    func_lobby_task_09AF3F58(prop);
+}
+
+
+extern "C" void func_lobby_task_09AF5580(prop_089B6298 *prop, u8 arg2, prop_params *params, u16 arg4, u32 *arg5, u32 *arg6);
+
+void stage_manager::push_prop_089B6298(u8 arg2, prop_params *params, u16 arg4, u32 *arg5, u32 *arg6) {
+    prop_089B6298 *prop = alloc_and_push_prop<prop_089B6298>();
+    link_model(prop, true);
+    func_lobby_task_09AF5580(prop, arg2, params, arg4, arg5, arg6);
+}
+
+
+extern "C" void func_lobby_task_09AF6B20(prop_089B62B8 *prop, prop_params *params);
+
+void stage_manager::push_prop_089B62B8(prop_params *params) {
+    prop_089B62B8 *prop = alloc_and_push_prop<prop_089B62B8>();
+    link_model(prop, true);
+    func_lobby_task_09AF6B20(prop, params);
+}
+
+
+extern "C" void func_lobby_task_09AF7260(prop_089B62D8 *prop, prop_params *params);
+
+void stage_manager::push_prop_089B62D8(prop_params *params) {
+    prop_089B62D8 *prop = alloc_and_push_prop<prop_089B62D8>();
+    link_model(prop, true);
+    func_lobby_task_09AF7260(prop, params);
+}
+
+
+extern "C" void func_lobby_task_09AF78B8(prop_089B62F8 *prop, u8 arg2, prop_params *params, u16 arg4, u16 arg5, u32 *arg6, u32 *arg7);
+
+void stage_manager::push_prop_089B62F8(u8 arg2, prop_params *params, u16 arg4, u16 arg5, u32 *arg6, u32 *arg7) {
+    prop_089B62F8 *prop = alloc_and_push_prop<prop_089B62F8>();
+    link_model(prop, true);
+    func_lobby_task_09AF78B8(prop, arg2, params, arg4, arg5, arg6, arg7);
+}
+
+
+extern "C" void func_lobby_task_09AF8C18(prop_089B6318 *prop, u8 arg2, u32 arg3, u16 arg4);
+
+void stage_manager::push_prop_089B6318(u8 arg2, u32 arg3, u16 arg4) {
+    prop_089B6318 *prop = alloc_and_push_prop<prop_089B6318>();
+    link_model(prop, true);
+    func_lobby_task_09AF8C18(prop, arg2, arg3, arg4);
+}
+
+
+extern "C" void func_lobby_task_09AF9B38(prop_089B6338 *prop, u8 arg2, u32 arg3, u8 arg4, u32 *arg5, u32 *arg6);
+
+void stage_manager::push_prop_089B6338(u8 arg2, u32 arg3, u8 arg4, u32 *arg5, u32 *arg6) {
+    prop_089B6338 *prop = alloc_and_push_prop<prop_089B6338>();
+    link_model(prop, true);
+    func_lobby_task_09AF9B38(prop, arg2, arg3, arg4, arg5, arg6);
+}
+
+
+extern "C" void func_lobby_task_09AFB708(prop_089B6358 *prop, u32 arg2, u8 arg3, float arg4, u32 arg5);
+
+void stage_manager::push_prop_089B6358(u32 arg2, u8 arg3, float arg4, u32 arg5) {
+    prop_089B6358 *prop = alloc_and_push_prop<prop_089B6358>();
+    link_model(prop, true);
+    func_lobby_task_09AFB708(prop, arg2, arg3, arg4, arg5);
+}
+
+
+extern "C" void func_lobby_task_09AFB7C8(prop_089B6358 *prop, u32 *arg2);
+
+void stage_manager::push_prop_089B6358(u32 *arg2) {
+    prop_089B6358 *prop = alloc_and_push_prop<prop_089B6358>();
+    link_model(prop, true);
+    func_lobby_task_09AFB7C8(prop, arg2);
+}
+
+
+extern "C" void func_game_sub_09CC7DD8(prop_089B96DC *prop);
+
+void stage_manager::push_prop_089B96DC() {
+    prop_089B96DC *prop = alloc_and_push_prop<prop_089B96DC>();
+    link_model(prop, true);
+    func_game_sub_09CC7DD8(prop);
+}
+
+
+extern "C" void func_game_sub_09CC8378(prop_089B96FC *prop, prop_params *params);
+
+void stage_manager::push_prop_089B96FC(prop_params *params) {
+    prop_089B96FC *prop = alloc_and_push_prop<prop_089B96FC>();
+    link_model(prop, true);
+    func_game_sub_09CC8378(prop, params);
+}
+
+
+extern "C" void func_stage210_09D5E510(prop_089C41C8 *prop);
+
+void stage_manager::push_prop_089C41C8() {
+    prop_089C41C8 *prop = alloc_and_push_prop<prop_089C41C8>();
+    link_model(prop, true);
+    func_stage210_09D5E510(prop);
+}
+
+
+extern "C" void func_game_sub_09CC8730(prop_089B971C *prop, prop_params *params);
+
+void stage_manager::push_prop_089B971C(prop_params *params, int pmo_index) {
+    prop_089B971C *prop = alloc_and_push_prop<prop_089B971C>();
+    link_model(prop, pmo_index);
+    func_game_sub_09CC8730(prop, params);
+}
+
+
+
+extern "C" void func_game_sub_09CC8C60(prop_089B973C *prop, prop_params *params);
+
+void stage_manager::push_prop_089B973C(prop_params *params) {
+    prop_089B973C *prop = alloc_and_push_prop<prop_089B973C>();
+    link_model(prop, true);
+    func_game_sub_09CC8C60(prop, params);
+}
+
+
+extern "C" void func_game_sub_09CC9850(prop_089B975C *prop, prop_params *params);
+
+void stage_manager::push_prop_089B975C(prop_params *params) {
+    prop_089B975C *prop = alloc_and_push_prop<prop_089B975C>();
+    link_model(prop, true);
+    func_game_sub_09CC9850(prop, params);
+}
+
+
+void stage_manager::stage_clear() {
+    stage = STAGE_TABLE[stage_id];
+    stage->clear();
+    unknown_0xA2E8_clear();
+}
+
+void stage_manager::stage_destroy() {
+    stage->destroy();
+    stage = 0;
+}
+
+u32 stage_manager::stage_unknown_0x444() {
+    return stage->unknown_0x444;
+}
+
+u32 stage_manager::stage_unknown_0x444_thunk() {
+    return stage_unknown_0x444();
+}
+
+u32 stage_manager::stage_vtable_0xA8() {
+    return stage->vtable_0xA8();
+}
+
+extern "C" {
+    struct farm_state {
+        u8 vars[8];
+    };
+
+    struct global_089C7508 {
+        u8 padding_0x0[0x6A238];
+        farm_state farm;
+        u8 padding_0x6A240[0x6AF10 - 0x6A240];
+        u8 unknown_0x6AF10;
+    };
+    extern global_089C7508 *D_eboot_089C7508;
+
+    extern void *D_game_sub_09CF6718;
+    u8 func_game_sub_09C14800(void *, u32);
+}
+
+// inferred from 0x1787 corresponding to the first farm variant stage pac
+u16 stage_manager::farm_stage_file_id() {
+    farm_state &farm = D_eboot_089C7508->farm;
+    u16 offset = farm.vars[1];
+    if ((farm.vars[6] & 1) != 0) {
+        offset = 3;
+    }
+    if (farm.vars[2] < 2) {
+        offset += 4;
+    }
+    if (func_game_sub_09C14800(D_game_sub_09CF6718, 0x5F) == 0) {
+        offset += 8;
+    }
+    return offset + 0x1787;
+}
+
+void stage_manager::unknown_0xA2E8_clear() {
+    for (int i = 0; i < 0x100; ++i) {
+        unknown_0xA2E8[i] = 0;
+    }
+}
+
+extern "C" {
+    extern void *D_eboot_08A5DE5C;
+    int func_eboot_08883CF4(void *, ScePspFVector4 *, u32);
+    void func_eboot_08885198(void *, u32, u32, u32, bool);
+    u32 func_eboot_08883858(void *, u32, u32, u32, u32, u32, ScePspFVector4 *, u32, u32, u32, bool);
+    void func_eboot_0888444C(void *, u32, u32, u32, u32, ScePspFVector4 *, u32, u32, u32);
+}
+
+
+u32 stage_manager::register_sound(u32 arg2, u32 arg3, u32 arg4, u32 arg5, u32 arg6, ScePspFVector4 *arg7, u32 arg8) {
+    u32 result = 0;
+    if (func_eboot_08883CF4(D_eboot_08A5DE5C, arg7, arg8) == 0) {
+        if (unknown_0xA2E8[arg6] != 0) {
+            unknown_0xA2E8[arg6] = 0;
+            func_eboot_08885198(D_eboot_08A5DE5C, arg2, arg5, arg6, false);
+        } else {
+            result = result;
+        }
+    } else {
+        if (unknown_0xA2E8[arg6] == 0) {
+            result = func_eboot_08883858(D_eboot_08A5DE5C, arg2, arg3, arg4, arg5, arg6, arg7, arg8, 0, 0, false);
+            unknown_0xA2E8[arg6] = 1;
+        } else {
+            func_eboot_0888444C(D_eboot_08A5DE5C, arg2, arg4, arg5, arg6, arg7, arg8, 0, 0);
+        }
+    }
+    return result;
+}
+
+void stage_manager::register_lobby_sounds() {
+    int index;
+    stage_sound_definition *definition = stage->vtable_0x28().sound_definitions;
+    if (definition != 0) {
+        for (index = 0; index < stage->vtable_0x28().unknown_0x3F; ++index, ++definition) {
+            if (definition->unknown_0x0 == 0) {
+                INSTANCE->register_sound(definition->unknown_0x4, definition->unknown_0x8, 0, 0xC0, index + 1, &definition->position, definition->unknown_0xC);
+            }
+        }
+    }
+}
+
+// follow_camera seems to be true in most cases.
+// I've only observed it to be false during the intro cutscene panning across Pokke Village,
+/*
+void stage_manager::compile_pac(pac_header *pac, bool follow_camera) {
+    cache.reset(slab, sizeof(slab));
+    vram_transfer_size = 0;
+    this->pac = pac;
+    // will continue once pac parsing is decompiled
+}
+*/
+
+extern "C"
+INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", compile_pac__13stage_managerFP10pac_headerb);
+
+void stage_manager::vram_clear() {
+    cache.reset(slab, sizeof(slab));
+    vram_transfer_size = 0;
+    unknown_0xA2B8 = 0;
+    if (stage != 0) {
+        stage->unknown_0x4 &= ~0x2;
+    }
+    flag_0xA3E8 = false;
+}
+
+u8 *stage_manager::vram_alloc(s32 size) {
+    u32 misalignment = size & 0xf;
+    if ((size < 0) && misalignment != 0) {
+        misalignment -= 0x10;
+    }
+    if (misalignment != 0) {
+        size += 0x10 - misalignment;
+    }
+    u8 *block = vram_start + vram_transfer_size;
+    vram_transfer_size += size;
+    return block;
+}
+
+void stage_manager::push(base_prop *prop) {
+    if (!prop_list) {
+        prop_list = prop;
+        prop->prev = 0;
+        prop->next = 0;
+    } else {
+        prop_list->prev = prop;
+        prop->next = prop_list;
+        prop->prev = 0;
+        prop_list = prop;
+    }
+}
+
+void stage_manager::free(base_prop *prop) {
+    base_prop *next = prop->next;
+    if (prop_list == prop) {
+        prop_list = next;
+        if (next != 0) {
+            next->prev = 0;
+        }
+    } else {
+        if (next == 0) {
+            prop->prev->next = next;
+        } else {
+            prop->prev->next = next;
+            prop->next->prev = prop->prev;
+        }
+    }
+    delete prop;
+    cache.free(prop);
+}
+
+extern "C" {
+    struct D_game_sub_09CDF678_entry {
+        s32 length;
+        u16 *data;
+    };
+    extern D_game_sub_09CDF678_entry D_game_sub_09CDF678[0x20];
+}
+
+u16 stage_manager::find_in_D_game_sub_09CDF678(int index, u16 key) {
+    for (int i = 0; i < D_game_sub_09CDF678[index].length; ++i) {
+        if (key == D_game_sub_09CDF678[index].data[i]) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void stage_manager::stage_vtable_0x2C() {
+    stage->vtable_0x2C(entrance_id);
+}
+
+void stage_manager::stage_vtable_0x30() {
+    stage->vtable_0x30(entrance_id);
+}
+
+extern "C" {
+INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", func_eboot_088C9BF8);
+INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", func_eboot_088C9D6C);
+INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", func_eboot_088C9F1C);
+}
+
+
+u8 stage_manager::get_flag_0xA3E8() {
+    return flag_0xA3E8;
+}
+
+u8 stage_manager::find_in_D_game_sub_09CDF678(u16 key) {
+    int index = D_eboot_089C7508->unknown_0x6AF10;
+    D_game_sub_09CDF678_entry &entry = D_game_sub_09CDF678[index];
+    for (int i = 0; i < entry.length; ++i) {
+        if (key == entry.data[i]) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+u16 stage_manager::get_in_D_game_sub_09CDF678(u8 i) {
+    int index = D_eboot_089C7508->unknown_0x6AF10;
+    D_game_sub_09CDF678_entry &entry = D_game_sub_09CDF678[index];
+    return entry.data[i];
 }

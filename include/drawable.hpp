@@ -1,3 +1,5 @@
+#pragma once
+
 struct drawable {
     virtual ~drawable() {}
     virtual void draw() = 0;

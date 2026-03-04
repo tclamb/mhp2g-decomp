@@ -1,3 +1,5 @@
+#pragma once
+
 struct bind_pose {
     ScePspFMatrix4 transform;
     ScePspFVector3 scale;
