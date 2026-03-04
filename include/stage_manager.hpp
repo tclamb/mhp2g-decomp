@@ -166,18 +166,16 @@ struct stage_manager
 private:
     template<typename T>
     inline T *alloc_prop() {
-        u8 *memory = cache.alloc(sizeof(T), 0x10);
+        void *memory = cache.alloc(sizeof(T), 0x10);
         if (memory != 0) {
             memset(memory, 0, sizeof(T));
-            u8 *buf = memory;
-            T *prop = new (memory) T();
-            if (!buf) {
+            void *prop = new (memory) T();
+            if (!prop) {
                 cache.free(memory);
             }
-            return prop;
-        } else {
-            return 0;
+            return (T *)prop;
         }
+        return 0;
     }
 
     template<typename T>

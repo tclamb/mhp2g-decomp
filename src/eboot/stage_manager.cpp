@@ -1,4 +1,3 @@
-
 #pragma opt_unroll_loops on
 
 #include "stage_manager.hpp"
@@ -229,7 +228,6 @@ void stage_manager::push_prop_089B92FC(prop_params *params) {
 }
 
 
-#ifdef BUILD_NONMATCHING
 extern "C" void func_game_sub_09CB7008(prop_089B931C *prop, prop_params *params, u32 arg3, u16 arg4, u16 arg5, u32 arg6, u16 arg7);
 
 void stage_manager::push_prop_089B931C(prop_params *params, u32 arg3, u16 arg4, u16 arg5, u32 arg6, u16 arg7) {
@@ -238,10 +236,6 @@ void stage_manager::push_prop_089B931C(prop_params *params, u32 arg3, u16 arg4, 
     link_model(prop, true);
     func_game_sub_09CB7008(prop, params, arg3, arg4, arg5, arg6, arg7);
 }
-#else
-extern "C"
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", push_prop_089B931C__13stage_managerFP11prop_paramsUiUsUsUiUs);
-#endif
 
 
 extern "C" void func_game_sub_09CB76E0(prop_089B933C *prop, prop_params *params);
