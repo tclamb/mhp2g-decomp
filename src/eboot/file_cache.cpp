@@ -10,7 +10,6 @@ extern "C" {
 
 #define NUM_ENTRIES 0x2B
 #pragma opt_unroll_loops on
-//#define ALLOW_NONMATCHING 1
 
 enum language_id {
     LANGUAGE_DEFAULT,
@@ -27,37 +26,19 @@ enum event_t {
     POWER_RESUME_COMPLETE = 4,
 };
 
-template<typename T, int N>
-struct array {
-    T data[N];
-
-    template<typename F>
-    inline void for_each(F f) {
-        T *t = &data[0];
-        for (int i = 0; i < N; ++i) {
-            f(*t);
-            ++t;
-        }
-    }
-
-    inline T &operator[](int i) {
-        return data[i];
-    }
-
-};
-
-
 struct file_cache {
     struct entry {
         u16 flags;
         u16 file_id;
         u8 *buffer;
         u32 was_cancelled;
+
+        void reset();
     };
 
     static file_cache *INSTANCE;
 
-    array<entry, NUM_ENTRIES> entries;
+    entry entries[NUM_ENTRIES];
     int volatile_memory_size;
     u8 *volatile_memory;
     u8 *write_head;
@@ -111,14 +92,10 @@ private:
     inline s32 next_pac_index();
 };
 
-void reset_entry(file_cache::entry &e) {
-    e.flags = 0;
-    e.file_id = -1;
-    e.buffer = 0;
-}
-
-inline void clear_flag_1(file_cache::entry &e) {
-    e.flags &= ~(1 << 1);
+void file_cache::entry::reset() {
+    flags = 0;
+    file_id = -1;
+    buffer = 0;
 }
 
 file_cache::file_cache() {
@@ -156,7 +133,10 @@ inline void file_cache::reset_pointers() {
 
 
 inline void file_cache::clear_entries() {
-    entries.for_each(reset_entry);
+    entry *e = &entries[0];
+    for (int i = 0; i < NUM_ENTRIES; ++i, ++e) {
+        e->reset();
+    }
     reset_pointers();
 }
 
@@ -176,7 +156,7 @@ inline void file_cache::clear_pacs_inner() {
     write_head = volatile_memory;
 
     for (int i = 0x15; i <= NUM_ENTRIES - 1; ++i) {
-        clear_flag_1(entries[i]);
+        entries[i].flags &= ~(1 << 1);
     }
 
     func_eboot_088BB548(D_eboot_089C7504, true);
@@ -366,7 +346,7 @@ bool file_cache::is_loaded(s32 index) {
 void file_cache::free(s32 index) {
     entry &e = entries[index];
     tagged_cache::INSTANCE->free(e.buffer);
-    reset_entry(e);
+    e.reset();
 }
 
 u8 *file_cache::emmodel_pac(u8 em_id) {
@@ -472,21 +452,23 @@ void file_cache::load_emmodel(u8 em_id) {
     }
 }
 
-#ifdef ALLOW_NONMATCHING
+struct implicit_converter {
+    int value;
+
+    inline implicit_converter(int x) : value(x) {}
+
+    operator u16() { return value; }
+};
+
 void file_cache::free_emmodel(u8 em_id) {
     entry *e = &entries[9];
     for (int i = 0; i < 4; ++i) {
-        if ((e->flags & 3) != 0 && em_id + 0x17AB == e->file_id) {
+        if ((e->flags & 3) != 0 && implicit_converter(em_id + 0x17AB) == e->file_id) {
             free(i + 9);
         }
         ++e;
     }
 }
-#else
-extern "C"
-INCLUDE_ASM("asm/eboot/nonmatchings/file_cache", free_emmodel__10file_cacheFUc)
-
-#endif
 
 void file_cache::free_all_emmodels() {
     entry *e = &entries[9];
