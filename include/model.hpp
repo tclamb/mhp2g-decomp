@@ -30,8 +30,32 @@ struct skeleton {
     u16 unknown_0x138[4];
 };
 
-struct tmh_header {
+struct tmh_block_header {
+    u32 size;
+    u32 type;
+};
 
+struct tmh_palette_header : tmh_block_header {
+    u32 width;
+    u32 height;
+};
+
+struct tmh_image_header : tmh_block_header {
+    u32 format;
+    u16 width;
+    u16 height;
+};
+
+struct tmh_picture_header : tmh_block_header {
+    u32 image_count;
+    u32 palette_count;
+};
+
+struct tmh_header {
+    u8 magic[0x4];
+    u32 version;
+    u32 picture_count;
+    u32 padding_0xC;
 };
 
 struct tmh {

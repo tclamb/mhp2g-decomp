@@ -3,6 +3,9 @@
 #include "common.h"
 #include "model.hpp"
 
+struct stage_environment_params {
+};
+
 struct stage_depth_buffer_params {
     float *tristrip_vertices;
     u16 unknown_0x4;
@@ -11,12 +14,22 @@ struct stage_depth_buffer_params {
     u16 unknown_0xA;
 };
 
-struct stage_sound_definition {
+struct stage_sound {
     u32 unknown_0x0;
     u32 unknown_0x4;
     u32 unknown_0x8;
     u32 unknown_0xC;
     ScePspFVector4 position;
+};
+
+struct stage_exit {
+    u16 destination_stage_id;
+    s16 shape;
+    ScePspFVector3 p;
+    float size;
+    float height;
+    ScePspFVector3 q;
+    u8 undefined_0x24[0x10];
 };
 
 struct stage_definitions {
@@ -28,13 +41,14 @@ struct stage_definitions {
     u16 unknown_0x14;
     u8 undefined_0x16[0x10];
     u16 unknown_0x26;
-    u8 undefined_0x18[0xC];
-    stage_sound_definition *sound_definitions;
+    u8 undefined_0x28[0x8];
+    stage_exit *exits;
+    stage_sound *sounds;
     u32 *unknown_0x38;
     u8 unknown_0x3C;
-    u8 unknown_0x3D;
+    u8 exit_count;
     s8 unknown_0x3E;
-    u8 unknown_0x3F;
+    u8 sound_count;
     u8 unknown_0x40;
     u8 unknown_0x41;
     u16 unknown_0x42;
@@ -69,9 +83,9 @@ struct base_stage : model {
     virtual void vtable_0x1C();
     virtual void vtable_0x20();
     virtual void vtable_0x24();
-    virtual stage_definitions &vtable_0x28();
-    virtual void vtable_0x2C(u32);
-    virtual void vtable_0x30(u32);
+    virtual stage_definitions *definitions();
+    virtual stage_exit *exits(u32 map_id);
+    virtual s8 exit_count(u32 map_id);
     virtual void vtable_0x34();
     virtual void vtable_0x38();
     virtual void vtable_0x3C();
@@ -144,6 +158,7 @@ struct base_stage : model {
 
     void method_088CA624();
     void method_088CDCAC();
+    void compile_environment_params(stage_environment_params *);
 
 protected:
     inline void set_ptmf_0x3D8(ptmf x) {

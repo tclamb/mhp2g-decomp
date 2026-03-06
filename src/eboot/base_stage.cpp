@@ -177,21 +177,41 @@ INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", destroy__10base_stageFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", draw__10base_stageFv);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x28__10base_stageFv);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x2C__10base_stageFUi);
+stage_definitions *base_stage::definitions() {
+    return 0;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x30__10base_stageFUi);
+stage_exit *base_stage::exits(u32 ignored_map_id) {
+    stage_definitions *d = definitions();
+    if (d != 0) {
+        return d->exits;
+    }
+    return 0;
+}
 
+s8 base_stage::exit_count(u32 ignored_map_id) {
+    stage_definitions *d = definitions();
+    u8 count;
+    if (d != 0) {
+        count = d->exit_count;
+    } else {
+        count = 0;
+    }
+    return count;
+}
+
+extern "C"
+{
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CD4E0);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x24__10base_stageFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CD61C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CD810);
+INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", compile_environment_params__10base_stageFP24stage_environment_params);
 }
-
 
 void base_stage::operator delete(void *) {
     // empty
