@@ -1,9 +1,9 @@
 #pragma once
 
 #include "cache.hpp"
+#include "singleton.hpp"
 
-struct tagged_cache {
-    static tagged_cache *INSTANCE;
+struct tagged_cache : singleton<tagged_cache> {
 
     cache cache;
     u32 padding[5];

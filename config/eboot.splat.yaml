@@ -101,27 +101,8 @@ segments:
       - [0x49654, asmtu, global_089c70cc] # utility for creating display lists
       - [0x4b524, asmtu, state/edit_state]
       - [0x4b714, asmtu, state/loading_state]
-      # TODO: refactor these all into io/base_data_loader
-      - [0x4bd30, cpp, io/data_loader__start_threads]
-      - [0x4c060, asmtu, io/base_data_loader.1]
-      - [0x4cf14, cpp, io/data_loader__decrypt_buffer]
-      - [0x4cff8, asm, io/base_data_loader.2]
-      - [0x4d134, cpp, io/data_loader__set_decryption_key]
-      - [0x4d1a4, cpp, io/data_loader__next_decryption_key]
-      - [0x4d21c, cpp, io/data_loader__file_size]
-      - [0x4d28c, cpp, io/data_loader__file_blocks_size]
-      - [0x4d2c0, cpp, io/data_loader__load_file_blocking]
-      - [0x4d404, cpp, io/data_loader__load_file_async]
-      - [0x4d5d0, cpp, io/data_loader__movie_open]
-      - [0x4d688, cpp, io/data_loader__movie_read]
-      - [0x4d73c, cpp, io/data_loader__movie_seek]
-      - [0x4d7c4, cpp, io/data_loader__movie_close]
-      - [0x4d7d8, cpp, io/data_loader__load_libfont]
-      - [0x4d8f4, cpp, io/data_loader__file_has_sha1]
-      - [0x4d938, cpp, io/data_loader__calculate_install_block_offsets]
-      - [0x4da08, asm, io/base_data_loader.3]
-      - [0x4dd64, cpp, io/data_loader__data_bin_path]
-      - [0x4dd70, asmtu, global_089c7508] # string manager?
+      - [0x4bd30, cpp, data_loader_impl]
+      - [0x4ddcc, asmtu, global_089c7508] # string manager?
       - [0x574c8, cpp, ge_manager] # tmh parsing emitted here (header?)
       - [0x57fb8, cpp, cache]
       - [0x581e8, asmtu, toast_notification]
@@ -152,7 +133,7 @@ segments:
       - [0x95d70, asmtu, lib/libwave]
       - [0x975ac, asm, lib/libfpu]
       - [0x97914, asm, lib/libvfpu]
-      - [0x99254, asmtu, main] # root object for application, most globals are its members, a lot of constructors/destructors are emitted here
+      - [0x99254, cpp, main] # root object for application, most globals are its members, a lot of constructors/destructors are emitted here
       - [0x99968, cpp, tagged_cache]
       - [0x99d24, asmtu, global_09a07284] # netplay layer 3
       - [0x9fc80, asmtu, csepsp] # "Capcom Sound Engine for [PSP] Ver1.8", "Capcom Sound Engine CORE Ver2.0"
@@ -164,9 +145,7 @@ segments:
       - [0xb4ac4, asmtu, global_09a1bb18_3]
       - [0xb91c0, asm, global_09a1bb18_4] # weird angle functions
       - [0xb96c0, asmtu, state/option_state]
-      - [0xb9894, cpp, io/data_loader__initialize_fake_rofs_semaphore]
-      - [0xb9918, cpp, io/data_loader__initialize_load_request_queue]
-      - [0xb9944, asmtu, data_loader] # virtual base class methods, pac parsing emitted at 0xb9cf4 (header?)
+      - [0xb9894, cpp, base_data_loader]
       - [0xbab08, asmtu, state/game_state]
       - [0xbae58, asmtu, state/initial_state]
       - [0xbb0f4, asmtu, state/gallery_state]
@@ -208,7 +187,7 @@ segments:
       - [0x10c578, .rodata, global_089c6cb4]
       - [0x10c620, .rodata, global_089c6cb8]
       - [0x12c620, .rodata, global_089c6cbc]
-      - [0x12cff8, .rodata, io/base_data_loader.1]
+      - [0x12cff8, .rodata, data_loader_impl]
       - [0x12d02c, .rodata, global_089c7508]
       - [0x12d0e4, .rodata, toast_notification]
       - [0x12d12c, .rodata, global_08a5dd20]
@@ -249,20 +228,7 @@ segments:
       - [0x13726c, .data, global_089c70cc]
       - [0x1372b0, .data, state/edit_state]
       - [0x1372c8, .data, state/loading_state] # thought it was global_08a5dd24 ?
-      # TODO: refactor these all into io/base_data_loader
-      - [0x1752b4, .sha1digests, io/data_loader__file_sha1_digests]
-      - [0x19567c, .bytetable, io/data_loader__decrypt_table]
-      - [0x19577c, .cstring, io/data_loader__umd_disc_drive_name]
-      - [0x195784, .cstring, io/data_loader__loader_thread_name]
-      - [0x195794, .cstring, io/data_loader__sha1_event_flag_name]
-      - [0x1957a4, .cstring, io/data_loader__sha1_thread_name]
-      - [0x1957b0, .cstring, io/data_loader__transfer_event_flag_name]
-      - [0x1957c4, .cstring, io/data_loader__transfer_thread_name]
-      - [0x1957d4, .cstring, io/data_loader__null_utility_message_dialog_header]
-      - [0x1957d8, .cstring, io/data_loader__install_block_path_format]
-      - [0x195800, .cstring, io/data_loader__lba_umd_access_path_format]
-      - [0x19581c, .cstring, io/data_loader__install_folder_path]
-      - [0x195840, .cstring, io/data_loader__data_bin_path]
+      - [0x1752b4, .data, data_loader_impl]
       - [0x195860, .data, global_089c7508]
       - [0x198378, .data, ge_manager]
       - [0x198764, .data, toast_notification]
@@ -288,7 +254,7 @@ segments:
       - [0x1adea0, .data, global_09a1bb18]
       - [0x1adec4, .data, global_09a1bb18_1]
       - [0x1ae0b8, .int4, state/option_state]
-      - [0x1ae0d0, .data, data_loader]
+      - [0x1ae0d0, .data, base_data_loader]
       - [0x1ae1ac, .int4, state/game_state]
       - [0x1ae1c4, .int4, state/initial_state]
       - [0x1ae1dc, .int4, state/gallery_state]
@@ -326,7 +292,7 @@ segments:
       - [0x1b40ec, .vtables, state/cont_state]
       - [0x1b4100, .vtables, state/edit_state]
       - [0x1b4114, .vtables, state/loading_state]
-      - [0x1b4128, .vtables, io/base_data_loader.1]
+      - [0x1b4128, .vtables, data_loader_impl]
       - [0x1b4174, .vtables, state/start_state]
       - [0x1b4188, .vtables, bone] # FIXME
       - [0x1b4198, .vtables, model]
@@ -336,7 +302,7 @@ segments:
       - [0x1b422c, .vtables, main]
       - [0x1b4278, .vtables, state/lobby_state]
       - [0x1b428c, .vtables, state/option_state]
-      - [0x1b42a0, .vtables, data_loader]
+      - [0x1b42a0, .vtables, base_data_loader]
       - [0x1b42ec, .vtables, state/game_state]
       - [0x1b4300, .vtables, state/initial_state]
       - [0x1b4314, .vtables, state/gallery_state]
@@ -878,8 +844,14 @@ segments:
       - [0x1c5030, vtables, stage2/stage266]
       - [0x1c50ec, pad]
       - [0x1c50f4, bin, omit_overlay_addresses]
-      - {start: 0x1c5114, type: .bss, vram: 0x089c6b60, name: lib/crt0} # FIXME: split bss into translation units
+      - {start: 0x1c5114, type: .bss, vram: 0x089c6b60, name: lib/crt0} # FIXME: split
+      - {start: 0x1c5114, type: .bss, vram: 0x089c70f0, name: data_loader_impl}
+      - {start: 0x1c5114, type: .bss, vram: 0x089c7504, name: main} # FIXME: most of bss is allocated by the singletons defined here
+      - {start: 0x1c5114, type: .bss, vram: 0x09a072a0, name: csepsp} # FIXME: split
       - {start: 0x1c5114, type: .bss, vram: 0x09a409a0, name: stage_manager}
-      - {start: 0x1c5114, type: .bss, vram: 0x09a4ada4, name: lib/crt0_elf}
+      - {start: 0x1c5114, type: .bss, vram: 0x09a4ada4, name: lib/crti} # FIXME: split
+      - {start: 0x1c5114, type: .bss, vram: 0x09a4ae1c, name: file_cache}
+      - {start: 0x1c5114, type: .bss, vram: 0x09a4ae20, name: lib/crt0_elf} # FIXME: split
+
   - [0x1c5114, bin, omit_elf_footer]
   - [0x1cd740]

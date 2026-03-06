@@ -13,5 +13,5 @@ vtable_0x24__10base_stageFv = 0x088CD614; // type:func
 vtable_0x9C__10base_stageFv = 0x088CDDBC;
 __register_global_object = 0x08909D80; // type:func
 D_eboot_089C5820 = 0x089C5820;
-INSTANCE__13stage_manager = 0x09A4ADA0;
+INSTANCE__26singleton<13stage_manager> = 0x09A4ADA0; // filename:D_eboot_09A4ADA0
 func_game_sub_09C70408 = 0x09C70408; // type:func

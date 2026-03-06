@@ -24,5 +24,5 @@ __register_global_object = 0x08909D80; // type:func
 D_eboot_089BE30C = 0x089BE30C;
 D_eboot_089C7508 = 0x089C7508;
 D_eboot_08A5DE5C = 0x08A5DE5C;
-INSTANCE__13stage_manager = 0x09A4ADA0;
+INSTANCE__26singleton<13stage_manager> = 0x09A4ADA0; // filename:D_eboot_09A4ADA0
 D_eboot_09A4AE04 = 0x09A4AE04;

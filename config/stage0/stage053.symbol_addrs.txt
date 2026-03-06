@@ -13,4 +13,4 @@ vtable_0x9C__10base_stageFv = 0x088CDDBC;
 vtable_0x3C__10base_stageFv = 0x088CEE38;
 __register_global_object = 0x08909D80; // type:func
 D_eboot_089BCDC0 = 0x089BCDC0;
-INSTANCE__13stage_manager = 0x09A4ADA0;
+INSTANCE__26singleton<13stage_manager> = 0x09A4ADA0; // filename:D_eboot_09A4ADA0

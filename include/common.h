@@ -15,10 +15,8 @@ typedef unsigned long uint64_t;
 #include <pspkerneltypes.h>
 
 extern "C" {
+    void *memset(void*, int,  long unsigned int);
     void sceKernelDcacheWritebackRange(const void *p, unsigned int size);
     void sceKernelDcacheWritebackInvalidateRange(const void *p, unsigned int size);
     void sceKernelDcacheInvalidateRange(const void *p, unsigned int size);
 }
-
-#include "game.hpp"
-#include "io.hpp"

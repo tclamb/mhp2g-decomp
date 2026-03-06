@@ -5,13 +5,11 @@
 #pragma opt_unroll_loops on
 
 tagged_cache::tagged_cache() {
-    INSTANCE = this;
+    /// empty
 }
 
 tagged_cache::~tagged_cache() {
-    if (this) {
-        INSTANCE = 0;
-    }
+    // empty
 }
 
 void tagged_cache::reset(u32 size) {

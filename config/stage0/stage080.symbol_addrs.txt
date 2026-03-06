@@ -22,4 +22,4 @@ D_eboot_089BE194 = 0x089BE194;
 D_eboot_089C70D0 = 0x089C70D0;
 D_eboot_089C7508 = 0x089C7508;
 instance__4game = 0x08A5E270;
-INSTANCE__13stage_manager = 0x09A4ADA0;
+INSTANCE__26singleton<13stage_manager> = 0x09A4ADA0; // filename:D_eboot_09A4ADA0

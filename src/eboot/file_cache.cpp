@@ -1,7 +1,9 @@
 #include "common.h"
-#include "io.hpp"
 #include "tagged_cache.hpp"
+#include "data_loader.hpp"
+#include "singleton.hpp"
 
+#include <pspsdk/pspthreadman.h>
 #include <pspsdk/pspsuspend.h>
 extern "C" {
     void sceKernelDcacheWritebackInvalidateAll();
@@ -26,7 +28,7 @@ enum event_t {
     POWER_RESUME_COMPLETE = 4,
 };
 
-struct file_cache {
+struct file_cache : singleton<file_cache> {
     struct entry {
         u16 flags;
         u16 file_id;
@@ -35,8 +37,6 @@ struct file_cache {
 
         void reset();
     };
-
-    static file_cache *INSTANCE;
 
     entry entries[NUM_ENTRIES];
     int volatile_memory_size;
@@ -92,6 +92,8 @@ private:
     inline s32 next_pac_index();
 };
 
+file_cache *singleton<file_cache>::INSTANCE;
+
 void file_cache::entry::reset() {
     flags = 0;
     file_id = -1;
@@ -99,13 +101,11 @@ void file_cache::entry::reset() {
 }
 
 file_cache::file_cache() {
-    INSTANCE = this;
+    // empty
 }
 
 file_cache::~file_cache() {
-    if (this) {
-        INSTANCE = 0;
-    }
+    // empty
 }
 
 void file_cache::reset() {
@@ -146,11 +146,6 @@ void file_cache::clear() {
     loading_flag = false;
 }
 
-extern "C" {
-    extern data_loader *D_eboot_089C7504;
-    void func_eboot_088BB548(data_loader *, bool);
-}
-
 inline void file_cache::clear_pacs_inner() {
     remaining_bytes = volatile_memory_size;
     write_head = volatile_memory;
@@ -159,7 +154,7 @@ inline void file_cache::clear_pacs_inner() {
         entries[i].flags &= ~(1 << 1);
     }
 
-    func_eboot_088BB548(D_eboot_089C7504, true);
+    data_loader::get()->update_ringbuf(1);
 }
 
 void file_cache::clear_pacs() {
@@ -199,7 +194,7 @@ void file_cache::update() {
         u16 flags = entries[i].flags;
         if (((flags & 1) != 0)
           && ((flags & 2) == 0)
-          && !D_eboot_089C7504->is_loaded(entries[i].file_id)) {
+          && !data_loader::get()->is_loading(entries[i].file_id)) {
             if (entries[i].was_cancelled != 1) {
                 entries[i].flags &= ~1;
                 entries[i].flags |= 2;
@@ -211,7 +206,7 @@ void file_cache::update() {
 }
 
 void file_cache::load(s32 index, s32 file_id, u32 size) {
-    u32 load_size = D_eboot_089C7504->file_blocks_size(file_id);
+    u32 load_size = data_loader::get()->file_size(file_id);
     if (size != 0) {
         load_size = size;
     }
@@ -232,11 +227,11 @@ void file_cache::load(s32 index, s32 file_id, u32 size) {
         }
         notify_on_cancel = true;
     } else {
-        e.buffer = tagged_cache::INSTANCE->alloc(0x14, load_size);
+        e.buffer = tagged_cache::get()->alloc(0x14, load_size);
         notify_on_cancel = false;
     }
     e.was_cancelled = false;
-    D_eboot_089C7504->load_file_async(file_id, e.buffer, -1, notify_on_cancel, &e.was_cancelled, true);
+    data_loader::get()->load_file_async(file_id, e.buffer, -1, notify_on_cancel, &e.was_cancelled, true);
     e.flags |= 1;
     e.file_id = file_id;
 }
@@ -245,8 +240,8 @@ void file_cache::duplicate(s32 destination_index, s32 source_index) {
     entry &destination = entries[destination_index];
     entry &source = entries[source_index];
 
-    u32 size = D_eboot_089C7504->file_blocks_size(source.file_id);
-    destination.buffer = tagged_cache::INSTANCE->alloc(0x14, size);
+    u32 size = data_loader::get()->file_size(source.file_id);
+    destination.buffer = tagged_cache::get()->alloc(0x14, size);
 
     sceKernelDcacheWritebackInvalidateAll();
     sceDmacMemcpy(destination.buffer, source.buffer, size);
@@ -258,7 +253,7 @@ void file_cache::duplicate(s32 destination_index, s32 source_index) {
 u32 file_cache::copy(void *dst, s32 source_index, u32 size) {
     entry &source = entries[source_index];
     if (size == -1) {
-        size = D_eboot_089C7504->file_blocks_size(source.file_id);
+        size = data_loader::get()->file_size(source.file_id);
     }
     sceKernelDcacheWritebackInvalidateAll();
     sceDmacMemcpy(dst, source.buffer, size);
@@ -345,7 +340,7 @@ bool file_cache::is_loaded(s32 index) {
 
 void file_cache::free(s32 index) {
     entry &e = entries[index];
-    tagged_cache::INSTANCE->free(e.buffer);
+    tagged_cache::get()->free(e.buffer);
     e.reset();
 }
 
@@ -501,7 +496,7 @@ void file_cache::release_volatile_memory() {
 }
 
 extern "C"
-void func_eboot_0884EA44(data_loader *);
+void func_eboot_0884EA44(void *);
 
 int on_power_down(int error, event_t event, file_cache *cache) {
     if (event != POWER_STANDBY && event != POWER_SUSPENDING) {
@@ -510,7 +505,7 @@ int on_power_down(int error, event_t event, file_cache *cache) {
     D_eboot_089C7508->flag_0x2A |= 1;
     cache->ready_flag = false;
     if (cache->loading_flag != 0) {
-        func_eboot_0884EA44(D_eboot_089C7504);
+        func_eboot_0884EA44(data_loader::get());
         u32 handle = sceKernelSuspendDispatchThread();
         cache->loading_flag = false;
         cache->clear_pacs_inner();

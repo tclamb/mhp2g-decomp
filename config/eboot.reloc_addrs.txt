@@ -37,6 +37,20 @@ rom:0x12e030 reloc:MIPS_32 symbol:method_088CA624__10base_stageFv addend:0x34c
 rom:0x12e034 reloc:MIPS_32 symbol:method_088CA624__10base_stageFv addend:0x388
 rom:0x12e038 reloc:MIPS_32 symbol:method_088CA624__10base_stageFv addend:0x370
 
+rom:0x12cff8 reloc:MIPS_32 symbol:draw_loading_screen__16data_loader_implFv addend:0x158
+rom:0x12cffc reloc:MIPS_32 symbol:draw_loading_screen__16data_loader_implFv addend:0x0cc
+rom:0x12d000 reloc:MIPS_32 symbol:draw_loading_screen__16data_loader_implFv addend:0x0d8
+rom:0x12d004 reloc:MIPS_32 symbol:draw_loading_screen__16data_loader_implFv addend:0x0e4
+rom:0x12d008 reloc:MIPS_32 symbol:draw_loading_screen__16data_loader_implFv addend:0x0f0
+rom:0x12d00c reloc:MIPS_32 symbol:draw_loading_screen__16data_loader_implFv addend:0x0fc
+rom:0x12d010 reloc:MIPS_32 symbol:draw_loading_screen__16data_loader_implFv addend:0x108
+rom:0x12d014 reloc:MIPS_32 symbol:draw_loading_screen__16data_loader_implFv addend:0x114
+rom:0x12d018 reloc:MIPS_32 symbol:draw_loading_screen__16data_loader_implFv addend:0x120
+rom:0x12d01c reloc:MIPS_32 symbol:draw_loading_screen__16data_loader_implFv addend:0x12c
+rom:0x12d020 reloc:MIPS_32 symbol:draw_loading_screen__16data_loader_implFv addend:0x138
+rom:0x12d024 reloc:MIPS_32 symbol:draw_loading_screen__16data_loader_implFv addend:0x144
+rom:0x12d028 reloc:MIPS_32 symbol:draw_loading_screen__16data_loader_implFv addend:0x150
+
 rom:0x109E70 reloc:MIPS_HI16 symbol:__static_init
 rom:0x109E74 reloc:MIPS_HI16 symbol:__static_init_end
 rom:0x109E78 reloc:MIPS_HI16 symbol:__exception_table_start__

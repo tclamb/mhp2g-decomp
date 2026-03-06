@@ -1,14 +1,15 @@
 #pragma opt_unroll_loops on
 
 #include "stage_manager.hpp"
+#include "singleton.hpp"
+#include "tagged_cache.hpp"
 
 #include "stage_table.inc.cpp"
 
 stage_manager global_stage_manager;
-stage_manager *stage_manager::INSTANCE;
+stage_manager *singleton<stage_manager>::INSTANCE;
 
 stage_manager::stage_manager() {
-    INSTANCE = this;
     vram_start = 0;
     vram_transfer_size = 0;
     unknown_0xA2B4 = 0;
@@ -17,9 +18,8 @@ stage_manager::stage_manager() {
 }
 
 stage_manager::~stage_manager() {
-    if (this != 0) {
-        INSTANCE = 0;
-    }
+
+    // empty
 }
 
 extern "C" {
@@ -43,7 +43,7 @@ void stage_manager::reset() {
 }
 
 void stage_manager::unload() {
-    tagged_cache::INSTANCE->free_all(1);
+    tagged_cache::get()->free_all(1);
     unknown_0xA2B8 = 0;
     func_eboot_08813024(D_eboot_089C6CB0, 6);
     vram_transfer_size = 0;
@@ -749,7 +749,7 @@ void stage_manager::register_lobby_sounds() {
     if (definition != 0) {
         for (index = 0; index < stage->vtable_0x28().unknown_0x3F; ++index, ++definition) {
             if (definition->unknown_0x0 == 0) {
-                INSTANCE->register_sound(definition->unknown_0x4, definition->unknown_0x8, 0, 0xC0, index + 1, &definition->position, definition->unknown_0xC);
+                get()->register_sound(definition->unknown_0x4, definition->unknown_0x8, 0, 0xC0, index + 1, &definition->position, definition->unknown_0xC);
             }
         }
     }

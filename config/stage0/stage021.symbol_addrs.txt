@@ -21,6 +21,6 @@ D_eboot_089BB640 = 0x089BB640;
 D_eboot_089C7508 = 0x089C7508;
 D_eboot_08A5DE54 = 0x08A5DE54;
 D_eboot_08A5DE5C = 0x08A5DE5C;
-INSTANCE__13stage_manager = 0x09A4ADA0;
+INSTANCE__26singleton<13stage_manager> = 0x09A4ADA0; // filename:D_eboot_09A4ADA0
 D_eboot_09A4AE04 = 0x09A4AE04;
 func_game_sub_09C70408 = 0x09C70408; // type:func

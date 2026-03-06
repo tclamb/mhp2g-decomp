@@ -52,8 +52,7 @@ struct base_prop : drawable {
     }
 };
 
-struct stage_manager
-{
+struct stage_manager : singleton<stage_manager> {
     base_stage *stage;
     u8 unknown_0x4[640];
     u32 entrance_id;
@@ -76,8 +75,6 @@ struct stage_manager
     u8 flag_0xA3E8;
     u8 unknown_0xA3E9;
     u8 unknown_0xA3EA[6];
-
-    static stage_manager *INSTANCE;
 
     stage_manager();
     ~stage_manager();
