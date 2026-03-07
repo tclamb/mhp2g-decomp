@@ -760,26 +760,7 @@ void stage_manager::register_lobby_sounds() {
 extern "C" {
     int sceDmacMemcpy(void *, const void *, u32);
     void sceKernelDcacheWritebackInvalidateAll();
-}
 
-template<pmo base_stage::*P>
-inline void stage_manager::compile_stage_pmo(pmo_header *header) {
-    u32 mesh_count = header->mesh_count;
-    u32 material_count = header->material_count();
-    pmo_material_params *material_params = (pmo_material_params *)cache.alloc(material_count * 16 + mesh_count * 8, 0x10);
-
-    s32 mesh_data_size = header->mesh_data_size();
-    pmo_mesh_data *vram_block = (pmo_mesh_data *)vram_alloc(mesh_data_size);
-    sceKernelDcacheWritebackInvalidateAll();
-    pmo_mesh_data *mesh_data = header->mesh_data();
-    sceDmacMemcpy(vram_block, mesh_data, mesh_data_size);
-    mesh_data = vram_block;
-
-
-    (stage->*P).compile(material_params, header, mesh_data);
-}
-
-extern "C" {
     extern void *D_eboot_089C6CB4;
     void func_eboot_088157D4(void *, void *);
 
@@ -787,14 +768,30 @@ extern "C" {
     void func_game_sub_09C336D8(void *, void *);
 }
 
+inline u32 header_mesh_data_size(pmo_header *header) {
+    return header->mesh_data_size();
+}
 
 void stage_manager::compile_pac(pac_header *pac, bool load_all) {
     cache.reset(slab, sizeof(slab));
     vram_transfer_size = 0;
 
     stage_pac = pac;
-    pmo_header *model_pmo = (pmo_header *)pac->data(0);
-    compile_stage_pmo<&base_stage::model_pmo>(model_pmo);
+    pmo_header *model_header = (pmo_header *)pac->data(0);
+    {
+        u32 mesh_count = model_header->mesh_count;
+        u32 material_count = model_header->material_count();
+        pmo_material_params *material_params = (pmo_material_params *)cache.alloc(material_count * 16 + mesh_count * 8, 0x10);
+
+        u32 mesh_data_size = header_mesh_data_size(model_header);
+        pmo_mesh_data *vram_block = (pmo_mesh_data *)vram_alloc(mesh_data_size);
+
+        sceKernelDcacheWritebackInvalidateAll();
+        pmo_mesh_data *mesh_data = model_header->mesh_data();
+        sceDmacMemcpy(vram_block, mesh_data, mesh_data_size);
+
+        stage->model_pmo.compile(material_params, model_header, vram_block);
+    }
 
     tmh_header *tmh = (tmh_header *)pac->data(1);
     if (tmh != 0) {
@@ -807,9 +804,20 @@ void stage_manager::compile_pac(pac_header *pac, bool load_all) {
         stage->compile_environment_params(environment);
     }
 
-    pmo_header *prop_pmo = (pmo_header *)pac->data(2);
-    if (prop_pmo != 0) {
-        compile_stage_pmo<&base_stage::prop_pmo>(prop_pmo);
+    pmo_header *prop_header = (pmo_header *)pac->data(2);
+    if (prop_header != 0) {
+        u32 mesh_count = prop_header->mesh_count;
+        u32 material_count = prop_header->material_count();
+        pmo_material_params *material_params = (pmo_material_params *)cache.alloc(material_count * 16 + mesh_count * 8, 0x10);
+
+        u32 mesh_data_size = prop_header->mesh_data_size();
+        pmo_mesh_data *vram_block = (pmo_mesh_data *)vram_alloc(mesh_data_size);
+
+        sceKernelDcacheWritebackInvalidateAll();
+        pmo_mesh_data *mesh_data = prop_header->mesh_data();
+        sceDmacMemcpy(vram_block, mesh_data, mesh_data_size);
+
+        stage->prop_pmo.compile(material_params, prop_header, vram_block);
     }
 
     if (load_all == true) {
@@ -905,24 +913,8 @@ s8 stage_manager::stage_exit_count() {
     return stage->exit_count(map_id);
 }
 
-extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", func_eboot_088C9BF8);
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", func_eboot_088C9D6C);
-}
-
-
-inline float length(float x1, float y1, float x2, float y2) {
-    float dx = (x2 - x1);
-    float dy = (y2 - y1);
-    float r2 = dx * dx + dy * dy;
-    return vsqrt_s(r2);
-}
-
-inline float distance_point_circle(ScePspFVector4 *p, ScePspFVector3 *center, float *radius) {
-    return length(p->x, p->z, center->x, center->z) - *radius;
-}
-
 // test if position is in rectangular prism with center bottom left/right points a/b
+extern "C"
 int func_game_sub_09C31748(ScePspFVector4 *position,  ScePspFVector4 *a, ScePspFVector4 *b, float height, float half_thickness);
 
 stage_exit *stage_manager::intersecting_exit(ScePspFVector4 *position) {
@@ -964,7 +956,12 @@ u16 stage_manager::nearest_exit_destination_stage_id(u16 ignored, ScePspFVector4
     for (s8 i = 0; i < stage_exit_count(); ++i, ++exit) {
         float distance;
         if (exit->shape == 0) {
-            distance = distance_point_circle(position, &exit->p, &exit->size);
+            float dx = exit->p.x;
+            float dz = exit->p.z;
+            dx -= position->x;
+            dz -= position->z;
+            float r2 = dx * dx + dz * dz;
+            distance = vsqrt_s(r2) - exit->size;
         } else {
             ScePspFVector4 p, q, v;
             p.x = exit->p.x;    p.y = 0;    p.z = exit->p.z;    p.w = 1;
