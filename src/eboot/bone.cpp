@@ -102,10 +102,10 @@ void bone::update(ScePspFMatrix4 *parentGlobalPose, ScePspFMatrix4 *parentLocalP
     invScale.w.x = bind.transform.w.x;
     invScale.w.y = bind.transform.w.y;
     invScale.w.z = bind.transform.w.z;
-    vmmul_t(&localPose, &bind.transform);
-    vmmul_q(&localPose, &invScale);
+    vmmul_t(&localPose, &bind.transform, &localPose);
+    vmmul_q(&localPose, &localPose, &invScale);
     vmmul_q(&globalPose, &localPose, parentGlobalPose);
-    vmmul_q(&localPose, parentLocalPose);
+    vmmul_q(&localPose, &localPose, parentLocalPose);
 
     if (child) {
         child->update(&globalPose, &localPose, sx, sy, sz);

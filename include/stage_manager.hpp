@@ -6,8 +6,7 @@
 #include "drawable.hpp"
 #include "tagged_cache.hpp"
 #include "base_stage.hpp"
-
-struct pac_header;
+#include "pac.hpp"
 
 struct prop_params {
     u16 words[4];
@@ -55,7 +54,7 @@ struct base_prop : drawable {
 struct stage_manager : singleton<stage_manager> {
     base_stage *stage;
     u8 unknown_0x4[640];
-    u32 entrance_id;
+    u32 map_id;
     u16 stage_id;
     u16 unknown_0x28A;
     u8 slab[0xA000];
@@ -70,7 +69,7 @@ struct stage_manager : singleton<stage_manager> {
     u8 unknown_0xA2C9[7];
     ScePspFVector4 unknown_0xA2D0;
     base_prop *prop_list;
-    pac_header *pac;
+    pac_header *stage_pac;
     u8 unknown_0xA2E8[0x100];
     u8 flag_0xA3E8;
     u8 unknown_0xA3E9;
@@ -148,17 +147,19 @@ struct stage_manager : singleton<stage_manager> {
     void unknown_0xA2E8_clear();
     u32 register_sound(u32 arg2, u32 arg3, u32 arg4, u32 arg5, u32 arg6, ScePspFVector4 *arg7, u32 arg8);
     void register_lobby_sounds();
-    void compile_pac(pac_header *pac, bool follow_camera);
+    void compile_pac(pac_header *pac, bool load_all);
     void vram_clear();
     u8 *vram_alloc(s32 size);
     void push(base_prop *prop);
     void free(base_prop *prop);
     u16 find_in_D_game_sub_09CDF678(int index, u16 key);
-    void stage_vtable_0x2C();
-    void stage_vtable_0x30();
+    stage_exit *stage_exits();
+    s8 stage_exit_count();
     u8 get_flag_0xA3E8();
     u8 find_in_D_game_sub_09CDF678(u16 key);
     u16 get_in_D_game_sub_09CDF678(u8 i);
+    stage_exit *intersecting_exit(ScePspFVector4 *position);
+    u16 nearest_exit_destination_stage_id(u16 /* ignored */ stage_id, ScePspFVector4 *position);
 
 private:
     template<typename T>
@@ -193,4 +194,10 @@ private:
             prop->prop_tmh = &st->model_tmh;
         }
     }
+
+    template<pmo base_stage::*P>
+    inline void compile_stage_pmo(pmo_header *header);
+
+    // distance of point P to rectangle in the XZ plane with center (A+B)/2, width |AB|, and height |2t|
+    float distance_point_rectangle(ScePspFVector4 *P, ScePspFVector4 *A, ScePspFVector4 *B, float t);
 };

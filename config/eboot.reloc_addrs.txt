@@ -9288,16 +9288,16 @@ rom:0xC8678 reloc:MIPS_HI16 symbol:D_game_sub_09CDF678
 rom:0xC867C reloc:MIPS_LO16 symbol:D_game_sub_09CDF678
 rom:0xC86E4 reloc:MIPS_HI16 symbol:D_game_sub_09CDF678
 rom:0xC86E8 reloc:MIPS_LO16 symbol:D_game_sub_09CDF678
-rom:0x41BC8 reloc:MIPS_HI16 symbol:D_game_sub_09CDF67C
-rom:0x41BCC reloc:MIPS_LO16 symbol:D_game_sub_09CDF67C
-rom:0x422AC reloc:MIPS_HI16 symbol:D_game_sub_09CDF67C
-rom:0x422B0 reloc:MIPS_LO16 symbol:D_game_sub_09CDF67C
-rom:0x54A0C reloc:MIPS_HI16 symbol:D_game_sub_09CDF67C
-rom:0x54A10 reloc:MIPS_LO16 symbol:D_game_sub_09CDF67C
-rom:0x687FC reloc:MIPS_HI16 symbol:D_game_sub_09CDF67C
-rom:0x68800 reloc:MIPS_LO16 symbol:D_game_sub_09CDF67C
-rom:0xC8364 reloc:MIPS_HI16 symbol:D_game_sub_09CDF67C
-rom:0xC8368 reloc:MIPS_LO16 symbol:D_game_sub_09CDF67C
+rom:0x41BC8 reloc:MIPS_HI16 symbol:D_game_sub_09CDF678 addend:0x4
+rom:0x41BCC reloc:MIPS_LO16 symbol:D_game_sub_09CDF678 addend:0x4
+rom:0x422AC reloc:MIPS_HI16 symbol:D_game_sub_09CDF678 addend:0x4
+rom:0x422B0 reloc:MIPS_LO16 symbol:D_game_sub_09CDF678 addend:0x4
+rom:0x54A0C reloc:MIPS_HI16 symbol:D_game_sub_09CDF678 addend:0x4
+rom:0x54A10 reloc:MIPS_LO16 symbol:D_game_sub_09CDF678 addend:0x4
+rom:0x687FC reloc:MIPS_HI16 symbol:D_game_sub_09CDF678 addend:0x4
+rom:0x68800 reloc:MIPS_LO16 symbol:D_game_sub_09CDF678 addend:0x4
+rom:0xC8364 reloc:MIPS_HI16 symbol:D_game_sub_09CDF678 addend:0x4
+rom:0xC8368 reloc:MIPS_LO16 symbol:D_game_sub_09CDF678 addend:0x4
 rom:0x12BA0 reloc:MIPS_HI16 symbol:D_game_sub_09CDF778
 rom:0x12BA4 reloc:MIPS_LO16 symbol:D_game_sub_09CDF778
 rom:0x69004 reloc:MIPS_HI16 symbol:D_game_sub_09CDF778

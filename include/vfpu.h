@@ -2,6 +2,7 @@
 
 #include "common.h"
 
+extern "C" {
 
 inline void vsub_q(ScePspFVector4 *v, ScePspFVector4 *a, ScePspFVector4 *b) {
 #if defined(__MWERKS__)
@@ -21,6 +22,45 @@ inline void vsub_q(ScePspFVector4 *v, ScePspFVector4 *a, ScePspFVector4 *b) {
 #endif
 }
 
+inline void vscl_q(ScePspFVector4 *v, ScePspFVector4 *a, float b) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C000, %1"
+        "lv.s S010, %2"
+        "vscl.q C000, C000, S010"
+        "sv.q C000, %0"
+        : "=m"(*v)
+        : "m"(*a), "m"(b)
+    );
+#else
+    v->x = a->x * b;
+    v->y = a->y * b;
+    v->z = a->z * b;
+    v->w = a->w * b;
+#endif
+}
+
+void vadd_q(ScePspFVector4 *v, ScePspFVector4 *a, ScePspFVector4 *b);
+/*
+void vadd_q(ScePspFVector4 *v, ScePspFVector4 *a, ScePspFVector4 *b) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C000, %1"
+        "lv.q C010, %2"
+        "vadd.q C000, C000, C010"
+        "sv.q C000, %0"
+        : "=m"(*v)
+        : "m"(*a), "m"(*b)
+    );
+#else
+    v->x = a->x + b->x;
+    v->y = a->y + b->y;
+    v->z = a->z + b->z;
+    v->w = a->w + b->w;
+#endif
+}
+*/
+
 inline void vmidt_q(ScePspFMatrix4 *m) {
 #if defined(__MWERKS__)
     __asm__ (
@@ -39,12 +79,12 @@ inline void vmidt_q(ScePspFMatrix4 *m) {
 #endif
 }
 
-inline void vmmul_t(ScePspFMatrix4 *m, ScePspFMatrix4 *a) {
+inline void vmmul_t(ScePspFMatrix4 *m, ScePspFMatrix4 *a, ScePspFMatrix4 *b) {
 #if defined(__MWERKS__)
     __asm__ (
-        "lv.q C100, 0x0(%0)"
-        "lv.q C110, 0x10(%0)"
-        "lv.q C120, 0x20(%0)"
+        "lv.q C100, 0x0(%2)"
+        "lv.q C110, 0x10(%2)"
+        "lv.q C120, 0x20(%2)"
         "lv.q C200, 0x0(%1)"
         "lv.q C210, 0x10(%1)"
         "lv.q C220, 0x20(%1)"
@@ -59,7 +99,7 @@ inline void vmmul_t(ScePspFMatrix4 *m, ScePspFMatrix4 *a) {
         "sv.s S021, 0x24(%0)"
         "sv.s S022, 0x28(%0)"
         : "=m" (*m)
-        : "m" (*a)
+        : "m" (*a), "m" (*b)
     );
 #else
     // TODO
@@ -89,31 +129,6 @@ inline void vmmul_q(ScePspFMatrix4 *m0, ScePspFMatrix4 *m1, ScePspFMatrix4 *m2) 
 #else
     // TODO
     vmidt_q(m0);
-#endif
-}
-
-inline void vmmul_q(ScePspFMatrix4 *m, ScePspFMatrix4 *o) {
-#if defined(__MWERKS__)
-    __asm__ (
-        "lv.q C100, 0x0(%1)"
-        "lv.q C110, 0x10(%1)"
-        "lv.q C120, 0x20(%1)"
-        "lv.q C130, 0x30(%1)"
-        "lv.q C200, 0x0(%0)"
-        "lv.q C210, 0x10(%0)"
-        "lv.q C220, 0x20(%0)"
-        "lv.q C230, 0x30(%0)"
-        "vmmul.q E000, E200, E100"
-        "sv.q C000, 0x0(%0)"
-        "sv.q C010, 0x10(%0)"
-        "sv.q C020, 0x20(%0)"
-        "sv.q C030, 0x30(%0)"
-        : "=m" (*m)
-        : "m" (*o)
-    );
-#else
-    // TODO
-    vmidt_q(m);
 #endif
 }
 
@@ -204,6 +219,51 @@ inline void rotateZ(ScePspFMatrix4 *m, float angle) {
 #endif
 }
 
+inline void normalize(ScePspFVector4 *out, ScePspFVector4 *v) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C000, %1"
+        "vdot.q S010, C000, C000"
+        "vzero.s S011"
+        "vcmp.s EZ, S010, S010"
+        "nop"
+        "vrsq.s S010, S010"
+        "vcmovt.s S010, S011, 0"     // S010 <- v^2 == 0 ? 0 : 1/sqrt(v^2)
+        "vpfxd 0xFF"                 // clamp to interval -1.0 to +1.0
+        "vscl.q C000, C000, S010"
+        "sv.q C000, %0"
+        : "=m"(*out)
+        : "m"(*v)
+    );
+#else
+    float f = v->x * v->x + v->y * v->y + v->z * v->z + v->w * v->w;
+    if (f == 0.0f) {
+        out->x = out->y = out->z = out->w = 0.0f;
+    }
+    f = 1.0f / sqrt(f);
+    out->x = v->x * f;
+    out->y = v->y * f;
+    out->z = v->z * f;
+    out->w = v->w * f;
+#endif
+}
+
+inline float vsqrt_s(float x) {
+    float result;
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.s S000, %1"
+        "vsqrt.s S000, S000"
+        "sv.s S000, %0"
+        : "=m"(result)
+        : "m"(x)
+    );
+#else
+    result = sqrt(x);
+#endif
+    return result;
+}
+
 inline void scaleMatrix(ScePspFMatrix4 *out, float x, float y, float z) {
     vmidt_q(out);
     out->x.x = x;
@@ -227,4 +287,6 @@ inline void rotateZXY(ScePspFMatrix4 *out, ScePspFVector3 * angle) {
     rotateZ(out, z);
     rotateX(out, x);
     rotateY(out, y);
+}
+
 }

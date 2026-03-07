@@ -3,6 +3,8 @@
 #include "stage_manager.hpp"
 #include "singleton.hpp"
 #include "tagged_cache.hpp"
+#include "pac.hpp"
+#include "vfpu.h"
 
 #include "stage_table.inc.cpp"
 
@@ -684,7 +686,7 @@ extern "C" {
         u8 padding_0x0[0x6A238];
         farm_state farm;
         u8 padding_0x6A240[0x6AF10 - 0x6A240];
-        u8 unknown_0x6AF10;
+        u8 map_id;
     };
     extern global_089C7508 *D_eboot_089C7508;
 
@@ -745,29 +747,91 @@ u32 stage_manager::register_sound(u32 arg2, u32 arg3, u32 arg4, u32 arg5, u32 ar
 
 void stage_manager::register_lobby_sounds() {
     int index;
-    stage_sound_definition *definition = stage->vtable_0x28().sound_definitions;
-    if (definition != 0) {
-        for (index = 0; index < stage->vtable_0x28().unknown_0x3F; ++index, ++definition) {
-            if (definition->unknown_0x0 == 0) {
-                get()->register_sound(definition->unknown_0x4, definition->unknown_0x8, 0, 0xC0, index + 1, &definition->position, definition->unknown_0xC);
+    stage_sound *sound = stage->definitions()->sounds;
+    if (sound != 0) {
+        for (index = 0; index < stage->definitions()->sound_count; ++index, ++sound) {
+            if (sound->unknown_0x0 == 0) {
+                get()->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, index + 1, &sound->position, sound->unknown_0xC);
             }
         }
     }
 }
 
-// follow_camera seems to be true in most cases.
-// I've only observed it to be false during the intro cutscene panning across Pokke Village,
-/*
-void stage_manager::compile_pac(pac_header *pac, bool follow_camera) {
+extern "C" {
+    int sceDmacMemcpy(void *, const void *, u32);
+    void sceKernelDcacheWritebackInvalidateAll();
+
+    extern void *D_eboot_089C6CB4;
+    void func_eboot_088157D4(void *, void *);
+
+    extern void *D_game_sub_09D14FE0;
+    void func_game_sub_09C336D8(void *, void *);
+}
+
+inline u32 header_mesh_data_size(pmo_header *header) {
+    return header->mesh_data_size();
+}
+
+void stage_manager::compile_pac(pac_header *pac, bool load_all) {
     cache.reset(slab, sizeof(slab));
     vram_transfer_size = 0;
-    this->pac = pac;
-    // will continue once pac parsing is decompiled
-}
-*/
 
-extern "C"
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", compile_pac__13stage_managerFP10pac_headerb);
+    stage_pac = pac;
+    pmo_header *model_header = (pmo_header *)pac->data(0);
+    {
+        u32 mesh_count = model_header->mesh_count;
+        u32 material_count = model_header->material_count();
+        pmo_material_params *material_params = (pmo_material_params *)cache.alloc(material_count * 16 + mesh_count * 8, 0x10);
+
+        u32 mesh_data_size = header_mesh_data_size(model_header);
+        pmo_mesh_data *vram_block = (pmo_mesh_data *)vram_alloc(mesh_data_size);
+
+        sceKernelDcacheWritebackInvalidateAll();
+        pmo_mesh_data *mesh_data = model_header->mesh_data();
+        sceDmacMemcpy(vram_block, mesh_data, mesh_data_size);
+
+        stage->model_pmo.compile(material_params, model_header, vram_block);
+    }
+
+    tmh_header *tmh = (tmh_header *)pac->data(1);
+    if (tmh != 0) {
+        u32 *texture_buffer = (u32 *)cache.alloc(tmh->picture_count * 0x20, 0x10);
+        stage->model_tmh.compile(texture_buffer, tmh, 0);
+    }
+
+    stage_environment_params *environment = (stage_environment_params *)pac->data(3);
+    if (environment != 0) {
+        stage->compile_environment_params(environment);
+    }
+
+    pmo_header *prop_header = (pmo_header *)pac->data(2);
+    if (prop_header != 0) {
+        u32 mesh_count = prop_header->mesh_count;
+        u32 material_count = prop_header->material_count();
+        pmo_material_params *material_params = (pmo_material_params *)cache.alloc(material_count * 16 + mesh_count * 8, 0x10);
+
+        u32 mesh_data_size = prop_header->mesh_data_size();
+        pmo_mesh_data *vram_block = (pmo_mesh_data *)vram_alloc(mesh_data_size);
+
+        sceKernelDcacheWritebackInvalidateAll();
+        pmo_mesh_data *mesh_data = prop_header->mesh_data();
+        sceDmacMemcpy(vram_block, mesh_data, mesh_data_size);
+
+        stage->prop_pmo.compile(material_params, prop_header, vram_block);
+    }
+
+    if (load_all == true) {
+        void *unknown_data_4 = pac->data(4);
+        func_eboot_088157D4(D_eboot_089C6CB4, unknown_data_4);
+
+        void *unknown_data_5 = pac->data(5);
+        if (unknown_data_5 != 0) {
+            func_game_sub_09C336D8(D_game_sub_09D14FE0, unknown_data_5);
+        }
+    }
+
+    flag_0xA3E8 = true;
+}
 
 void stage_manager::vram_clear() {
     cache.reset(slab, sizeof(slab));
@@ -825,46 +889,146 @@ void stage_manager::free(base_prop *prop) {
 }
 
 extern "C" {
-    struct D_game_sub_09CDF678_entry {
-        s32 length;
-        u16 *data;
+    struct map_stage_ids {
+        s32 count;
+        u16 *stage_ids;
     };
-    extern D_game_sub_09CDF678_entry D_game_sub_09CDF678[0x20];
+    extern map_stage_ids D_game_sub_09CDF678[0x20];
 }
 
 u16 stage_manager::find_in_D_game_sub_09CDF678(int index, u16 key) {
-    for (int i = 0; i < D_game_sub_09CDF678[index].length; ++i) {
-        if (key == D_game_sub_09CDF678[index].data[i]) {
+    for (int i = 0; i < D_game_sub_09CDF678[index].count; ++i) {
+        if (key == D_game_sub_09CDF678[index].stage_ids[i]) {
             return i;
         }
     }
     return -1;
 }
 
-void stage_manager::stage_vtable_0x2C() {
-    stage->vtable_0x2C(entrance_id);
+stage_exit *stage_manager::stage_exits() {
+    return stage->exits(map_id);
 }
 
-void stage_manager::stage_vtable_0x30() {
-    stage->vtable_0x30(entrance_id);
+s8 stage_manager::stage_exit_count() {
+    return stage->exit_count(map_id);
 }
 
-extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", func_eboot_088C9BF8);
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", func_eboot_088C9D6C);
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_manager", func_eboot_088C9F1C);
+// test if position is in rectangular prism with center bottom left/right points a/b
+extern "C"
+int func_game_sub_09C31748(ScePspFVector4 *position,  ScePspFVector4 *a, ScePspFVector4 *b, float height, float half_thickness);
+
+stage_exit *stage_manager::intersecting_exit(ScePspFVector4 *position) {
+    stage_exit *exit;
+    if ((exit = stage_exits()) == 0) {
+        return 0;
+    }
+    for (s8 i = 0; i < stage_exit_count(); ++i, ++exit) {
+        if (position->y >= exit->p.y && position->y < exit->p.y + exit->height) {
+            switch (exit->shape) {
+            case 0:
+                float dx = position->x - exit->p.x;
+                float dz = position->z - exit->p.z;
+                if (dx * dx + dz * dz <= exit->size * exit->size) {
+                    return exit;
+                }
+                break;
+            case 1:
+                ScePspFVector4 p, q;
+                p.x = exit->p.x;    p.y = exit->p.y;    p.z = exit->p.z;    p.w = 0;
+                q.x = exit->q.x;    q.y = exit->q.y;    q.z = exit->q.z;    q.w = 0;
+                if (func_game_sub_09C31748(position, &p, &q, exit->height, exit->size)) {
+                    return exit;
+                }
+                break;
+            }
+        }
+    }
+    return 0;
 }
 
+u16 stage_manager::nearest_exit_destination_stage_id(u16 ignored, ScePspFVector4 *position) {
+    stage_exit *exit = stage_exits();
+    if (exit == 0) {
+        return D_game_sub_09CDF678[map_id].stage_ids[0];
+    }
+    float min = 1.0e10f;
+    u16 result = 0;
+    for (s8 i = 0; i < stage_exit_count(); ++i, ++exit) {
+        float distance;
+        if (exit->shape == 0) {
+            float dx = exit->p.x;
+            float dz = exit->p.z;
+            dx -= position->x;
+            dz -= position->z;
+            float r2 = dx * dx + dz * dz;
+            distance = vsqrt_s(r2) - exit->size;
+        } else {
+            ScePspFVector4 p, q, v;
+            p.x = exit->p.x;    p.y = 0;    p.z = exit->p.z;    p.w = 1;
+            q.x = exit->q.x;    q.y = 0;    q.z = exit->q.z;    q.w = 1;
+            v.x = position->x;  v.y = 0;    v.z = position->z;  v.w = 1;
+            distance = distance_point_rectangle(&v, &p, &q, exit->size);
+        }
+        if (min > distance) {
+            result = exit->destination_stage_id;
+            min = distance;
+        }
+    }
+    return result;
+}
+
+// out <- closest point on line segment a-b to point p
+// returns distance from p to out
+extern "C"
+float func_game_sub_09C30780(ScePspFVector4 *out, ScePspFVector4 *a, ScePspFVector4 *b, ScePspFVector4 *p);
+
+// this is specifically the distance between a point and the boundary of a rectangle
+float stage_manager::distance_point_rectangle(ScePspFVector4 *v, ScePspFVector4 *p, ScePspFVector4 *q, float t) {
+    ScePspFVector4 ignored;
+    ScePspFVector4 direction;
+    ScePspFVector4 perpendicular;
+    ScePspFVector4 q_minus;
+    ScePspFVector4 q_plus;
+    ScePspFVector4 p_minus;
+    ScePspFVector4 p_plus;
+
+    vsub_q(&direction, p, q);
+    normalize(&direction, &direction);
+
+    perpendicular.x = -direction.z;
+    perpendicular.y = direction.y;
+    perpendicular.z = direction.x;
+    perpendicular.w = 0;
+    vscl_q(&perpendicular, &perpendicular, t);
+
+    vadd_q(&p_plus,  p, &perpendicular);
+    vsub_q(&p_minus, p, &perpendicular);
+    vadd_q(&q_plus,  q, &perpendicular);
+    vsub_q(&q_minus, q, &perpendicular);
+
+    float distance[4];
+    distance[0] = func_game_sub_09C30780(&ignored, &p_plus,  &p_minus, v);
+    distance[1] = func_game_sub_09C30780(&ignored, &q_plus,  &q_minus, v);
+    distance[2] = func_game_sub_09C30780(&ignored, &p_plus,  &q_plus,  v);
+    distance[3] = func_game_sub_09C30780(&ignored, &p_minus, &q_minus, v);
+
+    for (int i = 1; i <= 4 - 1; ++i) {
+        if (distance[0] > distance[i]) {
+            distance[0] = distance[i];
+        }
+    }
+    return distance[0];
+}
 
 u8 stage_manager::get_flag_0xA3E8() {
     return flag_0xA3E8;
 }
 
 u8 stage_manager::find_in_D_game_sub_09CDF678(u16 key) {
-    int index = D_eboot_089C7508->unknown_0x6AF10;
-    D_game_sub_09CDF678_entry &entry = D_game_sub_09CDF678[index];
-    for (int i = 0; i < entry.length; ++i) {
-        if (key == entry.data[i]) {
+    int map_id = D_eboot_089C7508->map_id;
+    map_stage_ids &m = D_game_sub_09CDF678[map_id];
+    for (int i = 0; i < m.count; ++i) {
+        if (key == m.stage_ids[i]) {
             return i;
         }
     }
@@ -872,7 +1036,7 @@ u8 stage_manager::find_in_D_game_sub_09CDF678(u16 key) {
 }
 
 u16 stage_manager::get_in_D_game_sub_09CDF678(u8 i) {
-    int index = D_eboot_089C7508->unknown_0x6AF10;
-    D_game_sub_09CDF678_entry &entry = D_game_sub_09CDF678[index];
-    return entry.data[i];
+    int map_id = D_eboot_089C7508->map_id;
+    map_stage_ids &m = D_game_sub_09CDF678[map_id];
+    return m.stage_ids[i];
 }

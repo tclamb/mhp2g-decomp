@@ -1,3 +1,5 @@
+#pragma once
+
 #include "common.h"
 
 struct pac_block_header {
