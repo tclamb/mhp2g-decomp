@@ -79,7 +79,7 @@ struct stage_manager : singleton<stage_manager> {
     ~stage_manager();
     void reset();
     void unload();
-    void call_stage_vtable_0x14();
+    void call_stage_ptmf_0x3D8();
     void call_0884ca28_with_stage();
 
     void call_prop_list_vtable_0x10();

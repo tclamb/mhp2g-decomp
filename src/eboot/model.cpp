@@ -112,7 +112,7 @@ void model::operator delete(void *p) {
 }
 
 void model::reset_transform() {
-    unknown_0x4 = 3;
+    flags_0x4 = 3;
     unknown_0x8 = 0;
     unknown_0xC = 0.0f;
     vmidt_q(&transform);

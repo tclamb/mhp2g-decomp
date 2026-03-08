@@ -1,5 +1,5 @@
 push_prop_089B967C__13stage_managerFP11prop_params = 0x088C7FB4; // type:func
-func_eboot_088CA15C = 0x088CA15C; // type:func
+__ct__10base_stageFv = 0x088CA15C; // type:func
 __dt__10base_stageFv = 0x088CA1E4; // type:func
 vtable_0x5C__10base_stageFv = 0x088CAD38;
 vtable_0x6C__10base_stageFv = 0x088CB428;

@@ -51,9 +51,9 @@ void stage_manager::unload() {
     vram_transfer_size = 0;
 }
 
-void stage_manager::call_stage_vtable_0x14() {
+void stage_manager::call_stage_ptmf_0x3D8() {
     if (stage != 0 && stage->model_pmo.header != 0) {
-        stage->vtable_0x14();
+        stage->call_ptmf_0x3D8();
     }
 }
 
@@ -838,7 +838,7 @@ void stage_manager::vram_clear() {
     vram_transfer_size = 0;
     unknown_0xA2B8 = 0;
     if (stage != 0) {
-        stage->unknown_0x4 &= ~0x2;
+        stage->flags_0x4 &= ~0x2;
     }
     flag_0xA3E8 = false;
 }

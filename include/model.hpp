@@ -148,7 +148,7 @@ struct model : drawable {
     virtual void draw();
 
 
-    u32 unknown_0x4;
+    u32 flags_0x4;
     u32 unknown_0x8;
     float unknown_0xC;
     ScePspFMatrix4 transform;

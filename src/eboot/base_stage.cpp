@@ -6,16 +6,14 @@
 
 using namespace immediate_ge;
 
-extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CA15C);
+#pragma opt_unroll_loops on
+
+base_stage::base_stage() {
+
 }
 
 base_stage::~base_stage() {
     // empty
-}
-
-extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CA25C);
 }
 
 extern struct global_089C7508 {
@@ -28,6 +26,70 @@ extern "C" {
     void func_eboot_0886234C(ScePspFMatrix4 *transform, ScePspFVector4 *scale);
     // draw mesh
     void func_eboot_08861714(pmo *pmo, skeleton *skeleton, tmh *, int mesh);
+}
+
+void base_stage::method_088CA25C() {
+    pmo *pmo = &model_pmo;
+    stage_draw_command *command = vtable_0x48()->model_commands;
+    func_eboot_0886234C(&transform, &pmo->scale);
+    for (int i = 0; i < vtable_0x48()->model_commands_length; ++i, ++command) {
+        ge::atest(0xFF, command->alpha_threshold, GE_OP_AT_LEAST);
+        if ((command->flags & 1) == 0 || !D_eboot_089C7508->allow_hidden_props) {
+            if ((command->flags & 4) != 0) {
+                ge::ztest(GE_OP_ALWAYS);
+            }
+            if ((command->flags & 2) != 0) {
+                ge::zwritedisable(true);
+            }
+            switch (command->opcode) {
+            case 0:
+                break;
+            case 1:
+                func_eboot_08861714(pmo, 0, &model_tmh, command->mesh_index);
+                break;
+            case 2:
+                vtable_0x54(pmo, command->data, command->mesh_index);
+                break;
+            case 3:
+                vtable_0x58(pmo, command->data, command->mesh_index);
+                break;
+            case 4:
+                vtable_0x5C(pmo, command->data, command->mesh_index);
+                break;
+            case 6:
+                vtable_0x64(pmo, command->data, command->mesh_index);
+                break;
+            case 7:
+                vtable_0x68(pmo, command->data, command->mesh_index);
+                break;
+            case 8:
+                vtable_0x6C(pmo, command->data, command->mesh_index);
+                break;
+            case 9:
+                vtable_0x70(pmo, command->data, command->mesh_index);
+                break;
+            case 11:
+                vtable_0x78(pmo, command->data, command->mesh_index);
+                break;
+            case 15:
+                vtable_0x88(pmo, command->data);
+                break;
+            case 18:
+                vtable_0x94(pmo, command->data, command->mesh_index);
+                // fallthrough
+            case 19:
+                vtable_0x98(pmo, command->data);
+            default:
+                break;
+            }
+            if ((command->flags & 4) != 0) {
+                ge::ztest(GE_OP_AT_MOST);
+            }
+            if ((command->flags & 2) != 0) {
+                ge::zwritedisable(false);
+            }
+        }
+    }
 }
 
 void base_stage::method_088CA624() {
@@ -128,7 +190,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x70__10base_stageFP3pmo
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x74__10base_stageFP3pmoPvUc);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x78__10base_stageFv);
+INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x78__10base_stageFP3pmoPvUc);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x7C__10base_stageFP3pmoPvUc);
 
@@ -142,7 +204,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x8C__10base_stageFP3pmo
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x90__10base_stageFP3pmoPvUc);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x94__10base_stageFv);
+INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x94__10base_stageFP3pmoPvUc);
 }
 
 void base_stage::vtable_0x98(pmo *, void *) {
@@ -153,10 +215,10 @@ void base_stage::clear() {
     memset(&prop_pmo, 0, sizeof(prop_pmo));
     memset(&prop_skeleton, 0, sizeof(prop_skeleton));
     reset_transform();
-    unknown_0x330 = 0;
+    unknown_0x330 = 0; // environment_params->type
     unknown_0x3D4 = 0;
-    unknown_0x4 &= ~2;
-    unknown_0x1C0 = 0;
+    flags_0x4 &= ~2;
+    unknown_0x1C0 = 0; // animation timer?
     unknown_0x1C2 = 0;
     method_088CDCAC();
     set_ptmf_0x3D8(&base_stage::vtable_0x4C);
@@ -170,9 +232,15 @@ INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0xAC__10base_stageFv);
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0xB0__10base_stageFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x20__10base_stageFv);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x14__10base_stageFv);
+void base_stage::call_ptmf_0x3D8() {
+    if (ptmf_0x3D8 != 0) {
+        (this->*ptmf_0x3D8)();
+    }
+}
 
+extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", destroy__10base_stageFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", draw__10base_stageFv);
@@ -206,11 +274,31 @@ extern "C"
 {
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CD4E0);
 
+// allocate props
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x24__10base_stageFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CD61C);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", compile_environment_params__10base_stageFP24stage_environment_params);
+void base_stage::compile_environment_params(stage_environment_params *environment) {
+    unknown_0x330 = environment->type;
+
+    stage_unk1_params *unk1_params;
+    stage_unk2_params *unk2_params;
+    switch (unknown_0x330) {
+    case 1:
+        unk1_params = compile_fog_params((stage_fog_params *)environment->data);
+        compile_unk1_params(unk1_params);
+        break;
+    case 2:
+        unk1_params = compile_fog_params((stage_fog_params *)environment->data);
+        unk2_params = compile_unk1_params(unk1_params);
+        compile_unk2_params(unk2_params);
+        break;
+    default:
+        unknown_0x330 = 0;
+        break;
+    }
 }
 
 void base_stage::operator delete(void *) {
@@ -226,7 +314,7 @@ void base_stage::vtable_0x4C() {
     depth_buffer_params[1].unknown_0x8 = 0;
     depth_buffer_params[2].unknown_0x8 = 0;
     depth_buffer_params[0].unknown_0x8 = 0;
-    unknown_0x4 |= 2;
+    flags_0x4 |= 2;
     vtable_0x1C();
     method_088CDCAC();
     set_ptmf_0x3D8(&base_stage::vtable_0x50);
@@ -246,14 +334,32 @@ INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x9C__10base_stageFv);
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CE4F4);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CE668);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CEA2C);
+void base_stage::method_088CEA2C() {
+    unknown_0x3A0 = 0;
+    unknown_0x3A2 = 0;
+    unknown_0x41C = 0;
+    unknown_0x41A = 0;
+    unknown_0x418 = 0;
+    unknown_0x424 = 480;
+    unknown_0x426 = 272;
+    unknown_0x428 = 0;
+    unknown_0x41C = 0;
+    unknown_0x41A = 0;
+    unknown_0x430 = 0;
+    unknown_0x43C = 480;
+    unknown_0x43E = 272;
+    unknown_0x440 = 0;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CEA70);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CEAD8);
+extern "C" {
+INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", compile_fog_params__10base_stageFP16stage_fog_params);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CEB94);
+INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", compile_unk1_params__10base_stageFP17stage_unk1_params);
+
+INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", compile_unk2_params__10base_stageFP17stage_unk2_params);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CEDC0);
 

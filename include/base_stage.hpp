@@ -3,7 +3,23 @@
 #include "common.h"
 #include "model.hpp"
 
+struct stage_fog_params {
+    float color;
+    float near;
+    float far;
+};
+
+struct stage_unk1_params {
+
+};
+
+struct stage_unk2_params {
+
+};
+
 struct stage_environment_params {
+    u16 type;
+    u8 data[0];
 };
 
 struct stage_depth_buffer_params {
@@ -65,20 +81,21 @@ struct stage_draw_command {
 
 
 struct stage_commands {
-    u16 unknown_0x0;
+    s16 model_commands_length;
     s16 draw_commands_length;
-    void *unknown_0x4;
+    stage_draw_command *model_commands;
     stage_draw_command *draw_commands;
 };
 
 struct base_stage : model {
     typedef void (base_stage::*ptmf)(void);
 
+    base_stage();
     virtual ~base_stage();
     virtual void draw();
 
     virtual void clear();
-    virtual void vtable_0x14();
+    virtual void call_ptmf_0x3D8();
     virtual void destroy();
     virtual void vtable_0x1C();
     virtual void vtable_0x20();
@@ -103,20 +120,20 @@ struct base_stage : model {
     virtual void vtable_0x6C(pmo *, void *, u8);
     virtual void vtable_0x70(pmo *, void *, u8);
     virtual void vtable_0x74(pmo *, void *, u8);
-    virtual void vtable_0x78();
+    virtual void vtable_0x78(pmo *, void *, u8);
     virtual void vtable_0x7C(pmo *, void *, u8);
     virtual void vtable_0x80(pmo *, void *, u8);
     virtual void vtable_0x84(pmo *, void *, u8);
     virtual void vtable_0x88(pmo *, void *);
     virtual void vtable_0x8C(pmo *, void *, u8);
     virtual void vtable_0x90(pmo *, void *, u8);
-    virtual void vtable_0x94();
+    virtual void vtable_0x94(pmo *, void *, u8);
     virtual void vtable_0x98(pmo *, void *);
     virtual void vtable_0x9C();
     virtual void vtable_0xA0();
     virtual void vtable_0xA4();
     virtual u32 vtable_0xA8() { return 0; }
-    virtual void vtable_0xAC();
+    virtual u32 vtable_0xAC();
     virtual void vtable_0xB0();
     virtual void vtable_0xB4();
     virtual void vtable_0xB8();
@@ -156,9 +173,15 @@ struct base_stage : model {
     u32 unknown_0x444;
     u8 struct_0x448[0xC];
 
+    void method_088CA25C();
     void method_088CA624();
     void method_088CDCAC();
+    void method_088CEA2C();
     void compile_environment_params(stage_environment_params *);
+    stage_unk1_params *compile_fog_params(stage_fog_params *);
+    stage_unk2_params *compile_unk1_params(stage_unk1_params *);
+    void compile_unk2_params(stage_unk2_params *);
+
 
 protected:
     inline void set_ptmf_0x3D8(ptmf x) {
