@@ -1,11 +1,14 @@
 #pragma once
 
+#define GE_CMD_TEXOFFSETU 0x4A
+#define GE_CMD_TEXOFFSETV 0x4B
 #define GE_CMD_ATEST 0xDB
 #define GE_CMD_ZTEST 0xDE
 #define GE_CMD_ZWRITEDISABLE 0xE7
 
 #define GE_OP_ALWAYS 1
 #define GE_OP_AT_MOST 5
+#define GE_OP_GREATER_THAN 6
 #define GE_OP_AT_LEAST 7
 
 extern u32 *D_eboot_089C70D0;
@@ -18,6 +21,14 @@ namespace immediate_ge {
                 *D_eboot_089C70D0++ = cmd;
             }
 
+        }
+
+        inline void texoffsetu() {
+            impl::emit((GE_CMD_TEXOFFSETU << 24));
+        }
+
+        inline void texoffsetv() {
+            impl::emit((GE_CMD_TEXOFFSETV << 24));
         }
 
         inline void atest(u8 mask, u8 threshold, u8 op) {

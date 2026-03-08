@@ -1,7 +1,7 @@
 #include "common.h"
 
 #include "base_stage.hpp"
-
+#include "vfpu.h"
 #include "immediate_ge.hpp"
 
 using namespace immediate_ge;
@@ -18,7 +18,9 @@ base_stage::~base_stage() {
 
 extern struct global_089C7508 {
     u8 padding_0x0[0x422];
-    bool allow_hidden_props;
+    bool allow_hidden_flag;
+    u8 padding_0x423[0x6AF0E - 0x423];
+    u16 render_stage;
 } *D_eboot_089C7508;
 
 extern "C" {
@@ -28,13 +30,13 @@ extern "C" {
     void func_eboot_08861714(pmo *pmo, skeleton *skeleton, tmh *, int mesh);
 }
 
-void base_stage::method_088CA25C() {
+void base_stage::execute_model_draw_commands() {
     pmo *pmo = &model_pmo;
     stage_draw_command *command = vtable_0x48()->model_commands;
     func_eboot_0886234C(&transform, &pmo->scale);
     for (int i = 0; i < vtable_0x48()->model_commands_length; ++i, ++command) {
         ge::atest(0xFF, command->alpha_threshold, GE_OP_AT_LEAST);
-        if ((command->flags & 1) == 0 || !D_eboot_089C7508->allow_hidden_props) {
+        if ((command->flags & 1) == 0 || !D_eboot_089C7508->allow_hidden_flag) {
             if ((command->flags & 4) != 0) {
                 ge::ztest(GE_OP_ALWAYS);
             }
@@ -92,13 +94,13 @@ void base_stage::method_088CA25C() {
     }
 }
 
-void base_stage::method_088CA624() {
+void base_stage::execute_prop_draw_commands() {
     pmo *pmo = &prop_pmo;
-    stage_draw_command *command = vtable_0x48()->draw_commands;
+    stage_draw_command *command = vtable_0x48()->prop_commands;
     func_eboot_0886234C(&transform, &pmo->scale);
-    for (int i = 0; i < vtable_0x48()->draw_commands_length; ++i, ++command) {
+    for (int i = 0; i < vtable_0x48()->prop_commands_length; ++i, ++command) {
         ge::atest(0xFF, command->alpha_threshold, GE_OP_AT_LEAST);
-        if ((command->flags & 1) == 0 || !D_eboot_089C7508->allow_hidden_props) {
+        if ((command->flags & 1) == 0 || !D_eboot_089C7508->allow_hidden_flag) {
             if ((command->flags & 4) != 0) {
                 ge::ztest(GE_OP_ALWAYS);
             }
@@ -242,9 +244,33 @@ void base_stage::call_ptmf_0x3D8() {
 
 extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", destroy__10base_stageFv);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", draw__10base_stageFv);
+extern "C" {
+    extern void *D_eboot_08A5DD28;
 
+    void func_eboot_08860C4C(void *);
+    void func_eboot_0886117C(void *, u8 i);
+}
+
+void base_stage::draw() {
+    if (D_eboot_089C7508->render_stage != false) {
+        if (vtable_0x48() != 0) {
+            vmidt_q(&transform);
+            if (vtable_0x48()->model_commands != 0) {
+                execute_model_draw_commands();
+            }
+            if (vtable_0x48()->prop_commands != 0) {
+                execute_prop_draw_commands();
+            }
+        }
+
+        ge::texoffsetu();
+        ge::texoffsetv();
+        ge::atest(0xFF, 0, GE_OP_GREATER_THAN);
+        func_eboot_08860C4C(D_eboot_08A5DD28);
+        func_eboot_0886117C(D_eboot_08A5DD28, 1);
+    }
 }
 
 stage_definitions *base_stage::definitions() {

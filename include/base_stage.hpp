@@ -80,11 +80,11 @@ struct stage_draw_command {
 };
 
 
-struct stage_commands {
+struct stage_draw_commands {
     s16 model_commands_length;
-    s16 draw_commands_length;
+    s16 prop_commands_length;
     stage_draw_command *model_commands;
-    stage_draw_command *draw_commands;
+    stage_draw_command *prop_commands;
 };
 
 struct base_stage : model {
@@ -108,7 +108,7 @@ struct base_stage : model {
     virtual void vtable_0x3C();
     virtual void vtable_0x40();
     virtual void vtable_0x44();
-    virtual stage_commands *vtable_0x48();
+    virtual stage_draw_commands *vtable_0x48();
     virtual void vtable_0x4C();
     virtual void vtable_0x50();
     virtual void vtable_0x54(pmo *, void *, u8);
@@ -173,8 +173,8 @@ struct base_stage : model {
     u32 unknown_0x444;
     u8 struct_0x448[0xC];
 
-    void method_088CA25C();
-    void method_088CA624();
+    void execute_model_draw_commands();
+    void execute_prop_draw_commands();
     void method_088CDCAC();
     void method_088CEA2C();
     void compile_environment_params(stage_environment_params *);
