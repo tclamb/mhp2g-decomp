@@ -210,6 +210,16 @@ all_overlays = ([]
 EBOOT_MODULE = ModuleInfo("eboot.elf", ".")
 all_modules = [EBOOT_MODULE] + all_overlays
 
+# objdiff report categories
+ALLOWED_UNIT_CATEGORIES = set(['eboot'])
+ALLOWED_UNIT_CATEGORIES.update([overlay.subfolder for overlay in all_overlays])
+UNIT_CATEGORY_SUBSTITUTIONS = {
+    'stage0': 'stage',
+    'stage1': 'stage',
+    'stage2': 'stage',
+}
+
+
 def clean():
     if os.path.exists(".splache"):
         os.remove(".splache")
@@ -333,12 +343,18 @@ def build_stuff(linker_entries_by_module_name: Dict[str, List[LinkerEntry]], git
             implicit_outputs=implicit_outputs,
         )
 
-    def add_unit(target_path, base_path, src_path = None, is_complete = False):
+    def add_unit(target_path, base_path, src_path = None):
         if target_path:
             unit_path = target_path.relative_to('build/asm').with_suffix('')
         elif base_path:
             unit_path = base_path.relative_to('build/assets').with_suffix('')
+
         unit_categories = [str(parent) for parent in unit_path.parents][:-1] # / ["."]
+        unit_categories = [UNIT_CATEGORY_SUBSTITUTIONS.get(x, x) for x in unit_categories if x in ALLOWED_UNIT_CATEGORIES]
+        if len(unit_path.parts) > 1 and unit_path.parts[-2] == 'lib':
+            unit_categories.append('All Library')
+        else:
+            unit_categories.append('All Application')
         for c in unit_categories:
             built_categories.add(c)
         built_units.append({
@@ -348,7 +364,6 @@ def build_stuff(linker_entries_by_module_name: Dict[str, List[LinkerEntry]], git
             "metadata": {
                 "progress_categories": unit_categories,
                 "source_path": str(src_path),
-                "complete": is_complete,
             }
         })
 
@@ -540,7 +555,7 @@ def build_stuff(linker_entries_by_module_name: Dict[str, List[LinkerEntry]], git
             "build_target": True,
             "build_base": True,
             "units": built_units,
-            "progress_categories": [{"id": c, "name": c} for c in built_categories],
+            "progress_categories": [{"id": c, "name": c} for c in sorted(built_categories)],
             "scratch": {
                 "platform": "psp",
                 "compiler": "mwccpsp_3.0.1_219",
