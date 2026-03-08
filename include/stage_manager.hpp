@@ -152,12 +152,12 @@ struct stage_manager : singleton<stage_manager> {
     u8 *vram_alloc(s32 size);
     void push(base_prop *prop);
     void free(base_prop *prop);
-    u16 find_in_D_game_sub_09CDF678(int index, u16 key);
+    u16 find_map_stage_index(int map_id, u16 stage_id);
     stage_exit *stage_exits();
     s8 stage_exit_count();
     u8 get_flag_0xA3E8();
-    u8 find_in_D_game_sub_09CDF678(u16 key);
-    u16 get_in_D_game_sub_09CDF678(u8 i);
+    u8 find_map_stage_index(u16 stage_id);
+    u16 map_stage_id(u8 map_stage_index);
     stage_exit *intersecting_exit(ScePspFVector4 *position);
     u16 nearest_exit_destination_stage_id(u16 /* ignored */ stage_id, ScePspFVector4 *position);
 

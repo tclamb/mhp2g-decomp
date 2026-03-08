@@ -896,9 +896,9 @@ extern "C" {
     extern map_stage_ids D_game_sub_09CDF678[0x20];
 }
 
-u16 stage_manager::find_in_D_game_sub_09CDF678(int index, u16 key) {
-    for (int i = 0; i < D_game_sub_09CDF678[index].count; ++i) {
-        if (key == D_game_sub_09CDF678[index].stage_ids[i]) {
+u16 stage_manager::find_map_stage_index(int map_id, u16 stage_id) {
+    for (int i = 0; i < D_game_sub_09CDF678[map_id].count; ++i) {
+        if (stage_id == D_game_sub_09CDF678[map_id].stage_ids[i]) {
             return i;
         }
     }
@@ -1024,19 +1024,19 @@ u8 stage_manager::get_flag_0xA3E8() {
     return flag_0xA3E8;
 }
 
-u8 stage_manager::find_in_D_game_sub_09CDF678(u16 key) {
+u8 stage_manager::find_map_stage_index(u16 stage_id) {
     int map_id = D_eboot_089C7508->map_id;
     map_stage_ids &m = D_game_sub_09CDF678[map_id];
     for (int i = 0; i < m.count; ++i) {
-        if (key == m.stage_ids[i]) {
+        if (stage_id == m.stage_ids[i]) {
             return i;
         }
     }
     return 0;
 }
 
-u16 stage_manager::get_in_D_game_sub_09CDF678(u8 i) {
+u16 stage_manager::map_stage_id(u8 map_stage_index) {
     int map_id = D_eboot_089C7508->map_id;
     map_stage_ids &m = D_game_sub_09CDF678[map_id];
-    return m.stage_ids[i];
+    return m.stage_ids[map_stage_index];
 }
