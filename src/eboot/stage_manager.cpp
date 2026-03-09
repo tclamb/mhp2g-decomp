@@ -781,7 +781,7 @@ void stage_manager::compile_pac(pac_header *pac, bool load_all) {
     {
         u32 mesh_count = model_header->mesh_count;
         u32 material_count = model_header->material_count();
-        pmo_material_params *material_params = (pmo_material_params *)cache.alloc(material_count * 16 + mesh_count * 8, 0x10);
+        void *buffer = cache.alloc(material_count * sizeof(pmo_material_data) + mesh_count * sizeof(pmo_mesh_lighting), 0x10);
 
         u32 mesh_data_size = header_mesh_data_size(model_header);
         pmo_mesh_data *vram_block = (pmo_mesh_data *)vram_alloc(mesh_data_size);
@@ -790,7 +790,7 @@ void stage_manager::compile_pac(pac_header *pac, bool load_all) {
         pmo_mesh_data *mesh_data = model_header->mesh_data();
         sceDmacMemcpy(vram_block, mesh_data, mesh_data_size);
 
-        stage->model_pmo.compile(material_params, model_header, vram_block);
+        stage->model_pmo.compile(buffer, model_header, vram_block);
     }
 
     tmh_header *tmh = (tmh_header *)pac->data(1);
@@ -808,7 +808,7 @@ void stage_manager::compile_pac(pac_header *pac, bool load_all) {
     if (prop_header != 0) {
         u32 mesh_count = prop_header->mesh_count;
         u32 material_count = prop_header->material_count();
-        pmo_material_params *material_params = (pmo_material_params *)cache.alloc(material_count * 16 + mesh_count * 8, 0x10);
+        void *buffer = cache.alloc(material_count * sizeof(pmo_material_data) + mesh_count * sizeof(pmo_mesh_lighting), 0x10);
 
         u32 mesh_data_size = prop_header->mesh_data_size();
         pmo_mesh_data *vram_block = (pmo_mesh_data *)vram_alloc(mesh_data_size);
@@ -817,7 +817,7 @@ void stage_manager::compile_pac(pac_header *pac, bool load_all) {
         pmo_mesh_data *mesh_data = prop_header->mesh_data();
         sceDmacMemcpy(vram_block, mesh_data, mesh_data_size);
 
-        stage->prop_pmo.compile(material_params, prop_header, vram_block);
+        stage->prop_pmo.compile(buffer, prop_header, vram_block);
     }
 
     if (load_all == true) {

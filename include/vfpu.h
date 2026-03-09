@@ -2,7 +2,28 @@
 
 #include "common.h"
 
+#ifdef __cplusplus
 extern "C" {
+#endif
+
+inline void sv_q(ScePspFVector4 *v, float x, float y, float z, float w) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.s S000, %1"
+        "lv.s S001, %2"
+        "lv.s S002, %3"
+        "lv.s S003, %4"
+        "sv.q C000, %0"
+        : "=m"(*v)
+        : "m"(x), "m"(y), "m"(z), "m"(w)
+    );
+#else
+    v->x = x;
+    v->y = y;
+    v->z = z;
+    v->w = w;
+#endif
+}
 
 inline void vsub_q(ScePspFVector4 *v, ScePspFVector4 *a, ScePspFVector4 *b) {
 #if defined(__MWERKS__)
@@ -119,6 +140,31 @@ inline void vmmul_q(ScePspFMatrix4 *m0, ScePspFMatrix4 *m1, ScePspFMatrix4 *m2) 
         "lv.q C220, 0x20(%1)"
         "lv.q C230, 0x30(%1)"
         "vmmul.q E000, E200, E100"
+        "sv.q C000, 0x0(%0)"
+        "sv.q C010, 0x10(%0)"
+        "sv.q C020, 0x20(%0)"
+        "sv.q C030, 0x30(%0)"
+        : "=m" (*m0)
+        : "m" (*m1), "m" (*m2)
+    );
+#else
+    // TODO
+    vmidt_q(m0);
+#endif
+}
+
+inline void vmmulr_q(ScePspFMatrix4 *m0, ScePspFMatrix4 *m1, ScePspFMatrix4 *m2) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C100, 0x0(%2)"
+        "lv.q C110, 0x10(%2)"
+        "lv.q C120, 0x20(%2)"
+        "lv.q C130, 0x30(%2)"
+        "lv.q C200, 0x0(%1)"
+        "lv.q C210, 0x10(%1)"
+        "lv.q C220, 0x20(%1)"
+        "lv.q C230, 0x30(%1)"
+        "vmmul.q E000, E100, E200"
         "sv.q C000, 0x0(%0)"
         "sv.q C010, 0x10(%0)"
         "sv.q C020, 0x20(%0)"
@@ -289,4 +335,6 @@ inline void rotateZXY(ScePspFMatrix4 *out, ScePspFVector3 * angle) {
     rotateY(out, y);
 }
 
+#ifdef __cplusplus
 }
+#endif

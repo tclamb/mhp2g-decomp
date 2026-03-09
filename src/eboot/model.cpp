@@ -9,6 +9,9 @@
 //#define BUILD_NONMATCHING
 
 #include "model.hpp"
+#include "immediate_ge.hpp"
+
+using namespace immediate_ge;
 
 model::model() {
     memset(&model_pmo, 0, sizeof(model_pmo));
@@ -21,24 +24,97 @@ model::~model() {
 }
 
 void model::draw() {
-    model_pmo.draw_skin(model_skeleton, model_tmh, transform);
+    model_pmo.draw(&model_skeleton, &model_tmh, &transform);
 }
 
-#ifdef BUILD_NONMATCHING
-void pmo::draw_skin(skeleton &skeleton, tmh &tmh, ScePspFMatrix4 &transform) {
+void emit_world_to_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale);
 
+void pmo::draw(skeleton *skeleton, tmh *tmh, ScePspFMatrix4 *transform) {
+    emit_world_to_model(transform, &scale);
+    for (int i = 0; i < header->mesh_count; ++i) {
+        draw_mesh(skeleton, tmh,  i);
+    }
 }
-#else
-extern "C"
-INCLUDE_ASM("asm/eboot/nonmatchings/model", draw_skin__3pmoFR8skeletonR3tmhR14ScePspFMatrix4);
-#endif
 
-extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08861714);
+void pmo::draw_mesh(skeleton *skeleton, tmh *tmh, u8 mesh_index) {
+    pmo_header *header = this->header;
+    pmo_mesh_header *mesh = header->mesh_header(mesh_index);
+    pmo_mesh_lighting *lighting = mesh_lighting(mesh_index);
+    lighting->emit();
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08861C74);
+    ge::texscaleu(mesh->uv_scale.x);
+    ge::texscalev(mesh->uv_scale.y);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08861D74);
+    header->mesh_material_count(mesh_index); // oops
+
+    u8 *remap = header->material_remap(mesh_index, 0);
+    u32 last_texture = -1;
+    pmo_tristrip_header *tristrip = header->tristrip_header(mesh_index, 0);
+    for (int i = 0; i < mesh->tristrip_count; ++i, ++tristrip) {
+        if (remap[tristrip->material_offset] != -1) {
+            pmo_material_data *material = &material_data[remap[tristrip->material_offset]];
+            if (material->color.uc[3] != 0) {
+                ge::materialupdate(GE_MATERIALCOLOR_AMBIENT | GE_MATERIALCOLOR_DIFFUSE);
+                ge::materialdiffuse(material->color.uc[0], material->color.uc[1], material->color.uc[2]);
+                ge::materialalpha(material->color.uc[3]);
+                ge::materialambient(material->shadow_color.uc[0], material->shadow_color.uc[1], material->shadow_color.uc[2]);
+
+                u32 texture_index = material->texture_index;
+                if (material->texture_index != 0xFF) {
+                    if (texture_index != last_texture) {
+                        tmh_display_list_fragment *texture_fragment = tmh->display_list_fragments + texture_index;
+                        ge::texturemapenable(true);
+
+                        ge::texmode(GE_TEXMODE_SWIZZLE);
+
+                        ge::impl::emit(texture_fragment->texformat);
+                        ge::impl::emit(texture_fragment->texture_address_low);
+                        ge::impl::emit(texture_fragment->texture_stride_address_high);
+                        ge::impl::emit(texture_fragment->texture_size);
+                        ge::impl::emit(texture_fragment->clut_format);
+                        ge::impl::emit(texture_fragment->clut_address_low);
+                        ge::impl::emit(texture_fragment->clut_address_high);
+                        ge::impl::emit(texture_fragment->clut_load);
+
+                        ge::texflush();
+                        last_texture = material->texture_index;
+                    }
+                } else {
+                    ge::texturemapenable(false);
+                    last_texture = material->texture_index;
+                }
+                goto draw;
+            }
+        } else {
+            draw:
+            pmo_mesh_data *data = mesh_data + tristrip->mesh_offset;
+            ge::call(data, 0);
+        }
+    }
+    ge::colortestenable(false);
+}
+
+void pmo::draw_alpha(tmh *tmh, ScePspFMatrix4 *transform, u16 mesh_index, u32 blend_mode, u8 alpha) {
+    set_mesh_blend_mode(mesh_index, blend_mode);
+    ge::atest(0xFF, 0, GE_OP_GREATER_THAN);
+    emit_world_to_model(transform, &scale);
+    set_mesh_alpha(mesh_index, alpha);
+    set_mesh_shadow_color(mesh_index, 0xFF, 0xFF, 0xFF);
+    draw_mesh(0, tmh, mesh_index);
+    ge::atest(0xFF, 0x80, GE_OP_AT_LEAST);
+}
+
+void pmo::draw_rgba8888(tmh *tmh, ScePspFMatrix4 *transform, u16 mesh_index, u32 blend_mode, u32 color) {
+    ScePspUnion32 rgba; rgba.ui = color;
+    set_mesh_blend_mode(mesh_index, blend_mode);
+    ge::atest(0xFF, 0, GE_OP_GREATER_THAN);
+    emit_world_to_model(transform, &scale);
+    u8 r = rgba.uc[0], b = rgba.uc[2], g = rgba.uc[1], a = rgba.uc[3];
+    set_mesh_color(mesh_index, r, g, b);
+    set_mesh_shadow_color(mesh_index, r, g, b);
+    set_mesh_alpha(mesh_index, a);
+    draw_mesh(0, tmh, mesh_index);
+    ge::atest(0xFF, 0x80, GE_OP_AT_LEAST);
 }
 
 void world_matrix (
@@ -90,21 +166,72 @@ void world_matrix (
 }
 
 extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_0886234C);
+    extern void *D_eboot_089C70CC;
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", compile__3pmoFP19pmo_material_paramsP10pmo_headerP13pmo_mesh_data);
+    // ge write world matrix 0
+    void func_eboot_0884CCE8(void *, ScePspFMatrix4 *);
 }
 
-int model::compile_pmo(pmo_material_params *material_params, pmo_header *header, pmo_mesh_data *mesh_data) {
-    return model_pmo.compile(material_params, header, mesh_data);
+void emit_world_to_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale) {
+    ScePspFMatrix4 n;
+    ScePspFMatrix4 o;
+    scaleMatrix(&n, scale->x, scale->y, scale->z);
+    vmmulr_q(&o, transform, &n);
+    func_eboot_0884CCE8(D_eboot_089C70CC, &o);
+}
+
+#ifdef BUILD_NONMATCHING
+// 65/7700, one regswap remaining
+#pragma nofpregforblkmv on
+int pmo::compile(void *buffer, pmo_header *header, pmo_mesh_data *mesh_data) {
+    this->header = header;
+    this->mesh_data = mesh_data;
+
+    sv_q(&this->scale, header->scale.x, header->scale.y, header->scale.z, 0);
+
+    {
+        int i = 0;
+        pmo_material_data *out = (pmo_material_data *)buffer;
+        this->material_data = out;
+        pmo_material_data *data = header->material_data(0);
+        for (; i < header->material_count(); ++i, ++out, ++data) {
+            out->color = data->color;
+            out->shadow_color = data->shadow_color;
+            out->texture_index = data->texture_index;
+        }
+        buffer = out;
+    }
+
+    {
+        pmo_mesh_lighting *out = (pmo_mesh_lighting *)buffer;
+        this->mesh_lighting_ = out;
+        pmo_mesh_header *mesh = header->mesh_header(0);
+        for (int i = 0; i < header->mesh_count; ++i, ++out, ++mesh) {
+            out->lighting_cmd = mesh->lighting_cmd;
+            out->blend_mode_cmd = mesh->blend_mode_cmd;
+        }
+        buffer = out;
+    }
+
+    return 1;
+}
+#pragma nofpregforblkmv reset
+#else
+extern "C" {
+INCLUDE_ASM("asm/eboot/nonmatchings/model", compile__3pmoFPvP10pmo_headerP13pmo_mesh_data);
+}
+#endif
+
+int model::compile_pmo(void *buffer, pmo_header *header, pmo_mesh_data *mesh_data) {
+    return model_pmo.compile(buffer, header, mesh_data);
 }
 
 extern "C"
-INCLUDE_ASM("asm/eboot/nonmatchings/model", compile__3tmhFPUiP10tmh_headerUi);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", compile__3tmhFPvP10tmh_headerUi);
 
 
-int model::compile_tmh(u32 *displaylist_out, tmh_header *header) {
-    return model_tmh.compile(displaylist_out, header, 0);
+int model::compile_tmh(void *buffer, tmh_header *header) {
+    return model_tmh.compile(buffer, header, 0);
 }
 
 void model::operator delete(void *p) {
@@ -139,7 +266,7 @@ u8 *pmo_header::material_remap(u32 mesh_index, u32 material) {
     return magic + material_remaps_offset + mesh->cumulative_material_count + material;
 }
 
-u32 pmo_header::material_count() {
+s32 pmo_header::material_count() {
     return material_count_;
 }
 
@@ -148,16 +275,64 @@ pmo_tristrip_header *pmo_header::tristrip_header(u32 mesh_index, u32 tristrip_in
     return (pmo_tristrip_header*)(magic + tristrip_header_offset + mesh->cumulative_tristrip_count * sizeof(ScePspFVector4) + tristrip_index * sizeof(ScePspFVector4));
 }
 
+// scheduling & regswaps on all three
+#ifdef BUILD_NONMATCHING
+void pmo::set_mesh_color(u32 mesh_index, u8 r, u8 g, u8 b) {
+    u8 *remap = header->material_remap(mesh_index, 0);
+    int count = header->mesh_material_count(mesh_index);
+    for (int i = 0; i < count; ++i, ++remap) {
+        pmo_material_data &material = material_data[*remap];
+        material.color.uc[0] = r;
+        material.color.uc[1] = g;
+        material.color.uc[2] = b;
+    }
+}
+void pmo::set_mesh_shadow_color(u32 mesh_index, u8 r, u8 g, u8 b) {
+    u8 *remap = header->material_remap(mesh_index, 0);
+    int count = header->mesh_material_count(mesh_index);
+    for (int i = 0; i < count; ++i, ++remap) {
+        pmo_material_data &material = material_data[*remap];
+        material.shadow_color.uc[0] = r;
+        material.shadow_color.uc[1] = g;
+        material.shadow_color.uc[2] = b;
+    }
+}
+
+void pmo::set_mesh_alpha(u32 mesh_index, u8 a) {
+    u8 *remap = header->material_remap((u16)mesh_index, 0);
+    int count = header->mesh_material_count((u16)mesh_index);
+    for (int i = 0; i < count; ++remap, ++i) {
+        material_data[*remap].color.uc[3] = a;
+    }
+}
+#else
 extern "C" {
-// void pmo::set_mesh_color(u32 mesh_index, u8 r, u8 g, u8 b);
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088627F8);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", set_mesh_color__3pmoFUiUcUcUc);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088629D4);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", set_mesh_shadow_color__3pmoFUiUcUcUc);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862BB0);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", set_mesh_alpha__3pmoFUiUc);
+}
+#endif
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862D2C);
+void pmo::set_mesh_blend_mode(u32 mesh_index, u8 blend_mode) {
+    pmo_mesh_lighting *lighting = mesh_lighting((u16)mesh_index);
+    switch (blend_mode) {
+    case 1:
+        lighting->blend_mode_cmd = (GE_CMD_BLENDMODE << 24) | 0x32;
+        break;
+    case 2:
+        lighting->blend_mode_cmd = (GE_CMD_BLENDMODE << 24) | 0xA2;
+        break;
+    case 3:
+        lighting->blend_mode_cmd = (GE_CMD_BLENDMODE << 24) | (0x2 << 8) | 0xA2;
+        break;
+    default:
+        break;
+    }
+}
 
+extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862DA4);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862DF8);
@@ -168,7 +343,7 @@ pmo_mesh_lighting *pmo::mesh_lighting(u32 mesh_index) {
 }
 
 extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862E5C);
+INCLUDE_ASM("asm/eboot/nonmatchings/model", emit__17pmo_mesh_lightingFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862FD8);
 

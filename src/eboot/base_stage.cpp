@@ -23,17 +23,10 @@ extern struct global_089C7508 {
     u16 render_stage;
 } *D_eboot_089C7508;
 
-extern "C" {
-    // emit world matrix for model
-    void func_eboot_0886234C(ScePspFMatrix4 *transform, ScePspFVector4 *scale);
-    // draw mesh
-    void func_eboot_08861714(pmo *pmo, skeleton *skeleton, tmh *, int mesh);
-}
-
 void base_stage::execute_model_draw_commands() {
     pmo *pmo = &model_pmo;
     stage_draw_command *command = vtable_0x48()->model_commands;
-    func_eboot_0886234C(&transform, &pmo->scale);
+    emit_world_to_model(&transform, &pmo->scale);
     for (int i = 0; i < vtable_0x48()->model_commands_length; ++i, ++command) {
         ge::atest(0xFF, command->alpha_threshold, GE_OP_AT_LEAST);
         if ((command->flags & 1) == 0 || !D_eboot_089C7508->allow_hidden_flag) {
@@ -47,7 +40,7 @@ void base_stage::execute_model_draw_commands() {
             case 0:
                 break;
             case 1:
-                func_eboot_08861714(pmo, 0, &model_tmh, command->mesh_index);
+                pmo->draw_mesh(0, &model_tmh, command->mesh_index);
                 break;
             case 2:
                 vtable_0x54(pmo, command->data, command->mesh_index);
@@ -97,7 +90,7 @@ void base_stage::execute_model_draw_commands() {
 void base_stage::execute_prop_draw_commands() {
     pmo *pmo = &prop_pmo;
     stage_draw_command *command = vtable_0x48()->prop_commands;
-    func_eboot_0886234C(&transform, &pmo->scale);
+    emit_world_to_model(&transform, &pmo->scale);
     for (int i = 0; i < vtable_0x48()->prop_commands_length; ++i, ++command) {
         ge::atest(0xFF, command->alpha_threshold, GE_OP_AT_LEAST);
         if ((command->flags & 1) == 0 || !D_eboot_089C7508->allow_hidden_flag) {
@@ -109,7 +102,7 @@ void base_stage::execute_prop_draw_commands() {
             }
             switch (command->opcode) {
             case 1:
-                func_eboot_08861714(pmo, 0, &model_tmh, command->mesh_index);
+                pmo->draw_mesh(0, &model_tmh, command->mesh_index);
                 break;
             case 2:
                 vtable_0x54(pmo, command->data, command->mesh_index);

@@ -58,14 +58,31 @@ struct tmh_header {
     u32 padding_0xC;
 };
 
-struct tmh {
-    u8 placeholder[0x10];
-
-    int compile(u32 *out, tmh_header *header, u32 index);
+struct tmh_display_list_fragment {
+    u32 texformat;
+    u32 texture_address_low;
+    u32 texture_stride_address_high;
+    u32 texture_size;
+    u32 clut_format;
+    u32 clut_address_low;
+    u32 clut_address_high;
+    u32 clut_load;
 };
 
-struct pmo_material_params {
+struct tmh {
+    u8 unknown_0x0[4];
+    tmh_display_list_fragment *display_list_fragments;
+    u8 texture_count;
+    u8 unknown_0x9[7];
 
+    int compile(void *buffer, tmh_header *header, u32 index);
+};
+
+struct pmo_material_data {
+    ScePspUnion32 color;
+    ScePspUnion32 shadow_color;
+    u8 texture_index;
+    u32 padding_0xC;
 };
 
 struct pmo_mesh_data {
@@ -73,7 +90,7 @@ struct pmo_mesh_data {
 };
 
 struct pmo_mesh_header {
-    ScePspFVector2 uv_scale;
+    ScePspIVector2 uv_scale;
     u32 lighting_cmd;
     u32 blend_mode_cmd;
     u8 material_count;
@@ -83,16 +100,16 @@ struct pmo_mesh_header {
 };
 
 struct pmo_tristrip_header {
-    u8 material_offset;
-    u8 weight_count;
-    u16 cumulative_weight_count;
+    s8 material_offset;
+    u8 tristrip_count;
+    u16 cumulative_tristrip_count;
     u32 mesh_offset;
     u32 vertex_offset;
     u32 index_offset;
 };
 
 struct pmo_mesh_lighting {
-    u32 lighting_flags;
+    u32 lighting_cmd;
     u32 blend_mode_cmd;
     void emit();
 };
@@ -117,22 +134,26 @@ struct pmo_header {
     pmo_mesh_header *mesh_header(u32 mesh_index);
     u8 mesh_material_count(u32 mesh_index);
     u8 *material_remap(u32 mesh_index, u32 material);
-    u32 material_count();
+    s32 material_count();
     pmo_tristrip_header *tristrip_header(u32 mesh_index, u32 tristrip_index);
+
+    inline pmo_material_data *material_data(u32 material_index) {
+        return (pmo_material_data *)(magic + material_data_offset) + material_index;
+    }
 };
 
 struct pmo {
     pmo_header *header;
     pmo_mesh_data *mesh_data;
-    pmo_material_params *material_params;
+    pmo_material_data *material_data;
     pmo_mesh_lighting *mesh_lighting_;
     ScePspFVector4 scale;
 
-    void draw_skin(skeleton &skeleton, tmh &tmh, ScePspFMatrix4 &transform);
-    void draw_skin_mesh(skeleton &skeleton, tmh &tmh, u32 index);
-    void draw_alpha(tmh &tmh, ScePspFMatrix4 &transform, u32 mesh, u8 blend_mode, u8 alpha);
-    void draw_alpha(tmh &tmh, ScePspFMatrix4 &transform, u32 mesh, u8 blend_mode, u32 color);
-    int compile(pmo_material_params *, pmo_header *, pmo_mesh_data *);
+    void draw(skeleton *skeleton, tmh *tmh, ScePspFMatrix4 *transform);
+    void draw_mesh(skeleton *skeleton, tmh *tmh, u8 mesh);
+    void draw_alpha(tmh *tmh, ScePspFMatrix4 *transform, u16 mesh, u32 blend_mode, u8 alpha);
+    void draw_rgba8888(tmh *tmh, ScePspFMatrix4 *transform, u16 mesh, u32 blend_mode, u32 color);
+    int compile(void *, pmo_header *, pmo_mesh_data *);
     void set_mesh_color(u32 mesh_index, u8 r, u8 g, u8 b);
     void set_mesh_shadow_color(u32 mesh_index, u8 r, u8 g, u8 b);
     void set_mesh_alpha(u32 mesh_index, u8 a);
@@ -142,11 +163,13 @@ struct pmo {
     pmo_mesh_lighting *mesh_lighting(u32 mesh_index);
 };
 
+// possible wrapper class?
+void emit_world_to_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale);
+
 struct model : drawable {
     model();
     virtual ~model();
     virtual void draw();
-
 
     u32 flags_0x4;
     u32 unknown_0x8;
@@ -156,8 +179,8 @@ struct model : drawable {
     tmh model_tmh;
     skeleton model_skeleton;
 
-    int compile_pmo(pmo_material_params*, pmo_header*, pmo_mesh_data*);
-    int compile_tmh(u32*, tmh_header*);
+    int compile_pmo(void *, pmo_header *, pmo_mesh_data *);
+    int compile_tmh(void *, tmh_header *);
     void reset_transform();
 
     static void operator delete(void *p);
