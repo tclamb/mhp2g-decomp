@@ -1,5 +1,16 @@
 #include "common.h"
 
+#include <pspgecmd.h>
+
+#define emit(out, cmd) do { \
+    *out++ = cmd; \
+} while(0)
+
+#define jump(out, target) do { \
+    emit(out, GE_SET_BASE_BASE8(target)); \
+    emit(out, GE_SET_JUMP_ADDR24(target)); \
+} while(0)
+
 #include <pspge.h>
 #include <pspdisplay.h>
 
@@ -300,7 +311,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08859138);
 void ge_manager::swap_buffers() {
   active_buffer ^= 1;
   sceGeListSync(sceGeListEnQueue(BLANK_BUFFER_DISPLAY_LISTS[active_buffer],(void *)0x0,-1,(PspGeListArgs *)0x0),0);
-  write_head = slab[active_buffer];
+  active_write_head = slab[active_buffer];
   clear_display_list();
 }
 
@@ -377,11 +388,15 @@ void ge_manager::spinlock_until_ge_end() {
     }
 }
 
+ge_command *ge_manager::write_head() {
+    return active_write_head;
+}
+
+void ge_manager::set_write_head(ge_command *value) {
+    active_write_head = value;
+}
+
 extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_0885971C);
-
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_0885972C);
-
 INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_0885973C);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08859768);

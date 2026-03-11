@@ -3,6 +3,7 @@
 #include "data_loader.hpp"
 #include "game.hpp"
 #include "singleton.hpp"
+#include "ge_manager.hpp"
 #include "cache.hpp"
 #include "tagged_cache.hpp"
 
@@ -13,9 +14,9 @@ u8 D_eboot_089C7510[0x90000] __attribute__((aligned(16)));
 u8 D_eboot_08A57510[0x24];
 u8 D_eboot_08A57534[0x67DC];
 
-void *D_eboot_08A5DD10; // singleton
+ge_manager *singleton<ge_manager>::INSTANCE;
 u8 D_eboot_08A5DD14;
-u8 GE_END_REACHED;
+volatile bool GE_END_REACHED;
 u32 D_eboot_08A5DD18;
 u32 D_eboot_08A5DD1C;
 

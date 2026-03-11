@@ -1,5 +1,5 @@
 draw_mesh__3pmoFP8skeletonP3tmhUc = 0x08861714; // type:func
-emit_world_to_model__FP14ScePspFMatrix4P14ScePspFVector4 = 0x0886234C; // type:func
+emit_world_model__FP14ScePspFMatrix4P14ScePspFVector4 = 0x0886234C; // type:func
 func_eboot_08883858 = 0x08883858; // type:func
 next_index__4gameFUi = 0x0888FDCC; // type:func
 __ct__10base_stageFv = 0x088CA15C; // type:func

@@ -1,6 +1,6 @@
 func_eboot_08814BE0 = 0x08814BE0; // type:func
 draw_mesh__3pmoFP8skeletonP3tmhUc = 0x08861714; // type:func
-emit_world_to_model__FP14ScePspFMatrix4P14ScePspFVector4 = 0x0886234C; // type:func
+emit_world_model__FP14ScePspFMatrix4P14ScePspFVector4 = 0x0886234C; // type:func
 next_index__4gameFUi = 0x0888FDCC; // type:func
 push_prop_089B92BC__13stage_managerFP11prop_paramsUi = 0x088C5F88; // type:func
 push_prop_089B931C__13stage_managerFP11prop_paramsUiUsUsUiUs = 0x088C6290; // type:func

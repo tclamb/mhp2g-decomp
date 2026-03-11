@@ -164,16 +164,13 @@ struct pmo {
 };
 
 // possible wrapper class?
-void emit_world_to_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale);
+void emit_world_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale);
 
 struct model : drawable {
     model();
     virtual ~model();
     virtual void draw();
 
-    u32 flags_0x4;
-    u32 unknown_0x8;
-    float unknown_0xC;
     ScePspFMatrix4 transform;
     pmo model_pmo;
     tmh model_tmh;

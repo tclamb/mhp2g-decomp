@@ -26,7 +26,7 @@ extern struct global_089C7508 {
 void base_stage::execute_model_draw_commands() {
     pmo *pmo = &model_pmo;
     stage_draw_command *command = vtable_0x48()->model_commands;
-    emit_world_to_model(&transform, &pmo->scale);
+    emit_world_model(&transform, &pmo->scale);
     for (int i = 0; i < vtable_0x48()->model_commands_length; ++i, ++command) {
         ge::atest(0xFF, command->alpha_threshold, GE_OP_AT_LEAST);
         if ((command->flags & 1) == 0 || !D_eboot_089C7508->allow_hidden_flag) {
@@ -90,7 +90,7 @@ void base_stage::execute_model_draw_commands() {
 void base_stage::execute_prop_draw_commands() {
     pmo *pmo = &prop_pmo;
     stage_draw_command *command = vtable_0x48()->prop_commands;
-    emit_world_to_model(&transform, &pmo->scale);
+    emit_world_model(&transform, &pmo->scale);
     for (int i = 0; i < vtable_0x48()->prop_commands_length; ++i, ++command) {
         ge::atest(0xFF, command->alpha_threshold, GE_OP_AT_LEAST);
         if ((command->flags & 1) == 0 || !D_eboot_089C7508->allow_hidden_flag) {
@@ -212,7 +212,7 @@ void base_stage::clear() {
     reset_transform();
     unknown_0x330 = 0; // environment_params->type
     unknown_0x3D4 = 0;
-    flags_0x4 &= ~2;
+    flags &= ~drawable::CLEAN;
     unknown_0x1C0 = 0; // animation timer?
     unknown_0x1C2 = 0;
     method_088CDCAC();
@@ -333,7 +333,7 @@ void base_stage::vtable_0x4C() {
     depth_buffer_params[1].unknown_0x8 = 0;
     depth_buffer_params[2].unknown_0x8 = 0;
     depth_buffer_params[0].unknown_0x8 = 0;
-    flags_0x4 |= 2;
+    flags |= drawable::CLEAN;
     vtable_0x1C();
     method_088CDCAC();
     set_ptmf_0x3D8(&base_stage::vtable_0x50);

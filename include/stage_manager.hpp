@@ -29,9 +29,6 @@ struct base_prop : drawable {
     virtual void update() = 0;
     virtual void call_ptmf();
 
-    u32 unknown_0x4;
-    u32 unknown_0x8;
-    u32 unknown_0xC;
     base_prop *prev;
     base_prop *next;
     u8 unknown_0x18;
@@ -80,7 +77,7 @@ struct stage_manager : singleton<stage_manager> {
     void reset();
     void unload();
     void call_stage_ptmf_0x3D8();
-    void call_0884ca28_with_stage();
+    void register_drawable();
 
     void call_prop_list_vtable_0x10();
     void call_prop_list_ptmf();

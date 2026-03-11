@@ -1,5 +1,5 @@
 func_eboot_08826600 = 0x08826600; // type:func
-func_eboot_0884B188 = 0x0884B188; // type:func
+reset__16drawable_managerFv = 0x0884B188; // type:func
 func_eboot_0884D694 = 0x0884D694; // type:func
 func_eboot_0884FA08 = 0x0884FA08; // type:func
 func_eboot_0884FA7C = 0x0884FA7C; // type:func
@@ -28,7 +28,7 @@ func_eboot_088DD910 = 0x088DD910; // type:func
 __ptmf_test = 0x08909E80; // type:func
 sceKernelSetEventFlag = 0x0890BA00; // type:func
 D_eboot_089C6CBC = 0x089C6CBC;
-D_eboot_089C70CC = 0x089C70CC;
+INSTANCE__29singleton<16drawable_manager> = 0x089C70CC; // filename:D_eboot_089C70CC
 D_eboot_089C70EC = 0x089C70EC;
 D_eboot_089C7508 = 0x089C7508;
 D_eboot_08A5DD28 = 0x08A5DD28;

@@ -2,6 +2,7 @@
 
 #include "stage_manager.hpp"
 #include "singleton.hpp"
+#include "drawable_manager.hpp"
 #include "tagged_cache.hpp"
 #include "pac.hpp"
 #include "vfpu.h"
@@ -57,14 +58,9 @@ void stage_manager::call_stage_ptmf_0x3D8() {
     }
 }
 
-extern "C" {
-    extern void *D_eboot_089C70CC;
-    extern void func_eboot_0884CA28(void *, int, model *, bool);
-}
-
-void stage_manager::call_0884ca28_with_stage() {
+void stage_manager::register_drawable() {
     if (stage != 0 && stage->model_pmo.header != 0) {
-        func_eboot_0884CA28(D_eboot_089C70CC, 3, stage, true);
+        drawable_manager::get()->add(render_group::STAGE, stage, true);
     }
 }
 
@@ -89,7 +85,7 @@ void stage_manager::call_prop_list_ptmf() {
     while (prop != 0) {
         prop->call_ptmf();
         base_prop *next = prop->next;
-        bool done = prop->unknown_0x4 & 1;
+        bool done = prop->flags & drawable::DISPOSE;
         if (done == 0) {
             free(prop);
         }
@@ -838,7 +834,7 @@ void stage_manager::vram_clear() {
     vram_transfer_size = 0;
     unknown_0xA2B8 = 0;
     if (stage != 0) {
-        stage->flags_0x4 &= ~0x2;
+        stage->flags &= ~drawable::CLEAN;
     }
     flag_0xA3E8 = false;
 }

@@ -9,6 +9,7 @@
 //#define BUILD_NONMATCHING
 
 #include "model.hpp"
+#include "drawable_manager.hpp"
 #include "immediate_ge.hpp"
 
 using namespace immediate_ge;
@@ -27,10 +28,10 @@ void model::draw() {
     model_pmo.draw(&model_skeleton, &model_tmh, &transform);
 }
 
-void emit_world_to_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale);
+void emit_world_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale);
 
 void pmo::draw(skeleton *skeleton, tmh *tmh, ScePspFMatrix4 *transform) {
-    emit_world_to_model(transform, &scale);
+    emit_world_model(transform, &scale);
     for (int i = 0; i < header->mesh_count; ++i) {
         draw_mesh(skeleton, tmh,  i);
     }
@@ -42,8 +43,7 @@ void pmo::draw_mesh(skeleton *skeleton, tmh *tmh, u8 mesh_index) {
     pmo_mesh_lighting *lighting = mesh_lighting(mesh_index);
     lighting->emit();
 
-    ge::texscaleu(mesh->uv_scale.x);
-    ge::texscalev(mesh->uv_scale.y);
+    ge::texscale(mesh->uv_scale);
 
     header->mesh_material_count(mesh_index); // oops
 
@@ -55,9 +55,9 @@ void pmo::draw_mesh(skeleton *skeleton, tmh *tmh, u8 mesh_index) {
             pmo_material_data *material = &material_data[remap[tristrip->material_offset]];
             if (material->color.uc[3] != 0) {
                 ge::materialupdate(GE_MATERIALCOLOR_AMBIENT | GE_MATERIALCOLOR_DIFFUSE);
-                ge::materialdiffuse(material->color.uc[0], material->color.uc[1], material->color.uc[2]);
+                ge::materialdiffuse(material->color);
                 ge::materialalpha(material->color.uc[3]);
-                ge::materialambient(material->shadow_color.uc[0], material->shadow_color.uc[1], material->shadow_color.uc[2]);
+                ge::materialambient(material->shadow_color);
 
                 u32 texture_index = material->texture_index;
                 if (material->texture_index != 0xFF) {
@@ -97,7 +97,7 @@ void pmo::draw_mesh(skeleton *skeleton, tmh *tmh, u8 mesh_index) {
 void pmo::draw_alpha(tmh *tmh, ScePspFMatrix4 *transform, u16 mesh_index, u32 blend_mode, u8 alpha) {
     set_mesh_blend_mode(mesh_index, blend_mode);
     ge::atest(0xFF, 0, GE_OP_GREATER_THAN);
-    emit_world_to_model(transform, &scale);
+    emit_world_model(transform, &scale);
     set_mesh_alpha(mesh_index, alpha);
     set_mesh_shadow_color(mesh_index, 0xFF, 0xFF, 0xFF);
     draw_mesh(0, tmh, mesh_index);
@@ -108,7 +108,7 @@ void pmo::draw_rgba8888(tmh *tmh, ScePspFMatrix4 *transform, u16 mesh_index, u32
     ScePspUnion32 rgba; rgba.ui = color;
     set_mesh_blend_mode(mesh_index, blend_mode);
     ge::atest(0xFF, 0, GE_OP_GREATER_THAN);
-    emit_world_to_model(transform, &scale);
+    emit_world_model(transform, &scale);
     u8 r = rgba.uc[0], b = rgba.uc[2], g = rgba.uc[1], a = rgba.uc[3];
     set_mesh_color(mesh_index, r, g, b);
     set_mesh_shadow_color(mesh_index, r, g, b);
@@ -165,19 +165,12 @@ void world_matrix (
     out->w.z = pos.z;
 }
 
-extern "C" {
-    extern void *D_eboot_089C70CC;
-
-    // ge write world matrix 0
-    void func_eboot_0884CCE8(void *, ScePspFMatrix4 *);
-}
-
-void emit_world_to_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale) {
+void emit_world_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale) {
     ScePspFMatrix4 n;
     ScePspFMatrix4 o;
     scaleMatrix(&n, scale->x, scale->y, scale->z);
     vmmulr_q(&o, transform, &n);
-    func_eboot_0884CCE8(D_eboot_089C70CC, &o);
+    drawable_manager::get()->world_model(&o);
 }
 
 #ifdef BUILD_NONMATCHING
@@ -239,9 +232,9 @@ void model::operator delete(void *p) {
 }
 
 void model::reset_transform() {
-    flags_0x4 = 3;
-    unknown_0x8 = 0;
-    unknown_0xC = 0.0f;
+    flags = drawable::CLEAN | drawable::DISPOSE;
+    next = 0;
+    zindex = 0.0f;
     vmidt_q(&transform);
 }
 
