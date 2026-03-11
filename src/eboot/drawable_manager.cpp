@@ -5,6 +5,7 @@
 #include "drawable.hpp"
 #include "model.hpp"
 #include "drawable_manager.hpp"
+#include "stage_manager.hpp"
 #include "vfpu.h"
 
 #pragma opt_unroll_loops on
@@ -42,7 +43,7 @@ drawable_manager::drawable_manager() {
     writing = 0;
     DRAWABLE_WRITE_HEAD = NULL;
     fragment_start = NULL;
-    flag_0x214 = false;
+    vram_transfer_queued = false;
 }
 
 drawable_manager::~drawable_manager() {
@@ -55,9 +56,10 @@ extern "C" {
         float near_z;
         float far_z;
         u8 padding_0x8[0xB80 - 0x8];
-        ScePspFMatrix4 perspective;
+        ScePspFMatrix4 perspective; // unsure
         ScePspFMatrix4 world;
-        u8 padding_0xBC0[0xDA0 - 0xC00];
+        ScePspFMatrix4 projection;
+        u8 padding_0xC40[0xDA0 - 0xC40];
         ScePspVector3 viewport_scale;
         ScePspVector3 viewport_center;
     } *D_eboot_089C6CB4;
@@ -161,24 +163,51 @@ void drawable_manager::clear() {
     }
 }
 
-#define DITHER_SCALAR(a) ((u8)a & 0xF)
-#define DITHER_ROW(a, b, c, d) ((DITHER_SCALAR(a) << 12) | (DITHER_SCALAR(b) << 8) | (DITHER_SCALAR(c) << 4) | DITHER_SCALAR(d))
-#define DITHER_MATRIX(xx, xy, xz, xw, \
-                      yx, yy, yz, yw, \
-                      zx, zy, zz, zw, \
-                      wx, wy, wz, ww) \
-      ((GE_CMD_DITH0 << 24) | DITHER_ROW(xx, xy, xz, xw)), \
-      ((GE_CMD_DITH1 << 24) | DITHER_ROW(yx, yy, yz, yw)), \
-      ((GE_CMD_DITH2 << 24) | DITHER_ROW(zx, zy, zz, zw)), \
-      ((GE_CMD_DITH3 << 24) | DITHER_ROW(wx, wy, wz, ww))
+extern "C" {
+    extern struct global_089C7508 {
+        u8 padding_0x0[0x6AF0E];
+        u16 stage_id;
+    } *D_eboot_089C7508;
+}
 
+void drawable_manager::draw() {
+    for (int i = 0; i < render_group::GROUP_COUNT; ++i) {
+        if (start_fragment(i)) {
+            if (i == 1) {
+                ScePspFMatrix4 m;
+                vmidt_q(&m);
+                ge::view(&m);
+                ge::projection(&D_eboot_089C6CB4->projection);
+            }
+
+            for (int j = 0; j < z_index_bucket_length[i]; ++j) {
+                drawable *object = z_index_buckets[i][j];
+                while (object != NULL) {
+                    object->draw();
+                    object = object->next;
+                }
+            }
+
+            if (i == 8 && D_eboot_089C7508->stage_id != 0) {
+                base_stage *stage = stage_manager::get()->stage;
+                if (stage != 0 && stage->flag_0x3D4 == true) {
+                    stage->method_088CD61C();
+                }
+            }
+
+            end_fragment();
+        }
+    }
+
+    if (vram_transfer_queued == true) {
+        vram_transfer();
+        vram_transfer_queued = false;
+    }
+}
 
 extern "C" {
-// main loop; draws the 3d scene; iterates by group, calls #draw() of z-index bucketed drawables
-INCLUDE_ASM("asm/eboot/nonmatchings/drawable_manager", func_eboot_0884BA5C);
-
 // texture block transfer display list; refers to the unknown fields, possibly ui textures?
-INCLUDE_ASM("asm/eboot/nonmatchings/drawable_manager", func_eboot_0884C02C);
+INCLUDE_ASM("asm/eboot/nonmatchings/drawable_manager", vram_transfer__16drawable_managerFv);
 }
 
 void drawable_manager::initialize() {
@@ -256,6 +285,17 @@ void drawable_manager::initialize() {
         end_fragment();
     }
 }
+
+#define DITHER_SCALAR(a) ((u8)a & 0xF)
+#define DITHER_ROW(a, b, c, d) ((DITHER_SCALAR(a) << 12) | (DITHER_SCALAR(b) << 8) | (DITHER_SCALAR(c) << 4) | DITHER_SCALAR(d))
+#define DITHER_MATRIX(xx, xy, xz, xw, \
+                      yx, yy, yz, yw, \
+                      zx, zy, zz, zw, \
+                      wx, wy, wz, ww) \
+      ((GE_CMD_DITH0 << 24) | DITHER_ROW(xx, xy, xz, xw)), \
+      ((GE_CMD_DITH1 << 24) | DITHER_ROW(yx, yy, yz, yw)), \
+      ((GE_CMD_DITH2 << 24) | DITHER_ROW(zx, zy, zz, zw)), \
+      ((GE_CMD_DITH3 << 24) | DITHER_ROW(wx, wy, wz, ww))
 
 u32 dither_matrices[3*4] = {
     DITHER_MATRIX(  0, -1,  0, -1,
@@ -395,12 +435,12 @@ int drawable_manager::add(u8 group, drawable *object, ScePspFVector4 *position, 
     return true;
 }
 
-bool drawable_manager::method_0884CCC0(void *unknown_data, u8 unknown_index) {
-    if (flag_0x214 == false) {
-        unknown_0x215 = unknown_index;
-        unknown_0x218 = unknown_data;
-        flag_0x214 = true;
-        return flag_0x214;
+bool drawable_manager::queue_vram_transfer(void *dst, u8 fragment_index) {
+    if (vram_transfer_queued == false) {
+        vram_transfer_fragment_index = fragment_index;
+        vram_transfer_dst = dst;
+        vram_transfer_queued = true;
+        return vram_transfer_queued;
     }
     return false;
 }

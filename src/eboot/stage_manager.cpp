@@ -71,7 +71,7 @@ void stage_manager::call_prop_list_vtable_0x10() {
         prop = prop->next;
     }
     if (stage != 0 && unknown_0xA3E9 == true) {
-        stage->unknown_0x3D4 = true;
+        stage->flag_0x3D4 = true;
     }
 }
 

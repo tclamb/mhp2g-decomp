@@ -40,9 +40,9 @@ struct drawable_manager : singleton<drawable_manager> {
     u8 writing;
     u8 fragment_group;
     u32 *fragment_start;
-    bool flag_0x214;
-    u8 unknown_0x215;
-    void *unknown_0x218;
+    bool vram_transfer_queued;
+    u8 vram_transfer_fragment_index;
+    void *vram_transfer_dst;
     u8 padding_0x21C[12];
 
 
@@ -50,15 +50,18 @@ struct drawable_manager : singleton<drawable_manager> {
     ~drawable_manager();
     void reset();
     void clear();
-    bool start_fragment(u8 group);
-    void end_fragment();
+    void draw();
     void initialize();
     void dither_matrix(u8);
+    bool start_fragment(u8 group);
+    void end_fragment();
     int add(u8 group, drawable *object, ScePspFVector4 *position, bool no_culling);
     int add(u8 group, model *model, bool no_culling);
-    bool method_0884CCC0(void *unknown_data, u8 unknown_index);
+    bool queue_vram_transfer(void *unknown_data, u8 unknown_index);
     void world_model(ScePspFMatrix4 *transform);
 
 private:
+    void vram_transfer();
+
     inline drawable **head(u8 group, int index);
 };

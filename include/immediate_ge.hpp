@@ -268,6 +268,54 @@ namespace immediate_ge {
             impl::emit((GE_CMD_WORLDMATRIXDATA << 24) | ((u32)mm->im.w.z >> 8));
         }
 
+        inline void view(ScePspFMatrix4 *m) {
+            ScePspMatrix4 *mm = reinterpret_cast<ScePspMatrix4*>(m);
+
+            impl::emit(GE_CMD_VIEWMATRIXNUMBER << 24);
+
+            impl::emit((GE_CMD_VIEWMATRIXDATA << 24) | ((u32)mm->im.x.x >> 8));
+            impl::emit((GE_CMD_VIEWMATRIXDATA << 24) | ((u32)mm->im.x.y >> 8));
+            impl::emit((GE_CMD_VIEWMATRIXDATA << 24) | ((u32)mm->im.x.z >> 8));
+
+            impl::emit((GE_CMD_VIEWMATRIXDATA << 24) | ((u32)mm->im.y.x >> 8));
+            impl::emit((GE_CMD_VIEWMATRIXDATA << 24) | ((u32)mm->im.y.y >> 8));
+            impl::emit((GE_CMD_VIEWMATRIXDATA << 24) | ((u32)mm->im.y.z >> 8));
+
+            impl::emit((GE_CMD_VIEWMATRIXDATA << 24) | ((u32)mm->im.z.x >> 8));
+            impl::emit((GE_CMD_VIEWMATRIXDATA << 24) | ((u32)mm->im.z.y >> 8));
+            impl::emit((GE_CMD_VIEWMATRIXDATA << 24) | ((u32)mm->im.z.z >> 8));
+
+            impl::emit((GE_CMD_VIEWMATRIXDATA << 24) | ((u32)mm->im.w.x >> 8));
+            impl::emit((GE_CMD_VIEWMATRIXDATA << 24) | ((u32)mm->im.w.y >> 8));
+            impl::emit((GE_CMD_VIEWMATRIXDATA << 24) | ((u32)mm->im.w.z >> 8));
+        }
+
+        inline void projection(ScePspFMatrix4 *m) {
+            ScePspMatrix4 *mm = reinterpret_cast<ScePspMatrix4*>(m);
+
+            impl::emit(GE_CMD_PROJMATRIXNUMBER << 24);
+
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.x.x >> 8));
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.x.y >> 8));
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.x.z >> 8));
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.x.w >> 8));
+
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.y.x >> 8));
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.y.y >> 8));
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.y.z >> 8));
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.y.w >> 8));
+
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.z.x >> 8));
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.z.y >> 8));
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.z.z >> 8));
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.z.w >> 8));
+
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.w.x >> 8));
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.w.y >> 8));
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.w.z >> 8));
+            impl::emit((GE_CMD_PROJMATRIXDATA << 24) | ((u32)mm->im.w.w >> 8));
+        }
+
         // 0x4X
 
         inline void viewportscale(ScePspVector3 &scale) {

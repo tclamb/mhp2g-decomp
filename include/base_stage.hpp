@@ -151,7 +151,7 @@ struct base_stage : model {
     u16 unknown_0x3A0;
     u16 unknown_0x3A2;
     u8 struct_0x3A4[0x30];
-    u8 unknown_0x3D4;
+    bool flag_0x3D4;
     u8 undefined_0x3D5[3];
     ptmf ptmf_0x3D8;
     stage_depth_buffer_params depth_buffer_params[4];
@@ -175,6 +175,7 @@ struct base_stage : model {
 
     void execute_model_draw_commands();
     void execute_prop_draw_commands();
+    void method_088CD61C();
     void method_088CDCAC();
     void method_088CEA2C();
     void compile_environment_params(stage_environment_params *);

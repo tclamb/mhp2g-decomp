@@ -211,7 +211,7 @@ void base_stage::clear() {
     memset(&prop_skeleton, 0, sizeof(prop_skeleton));
     reset_transform();
     unknown_0x330 = 0; // environment_params->type
-    unknown_0x3D4 = 0;
+    flag_0x3D4 = false;
     flags &= ~drawable::CLEAN;
     unknown_0x1C0 = 0; // animation timer?
     unknown_0x1C2 = 0;
@@ -296,7 +296,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CD4E0);
 // allocate props
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x24__10base_stageFv);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CD61C);
+INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", method_088CD61C__10base_stageFv);
 }
 
 void base_stage::compile_environment_params(stage_environment_params *environment) {
