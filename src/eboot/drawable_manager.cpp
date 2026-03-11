@@ -206,8 +206,42 @@ void drawable_manager::draw() {
 }
 
 extern "C" {
-// texture block transfer display list; refers to the unknown fields, possibly ui textures?
-INCLUDE_ASM("asm/eboot/nonmatchings/drawable_manager", vram_transfer__16drawable_managerFv);
+    struct vram_transfer_request {
+        u8 pad_0x0[0x8];
+        void *src;
+        u8 pad_0xC[0xC];
+    };
+    extern void *D_eboot_089C6CB0;
+    bool func_eboot_08813364(void *global_089C6CB0, u8 buffer_index, vram_transfer_request *out);
+
+    // copies a display list fragment to the write head and calls that copy at the specified index
+    bool func_eboot_088593A0(ge_manager *, u32 *display_list, s32 length, s32 fragment_index);
+}
+
+bool drawable_manager::vram_transfer() {
+    vram_transfer_request req;
+    u32 display_list[16];
+
+    func_eboot_08813364(D_eboot_089C6CB0, ge_manager::get()->active_buffer ^ 1, &req);
+
+    // TODO: immediate_ge with destination parameter
+    u16 transfer_height = 272;
+    u16 transfer_width = 256;
+    u32 *write_head = &display_list[0];
+    *write_head++ = GE_CMD_TEXSYNC << 24;
+    *write_head++ = (GE_CMD_TRANSFERSRC << 24) | ((u32)req.src & 0xFFFFFF);
+    *write_head++ = (GE_CMD_TRANSFERSRCW << 24) | (((u32)req.src & 0xFF000000)) >> 8 | transfer_width;
+    *write_head++ = (GE_CMD_TRANSFERDST << 24) | ((u32)vram_transfer_dst & 0xFFFFFF);
+    *write_head++ = (GE_CMD_TRANSFERDSTW << 24) | (((u32)vram_transfer_dst & 0xFF000000)) >> 8 | transfer_width;
+    *write_head++ = GE_CMD_TRANSFERSRCPOS << 24;
+    *write_head++ = GE_CMD_TRANSFERDSTPOS << 24;
+    *write_head++ = (GE_CMD_TRANSFERSIZE << 24) | ((transfer_height - 1) << 10) | (transfer_width - 1);
+    *write_head++ = (GE_CMD_TRANSFERSTART << 24) | GE_TRANSFER_BPP_4;
+    *write_head++ = GE_CMD_TEXSYNC << 24;
+    *write_head++ = GE_CMD_BASE << 24;
+    *write_head++ = GE_CMD_JUMP << 24;
+
+    return func_eboot_088593A0(ge_manager::get(), display_list, 12, vram_transfer_fragment_index);
 }
 
 void drawable_manager::initialize() {
@@ -350,19 +384,53 @@ void drawable_manager::end_fragment() {
     }
 }
 
-extern "C" {
-// add for player/em objects
-INCLUDE_ASM("asm/eboot/nonmatchings/drawable_manager", func_eboot_0884C8BC);
+inline float min(float x, float y) {
+    return (x < y) ? x : y;
+}
+
+int drawable_manager::add(u8 group, character *character, bool no_culling) {
+    int result;
+    do {
+        character->flags &= ~drawable::VISIBLE;
+        if (no_culling == false) {
+            float s = character->scale.x;
+            if (s < character->scale.y) {
+                s = character->scale.y;
+            }
+            if (s < character->scale.z) {
+                s = character->scale.z;
+            }
+            float z = character->position.z;
+            float y = character->position.y + (0.5f * (s * character->model_pmo.header->scale.y));
+            float x = character->position.x;
+            float w = 0;
+
+            ScePspFVector4 position;
+            sv_q(&position, x, y, z, 0);
+            result = func_eboot_08816EA8(D_eboot_089C6CB4, &position, s * character->model_pmo.header->clipping_distance);
+            if ((u8)result == false) {
+                break;
+            }
+        }
+        if (character->alpha != 0xFF && group == render_group::GROUP_5) {
+            group = render_group::GROUP_7;
+        }
+        result = add(group, (drawable*)character, &character->position, no_culling);
+        if ((u8)result == true) {
+            character->flags |= drawable::VISIBLE;
+        }
+    } while(0);
+    return result;
 }
 
 int drawable_manager::add(u8 group, model *model, bool no_culling) {
     int result;
-    model->flags &= ~0x2;
+    model->flags &= ~drawable::VISIBLE;
     if (no_culling != false ||
         (result = func_eboot_08816EA8(D_eboot_089C6CB4, &model->transform.w, model->model_pmo.header->clipping_distance), (u8)result != false)) {
         result = add(group, model, &model->transform.w, no_culling);
         if ((u8)result == true) {
-            model->flags |= 2;
+            model->flags |= drawable::VISIBLE;
         }
     }
     return result;

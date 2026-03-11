@@ -212,7 +212,7 @@ void base_stage::clear() {
     reset_transform();
     unknown_0x330 = 0; // environment_params->type
     flag_0x3D4 = false;
-    flags &= ~drawable::CLEAN;
+    flags &= ~drawable::VISIBLE;
     unknown_0x1C0 = 0; // animation timer?
     unknown_0x1C2 = 0;
     method_088CDCAC();
@@ -333,7 +333,7 @@ void base_stage::vtable_0x4C() {
     depth_buffer_params[1].unknown_0x8 = 0;
     depth_buffer_params[2].unknown_0x8 = 0;
     depth_buffer_params[0].unknown_0x8 = 0;
-    flags |= drawable::CLEAN;
+    flags |= drawable::VISIBLE;
     vtable_0x1C();
     method_088CDCAC();
     set_ptmf_0x3D8(&base_stage::vtable_0x50);

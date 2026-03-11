@@ -5,6 +5,14 @@
 
 extern u32 *DRAWABLE_WRITE_HEAD;
 
+// stub for type with vtable at D_eboot_089B5C10
+struct character : model {
+    u8 padding_0x1C0[0x200 - 0x1C0];
+    ScePspFVector4 position;
+    u8 padding_0x1E0[0x10];
+    ScePspFVector4 scale;
+    u8 alpha;
+};
 
 struct render_group {
     enum {
@@ -45,7 +53,6 @@ struct drawable_manager : singleton<drawable_manager> {
     void *vram_transfer_dst;
     u8 padding_0x21C[12];
 
-
     drawable_manager();
     ~drawable_manager();
     void reset();
@@ -55,13 +62,14 @@ struct drawable_manager : singleton<drawable_manager> {
     void dither_matrix(u8);
     bool start_fragment(u8 group);
     void end_fragment();
-    int add(u8 group, drawable *object, ScePspFVector4 *position, bool no_culling);
+    int add(u8 group, character *character, bool no_culling);
     int add(u8 group, model *model, bool no_culling);
+    int add(u8 group, drawable *object, ScePspFVector4 *position, bool no_culling);
     bool queue_vram_transfer(void *unknown_data, u8 unknown_index);
     void world_model(ScePspFMatrix4 *transform);
 
 private:
-    void vram_transfer();
+    bool vram_transfer();
 
     inline drawable **head(u8 group, int index);
 };

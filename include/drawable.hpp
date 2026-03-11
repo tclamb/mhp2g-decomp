@@ -6,7 +6,7 @@ struct drawable {
 
     enum {
         DISPOSE = 0x1,
-        CLEAN = 0x2,
+        VISIBLE = 0x2,
     };
 
     u32 flags;

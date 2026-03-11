@@ -232,7 +232,7 @@ void model::operator delete(void *p) {
 }
 
 void model::reset_transform() {
-    flags = drawable::CLEAN | drawable::DISPOSE;
+    flags = drawable::VISIBLE | drawable::DISPOSE;
     next = 0;
     zindex = 0.0f;
     vmidt_q(&transform);

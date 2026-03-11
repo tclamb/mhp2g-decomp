@@ -834,7 +834,7 @@ void stage_manager::vram_clear() {
     vram_transfer_size = 0;
     unknown_0xA2B8 = 0;
     if (stage != 0) {
-        stage->flags &= ~drawable::CLEAN;
+        stage->flags &= ~drawable::VISIBLE;
     }
     flag_0xA3E8 = false;
 }

@@ -64,6 +64,7 @@ initialize__16drawable_managerFv = 0x0884C130; // type:func
 dither_matrix__16drawable_managerFUc = 0x0884C6C4; // type:func
 start_fragment__16drawable_managerFUc = 0x0884C7A0; // type:func
 end_fragment__16drawable_managerFv = 0x0884C818; // type:func
+add__16drawable_managerFUcP9characterb = 0x0884C8BC; // type:func
 add__16drawable_managerFUcP5modelb = 0x0884CA28; // type:func
 add__16drawable_managerFUcP8drawableP14ScePspFVector4b = 0x0884CADC; // type:func
 queue_vram_transfer__16drawable_managerFPvUc = 0x0884CCC0; // type:func
