@@ -84,7 +84,7 @@ void drawable_manager::reset() {
         ge::atest(0xFF, 0xC0, GE_OP_AT_LEAST);
 
         ge::alphablendenable(true);
-        ge::blendmode(GE_BLENDMODE_MUL_AND_ADD, GE_SRCBLEND_SRCALPHA, GE_SRCBLEND_INVSRCALPHA);
+        ge::blendmode(GE_BLENDMODE_MUL_AND_ADD, GE_SRCBLEND_SRCALPHA, GE_DSTBLEND_INVSRCALPHA);
 
         ge::colortestenable(false);
         ge::colortest(GE_OP_NEVER);
@@ -179,10 +179,82 @@ INCLUDE_ASM("asm/eboot/nonmatchings/drawable_manager", func_eboot_0884BA5C);
 
 // texture block transfer display list; refers to the unknown fields, possibly ui textures?
 INCLUDE_ASM("asm/eboot/nonmatchings/drawable_manager", func_eboot_0884C02C);
+}
 
-// like reset, display lists for render groups 1, 2, 5, 6, 18
-// called during startup and from edit_task
-INCLUDE_ASM("asm/eboot/nonmatchings/drawable_manager", func_eboot_0884C130);
+void drawable_manager::initialize() {
+    if (start_fragment(render_group::RESET)) {
+        ge::ztestenable(true);
+        ge::ztest(GE_OP_AT_MOST);
+
+        ge::alphatestenable(true);
+
+        ge::texmapmode(GE_TEXMAP_TEXTURE_COORDS, GE_PROJMAP_POSITION);
+        ge::texfilter(GE_TFILT_LINEAR_MIPMAP_LINEAR, GE_TFILT_LINEAR);
+        ge::texfunc(GE_TEXFUNC_MODULATE, GE_TEXFUNC_COMPONENTS_RGBA);
+        ge::texwrap();
+        ge::texoffset();
+
+        ge::depthclampenable(true);
+        ge::cullfaceenable(false);
+        ge::fogenable(true);
+
+        ge::shademode(GE_SHADE_GOURAUD);
+
+        ge::ambientcolor(0, 0, 0);
+        ge::ambientalpha(0xFF);
+
+        ge::blendfixeda(0xFF, 0xFF, 0xFF);
+        ge::blendfixedb(0xFF, 0xFF, 0xFF);
+
+        end_fragment();
+    }
+
+    if (start_fragment(render_group::GROUP_2)) {
+        ge::atest(0xFF, 0x40, GE_OP_AT_LEAST);
+        ge::alphablendenable(true);
+        ge::blendmode(GE_BLENDMODE_MUL_AND_ADD, GE_SRCBLEND_SRCALPHA, GE_DSTBLEND_INVSRCALPHA);
+
+        ge::lightingenable(false);
+
+        end_fragment();
+    }
+
+    if (start_fragment(render_group::GROUP_5)) {
+        ge::atest(0xFF, 0xC0, GE_OP_AT_LEAST);
+        ge::alphablendenable(false);
+        ge::lightingenable(true);
+
+        end_fragment();
+    }
+
+    if (start_fragment(render_group::GROUP_6)) {
+        ge::atest(0xFF, 0x80, GE_OP_AT_LEAST);
+        ge::alphablendenable(true);
+        ge::blendmode(GE_BLENDMODE_MUL_AND_ADD, GE_SRCBLEND_SRCALPHA, GE_DSTBLEND_INVSRCALPHA);
+
+        ge::lightingenable(false);
+
+        end_fragment();
+    }
+
+    if (start_fragment(render_group::GROUP_18)) {
+        ge::ztestenable(true);
+        ge::ztest(GE_OP_AT_MOST);
+
+        ge::alphatestenable(true);
+
+        ge::texmapmode(GE_TEXMAP_TEXTURE_COORDS, GE_PROJMAP_POSITION);
+        ge::texfilter(GE_TFILT_LINEAR, GE_TFILT_LINEAR);
+        ge::texfunc(GE_TEXFUNC_MODULATE, GE_TEXFUNC_COMPONENTS_RGBA);
+        ge::texwrap();
+        ge::texoffset();
+
+        ge::depthclampenable(true);
+        ge::cullfaceenable(false);
+        ge::lightingenable(false);
+
+        end_fragment();
+    }
 }
 
 u32 dither_matrices[3*4] = {

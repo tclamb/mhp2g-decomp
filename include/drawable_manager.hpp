@@ -52,6 +52,7 @@ struct drawable_manager : singleton<drawable_manager> {
     void clear();
     bool start_fragment(u8 group);
     void end_fragment();
+    void initialize();
     void dither_matrix(u8);
     int add(u8 group, drawable *object, ScePspFVector4 *position, bool no_culling);
     int add(u8 group, model *model, bool no_culling);

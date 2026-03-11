@@ -125,6 +125,8 @@
 #define GE_CMD_ZTEST            0xDE
 #define GE_CMD_BLENDMODE        0xDF
 
+#define GE_CMD_BLENDFIXEDA      0xE0
+#define GE_CMD_BLENDFIXEDB      0xE1
 #define GE_CMD_DITH0            0xE2
 #define GE_CMD_DITH1            0xE3
 #define GE_CMD_DITH2            0xE4
@@ -152,14 +154,17 @@
 #define GE_TEXFUNC_COMPONENTS_RGBA 1
 
 #define GE_TFILT_LINEAR 1
+#define GE_TFILT_LINEAR_MIPMAP_LINEAR 7
 
 #define GE_SHADE_GOURAUD 1
 
 #define GE_LIGHTMODE_SINGLECOLOR 0
 
 #define GE_BLENDMODE_MUL_AND_ADD 0
+
 #define GE_SRCBLEND_SRCALPHA 2
-#define GE_SRCBLEND_INVSRCALPHA 3
+
+#define GE_DSTBLEND_INVSRCALPHA 3
 
 
 extern u32 *DRAWABLE_WRITE_HEAD;
@@ -446,6 +451,14 @@ namespace immediate_ge {
         }
 
         // 0xEX
+
+        inline void blendfixeda(u8 rmask, u8 gmask, u8 bmask) {
+            impl::emit((GE_CMD_BLENDFIXEDA << 24) | (bmask << 16) | (gmask << 8) | rmask);
+        }
+
+        inline void blendfixedb(u8 rmask, u8 gmask, u8 bmask) {
+            impl::emit((GE_CMD_BLENDFIXEDB << 24) | (bmask << 16) | (gmask << 8) | rmask);
+        }
 
         inline void zwritedisable(bool value) {
             impl::emit((GE_CMD_ZWRITEDISABLE << 24) |  value);

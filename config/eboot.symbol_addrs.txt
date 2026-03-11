@@ -58,6 +58,7 @@ __ct__16drawable_managerFv = 0x0884B0A0; // type:func
 __dt__16drawable_managerFv = 0x0884B138; // type:func
 reset__16drawable_managerFv = 0x0884B188; // type:func
 clear__16drawable_managerFv = 0x0884BA04; // type:func
+initialize__16drawable_managerFv = 0x0884C130; // type:func
 dither_matrix__16drawable_managerFUc = 0x0884C6C4; // type:func
 start_fragment__16drawable_managerFUc = 0x0884C7A0; // type:func
 end_fragment__16drawable_managerFv = 0x0884C818; // type:func
