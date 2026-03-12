@@ -87,6 +87,12 @@ struct stage_draw_commands {
     stage_draw_command *prop_commands;
 };
 
+struct stage_fog {
+    float begin;
+    float end;
+    float color;
+};
+
 struct base_stage : model {
     typedef void (base_stage::*ptmf)(void);
 
@@ -171,14 +177,15 @@ struct base_stage : model {
     u16 unknown_0x440;
     u8 undefined_0x442[2];
     u32 unknown_0x444;
-    u8 struct_0x448[0xC];
+    stage_fog fog;
 
     void execute_model_draw_commands();
     void execute_prop_draw_commands();
+    void emit_fog();
     void method_088CD61C();
+    void compile_environment_params(stage_environment_params *);
     void method_088CDCAC();
     void method_088CEA2C();
-    void compile_environment_params(stage_environment_params *);
     stage_unk1_params *compile_fog_params(stage_fog_params *);
     stage_unk2_params *compile_unk1_params(stage_unk1_params *);
     void compile_unk2_params(stage_unk2_params *);

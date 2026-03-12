@@ -340,6 +340,7 @@ draw__10base_stageFv = 0x088CD348;
 definitions__10base_stageFv = 0x088CD474; // type:func
 exits__10base_stageFUi = 0x088CD47C; // type:func
 exit_count__10base_stageFUi = 0x088CD4AC; // type:func
+emit_fog__10base_stageFv = 0x088CD4E0; // type:func
 vtable_0x24__10base_stageFv = 0x088CD614; // type:func
 method_088CD61C__10base_stageFv = 0x088CD61C; // type:func
 compile_environment_params__10base_stageFP24stage_environment_params = 0x088CD810; // type:func

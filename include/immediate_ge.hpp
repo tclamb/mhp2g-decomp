@@ -473,14 +473,14 @@ namespace immediate_ge {
             impl::emit(GE_CMD_TEXFLUSH << 24);
         }
 
-        inline void fog(float color, float s, float t) {
+        inline void fog(float color, float begin, float end) {
             ScePspUnion32 c; c.f = color;
-            ScePspUnion32 fog1; fog1.f = t;
-            float f = t - s;
-            f = 1.0f / (f ? f : 1.0f);
+            ScePspUnion32 fog1; fog1.f = end;
+            float slope = end - begin;
+            slope = 1.0f / (slope ? slope : 1.0f);
             impl::emit((GE_CMD_FOGCOLOR << 24) | (c.uc[2] << 16) | (c.uc[1] << 8) | (c.uc[0]));
             impl::emit((GE_CMD_FOG1 << 24) | (fog1.ui >> 8));
-            ScePspUnion32 fog2; fog2.f = f;
+            ScePspUnion32 fog2; fog2.f = slope;
             impl::emit((GE_CMD_FOG2 << 24) | (fog2.ui >> 8));
         }
 

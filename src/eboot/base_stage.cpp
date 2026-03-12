@@ -2,6 +2,7 @@
 
 #include "base_stage.hpp"
 #include "vfpu.h"
+#include "drawable_manager.hpp"
 #include "immediate_ge.hpp"
 
 using namespace immediate_ge;
@@ -73,6 +74,7 @@ void base_stage::execute_model_draw_commands() {
                 vtable_0x94(pmo, command->data, command->mesh_index);
                 // fallthrough
             case 19:
+                // stage-defined opcode (see stages 13, 17, 39, 46, 66, 80, 99, 124, 192)
                 vtable_0x98(pmo, command->data);
             default:
                 break;
@@ -289,10 +291,27 @@ s8 base_stage::exit_count(u32 ignored_map_id) {
     return count;
 }
 
+#ifdef BUILD_NONMATCHING
+// score 45: 9 regswaps on the args passed to ge::fog; when is ft0 used??
+void base_stage::emit_fog() {
+    stage_fog *fog = &this->fog;
+    if (drawable_manager::get()->start_fragment(render_group::RESET)) {
+        float begin = fog->begin;
+        float end = fog->end;
+        float norm = ge_manager::get()->norm;
+        begin *= norm;
+        end *= norm;
+        ge::fog(fog->color, begin, end);
+        drawable_manager::get()->end_fragment();
+    }
+}
+#else
+extern "C"
+INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", emit_fog__10base_stageFv);
+#endif
+
 extern "C"
 {
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CD4E0);
-
 // allocate props
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x24__10base_stageFv);
 
