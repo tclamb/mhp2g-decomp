@@ -151,13 +151,13 @@ struct pmo {
 
     void draw(skeleton *skeleton, tmh *tmh, ScePspFMatrix4 *transform);
     void draw_mesh(skeleton *skeleton, tmh *tmh, u8 mesh);
-    void draw_alpha(tmh *tmh, ScePspFMatrix4 *transform, u16 mesh, u32 blend_mode, u8 alpha);
-    void draw_rgba8888(tmh *tmh, ScePspFMatrix4 *transform, u16 mesh, u32 blend_mode, u32 color);
+    void draw_alpha(tmh *tmh, ScePspFMatrix4 *transform, u32 mesh, u32 blend_mode, u8 alpha);
+    void draw_rgba8888(tmh *tmh, ScePspFMatrix4 *transform, u32 mesh, u32 blend_mode, u32 color);
     int compile(void *, pmo_header *, pmo_mesh_data *);
-    void set_mesh_color(u32 mesh_index, u8 r, u8 g, u8 b);
-    void set_mesh_shadow_color(u32 mesh_index, u8 r, u8 g, u8 b);
-    void set_mesh_alpha(u32 mesh_index, u8 a);
-    void set_mesh_blend_mode(u32 mesh_index, u8 blend_mode);
+    void set_mesh_color(u16 mesh_index, u8 r, u8 g, u8 b);
+    void set_mesh_shadow_color(u16 mesh_index, u8 r, u8 g, u8 b);
+    void set_mesh_alpha(u16 mesh_index, u8 a);
+    void set_mesh_blend_mode(u16 mesh_index, u8 blend_mode);
     void set_mesh_lighting(u32 mesh_index, u8 lighting_params, bool enable);
     void set_mesh_fog(u32 mesh_index, u8 fog_params, bool enable);
     pmo_mesh_lighting *mesh_lighting(u32 mesh_index);
