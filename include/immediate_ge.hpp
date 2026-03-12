@@ -95,6 +95,12 @@
 #define GE_CMD_LDC3 0x99
 #define GE_CMD_LSC3 0x9A
 
+#define GE_CMD_TEXADDR0       0xA0
+#define GE_CMD_TEXBUFWIDTH0   0xA8
+
+#define GE_CMD_CLUTADDR       0xB0
+#define GE_CMD_CLUTADDRUPPER  0xB1
+#define GE_CMD_TEXSIZE        0xB8
 #define GE_CMD_TRANSFERSRC    0xB2
 #define GE_CMD_TRANSFERSRCW   0xB3
 #define GE_CMD_TRANSFERDST    0xB4
@@ -124,6 +130,7 @@
 #define GE_CMD_MAXZ     0xD7
 
 #define GE_CMD_COLORTEST        0xD8
+#define GE_CMD_COLORREF         0xD9
 #define GE_CMD_COLORTESTMASK    0xDA
 #define GE_CMD_ATEST            0xDB
 #define GE_CMD_STENCILTEST      0xDC
@@ -145,6 +152,7 @@
 
 #define GE_OP_NEVER 0
 #define GE_OP_ALWAYS 1
+#define GE_OP_NOT_EQUALS 3
 #define GE_OP_AT_MOST 5
 #define GE_OP_GREATER_THAN 6
 #define GE_OP_AT_LEAST 7
@@ -175,6 +183,7 @@
 #define GE_SRCBLEND_SRCALPHA 2
 
 #define GE_DSTBLEND_INVSRCALPHA 3
+#define GE_DSTBLEND_FIXB 10
 
 #define GE_TRANSFER_BPP_4 1
 
@@ -492,6 +501,10 @@ namespace immediate_ge {
 
         inline void colortest(u32 op) {
             impl::emit((GE_CMD_COLORTEST << 24) | op);
+        }
+
+        inline void colorref(u8 r, u8 g, u8 b) {
+            impl::emit((GE_CMD_COLORREF << 24) | (b << 16) | (g << 8) | r);
         }
 
         inline void colortestmask(u8 rmask, u8 gmask, u8 bmask) {

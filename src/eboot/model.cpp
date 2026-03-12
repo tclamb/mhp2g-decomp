@@ -62,19 +62,19 @@ void pmo::draw_mesh(skeleton *skeleton, tmh *tmh, u8 mesh_index) {
                 u32 texture_index = material->texture_index;
                 if (material->texture_index != 0xFF) {
                     if (texture_index != last_texture) {
-                        tmh_display_list_fragment *texture_fragment = tmh->display_list_fragments + texture_index;
+                        u32 (&fragment)[8] = tmh->fragments[texture_index].commands;
                         ge::texturemapenable(true);
 
                         ge::texmode(GE_TEXMODE_SWIZZLE);
 
-                        ge::impl::emit(texture_fragment->texformat);
-                        ge::impl::emit(texture_fragment->texture_address_low);
-                        ge::impl::emit(texture_fragment->texture_stride_address_high);
-                        ge::impl::emit(texture_fragment->texture_size);
-                        ge::impl::emit(texture_fragment->clut_format);
-                        ge::impl::emit(texture_fragment->clut_address_low);
-                        ge::impl::emit(texture_fragment->clut_address_high);
-                        ge::impl::emit(texture_fragment->clut_load);
+                        ge::impl::emit(fragment[0]);
+                        ge::impl::emit(fragment[1]);
+                        ge::impl::emit(fragment[2]);
+                        ge::impl::emit(fragment[3]);
+                        ge::impl::emit(fragment[4]);
+                        ge::impl::emit(fragment[5]);
+                        ge::impl::emit(fragment[6]);
+                        ge::impl::emit(fragment[7]);
 
                         ge::texflush();
                         last_texture = material->texture_index;
@@ -178,17 +178,18 @@ void emit_world_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale) {
 #ifdef BUILD_NONMATCHING
 // 65/7700, one regswap remaining
 int pmo::compile(void *buffer, pmo_header *header, pmo_mesh_data *mesh_data) {
+    int i;
+
     this->header = header;
     this->mesh_data = mesh_data;
 
     sv_q(&this->scale, header->scale.x, header->scale.y, header->scale.z, 0);
 
     {
-        int i = 0;
         pmo_material_data *out = (pmo_material_data *)buffer;
         this->material_data = out;
         pmo_material_data *data = header->material_data(0);
-        for (; i < header->material_count(); ++i, ++out, ++data) {
+        for (i = 0; i < header->material_count(); ++i, ++out, ++data) {
             out->color.ui = data->color.ui;
             out->shadow_color.ui = data->shadow_color.ui;
             out->texture_index = data->texture_index;
@@ -198,10 +199,10 @@ int pmo::compile(void *buffer, pmo_header *header, pmo_mesh_data *mesh_data) {
 
     {
         pmo_mesh_lighting *out = (pmo_mesh_lighting *)buffer;
-        this->mesh_lighting_ = out;
+        this->mesh_lighting_data = out;
         pmo_mesh_header *mesh = header->mesh_header(0);
-        for (int i = 0; i < header->mesh_count; ++i, ++out, ++mesh) {
-            out->lighting_cmd = mesh->lighting_cmd;
+        for (i = 0; i < header->mesh_count; ++i, ++out, ++mesh) {
+            out->flags = mesh->lighting_flags;
             out->blend_mode_cmd = mesh->blend_mode_cmd;
         }
         buffer = out;
@@ -219,9 +220,55 @@ int model::compile_pmo(void *buffer, pmo_header *header, pmo_mesh_data *mesh_dat
     return model_pmo.compile(buffer, header, mesh_data);
 }
 
-extern "C"
-INCLUDE_ASM("asm/eboot/nonmatchings/model", compile__3tmhFPvP10tmh_headerUi);
+extern "C" {
+    struct texture {
+        tmh_image_header *data;
+        u32 format;
+        u16 width;
+        u16 height;
+        float *palette_data;
+        u32 palette_width;
+        u32 palette_height;
+    };
 
+    int func_eboot_08859768(ge_manager *, tmh_header *, s32, u32, u32, texture *);
+    u32 func_eboot_0885973C(ge_manager *, u32);
+}
+
+int tmh::compile(void *buffer, tmh_header *header, u8 index) {
+    texture t;
+    if (this != 0) {
+        this->fragments = (tmh_fragment*)buffer;
+        for (int i = 0; i < header->picture_count; ++i) {
+            if (func_eboot_08859768(ge_manager::get(), header, i, 0, 0, &t) == 0) {
+                return 0;
+            }
+
+            tmh_fragment *out = &this->fragments[i] + index;
+
+            out->commands[0] = (GE_CMD_TEXFORMAT << 24) | t.format;
+            out->commands[1] = (GE_CMD_TEXADDR0 << 24) |      ((u32)t.data & 0x00FFFFFF);
+            out->commands[2] = (GE_CMD_TEXBUFWIDTH0 << 24) | (((u32)t.data & 0xFF000000) >> 8) | t.width;
+
+            u32 halign = func_eboot_0885973C(ge_manager::get(), t.height);
+            u32 texsize = (GE_CMD_TEXSIZE << 24) | halign << 8;
+            u32 walign = func_eboot_0885973C(ge_manager::get(), t.width);
+            texsize |= walign;
+            out->commands[3] = texsize;
+
+            u8 index_mask = 0xFF;
+            out->commands[4] = (GE_CMD_CLUTFORMAT << 24) | (index_mask << 8) | t.palette_width;
+            out->commands[5] = (GE_CMD_CLUTADDR << 24) | ((u32)t.palette_data & 0x00FFFFFF);
+            out->commands[6] = (GE_CMD_CLUTADDRUPPER << 24) | (((u32)t.palette_data & 0xFF000000) >> 8);
+            out->commands[7] = (GE_CMD_LOADCLUT << 24) | ((t.palette_height + 7) >> 3);
+        }
+
+        this->header = header;
+        this->picture_count = header->picture_count;
+        return 1;
+    }
+    return 0;
+}
 
 int model::compile_tmh(void *buffer, tmh_header *header) {
     return model_tmh.compile(buffer, header, 0);
@@ -314,21 +361,129 @@ void pmo::set_mesh_blend_mode(u16 mesh_index, u8 blend_mode) {
     }
 }
 
-extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862DA4);
+void pmo::set_mesh_lighting(u16 mesh_index, bool enable) {
+    pmo_mesh_lighting *lighting = mesh_lighting(mesh_index);
+    if (enable == true) {
+        lighting->flags |= pmo_mesh_lighting::LIGHTING;
+    } else {
+        lighting->flags &= ~pmo_mesh_lighting::LIGHTING;
+    }
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862DF8);
+void pmo::set_mesh_fog(u16 mesh_index, bool enable) {
+    pmo_mesh_lighting *lighting = mesh_lighting(mesh_index);
+    if (enable == true) {
+        lighting->flags |= pmo_mesh_lighting::FOG;
+    } else {
+        lighting->flags &= ~pmo_mesh_lighting::FOG;
+    }
 }
 
 pmo_mesh_lighting *pmo::mesh_lighting(u32 mesh_index) {
-    return mesh_lighting_ + mesh_index;
+    return mesh_lighting_data + mesh_index;
+}
+
+void pmo_mesh_lighting::emit() {
+    if ((flags & pmo_mesh_lighting::ENABLE) != 0) {
+        if ((flags & pmo_mesh_lighting::LIGHTING) != 0) {
+            ge::lightingenable(true);
+        } else {
+            ge::lightingenable(false);
+        }
+
+        if ((flags & pmo_mesh_lighting::FOG) != 0) {
+            ge::fogenable(true);
+        } else {
+            ge::fogenable(false);
+        }
+
+        if ((flags & pmo_mesh_lighting::ALPHABLEND) != 0) {
+            ge::alphablendenable(true);
+            ge::impl::emit(blend_mode_cmd);
+
+            const u32 fixed_blend_mode =
+                ((GE_CMD_BLENDMODE << 24) |
+                    (GE_BLENDMODE_MUL_AND_ADD << 8) |
+                    (GE_DSTBLEND_FIXB << 4) |
+                    (GE_SRCBLEND_SRCALPHA));
+            if (blend_mode_cmd == fixed_blend_mode) {
+                ge::colortestenable(true);
+                ge::colortest(GE_OP_NOT_EQUALS);
+                ge::colorref(0, 0, 0);
+            }
+        }
+    }
+}
+
+float spline(float t, float x0, float t0, float dxdt0, float x1, float t1, float dxdt1) {
+    // standard cubic spline interpolation on the interval [t0, t1]
+    // found by solving f(t) = a + b*t + c*t^2 + d*t^3 for coefficients
+    // such that f(t0) = x0, f(t1) = x1, f'(t0) = dxdt0, f'(t1) = dxdt1
+    // for computation, rearrange that solution into the form:
+    //     f(t) =   x0 g0(t*) + dxdt0 (t - t0) h0(t*)
+    //            + x1 g1(t*) + dxdt1 (t - t0) h1(t*)
+    //     where t* = (t - t0) / (t1 - t0)
+    // this yields the following polynomials in the normalized variable:
+    //     g0(t) = 1 - 3t^2 + 2t^3
+    //     h0(t) = 1 - 2t + t^2
+    //     g1(t) = 3t^2 - 2t^3
+    //     h1(t) = -t + t^2
+    float result;
+#ifdef __MWERKS__
+    __asm__ (
+        "lv.s S100, %1"
+        "lv.s S101, %2"
+        "lv.s S102, %3"
+        "lv.s S103, %4"
+        "lv.s S110, %5"
+        "lv.s S111, %6"
+        "lv.s S112, %7"
+        "vsub.s S200, S100, S102" // t - t0
+        "vsub.s S201, S111, S102" // t1 - t0
+        "vrcp.s S201, S201"       // (t1 - t0)^-1
+        "vmul.s S202, S201, S201" // (t1 - t0)^-2
+        "vmul.s S203, S200, S200" // (t - t0)^2
+        "vmul.s S210, S203, S201" // (t - t0)^2 / (t1 - t0)
+        "vmul.s S211, S203, S200" // (t - t0)^3
+        "vmul.s S211, S211, S202" // (t - t0)^3 / (t1 - t0)^2
+        "vfim.s S212, 2.0f"
+        "vmul.s S212, S212, S211" // 2 (t - t0)^3 / (t1 - t0)^2
+        "vmul.s S212, S212, S201" // 2 (t - t0)^3 / (t1 - t0)^3 = 2 t*^3
+        "vfim.s S213, 3.0f"
+        "vmul.s S213, S213, S203" // 3 (t - t0)^2
+        "vmul.s S213, S213, S202" // 3 (t - t0)^2 / (t1 - t0)^2 = 3 t*^2
+        "vfim.s S220, 1.0f"
+        "vadd.s S220, S220, S212" // 1 + 2 t*^3
+        "vsub.s S220, S220, S213" // 1 - 3 t*^3 + 2 t*^2 = g0(t*)
+        "vmul.s S220, S101, S220" // x0 g0(t*)
+        "vsub.s S221, S213, S212" // 3 t*^2 - 2 t*^3  = g1(t*)
+        "vmul.s S221, S110, S221" // x1 g1(t*)
+        "vsub.s S222, S211, S210" // (t - t0) (-t* + t*^2)
+        "vsub.s S222, S222, S210" // (t - t0) (-2t* + t*^2)
+        "vadd.s S222, S222, S200" // (t - t0) (1 - 2t* + t*^2) = (t - t0) h0(t*)
+        "vmul.s S222, S103, S222" // dxdt0 (t - t0) h0(t*)
+        "vsub.s S223, S211, S210" // (t - t0) (-t* + t*^2) = (t - t0) h1(t*)
+        "vmul.s S223, S112, S223" // dxdt1 (t - t0) h1(t*)
+        "vfad.q S000, C220"       // f(t)
+        "sv.s S000, %0"
+        : "=m"(result)
+        : "m"(t),
+          "m"(x0), "m"(t0), "m"(dxdt0),
+          "m"(x1), "m"(t1), "m"(dxdt1)
+    );
+#else
+    float tn = (t - t0) / (t1 - t0);
+    float tn2 = tn*tn;
+    float tn3 = tn*tn*tn;
+    return x0 * (1 - 3*tn2 + 2*tn3)
+        + x1 * (3*tn2 - 2*tn3)
+        + dxdt0 * (t - t0) * (1 - 2*tn + tn2)
+        + dxdt1 * (t - t0) * (-tn + tn2);
+#endif
+    return result;
 }
 
 extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/model", emit__17pmo_mesh_lightingFv);
-
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08862FD8);
-
 INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088630C8);
 
 static int log2table[257] = {

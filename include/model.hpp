@@ -54,28 +54,21 @@ struct tmh_picture_header : tmh_block_header {
 struct tmh_header {
     u8 magic[0x4];
     u32 version;
-    u32 picture_count;
+    s32 picture_count;
     u32 padding_0xC;
 };
 
-struct tmh_display_list_fragment {
-    u32 texformat;
-    u32 texture_address_low;
-    u32 texture_stride_address_high;
-    u32 texture_size;
-    u32 clut_format;
-    u32 clut_address_low;
-    u32 clut_address_high;
-    u32 clut_load;
+struct tmh_fragment {
+    u32 commands[8];
 };
 
 struct tmh {
-    u8 unknown_0x0[4];
-    tmh_display_list_fragment *display_list_fragments;
-    u8 texture_count;
+    tmh_header *header;
+    tmh_fragment *fragments;
+    s8 picture_count;
     u8 unknown_0x9[7];
 
-    int compile(void *buffer, tmh_header *header, u32 index);
+    int compile(void *buffer, tmh_header *header, u8 index);
 };
 
 struct pmo_material_data {
@@ -91,7 +84,7 @@ struct pmo_mesh_data {
 
 struct pmo_mesh_header {
     ScePspIVector2 uv_scale;
-    u32 lighting_cmd;
+    u32 lighting_flags;
     u32 blend_mode_cmd;
     u8 material_count;
     u16 cumulative_material_count;
@@ -109,7 +102,14 @@ struct pmo_tristrip_header {
 };
 
 struct pmo_mesh_lighting {
-    u32 lighting_cmd;
+    enum {
+        LIGHTING   = 1 << 0,
+        FOG        = 1 << 1,
+        ALPHABLEND = 1 << 2,
+        ENABLE     = 1 << 31,
+    };
+
+    u32 flags;
     u32 blend_mode_cmd;
     void emit();
 };
@@ -146,7 +146,7 @@ struct pmo {
     pmo_header *header;
     pmo_mesh_data *mesh_data;
     pmo_material_data *material_data;
-    pmo_mesh_lighting *mesh_lighting_;
+    pmo_mesh_lighting *mesh_lighting_data;
     ScePspFVector4 scale;
 
     void draw(skeleton *skeleton, tmh *tmh, ScePspFMatrix4 *transform);
@@ -158,8 +158,8 @@ struct pmo {
     void set_mesh_shadow_color(u16 mesh_index, u8 r, u8 g, u8 b);
     void set_mesh_alpha(u16 mesh_index, u8 a);
     void set_mesh_blend_mode(u16 mesh_index, u8 blend_mode);
-    void set_mesh_lighting(u32 mesh_index, u8 lighting_params, bool enable);
-    void set_mesh_fog(u32 mesh_index, u8 fog_params, bool enable);
+    void set_mesh_lighting(u16 mesh_index, bool enable);
+    void set_mesh_fog(u16 mesh_index, bool enable);
     pmo_mesh_lighting *mesh_lighting(u32 mesh_index);
 };
 
