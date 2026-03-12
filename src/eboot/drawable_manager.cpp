@@ -384,8 +384,12 @@ void drawable_manager::end_fragment() {
     }
 }
 
-inline float min(float x, float y) {
-    return (x < y) ? x : y;
+inline float max(float x, float y) {
+    float result = x;
+    if (result < y) {
+        result = y;
+    }
+    return result;
 }
 
 int drawable_manager::add(u8 group, character *character, bool no_culling) {
@@ -394,12 +398,9 @@ int drawable_manager::add(u8 group, character *character, bool no_culling) {
         character->flags &= ~drawable::VISIBLE;
         if (no_culling == false) {
             float s = character->scale.x;
-            if (s < character->scale.y) {
-                s = character->scale.y;
-            }
-            if (s < character->scale.z) {
-                s = character->scale.z;
-            }
+            s = max(s, character->scale.y);
+            s = max(s, character->scale.z);
+
             float z = character->position.z;
             float y = character->position.y + (0.5f * (s * character->model_pmo.header->scale.y));
             float x = character->position.x;
@@ -407,6 +408,7 @@ int drawable_manager::add(u8 group, character *character, bool no_culling) {
 
             ScePspFVector4 position;
             sv_q(&position, x, y, z, 0);
+
             result = func_eboot_08816EA8(D_eboot_089C6CB4, &position, s * character->model_pmo.header->clipping_distance);
             if ((u8)result == false) {
                 break;
