@@ -20,3 +20,13 @@ extern "C" {
     void sceKernelDcacheWritebackInvalidateRange(const void *p, unsigned int size);
     void sceKernelDcacheInvalidateRange(const void *p, unsigned int size);
 }
+
+struct stages {
+    enum {
+        GREAT_FOREST_N_2 = 259,
+        TOWER_3 = 130,
+    };
+
+private:
+    stages();
+};

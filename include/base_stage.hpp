@@ -56,7 +56,7 @@ struct stage_definitions {
     u16 *unknown_0x10;
     u16 unknown_0x14;
     u8 undefined_0x16[0x10];
-    u16 unknown_0x26;
+    s16 bug_mesh_index;
     u8 undefined_0x28[0x8];
     stage_exit *exits;
     stage_sound *sounds;
@@ -154,8 +154,8 @@ struct base_stage : model {
     u8 unknown_0x330;
     u8 undefined_0x331[3];
     u8 struct_0x334[0x6C];
-    u16 unknown_0x3A0;
-    u16 unknown_0x3A2;
+    s16 unknown_0x3A0;
+    s16 unknown_0x3A2;
     u8 struct_0x3A4[0x30];
     bool flag_0x3D4;
     u8 undefined_0x3D5[3];
@@ -185,6 +185,7 @@ struct base_stage : model {
     void method_088CD61C();
     void compile_environment_params(stage_environment_params *);
     void method_088CDCAC();
+    void method_088CE668();
     void method_088CEA2C();
     stage_unk1_params *compile_fog_params(stage_fog_params *);
     stage_unk2_params *compile_unk1_params(stage_unk1_params *);

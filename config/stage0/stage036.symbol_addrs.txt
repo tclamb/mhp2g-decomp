@@ -1,4 +1,4 @@
-push_prop_089B969C__13stage_managerFP11prop_paramsUsPUiPUi = 0x088C80AC; // type:func
+push_prop_089B969C__13stage_managerFUisP14ScePspFVector4P14ScePspFVector4 = 0x088C80AC; // type:func
 __ct__10base_stageFv = 0x088CA15C; // type:func
 __dt__10base_stageFv = 0x088CA1E4; // type:func
 vtable_0x5C__10base_stageFv = 0x088CAD38;

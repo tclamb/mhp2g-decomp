@@ -116,7 +116,7 @@ struct stage_manager : singleton<stage_manager> {
     void push_prop_089B965C(prop_params *params);
     void push_prop_089B6208(prop_params *params);
     void push_prop_089B967C(prop_params *params);
-    void push_prop_089B969C(prop_params *params, u16 arg3, u32 *arg4, u32 *arg5);
+    void push_prop_089B969C(u32 bug_flags, s16 bug_mesh_id, ScePspFVector4 *spawn_center, ScePspFVector4 *spawn_box);
     void push_prop_089B6258(prop_params *params, u32 arg3);
     void push_prop_089B96BC(prop_params *params);
     void push_prop_089B6278();

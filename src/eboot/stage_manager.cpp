@@ -487,12 +487,12 @@ void stage_manager::push_prop_089B967C(prop_params *params) {
 }
 
 
-extern "C" void func_game_sub_09CC6950(prop_089B969C *prop, prop_params *params, u16 arg3, u32 *arg4, u32 *arg5);
+extern "C" void func_game_sub_09CC6950(prop_089B969C *, u32, s16, ScePspFVector4 *, ScePspFVector4 *);
 
-void stage_manager::push_prop_089B969C(prop_params *params, u16 arg3, u32 *arg4, u32 *arg5) {
+void stage_manager::push_prop_089B969C(u32 bug_flags, s16 bug_mesh_index, ScePspFVector4 *spawn_center, ScePspFVector4 *spawn_box) {
     prop_089B969C *prop = alloc_and_push_prop<prop_089B969C>();
     link_model(prop, true);
-    func_game_sub_09CC6950(prop, params, arg3, arg4, arg5);
+    func_game_sub_09CC6950(prop, bug_flags, bug_mesh_index, spawn_center, spawn_box);
 }
 
 

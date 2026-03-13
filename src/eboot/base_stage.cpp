@@ -3,6 +3,7 @@
 #include "base_stage.hpp"
 #include "vfpu.h"
 #include "drawable_manager.hpp"
+#include "stage_manager.hpp"
 #include "immediate_ge.hpp"
 
 using namespace immediate_ge;
@@ -21,7 +22,9 @@ extern struct global_089C7508 {
     u8 padding_0x0[0x422];
     bool allow_hidden_flag;
     u8 padding_0x423[0x6AF0E - 0x423];
-    u16 render_stage;
+    u16 stage_id;
+    u8 padding_0x6AF10[0x6AF14 - 0x6AF10];
+    u32 flags_0x6AF14;
 } *D_eboot_089C7508;
 
 void base_stage::execute_model_draw_commands() {
@@ -249,7 +252,7 @@ extern "C" {
 }
 
 void base_stage::draw() {
-    if (D_eboot_089C7508->render_stage != false) {
+    if (D_eboot_089C7508->stage_id != 0) {
         if (vtable_0x48() != 0) {
             vmidt_q(&transform);
             if (vtable_0x48()->model_commands != 0) {
@@ -310,12 +313,40 @@ extern "C"
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", emit_fog__10base_stageFv);
 #endif
 
-extern "C"
-{
-// allocate props
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x24__10base_stageFv);
+void base_stage::vtable_0x24() {
+    method_088CEA2C();
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", method_088CD61C__10base_stageFv);
+void base_stage::method_088CD61C() {
+    if (flag_0x3D4 != 0) {
+        ge::ditherenable(true);
+        drawable_manager::get()->dither_matrix(0);
+
+        ge::alphatestenable(false);
+        ge::lightingenable(false);
+
+        ge::alphablendenable(true);
+        ge::blendmode(GE_BLENDMODE_MUL_AND_ADD, GE_SRCBLEND_SRCALPHA, GE_DSTBLEND_INVSRCALPHA);
+
+        ge::ztestenable(false);
+        ge::ztest(GE_OP_NEVER);
+
+        ge::texturemapenable(false);
+
+        ge::shademode(GE_SHADE_GOURAUD);
+
+        vtable_0x9C();
+        method_088CE668();
+
+        ge::ztest(GE_OP_AT_MOST);
+        ge::ztestenable(true);
+
+        ge::alphatestenable(true);
+
+        ge::ditherenable(false);
+
+        flag_0x3D4 = false;
+    }
 }
 
 void base_stage::compile_environment_params(stage_environment_params *environment) {
@@ -359,8 +390,95 @@ void base_stage::vtable_0x4C() {
 }
 
 extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x50__10base_stageFv);
+    struct resource_type {
+        enum {
+            PICKAXE = 3,
+            BUG_NET = 4,
+        };
+    private: resource_type();
+    };
 
+    struct resource_node {
+        ScePspFVector3 position;
+        float unknown_0xC; // interaction distance?
+        u16 unknown_0x10; // loot table?
+        u16 remaining;
+        u16 type;
+        u16 unknown_0x16; // high tier rolls?
+    };
+
+    extern void *D_eboot_08A5DD4C;
+    resource_node *func_eboot_08869568(void *, int);
+
+    struct bug_flag {
+        enum {
+            SCALE_WITH_ALPHA = 1,
+            PERSISTENT = 2,
+            RANDOM_SPAWN_POSITION = 4,
+        };
+    private: bug_flag();
+    };
+}
+
+
+void base_stage::vtable_0x50() {
+    if (unknown_0x3A0 != 0) {
+        if (unknown_0x3A0 == 1) {
+            if (--unknown_0x3A2 <= 0) {
+                unknown_0x3A0 = 2;
+                unknown_0x3A2 = 2;
+            }
+        } else if (unknown_0x3A0 == 2) {
+            if (--unknown_0x3A2 <= 0) {
+                unknown_0x3A0 = 3;
+                unknown_0x3A2 = 0x5A;
+            }
+        } else {
+            if (--unknown_0x3A2 <= 0) {
+                unknown_0x3A0 = 0;
+                unknown_0x3A2 = 0;
+            }
+        }
+    }
+    resource_node *node = NULL;
+    if ((bool)(D_eboot_089C7508->flags_0x6AF14 & 1) != true) {
+        node = func_eboot_08869568(D_eboot_08A5DD4C, D_eboot_089C7508->stage_id);
+    }
+    if (node) {
+        while (node->position.x != -1.0f) {
+            if (node->remaining > 0 && node->type == resource_type::BUG_NET) {
+                stage_definitions *assets = stage_manager::get()->stage->definitions();
+                if (assets->bug_mesh_index != -1 && (unknown_0x1C0 & 0x7F) == 0) {
+                    ScePspFVector4 spawn_center, spawn_box;
+                    sv_q(&spawn_center, node->position.x, node->position.y + 65.0f, node->position.z, 0.0f);
+                    sv_q(&spawn_box, 64.0f, 64.0f, 64.0f, 0.0f);
+                    switch (D_eboot_089C7508->stage_id) {
+                        case stages::TOWER_3:
+                        case stages::GREAT_FOREST_N_2: {
+                            stage_definitions *assets = stage_manager::get()->stage->definitions();
+                            u32 flags = bug_flag::RANDOM_SPAWN_POSITION;
+                            stage_manager::get()->push_prop_089B969C(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
+                            break;
+                        }
+                        default: {
+                            stage_definitions *assets = stage_manager::get()->stage->definitions();
+                            u32 flags = bug_flag::RANDOM_SPAWN_POSITION | bug_flag::SCALE_WITH_ALPHA;
+                            stage_manager::get()->push_prop_089B969C(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
+                            break;
+                        }
+                    }
+                }
+            }
+            ++node;
+        }
+    }
+    method_088CDCAC();
+    vtable_0x20();
+    ++unknown_0x1C0;
+    unknown_0x1C2 += 0x2E;
+}
+
+extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CDC74);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", method_088CDCAC__10base_stageFv);
@@ -371,7 +489,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x9C__10base_stageFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CE4F4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CE668);
+INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", method_088CE668__10base_stageFv);
 }
 
 void base_stage::method_088CEA2C() {
