@@ -347,6 +347,7 @@ compile_environment_params__10base_stageFP24stage_environment_params = 0x088CD81
 __dl__10base_stageFPv = 0x088CD894; // type:func
 vtable_0x4C__10base_stageFv = 0x088CD89C; // type:func
 vtable_0x50__10base_stageFv = 0x088CD94C; // type:func
+method_088CDC74__10base_stageFv = 0x088CDC74; // type:func
 method_088CDCAC__10base_stageFv = 0x088CDCAC; // type:func
 vtable_0xA4__10base_stageFv = 0x088CDDB4; // type:func
 vtable_0x9C__10base_stageFv = 0x088CDDBC; // type:func

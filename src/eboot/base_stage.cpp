@@ -479,12 +479,53 @@ void base_stage::vtable_0x50() {
 }
 
 extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CDC74);
+    extern void *D_game_task_09C0D430;
+    u8 func_game_task_09AAEE58(void *, u8, bool, bool);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", method_088CDCAC__10base_stageFv);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0xA4__10base_stageFv);
+bool base_stage::method_088CDC74() {
+    return func_game_task_09AAEE58(D_game_task_09C0D430, 54, false, false) == true;
+}
 
+extern "C" {
+    bool func_eboot_0886A304(void *, bool);
+    int func_eboot_0886A354(void *, bool);
+}
+
+void base_stage::method_088CDCAC() {
+    if (vtable_0xA4() == false) {
+        unknown_0x444 = 0;
+        return;
+    }
+
+    if (func_eboot_0886A304(D_eboot_08A5DD4C, true)) {
+        return;
+    }
+
+    if (func_game_task_09AAEE58(D_game_task_09C0D430, 54, true, true) == true) {
+        unknown_0x444 = 2;
+        return;
+    }
+
+    if (func_eboot_0886A354(D_eboot_08A5DD4C, true) - func_eboot_0886A354(D_eboot_08A5DD4C, false) < 900) {
+        unknown_0x444 = 0;
+        return;
+    }
+
+    if ((func_eboot_0886A354(D_eboot_08A5DD4C, false) / 7200 & 1) != 0) {
+        unknown_0x444 = 0;
+        return;
+    }
+
+    unknown_0x444 = 1;
+}
+
+bool base_stage::vtable_0xA4() {
+    return false;
+}
+
+extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x9C__10base_stageFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CE4F4);

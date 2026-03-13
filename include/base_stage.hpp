@@ -137,7 +137,7 @@ struct base_stage : model {
     virtual void vtable_0x98(pmo *, void *);
     virtual void vtable_0x9C();
     virtual void vtable_0xA0();
-    virtual void vtable_0xA4();
+    virtual bool vtable_0xA4();
     virtual u32 vtable_0xA8() { return 0; }
     virtual u32 vtable_0xAC();
     virtual void vtable_0xB0();
@@ -184,6 +184,7 @@ struct base_stage : model {
     void emit_fog();
     void method_088CD61C();
     void compile_environment_params(stage_environment_params *);
+    bool method_088CDC74();
     void method_088CDCAC();
     void method_088CE668();
     void method_088CEA2C();
