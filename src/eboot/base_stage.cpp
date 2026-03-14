@@ -612,11 +612,29 @@ float *base_stage::compile_unk2_params(float *in) {
     return in + 12;
 }
 
+void *base_stage::method_088CEDC0() {
+    stage_definitions *d = definitions();
+    void *result;
+    if (d != 0) {
+        result = d->unknown_0x28;
+    } else {
+        result = 0;
+    }
+    return result;
+}
+
+void *base_stage::method_088CEDF0() {
+    stage_definitions *d = definitions();
+    void *result;
+    if (d != 0) {
+        result = d->unknown_0x2C;
+    } else {
+        result = 0;
+    }
+    return result;
+}
+
 extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CEDC0);
-
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CEDF0);
-
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x34__10base_stageFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x38__10base_stageFv);

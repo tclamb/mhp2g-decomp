@@ -43,7 +43,8 @@ struct stage_definitions {
     u16 unknown_0x14;
     u8 undefined_0x16[0x10];
     s16 bug_mesh_index;
-    u8 undefined_0x28[0x8];
+    void *unknown_0x28;
+    void *unknown_0x2C;
     stage_exit *exits;
     stage_sound *sounds;
     u32 *unknown_0x38;
@@ -176,6 +177,8 @@ struct base_stage : model {
     void method_088CDCAC();
     void method_088CE668();
     void method_088CEA2C();
+    void *method_088CEDC0();
+    void *method_088CEDF0();
     float *compile_fog_params(float *);
     float *compile_unk1_params(float *);
     float *compile_unk2_params(float *);
