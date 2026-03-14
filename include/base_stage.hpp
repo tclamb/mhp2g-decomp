@@ -153,10 +153,12 @@ struct base_stage : model {
     skeleton prop_skeleton;
     u8 unknown_0x330;
     u8 undefined_0x331[3];
-    u8 struct_0x334[0x6C];
+    ScePspFVector3 unknown_0x334[9];
     s16 unknown_0x3A0;
     s16 unknown_0x3A2;
-    u8 struct_0x3A4[0x30];
+    ScePspFVector3 unknown_0x3A4;
+    u32 unknown_0x3B0;
+    u32 unknown_0x3B4[8];
     bool flag_0x3D4;
     u8 undefined_0x3D5[3];
     ptmf ptmf_0x3D8;
@@ -188,9 +190,9 @@ struct base_stage : model {
     void method_088CDCAC();
     void method_088CE668();
     void method_088CEA2C();
-    stage_unk1_params *compile_fog_params(stage_fog_params *);
-    stage_unk2_params *compile_unk1_params(stage_unk1_params *);
-    void compile_unk2_params(stage_unk2_params *);
+    float *compile_fog_params(float *);
+    float *compile_unk1_params(float *);
+    float *compile_unk2_params(float *);
 
 
 protected:

@@ -352,17 +352,18 @@ void base_stage::method_088CD61C() {
 void base_stage::compile_environment_params(stage_environment_params *environment) {
     unknown_0x330 = environment->type;
 
-    stage_unk1_params *unk1_params;
-    stage_unk2_params *unk2_params;
+    float *in;
     switch (unknown_0x330) {
     case 1:
-        unk1_params = compile_fog_params((stage_fog_params *)environment->data);
-        compile_unk1_params(unk1_params);
+        in = (float *)environment->data;
+        in = compile_fog_params(in);
+        compile_unk1_params(in);
         break;
     case 2:
-        unk1_params = compile_fog_params((stage_fog_params *)environment->data);
-        unk2_params = compile_unk1_params(unk1_params);
-        compile_unk2_params(unk2_params);
+        in = (float *)environment->data;
+        in = compile_fog_params(in);
+        in = compile_unk1_params(in);
+        compile_unk2_params(in);
         break;
     default:
         unknown_0x330 = 0;
@@ -527,9 +528,24 @@ bool base_stage::vtable_0xA4() {
 
 extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x9C__10base_stageFv);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CE4F4);
 
+template<typename T, typename U>
+inline T lerp(T a, T b, U t) {
+    return a + (T) (t * (b - a));
+}
+
+void lerp_bgra8888(float *out, void *ignored, u8 *a, u8 *b, float t) {
+    ScePspUnion32 result;
+    result.uc[0] = lerp(a[2], b[2], t);
+    result.uc[1] = lerp(a[1], b[1], t);
+    result.uc[2] = lerp(a[0], b[0], t);
+    result.uc[3] = lerp(a[3], b[3], t);
+    *out = result.f;
+}
+
+extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", method_088CE668__10base_stageFv);
 }
 
@@ -550,14 +566,53 @@ void base_stage::method_088CEA2C() {
     unknown_0x440 = 0;
 }
 
+extern "C" {
+    void *memcpy(void *, void *, int);
+}
+
+
+float *base_stage::compile_fog_params(float *in) {
+    memcpy(&fog.color, in++, sizeof(fog.color));
+    memcpy(&fog.begin, in++, sizeof(fog.begin));
+    memcpy(&fog.end, in++, sizeof(fog.end));
+    return in;
+}
+
+float *base_stage::compile_unk1_params(float *in) {
+    u32 size = sizeof(unknown_0x334[0]);
+    u32 stride = sizeof(unknown_0x334[0]) / sizeof(*in);
+    memcpy(&unknown_0x334[0], in + 0 * stride, size);
+    memcpy(&unknown_0x334[3], in + 1 * stride, size);
+    memcpy(&unknown_0x334[6], in + 2 * stride, size);
+    memcpy(&unknown_0x334[1], in + 3 * stride, size);
+    memcpy(&unknown_0x334[4], in + 4 * stride, size);
+    memcpy(&unknown_0x334[7], in + 5 * stride, size);
+    memcpy(&unknown_0x334[2], in + 6 * stride, size);
+    memcpy(&unknown_0x334[5], in + 7 * stride, size);
+    memcpy(&unknown_0x334[8], in + 8 * stride, size);
+    return in + 9 * stride;
+}
+
+inline u32 from_bgra8888(ScePspUnion32 &x) {
+    return (x.uc[3] << 24) | (x.uc[0] << 16) |  (x.uc[1] << 8) | x.uc[2];
+}
+
+float *base_stage::compile_unk2_params(float *in) {
+    memcpy(&unknown_0x3A4, in, 0xC);
+    memcpy(&unknown_0x3B0, in + 3, 4);
+    ScePspUnion32 x;
+    memcpy(&x, in +  4, 4); unknown_0x3B4[0] = from_bgra8888(x);
+    memcpy(&x, in +  5, 4); unknown_0x3B4[1] = from_bgra8888(x);
+    memcpy(&x, in +  6, 4); unknown_0x3B4[2] = from_bgra8888(x);
+    memcpy(&x, in +  7, 4); unknown_0x3B4[3] = from_bgra8888(x);
+    memcpy(&x, in +  8, 4); unknown_0x3B4[4] = from_bgra8888(x);
+    memcpy(&x, in +  9, 4); unknown_0x3B4[5] = from_bgra8888(x);
+    memcpy(&x, in + 10, 4); unknown_0x3B4[6] = from_bgra8888(x);
+    memcpy(&x, in + 11, 4); unknown_0x3B4[7] = from_bgra8888(x);
+    return in + 12;
+}
 
 extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", compile_fog_params__10base_stageFP16stage_fog_params);
-
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", compile_unk1_params__10base_stageFP17stage_unk1_params);
-
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", compile_unk2_params__10base_stageFP17stage_unk2_params);
-
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CEDC0);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", func_eboot_088CEDF0);
