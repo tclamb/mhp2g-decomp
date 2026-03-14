@@ -34,6 +34,18 @@ struct stage_exit {
     u8 undefined_0x24[0x10];
 };
 
+struct stage_definitions_0x28_t {
+    ScePspFVector3 position;
+    float near;
+    float far;
+    u16 near_index;
+    u16 far_index;
+};
+
+typedef ScePspFVector2 stage_definitions_0x2C_t[4];
+
+struct stage_definitions_0x38_t;
+
 struct stage_definitions {
     u32 unknown_0x0;
     u32 unknown_0x4;
@@ -43,11 +55,11 @@ struct stage_definitions {
     u16 unknown_0x14;
     u8 undefined_0x16[0x10];
     s16 bug_mesh_index;
-    void *unknown_0x28;
-    void *unknown_0x2C;
+    stage_definitions_0x28_t *unknown_0x28;
+    stage_definitions_0x2C_t *unknown_0x2C;
     stage_exit *exits;
     stage_sound *sounds;
-    u32 *unknown_0x38;
+    stage_definitions_0x38_t *unknown_0x38;
     u8 unknown_0x3C;
     u8 exit_count;
     s8 unknown_0x3E;
@@ -65,7 +77,6 @@ struct stage_draw_command {
     u8 mesh_index;
     void *data;
 };
-
 
 struct stage_draw_commands {
     s16 model_commands_length;
@@ -96,11 +107,11 @@ struct base_stage : model {
     virtual stage_definitions *definitions();
     virtual stage_exit *exits(u32 map_id);
     virtual s8 exit_count(u32 map_id);
-    virtual void vtable_0x34();
-    virtual void vtable_0x38();
-    virtual void vtable_0x3C();
-    virtual void vtable_0x40();
-    virtual void vtable_0x44();
+    virtual stage_definitions_0x28_t *vtable_0x34();
+    virtual void *vtable_0x38();
+    virtual void *vtable_0x3C();
+    virtual void *vtable_0x40();
+    virtual void *vtable_0x44();
     virtual stage_draw_commands *vtable_0x48();
     virtual void vtable_0x4C();
     virtual void vtable_0x50();
@@ -126,10 +137,10 @@ struct base_stage : model {
     virtual void vtable_0xA0();
     virtual bool vtable_0xA4();
     virtual u32 vtable_0xA8() { return 0; }
-    virtual u32 vtable_0xAC();
-    virtual void vtable_0xB0();
-    virtual void vtable_0xB4();
-    virtual void vtable_0xB8();
+    virtual u8 vtable_0xAC();
+    virtual stage_sound *vtable_0xB0();
+    virtual u8 vtable_0xB4();
+    virtual stage_definitions_0x38_t *vtable_0xB8();
 
     static void operator delete(void *p);
 
@@ -177,8 +188,8 @@ struct base_stage : model {
     void method_088CDCAC();
     void method_088CE668();
     void method_088CEA2C();
-    void *method_088CEDC0();
-    void *method_088CEDF0();
+    stage_definitions_0x28_t *method_088CEDC0();
+    stage_definitions_0x2C_t *method_088CEDF0();
     float *compile_fog_params(float *);
     float *compile_unk1_params(float *);
     float *compile_unk2_params(float *);

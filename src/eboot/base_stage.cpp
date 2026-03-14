@@ -226,11 +226,17 @@ void base_stage::clear() {
 
 extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x1C__10base_stageFv);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0xAC__10base_stageFv);
+u8 base_stage::vtable_0xAC() {
+    return definitions()->sound_count;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0xB0__10base_stageFv);
+stage_sound *base_stage::vtable_0xB0() {
+    return definitions()->sounds;
+}
 
+extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x20__10base_stageFv);
 }
 
@@ -612,42 +618,56 @@ float *base_stage::compile_unk2_params(float *in) {
     return in + 12;
 }
 
-void *base_stage::method_088CEDC0() {
+stage_definitions_0x28_t *base_stage::method_088CEDC0() {
     stage_definitions *d = definitions();
-    void *result;
+    stage_definitions_0x28_t *result;
     if (d != 0) {
         result = d->unknown_0x28;
     } else {
-        result = 0;
+        result = NULL;
     }
     return result;
 }
 
-void *base_stage::method_088CEDF0() {
+stage_definitions_0x2C_t *base_stage::method_088CEDF0() {
     stage_definitions *d = definitions();
-    void *result;
+    stage_definitions_0x2C_t *result;
     if (d != 0) {
         result = d->unknown_0x2C;
     } else {
-        result = 0;
+        result = NULL;
     }
     return result;
 }
 
-extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x34__10base_stageFv);
+stage_definitions_0x28_t *base_stage::vtable_0x34() {
+    return NULL;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x38__10base_stageFv);
+void *base_stage::vtable_0x38() {
+    return NULL;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x48__10base_stageFv);
+stage_draw_commands *base_stage::vtable_0x48() {
+    return NULL;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x3C__10base_stageFv);
+void *base_stage::vtable_0x3C() {
+    return NULL;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x40__10base_stageFv);
+void *base_stage::vtable_0x40() {
+    return NULL;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x44__10base_stageFv);
+void *base_stage::vtable_0x44() {
+    return NULL;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0xB4__10base_stageFv);
+u8 base_stage::vtable_0xB4() {
+    return definitions()->unknown_0x40;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0xB8__10base_stageFv);
+stage_definitions_0x38_t *base_stage::vtable_0xB8() {
+    return definitions()->unknown_0x38;
 }
