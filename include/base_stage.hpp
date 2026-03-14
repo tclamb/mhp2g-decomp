@@ -3,20 +3,6 @@
 #include "common.h"
 #include "model.hpp"
 
-struct stage_fog_params {
-    float color;
-    float near;
-    float far;
-};
-
-struct stage_unk1_params {
-
-};
-
-struct stage_unk2_params {
-
-};
-
 struct stage_environment_params {
     u16 type;
     u8 data[0];
