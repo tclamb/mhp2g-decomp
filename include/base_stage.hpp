@@ -137,7 +137,7 @@ struct base_stage : model {
     virtual void vtable_0xA0();
     virtual bool vtable_0xA4();
     virtual u32 vtable_0xA8() { return 0; }
-    virtual u8 vtable_0xAC();
+    virtual int vtable_0xAC();
     virtual stage_sound *vtable_0xB0();
     virtual u8 vtable_0xB4();
     virtual stage_definitions_0x38_t *vtable_0xB8();

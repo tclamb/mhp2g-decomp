@@ -228,7 +228,7 @@ extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x1C__10base_stageFv);
 }
 
-u8 base_stage::vtable_0xAC() {
+int base_stage::vtable_0xAC() {
     return definitions()->sound_count;
 }
 
@@ -247,7 +247,18 @@ void base_stage::call_ptmf_0x3D8() {
 }
 
 extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", destroy__10base_stageFv);
+    extern void *D_eboot_08A5DE5C;
+
+    int func_eboot_08885198(void *, u32, u8, s32, u8);
+}
+
+void base_stage::destroy() {
+    func_eboot_08885198(D_eboot_08A5DE5C, 6, 0xC0, 0, 0);
+    int i;
+    stage_sound *sound = vtable_0xB0();
+    for (i = 0; i < vtable_0xAC(); ++i, ++sound) {
+        func_eboot_08885198(D_eboot_08A5DE5C, sound->unknown_0x4, 0xC0, i + 1, 0);
+    }
 }
 
 extern "C" {
