@@ -19,7 +19,11 @@ base_stage::~base_stage() {
 }
 
 extern struct global_089C7508 {
-    u8 padding_0x0[0x422];
+    u8 padding_0x0[0x1C];
+    u16 short_0x1C;
+    u8 padding_0x1E[0x2E - 0x1E];
+    u8 byte_0x2E;
+    u8 padding_0x2F[0x422-0x2F];
     bool allow_hidden_flag;
     u8 padding_0x423[0x6AF0E - 0x423];
     u16 stage_id;
@@ -225,7 +229,35 @@ void base_stage::clear() {
 }
 
 extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x1C__10base_stageFv);
+    extern void *D_eboot_08A5DE5C;
+    int func_eboot_08885198(void *, u32, u8, u32, u8);
+    void func_eboot_08883858(void *, u32, u32, u32, u32, u32, ScePspFVector4*, u32, u32, u32, bool);
+    int func_eboot_088852C8(void *, u32, u32, u32);
+    void func_eboot_0888444C(void *, u32, u32, u32, u32, ScePspFVector4 *, u32, u32, u32);
+
+    bool func_eboot_0884F9A0(void *, int);
+
+    extern void *D_eboot_09A4ADAC;
+    bool func_eboot_088D0824(void *, u32, u8);
+}
+
+void base_stage::vtable_0x1C() {
+    int i;
+    stage_sound *sound = vtable_0xB0();
+    for (i = 0; i < vtable_0xAC(); ++i, ++sound) {
+        if ((bool)(D_eboot_089C7508->flags_0x6AF14 & 1) == false && func_eboot_0884F9A0(D_eboot_089C7508, 0) == true) {
+            func_eboot_08885198(D_eboot_08A5DE5C, sound->unknown_0x4, 0xC0, i + 1, 0);
+        } else {
+            if (func_eboot_088D0824(D_eboot_09A4ADAC, sound->unknown_0x8, 0) != false) {
+                continue;
+            }
+            if (sound->unknown_0x0 == 0) {
+                stage_manager::get()->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC);
+            } else {
+                func_eboot_08883858(D_eboot_08A5DE5C, sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC, 0, 0, false);
+            }
+        }
+    }
 }
 
 int base_stage::vtable_0xAC() {
@@ -236,20 +268,65 @@ stage_sound *base_stage::vtable_0xB0() {
     return definitions()->sounds;
 }
 
-extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x20__10base_stageFv);
+void base_stage::vtable_0x20() {
+    if ((bool)(D_eboot_089C7508->flags_0x6AF14 & 1) != true) {
+        int i;
+        u16 *shorts = stage_manager::get()->stage->definitions()->unknown_0x10;
+        for (i = 0; i < (int)stage_manager::get()->stage->definitions()->unknown_0x3E; ++i, shorts += 12) {
+            int global_sound = 0;
+            if (shorts[1] == 0x17 && shorts[11] == 0) {
+                ScePspFVector4 *position = vtable_0x44();
+                if (position != NULL) {
+                    if ((0 < (D_eboot_089C7508->flags_0x6AF14 & 1)) == 0) {
+                        u8 byte_0x2E = D_eboot_089C7508->byte_0x2E;
+                        switch (byte_0x2E) {
+                        default:
+                            break;
+                        case 6:
+                        case 5:
+                        case 7:
+                        case 8:
+                            if (func_eboot_088852C8(D_eboot_08A5DE5C, 6, 0xC0, 0) != false) {
+                                func_eboot_08885198(D_eboot_08A5DE5C, 6, 0xC0, 0, 0);
+                            }
+                            global_sound = 1;
+                            break;
+                        }
+                    }
+                    if (global_sound == 0) {
+                        stage_manager::get()->register_sound(6, 0x11, 0, 0xC0, 0, position, 9);
+                    }
+                }
+                break;
+            }
+        }
+    }
+    stage_sound *sound = vtable_0xB0();
+    for (int i = 0; i < vtable_0xAC(); ++i, ++sound) {
+        if ((0 < (D_eboot_089C7508->flags_0x6AF14 & 1)) == 0 &&
+            func_eboot_0884F9A0(D_eboot_089C7508, 0) == 1) {
+            if (func_eboot_088852C8(D_eboot_08A5DE5C, sound->unknown_0x4, 0xC0, i + 1) != 0) {
+                func_eboot_08885198(D_eboot_08A5DE5C, sound->unknown_0x4, 0xC0, i + 1, 0);
+            }
+        } else if (func_eboot_088D0824(D_eboot_09A4ADAC, sound->unknown_0x8, 1) == 0) {
+            if (sound->unknown_0x0 == 0) {
+                stage_manager::get()->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC);
+            } else {
+                if (D_eboot_089C7508->short_0x1C % sound->unknown_0x0 == 0) {
+                    func_eboot_08883858(D_eboot_08A5DE5C, sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC, 0, 0, false);
+                }
+            }
+            if (sound->unknown_0x0 != 0 && sound->unknown_0x8 != 0x50) {
+                func_eboot_0888444C(D_eboot_08A5DE5C, sound->unknown_0x4, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC, 0, 0);
+            }
+        }
+    }
 }
 
 void base_stage::call_ptmf_0x3D8() {
     if (ptmf_0x3D8 != 0) {
         (this->*ptmf_0x3D8)();
     }
-}
-
-extern "C" {
-    extern void *D_eboot_08A5DE5C;
-
-    int func_eboot_08885198(void *, u32, u8, s32, u8);
 }
 
 void base_stage::destroy() {
@@ -562,25 +639,71 @@ void lerp_bgra8888(float *out, void *ignored, u8 *a, u8 *b, float t) {
     *out = result.f;
 }
 
-extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", method_088CE668__10base_stageFv);
+void base_stage::method_088CE668() {
+    if (unknown_0x3A0 != 0) {
+        ge::vertextype(
+            GE_VTYPE_TC_NONE,
+            GE_VTYPE_COL_8888,
+            GE_VTYPE_NRM_NONE,
+            GE_VTYPE_POS_S16,
+            GE_VTYPE_WEIGHT_NONE,
+            GE_VTYPE_IDX_NONE,
+            0,
+            0,
+            true);
+        u8 blend_mask;
+        if (unknown_0x3A0 == 1) {
+            blend_mask = 0xFF;
+            ge::blendfixeda(0xFF, 0xFF, 0xFF);
+            ge::blendfixedb(0xFF, 0xFF, 0xFF);
+            ge::blendmode(GE_BLENDMODE_MUL_AND_SUBTRACT, GE_SRCBLEND_FIXA, GE_DSTBLEND_FIXB);
+        } else if (unknown_0x3A0 == 2) {
+            blend_mask = 0xFF - (u8)(unknown_0x3A2 * 127.5f);
+            subtractive_blend_vertex_data[1].color.rgba8888 = (blend_mask << 24) | 0x000000;
+            subtractive_blend_vertex_data[0].color.rgba8888 = (blend_mask << 24) | 0x000000;
+            ge::vaddr(subtractive_blend_vertex_data);
+            ge::prim(GE_PRIM_RECTANGLES, 2);
+            ge::blendfixeda(0xFF, 0xFF, 0xFF);
+            ge::blendfixedb(0xFF, 0xFF, 0xFF);
+            ge::blendmode(GE_BLENDMODE_MUL_AND_SUBTRACT, GE_SRCBLEND_FIXA, GE_DSTBLEND_FIXB);
+        } else {
+            float x = vsin_s(6.2831855f * (((360.0f * (float) ((unknown_0x3A2 * 0xB6) + 0x7FFF + 0x4001)) / 65536.0f) / 360.0f));
+            blend_mask = (x + 1.0f) * 255.0f;
+            ge::blendmode(GE_BLENDMODE_MUL_AND_ADD, GE_SRCBLEND_SRCALPHA, GE_DSTBLEND_INVSRCALPHA);
+        }
+
+        if (unknown_0x3A0 - 1U < 2) {
+            additive_blend_vertex_data[1].color.rgba8888 = 0xFFFFFFFF;
+            additive_blend_vertex_data[0].color.rgba8888 = 0xFFFFFFFF;
+        } else {
+            u32 color = (blend_mask << 24) | 0xFFFFFF;
+            additive_blend_vertex_data[1].color.rgba8888 = color;
+            additive_blend_vertex_data[0].color.rgba8888 = color;
+        }
+        ge::vaddr(additive_blend_vertex_data);
+        ge::prim(GE_PRIM_RECTANGLES, 2);
+        ge::blendmode(GE_BLENDMODE_MUL_AND_ADD, GE_SRCBLEND_SRCALPHA, GE_DSTBLEND_INVSRCALPHA);
+    }
 }
 
 void base_stage::method_088CEA2C() {
     unknown_0x3A0 = 0;
     unknown_0x3A2 = 0;
-    unknown_0x41C = 0;
-    unknown_0x41A = 0;
-    unknown_0x418 = 0;
-    unknown_0x424 = 480;
-    unknown_0x426 = 272;
-    unknown_0x428 = 0;
-    unknown_0x41C = 0;
-    unknown_0x41A = 0;
-    unknown_0x430 = 0;
-    unknown_0x43C = 480;
-    unknown_0x43E = 272;
-    unknown_0x440 = 0;
+
+    additive_blend_vertex_data[0].z = 0;
+    additive_blend_vertex_data[0].y = 0;
+    additive_blend_vertex_data[0].x = 0;
+    additive_blend_vertex_data[1].x = 480;
+    additive_blend_vertex_data[1].y = 272;
+    additive_blend_vertex_data[1].z = 0;
+
+    // oops! fortunately this object is allocated in the bss & the missed values are always 0
+    additive_blend_vertex_data[0].z = 0;
+    additive_blend_vertex_data[0].y = 0;
+    subtractive_blend_vertex_data[0].x = 0;
+    subtractive_blend_vertex_data[1].x = 480;
+    subtractive_blend_vertex_data[1].y = 272;
+    subtractive_blend_vertex_data[1].z = 0;
 }
 
 extern "C" {
@@ -671,7 +794,7 @@ void *base_stage::vtable_0x40() {
     return NULL;
 }
 
-void *base_stage::vtable_0x44() {
+ScePspFVector4 *base_stage::vtable_0x44() {
     return NULL;
 }
 

@@ -91,6 +91,11 @@ struct stage_fog {
     float color;
 };
 
+struct stage_inline_vertex_data {
+    ScePspUnion32 color;
+    s16 x, y, z;
+};
+
 struct base_stage : model {
     typedef void (base_stage::*ptmf)(void);
 
@@ -111,7 +116,7 @@ struct base_stage : model {
     virtual void *vtable_0x38();
     virtual void *vtable_0x3C();
     virtual void *vtable_0x40();
-    virtual void *vtable_0x44();
+    virtual ScePspFVector4 *vtable_0x44();
     virtual stage_draw_commands *vtable_0x48();
     virtual void vtable_0x4C();
     virtual void vtable_0x50();
@@ -161,21 +166,8 @@ struct base_stage : model {
     u8 undefined_0x3D5[3];
     ptmf ptmf_0x3D8;
     stage_depth_buffer_params depth_buffer_params[4];
-    u8 undefined_0x414[4];
-    u16 unknown_0x418;
-    u16 unknown_0x41A;
-    u16 unknown_0x41C;
-    u8 undefined_0x41E[6];
-    u16 unknown_0x424;
-    u16 unknown_0x426;
-    u16 unknown_0x428;
-    u8 undefined_0x42A[6];
-    u16 unknown_0x430;
-    u8 undefined_0x432[10];
-    u16 unknown_0x43C;
-    u16 unknown_0x43E;
-    u16 unknown_0x440;
-    u8 undefined_0x442[2];
+    stage_inline_vertex_data additive_blend_vertex_data[2];
+    stage_inline_vertex_data subtractive_blend_vertex_data[2];
     u32 unknown_0x444;
     stage_fog fog;
 

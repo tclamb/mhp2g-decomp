@@ -179,14 +179,31 @@
 #define GE_LIGHTMODE_SINGLECOLOR 0
 
 #define GE_BLENDMODE_MUL_AND_ADD 0
+#define GE_BLENDMODE_MUL_AND_SUBTRACT 1
 
 #define GE_SRCBLEND_SRCALPHA 2
+#define GE_SRCBLEND_FIXA 10
 
 #define GE_DSTBLEND_INVSRCALPHA 3
 #define GE_DSTBLEND_FIXB 10
 
 #define GE_TRANSFER_BPP_4 1
 
+#define GE_PRIM_RECTANGLES 6
+
+#define GE_VTYPE_TC_NONE 0
+
+#define GE_VTYPE_COL_8888 7
+
+#define GE_VTYPE_NRM_NONE 0
+
+#define GE_VTYPE_POS_S16 2
+
+#define GE_VTYPE_WEIGHT_NONE 0
+
+#define GE_VTYPE_IDX_NONE 0
+
+#define GE_VTYPE_THROUGH 1
 
 extern u32 *DRAWABLE_WRITE_HEAD;
 
@@ -200,12 +217,42 @@ namespace immediate_ge {
 
         }
 
-        // 0x1X
+        // 0x0X
+
+        inline void vaddr(void *address) {
+            impl::emit((GE_CMD_BASE << 24) | (((u32)address & 0xFF000000) >> 8));
+            impl::emit((GE_CMD_VADDR << 24) | (((u32)address << 8) >> 8));
+        }
+
+        inline void prim(int type, u16 count) {
+            impl::emit(
+                (GE_CMD_PRIM << 24) |
+                ((type & 0x7) << 16) |
+                count
+            );
+        }
 
         inline void call(void *address, u32 offset) {
             impl::emit((GE_CMD_BASE << 24) | (((u32)address & 0xFF000000) >> 8));
             impl::emit((GE_CMD_OFFSETADDR << 24) | (offset & 0x00FFFFFF));
             impl::emit((GE_CMD_CALL << 24) | ((u32)address & 0x00FFFFFF));
+        }
+
+        // 0x1X
+
+        inline void vertextype(int uv_type, int color_type, int norm_type, int position_type, int weight_type, int index_type, int weight_count, int morph_count, bool through) {
+            impl::emit(
+                (GE_CMD_VERTEXTYPE << 24) |
+                (through << 23) |
+                ((morph_count & 0x7) << 18) |
+                ((weight_count & 0x7) << 14) |
+                ((index_type & 0x3) << 11) |
+                ((weight_type & 0x3) << 9) |
+                ((position_type & 0x3) << 7) |
+                ((norm_type & 0x3) << 5) |
+                ((color_type & 0x7) << 2) |
+                (uv_type & 0x3)
+            );
         }
 
         inline void lightingenable(bool enable) {

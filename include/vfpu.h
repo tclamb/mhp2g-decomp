@@ -310,6 +310,24 @@ inline float vsqrt_s(float x) {
     return result;
 }
 
+inline float vsin_s(float radians) {
+    float result;
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.s S000, %1"
+        "vcst.s S001, VFPU_2_PI"
+        "vmul.s S000, S000, S001"
+        "vsin.s S010, S000"
+        "sv.s S010, %0"
+        : "=m"(result)
+        : "m"(radians)
+    );
+#else
+    result = sinf(x);
+#endif
+    return result;
+}
+
 inline void scaleMatrix(ScePspFMatrix4 *out, float x, float y, float z) {
     vmidt_q(out);
     out->x.x = x;
