@@ -429,8 +429,8 @@ void base_stage::method_088CD61C() {
 
         ge::shademode(GE_SHADE_GOURAUD);
 
-        vtable_0x9C();
-        method_088CE668();
+        draw_sky_gradient();
+        draw_flash();
 
         ge::ztest(GE_OP_AT_MOST);
         ge::ztestenable(true);
@@ -457,7 +457,7 @@ void base_stage::compile_environment_params(stage_environment_params *environmen
         in = (float *)environment->data;
         in = compile_fog_params(in);
         in = compile_unk1_params(in);
-        compile_unk2_params(in);
+        compile_sky_gradient(in);
         break;
     default:
         unknown_0x330 = 0;
@@ -470,14 +470,14 @@ void base_stage::operator delete(void *) {
 }
 
 void base_stage::vtable_0x4C() {
-    depth_buffer_params[2].unknown_0x4 = 0;
-    depth_buffer_params[0].unknown_0x4 = 0;
-    depth_buffer_params[3].unknown_0x4 = 480;
-    depth_buffer_params[1].unknown_0x4 = 480;
-    depth_buffer_params[3].unknown_0x8 = 0;
-    depth_buffer_params[1].unknown_0x8 = 0;
-    depth_buffer_params[2].unknown_0x8 = 0;
-    depth_buffer_params[0].unknown_0x8 = 0;
+    sky_gradient_vdata[2].x = 0;
+    sky_gradient_vdata[0].x = 0;
+    sky_gradient_vdata[3].x = 480;
+    sky_gradient_vdata[1].x = 480;
+    sky_gradient_vdata[3].z = 0;
+    sky_gradient_vdata[1].z = 0;
+    sky_gradient_vdata[2].z = 0;
+    sky_gradient_vdata[0].z = 0;
     flags |= drawable::VISIBLE;
     vtable_0x1C();
     method_088CDCAC();
@@ -517,21 +517,21 @@ extern "C" {
 
 
 void base_stage::vtable_0x50() {
-    if (unknown_0x3A0 != 0) {
-        if (unknown_0x3A0 == 1) {
-            if (--unknown_0x3A2 <= 0) {
-                unknown_0x3A0 = 2;
-                unknown_0x3A2 = 2;
+    if (flash_state != 0) {
+        if (flash_state == 1) {
+            if (--flash_frames <= 0) {
+                flash_state = 2;
+                flash_frames = 2;
             }
-        } else if (unknown_0x3A0 == 2) {
-            if (--unknown_0x3A2 <= 0) {
-                unknown_0x3A0 = 3;
-                unknown_0x3A2 = 0x5A;
+        } else if (flash_state == 2) {
+            if (--flash_frames <= 0) {
+                flash_state = 3;
+                flash_frames = 0x5A;
             }
         } else {
-            if (--unknown_0x3A2 <= 0) {
-                unknown_0x3A0 = 0;
-                unknown_0x3A2 = 0;
+            if (--flash_frames <= 0) {
+                flash_state = 0;
+                flash_frames = 0;
             }
         }
     }
@@ -620,10 +620,67 @@ bool base_stage::vtable_0xA4() {
     return false;
 }
 
-extern "C" {
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x9C__10base_stageFv);
+void lerp_bgra8888(float *out, void *ignored, u8 *a, u8 *b, float t);
+
+inline u32 lerp_haze(void *ignored, u8 *a, u8 *b, float t) {
+    ScePspUnion32 result;
+    lerp_bgra8888(&result.f, ignored, a, b, t);
+    return result.ui;
 }
 
+inline u16 atan2s16(float y, float x) {
+    return (int)((65536.0f * atan2f_s(y, x)) / 6.2831855f + 0.5f);
+}
+
+void base_stage::draw_sky_gradient() {
+    u16 camera_angle = atan2s16(-D_eboot_089C6CB4->position.x, -D_eboot_089C6CB4->position.z);
+    u16 sun_angle = atan2s16(sky_gradient_origin.x, sky_gradient_origin.z);
+    u16 dtheta = sun_angle - camera_angle;
+    u16 top = sky_gradient_top;
+    sky_gradient_vdata[1].y = top;
+    sky_gradient_vdata[0].y = top;
+    float height = sky_gradient_height / 448.0f;
+    u16 bottom = height * 272.0f;
+    sky_gradient_vdata[3].y = bottom;
+    sky_gradient_vdata[2].y = bottom;
+    if (dtheta < 16384) {
+        float t = dtheta / 16384.0f;
+        sky_gradient_vdata[0].color.ui = lerp_haze(this, sky_gradient_colors[0].uc, sky_gradient_colors[2].uc, t);
+        sky_gradient_vdata[1].color.ui = lerp_haze(this, sky_gradient_colors[0].uc, sky_gradient_colors[3].uc, t);
+        sky_gradient_vdata[2].color.ui = lerp_haze(this, sky_gradient_colors[4].uc, sky_gradient_colors[6].uc, t);
+        sky_gradient_vdata[3].color.ui = lerp_haze(this, sky_gradient_colors[4].uc, sky_gradient_colors[7].uc, t);
+    } else if (dtheta < 2 * 16384) {
+        float t = (dtheta - 0x4000) / 16384.0f;
+        sky_gradient_vdata[0].color.ui = lerp_haze(this, sky_gradient_colors[2].uc, sky_gradient_colors[1].uc, t);
+        sky_gradient_vdata[1].color.ui = lerp_haze(this, sky_gradient_colors[3].uc, sky_gradient_colors[1].uc, t);
+        sky_gradient_vdata[2].color.ui = lerp_haze(this, sky_gradient_colors[6].uc, sky_gradient_colors[5].uc, t);
+        sky_gradient_vdata[3].color.ui = lerp_haze(this, sky_gradient_colors[7].uc, sky_gradient_colors[5].uc, t);
+    } else if (dtheta < 3 * 16384) {
+        float t = (dtheta - 0x8000) / 16384.0f;
+        sky_gradient_vdata[0].color.ui = lerp_haze(this, sky_gradient_colors[1].uc, sky_gradient_colors[3].uc, t);
+        sky_gradient_vdata[1].color.ui = lerp_haze(this, sky_gradient_colors[1].uc, sky_gradient_colors[2].uc, t);
+        sky_gradient_vdata[2].color.ui = lerp_haze(this, sky_gradient_colors[5].uc, sky_gradient_colors[7].uc, t);
+        sky_gradient_vdata[3].color.ui = lerp_haze(this, sky_gradient_colors[5].uc, sky_gradient_colors[6].uc, t);
+    } else {
+        float t = (dtheta - 0xC000) / 16384.0f;
+        sky_gradient_vdata[0].color.ui = lerp_haze(this, sky_gradient_colors[3].uc, sky_gradient_colors[0].uc, t);
+        sky_gradient_vdata[1].color.ui = lerp_haze(this, sky_gradient_colors[2].uc, sky_gradient_colors[0].uc, t);
+        sky_gradient_vdata[2].color.ui = lerp_haze(this, sky_gradient_colors[7].uc, sky_gradient_colors[4].uc, t);
+        sky_gradient_vdata[3].color.ui = lerp_haze(this, sky_gradient_colors[6].uc, sky_gradient_colors[4].uc, t);
+    }
+    ge::vertextype(
+        GE_VTYPE_TC_NONE,
+        GE_VTYPE_COL_8888,
+        GE_VTYPE_NRM_NONE,
+        GE_VTYPE_POS_S16,
+        GE_VTYPE_WEIGHT_NONE,
+        GE_VTYPE_IDX_NONE,
+        0,
+        0,
+        true);
+    ge::vaddr(sky_gradient_vdata);
+    ge::prim(GE_PRIM_TRIANGLE_STRIP, 4);
+}
 
 template<typename T, typename U>
 inline T lerp(T a, T b, U t) {
@@ -639,8 +696,8 @@ void lerp_bgra8888(float *out, void *ignored, u8 *a, u8 *b, float t) {
     *out = result.f;
 }
 
-void base_stage::method_088CE668() {
-    if (unknown_0x3A0 != 0) {
+void base_stage::draw_flash() {
+    if (flash_state != 0) {
         ge::vertextype(
             GE_VTYPE_TC_NONE,
             GE_VTYPE_COL_8888,
@@ -652,58 +709,58 @@ void base_stage::method_088CE668() {
             0,
             true);
         u8 blend_mask;
-        if (unknown_0x3A0 == 1) {
+        if (flash_state == 1) {
             blend_mask = 0xFF;
             ge::blendfixeda(0xFF, 0xFF, 0xFF);
             ge::blendfixedb(0xFF, 0xFF, 0xFF);
             ge::blendmode(GE_BLENDMODE_MUL_AND_SUBTRACT, GE_SRCBLEND_FIXA, GE_DSTBLEND_FIXB);
-        } else if (unknown_0x3A0 == 2) {
-            blend_mask = 0xFF - (u8)(unknown_0x3A2 * 127.5f);
-            subtractive_blend_vertex_data[1].color.rgba8888 = (blend_mask << 24) | 0x000000;
-            subtractive_blend_vertex_data[0].color.rgba8888 = (blend_mask << 24) | 0x000000;
-            ge::vaddr(subtractive_blend_vertex_data);
+        } else if (flash_state == 2) {
+            blend_mask = 0xFF - (u8)(flash_frames * 127.5f);
+            flash_blank_vdata[1].color.rgba8888 = (blend_mask << 24) | 0x000000;
+            flash_blank_vdata[0].color.rgba8888 = (blend_mask << 24) | 0x000000;
+            ge::vaddr(flash_blank_vdata);
             ge::prim(GE_PRIM_RECTANGLES, 2);
             ge::blendfixeda(0xFF, 0xFF, 0xFF);
             ge::blendfixedb(0xFF, 0xFF, 0xFF);
             ge::blendmode(GE_BLENDMODE_MUL_AND_SUBTRACT, GE_SRCBLEND_FIXA, GE_DSTBLEND_FIXB);
         } else {
-            float x = vsin_s(6.2831855f * (((360.0f * (float) ((unknown_0x3A2 * 0xB6) + 0x7FFF + 0x4001)) / 65536.0f) / 360.0f));
+            float x = vsin_s(6.2831855f * (((360.0f * (float) ((flash_frames * 0xB6) + 0x7FFF + 0x4001)) / 65536.0f) / 360.0f));
             blend_mask = (x + 1.0f) * 255.0f;
             ge::blendmode(GE_BLENDMODE_MUL_AND_ADD, GE_SRCBLEND_SRCALPHA, GE_DSTBLEND_INVSRCALPHA);
         }
 
-        if (unknown_0x3A0 - 1U < 2) {
-            additive_blend_vertex_data[1].color.rgba8888 = 0xFFFFFFFF;
-            additive_blend_vertex_data[0].color.rgba8888 = 0xFFFFFFFF;
+        if (flash_state - 1U < 2) {
+            flash_blend_vdata[1].color.rgba8888 = 0xFFFFFFFF;
+            flash_blend_vdata[0].color.rgba8888 = 0xFFFFFFFF;
         } else {
             u32 color = (blend_mask << 24) | 0xFFFFFF;
-            additive_blend_vertex_data[1].color.rgba8888 = color;
-            additive_blend_vertex_data[0].color.rgba8888 = color;
+            flash_blend_vdata[1].color.rgba8888 = color;
+            flash_blend_vdata[0].color.rgba8888 = color;
         }
-        ge::vaddr(additive_blend_vertex_data);
+        ge::vaddr(flash_blend_vdata);
         ge::prim(GE_PRIM_RECTANGLES, 2);
         ge::blendmode(GE_BLENDMODE_MUL_AND_ADD, GE_SRCBLEND_SRCALPHA, GE_DSTBLEND_INVSRCALPHA);
     }
 }
 
 void base_stage::method_088CEA2C() {
-    unknown_0x3A0 = 0;
-    unknown_0x3A2 = 0;
+    flash_state = 0;
+    flash_frames = 0;
 
-    additive_blend_vertex_data[0].z = 0;
-    additive_blend_vertex_data[0].y = 0;
-    additive_blend_vertex_data[0].x = 0;
-    additive_blend_vertex_data[1].x = 480;
-    additive_blend_vertex_data[1].y = 272;
-    additive_blend_vertex_data[1].z = 0;
+    flash_blend_vdata[0].z = 0;
+    flash_blend_vdata[0].y = 0;
+    flash_blend_vdata[0].x = 0;
+    flash_blend_vdata[1].x = 480;
+    flash_blend_vdata[1].y = 272;
+    flash_blend_vdata[1].z = 0;
 
     // oops! fortunately this object is allocated in the bss & the missed values are always 0
-    additive_blend_vertex_data[0].z = 0;
-    additive_blend_vertex_data[0].y = 0;
-    subtractive_blend_vertex_data[0].x = 0;
-    subtractive_blend_vertex_data[1].x = 480;
-    subtractive_blend_vertex_data[1].y = 272;
-    subtractive_blend_vertex_data[1].z = 0;
+    flash_blend_vdata[0].z = 0;
+    flash_blend_vdata[0].y = 0;
+    flash_blank_vdata[0].x = 0;
+    flash_blank_vdata[1].x = 480;
+    flash_blank_vdata[1].y = 272;
+    flash_blank_vdata[1].z = 0;
 }
 
 extern "C" {
@@ -737,18 +794,18 @@ inline u32 from_bgra8888(ScePspUnion32 &x) {
     return (x.uc[3] << 24) | (x.uc[0] << 16) |  (x.uc[1] << 8) | x.uc[2];
 }
 
-float *base_stage::compile_unk2_params(float *in) {
-    memcpy(&unknown_0x3A4, in, 0xC);
-    memcpy(&unknown_0x3B0, in + 3, 4);
+float *base_stage::compile_sky_gradient(float *in) {
+    memcpy(&sky_gradient_origin, in, 0xC);
+    memcpy(&sky_gradient_top, in + 3, 4);
     ScePspUnion32 x;
-    memcpy(&x, in +  4, 4); unknown_0x3B4[0] = from_bgra8888(x);
-    memcpy(&x, in +  5, 4); unknown_0x3B4[1] = from_bgra8888(x);
-    memcpy(&x, in +  6, 4); unknown_0x3B4[2] = from_bgra8888(x);
-    memcpy(&x, in +  7, 4); unknown_0x3B4[3] = from_bgra8888(x);
-    memcpy(&x, in +  8, 4); unknown_0x3B4[4] = from_bgra8888(x);
-    memcpy(&x, in +  9, 4); unknown_0x3B4[5] = from_bgra8888(x);
-    memcpy(&x, in + 10, 4); unknown_0x3B4[6] = from_bgra8888(x);
-    memcpy(&x, in + 11, 4); unknown_0x3B4[7] = from_bgra8888(x);
+    memcpy(&x, in +  4, 4); sky_gradient_colors[0].ui = from_bgra8888(x);
+    memcpy(&x, in +  5, 4); sky_gradient_colors[1].ui = from_bgra8888(x);
+    memcpy(&x, in +  6, 4); sky_gradient_colors[2].ui = from_bgra8888(x);
+    memcpy(&x, in +  7, 4); sky_gradient_colors[3].ui = from_bgra8888(x);
+    memcpy(&x, in +  8, 4); sky_gradient_colors[4].ui = from_bgra8888(x);
+    memcpy(&x, in +  9, 4); sky_gradient_colors[5].ui = from_bgra8888(x);
+    memcpy(&x, in + 10, 4); sky_gradient_colors[6].ui = from_bgra8888(x);
+    memcpy(&x, in + 11, 4); sky_gradient_colors[7].ui = from_bgra8888(x);
     return in + 12;
 }
 

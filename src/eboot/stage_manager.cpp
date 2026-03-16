@@ -757,8 +757,7 @@ extern "C" {
     int sceDmacMemcpy(void *, const void *, u32);
     void sceKernelDcacheWritebackInvalidateAll();
 
-    extern void *D_eboot_089C6CB4;
-    void func_eboot_088157D4(void *, void *);
+    void func_eboot_088157D4(global_089C6CB4 *, void *);
 
     extern void *D_game_sub_09D14FE0;
     void func_game_sub_09C336D8(void *, void *);

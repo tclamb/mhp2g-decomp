@@ -8,14 +8,6 @@ struct stage_environment_params {
     u8 data[0];
 };
 
-struct stage_depth_buffer_params {
-    float *tristrip_vertices;
-    u16 unknown_0x4;
-    u16 unknown_0x6;
-    u16 unknown_0x8;
-    u16 unknown_0xA;
-};
-
 struct stage_sound {
     u32 unknown_0x0;
     u32 unknown_0x4;
@@ -138,7 +130,7 @@ struct base_stage : model {
     virtual void vtable_0x90(pmo *, void *, u8);
     virtual void vtable_0x94(pmo *, void *, u8);
     virtual void vtable_0x98(pmo *, void *);
-    virtual void vtable_0x9C();
+    virtual void draw_sky_gradient();
     virtual void vtable_0xA0();
     virtual bool vtable_0xA4();
     virtual u32 vtable_0xA8() { return 0; }
@@ -157,17 +149,18 @@ struct base_stage : model {
     u8 unknown_0x330;
     u8 undefined_0x331[3];
     ScePspFVector3 unknown_0x334[9];
-    s16 unknown_0x3A0;
-    s16 unknown_0x3A2;
-    ScePspFVector3 unknown_0x3A4;
-    u32 unknown_0x3B0;
-    u32 unknown_0x3B4[8];
+    s16 flash_state;
+    s16 flash_frames;
+    ScePspFVector3 sky_gradient_origin;
+    s16 sky_gradient_top;
+    s16 sky_gradient_height; // in 480i scanlines: 448 for full screen height
+    ScePspUnion32 sky_gradient_colors[8];
     bool flag_0x3D4;
     u8 undefined_0x3D5[3];
     ptmf ptmf_0x3D8;
-    stage_depth_buffer_params depth_buffer_params[4];
-    stage_inline_vertex_data additive_blend_vertex_data[2];
-    stage_inline_vertex_data subtractive_blend_vertex_data[2];
+    stage_inline_vertex_data sky_gradient_vdata[4];
+    stage_inline_vertex_data flash_blend_vdata[2];
+    stage_inline_vertex_data flash_blank_vdata[2];
     u32 unknown_0x444;
     stage_fog fog;
 
@@ -178,13 +171,13 @@ struct base_stage : model {
     void compile_environment_params(stage_environment_params *);
     bool method_088CDC74();
     void method_088CDCAC();
-    void method_088CE668();
+    void draw_flash();
     void method_088CEA2C();
     stage_definitions_0x28_t *method_088CEDC0();
     stage_definitions_0x2C_t *method_088CEDF0();
     float *compile_fog_params(float *);
     float *compile_unk1_params(float *);
-    float *compile_unk2_params(float *);
+    float *compile_sky_gradient(float *);
 
 
 protected:

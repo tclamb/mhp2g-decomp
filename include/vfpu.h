@@ -328,6 +328,119 @@ inline float vsin_s(float radians) {
     return result;
 }
 
+
+inline float atan2f_s(float y, float x) {
+    float result;
+#if defined (__MWERKS__)
+    // implementation using asin and the identity:
+    //   atan(y/x) == asin((y/x) / sqrt(1 + (y/x)^2))
+    //
+    // per the pspdev accuracy tests, vasin.s must be
+    // restricted to the interval [-0.5, 0.5] for accuracy,
+    // forcing the handlelargey branch reflecting [0.5, 1.0] onto [0.5, 0.0]
+    // (recall that the VFPU scales angles by 2 / PI)
+    __asm__ (
+        ".set push"
+        ".set noreorder"
+        "lv.s       S000, %1"
+        "lv.s       S001, %2"
+        "vcmp.p     ES, C000, C000"
+        "bvt        4, any_special" // !isfinite(x) || !isfinite(y)
+        "vzero.s    S002"
+        "vcmp.s     GE, S001, S002"
+        "vcst.s     S010, VFPU_PI"
+        "vcmovt.s   S010, S002, 0"
+        "vcmp.s     EZ, S000, S000"
+        "bvt        0, done" // y == 0
+        "vcst.s     S002, VFPU_PI_2"
+        "vrcp.s     S003, S001"
+        "vmul.s     S003, S000, S003"
+        "vcmp.s     EN, S003, S003"
+        "bvt        0, done" // isnan(y / x)
+        "vmov.s     S010, S003"
+        "vcmp.s     ES, S003, S003"
+        "bvtl       0, fixquadrant" // isinf(y / x)
+          "vsgn.s   S010, S000"
+        "vmul.s     S011,S003,S003"
+        "vcmp.s     ES,S011,S011"
+        "bvt        0, handleinf2" // isinf((y / x) ** 2)
+        "vone.s     S003"
+        "vpfxs      0x00FE4" // absolute value source
+        "vcmp.s     LT, S010, S003"
+        "vadd.s     S003,S011,S003"
+        "bvfl       0, handlelargey"
+          "vrcp.s   S003, S003"
+        "vrsq.s     S003, S003"
+        "vmul.s     S010, S010, S003"
+        "b          fixquadrant" // return fixquadrant(asin( (y/x) / (1 + 2*(y/x) ** 2 + (y/x) ** 4) ))
+          "vasin.s   S010,S010"
+    any_special:
+        "vcmp.p     EN, C000, C000"
+        "vfim.s     S010, -1.0f"
+        "bvt        4, done" // isnan(x) || isnan(y)
+        "vrsq.s     S010, S010"
+        "vcmp.p     EI, C000, C000" // isinf(x) && isinf(y)
+        "bvt        5, bothinf"
+        "nop"
+        "vi2f.s     S000, S000, 0"
+        "vpfxt      0xF0FF"
+        "vadd.s     S000, S000, S000"
+        "vsgn.s     S000, S000"
+        "vcst.s     S002, VFPU_PI_2"
+        "bvt        0, scaleresult"
+        "vone.s     S010"
+        "vzero.s    S003"
+        "vcmp.s     GE, S001, S003"
+        "vcmovt.s   S010, S003, 0"
+        "b          scaleresult"
+          "vcst.s     S002, VFPU_PI"
+    bothinf:
+        "vsgn.p     C000, C000"
+        "vpfxs      0x0F0AA" // substitute 2 for source
+        "vsub.s     S010, S010, S001" // result <- 2 - x
+        "b          scaleresult"
+          "vcst.s   S002, VFPU_PI_4"
+    handleinf2:
+        "vsgn.s     S000, S000"
+        "vcst.s     S002, VFPU_PI_2"
+        "bvt        0, scaleresult"
+        "vone.s     S010"
+        "vsgn.s     S011, S001"
+        "b          scaleresult"
+          "vsub.s     S010, S010, S011"
+    handlelargey:
+        "vmul.s     S003, S011, S003"
+        "vpfxd      0x055" // clamp destination to [0, 1]
+        "vocp.s     S003, S003" // reflect across y = x
+        "vsqrt.s    S003, S003"
+        "vasin.s    S003, S003"
+        "vocp.s     S010, S003" // unreflect result
+    fixquadrant:
+        "vpfxd      0x004" // clamp y destination to [0, 1]
+        "vpfxs      0x200E4" // negate y source
+        "vsgn.p     C000, C000"
+        "vcmp.s     EZ, S001, S001"
+        "bvt        0, scaleresult" // skip if positive x
+        "nop"
+        "vpfxs      0x0F0AA" // constant 2 source
+        "vpfxt      0x00FE4" // absolute value target
+        "vsub.s     S010, S010, S010" // v = 2 - abs(v)
+    scaleresult:
+        "vpfxs      0x00FE4" // absolute value source
+        "vmul.s     S010, S010, S000" // correct sign
+        "vmul.s     S010, S010, S002" // scale to radians
+    done:
+        "sv.s S010, %0"
+        ".set pop"
+        : "=m" (result)
+        : "m" (y), "m" (x)
+    );
+#else
+    result = atan2f(y, x);
+#endif
+    return result;
+}
+
 inline void scaleMatrix(ScePspFMatrix4 *out, float x, float y, float z) {
     vmidt_q(out);
     out->x.x = x;
