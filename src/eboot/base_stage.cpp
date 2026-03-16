@@ -620,14 +620,6 @@ bool base_stage::vtable_0xA4() {
     return false;
 }
 
-void lerp_bgra8888(float *out, void *ignored, u8 *a, u8 *b, float t);
-
-inline u32 lerp_haze(void *ignored, u8 *a, u8 *b, float t) {
-    ScePspUnion32 result;
-    lerp_bgra8888(&result.f, ignored, a, b, t);
-    return result.ui;
-}
-
 inline u16 atan2s16(float y, float x) {
     return (int)((65536.0f * atan2f_s(y, x)) / 6.2831855f + 0.5f);
 }
@@ -645,28 +637,28 @@ void base_stage::draw_sky_gradient() {
     sky_gradient_vdata[2].y = bottom;
     if (dtheta < 16384) {
         float t = dtheta / 16384.0f;
-        sky_gradient_vdata[0].color.ui = lerp_haze(this, sky_gradient_colors[0].uc, sky_gradient_colors[2].uc, t);
-        sky_gradient_vdata[1].color.ui = lerp_haze(this, sky_gradient_colors[0].uc, sky_gradient_colors[3].uc, t);
-        sky_gradient_vdata[2].color.ui = lerp_haze(this, sky_gradient_colors[4].uc, sky_gradient_colors[6].uc, t);
-        sky_gradient_vdata[3].color.ui = lerp_haze(this, sky_gradient_colors[4].uc, sky_gradient_colors[7].uc, t);
+        sky_gradient_vdata[0].color.ui = lerp_bgra8888(sky_gradient_colors[0].uc, sky_gradient_colors[2].uc, t).ui;
+        sky_gradient_vdata[1].color.ui = lerp_bgra8888(sky_gradient_colors[0].uc, sky_gradient_colors[3].uc, t).ui;
+        sky_gradient_vdata[2].color.ui = lerp_bgra8888(sky_gradient_colors[4].uc, sky_gradient_colors[6].uc, t).ui;
+        sky_gradient_vdata[3].color.ui = lerp_bgra8888(sky_gradient_colors[4].uc, sky_gradient_colors[7].uc, t).ui;
     } else if (dtheta < 2 * 16384) {
         float t = (dtheta - 0x4000) / 16384.0f;
-        sky_gradient_vdata[0].color.ui = lerp_haze(this, sky_gradient_colors[2].uc, sky_gradient_colors[1].uc, t);
-        sky_gradient_vdata[1].color.ui = lerp_haze(this, sky_gradient_colors[3].uc, sky_gradient_colors[1].uc, t);
-        sky_gradient_vdata[2].color.ui = lerp_haze(this, sky_gradient_colors[6].uc, sky_gradient_colors[5].uc, t);
-        sky_gradient_vdata[3].color.ui = lerp_haze(this, sky_gradient_colors[7].uc, sky_gradient_colors[5].uc, t);
+        sky_gradient_vdata[0].color.ui = lerp_bgra8888(sky_gradient_colors[2].uc, sky_gradient_colors[1].uc, t).ui;
+        sky_gradient_vdata[1].color.ui = lerp_bgra8888(sky_gradient_colors[3].uc, sky_gradient_colors[1].uc, t).ui;
+        sky_gradient_vdata[2].color.ui = lerp_bgra8888(sky_gradient_colors[6].uc, sky_gradient_colors[5].uc, t).ui;
+        sky_gradient_vdata[3].color.ui = lerp_bgra8888(sky_gradient_colors[7].uc, sky_gradient_colors[5].uc, t).ui;
     } else if (dtheta < 3 * 16384) {
         float t = (dtheta - 0x8000) / 16384.0f;
-        sky_gradient_vdata[0].color.ui = lerp_haze(this, sky_gradient_colors[1].uc, sky_gradient_colors[3].uc, t);
-        sky_gradient_vdata[1].color.ui = lerp_haze(this, sky_gradient_colors[1].uc, sky_gradient_colors[2].uc, t);
-        sky_gradient_vdata[2].color.ui = lerp_haze(this, sky_gradient_colors[5].uc, sky_gradient_colors[7].uc, t);
-        sky_gradient_vdata[3].color.ui = lerp_haze(this, sky_gradient_colors[5].uc, sky_gradient_colors[6].uc, t);
+        sky_gradient_vdata[0].color.ui = lerp_bgra8888(sky_gradient_colors[1].uc, sky_gradient_colors[3].uc, t).ui;
+        sky_gradient_vdata[1].color.ui = lerp_bgra8888(sky_gradient_colors[1].uc, sky_gradient_colors[2].uc, t).ui;
+        sky_gradient_vdata[2].color.ui = lerp_bgra8888(sky_gradient_colors[5].uc, sky_gradient_colors[7].uc, t).ui;
+        sky_gradient_vdata[3].color.ui = lerp_bgra8888(sky_gradient_colors[5].uc, sky_gradient_colors[6].uc, t).ui;
     } else {
         float t = (dtheta - 0xC000) / 16384.0f;
-        sky_gradient_vdata[0].color.ui = lerp_haze(this, sky_gradient_colors[3].uc, sky_gradient_colors[0].uc, t);
-        sky_gradient_vdata[1].color.ui = lerp_haze(this, sky_gradient_colors[2].uc, sky_gradient_colors[0].uc, t);
-        sky_gradient_vdata[2].color.ui = lerp_haze(this, sky_gradient_colors[7].uc, sky_gradient_colors[4].uc, t);
-        sky_gradient_vdata[3].color.ui = lerp_haze(this, sky_gradient_colors[6].uc, sky_gradient_colors[4].uc, t);
+        sky_gradient_vdata[0].color.ui = lerp_bgra8888(sky_gradient_colors[3].uc, sky_gradient_colors[0].uc, t).ui;
+        sky_gradient_vdata[1].color.ui = lerp_bgra8888(sky_gradient_colors[2].uc, sky_gradient_colors[0].uc, t).ui;
+        sky_gradient_vdata[2].color.ui = lerp_bgra8888(sky_gradient_colors[7].uc, sky_gradient_colors[4].uc, t).ui;
+        sky_gradient_vdata[3].color.ui = lerp_bgra8888(sky_gradient_colors[6].uc, sky_gradient_colors[4].uc, t).ui;
     }
     ge::vertextype(
         GE_VTYPE_TC_NONE,
@@ -687,13 +679,13 @@ inline T lerp(T a, T b, U t) {
     return a + (T) (t * (b - a));
 }
 
-void lerp_bgra8888(float *out, void *ignored, u8 *a, u8 *b, float t) {
+ScePspUnion32 base_stage::lerp_bgra8888(u8 *a, u8 *b, float t) {
     ScePspUnion32 result;
     result.uc[0] = lerp(a[2], b[2], t);
     result.uc[1] = lerp(a[1], b[1], t);
     result.uc[2] = lerp(a[0], b[0], t);
     result.uc[3] = lerp(a[3], b[3], t);
-    *out = result.f;
+    return result;
 }
 
 void base_stage::draw_flash() {

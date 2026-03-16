@@ -186,4 +186,7 @@ protected:
             ptmf_0x3D8 = x;
         }
     }
+
+private:
+    ScePspUnion32 lerp_bgra8888(u8 *, u8 *, float);
 };
