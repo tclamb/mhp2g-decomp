@@ -5,6 +5,7 @@
 #include "drawable_manager.hpp"
 #include "stage_manager.hpp"
 #include "immediate_ge.hpp"
+#include "lighting_manager.hpp"
 
 using namespace immediate_ge;
 
@@ -338,13 +339,6 @@ void base_stage::destroy() {
     }
 }
 
-extern "C" {
-    extern void *D_eboot_08A5DD28;
-
-    void func_eboot_08860C4C(void *);
-    void func_eboot_0886117C(void *, u8 i);
-}
-
 void base_stage::draw() {
     if (D_eboot_089C7508->stage_id != 0) {
         if (vtable_0x48() != 0) {
@@ -360,8 +354,8 @@ void base_stage::draw() {
         ge::texoffsetu();
         ge::texoffsetv();
         ge::atest(0xFF, 0, GE_OP_GREATER_THAN);
-        func_eboot_08860C4C(D_eboot_08A5DD28);
-        func_eboot_0886117C(D_eboot_08A5DD28, 1);
+        lighting_manager::get()->method_08860C4C();
+        lighting_manager::get()->method_0886117C(1);
     }
 }
 
@@ -451,12 +445,12 @@ void base_stage::compile_environment_params(stage_environment_params *environmen
     case 1:
         in = (float *)environment->data;
         in = compile_fog_params(in);
-        compile_unk1_params(in);
+        compile_lights(in);
         break;
     case 2:
         in = (float *)environment->data;
         in = compile_fog_params(in);
-        in = compile_unk1_params(in);
+        in = compile_lights(in);
         compile_sky_gradient(in);
         break;
     default:
@@ -767,18 +761,18 @@ float *base_stage::compile_fog_params(float *in) {
     return in;
 }
 
-float *base_stage::compile_unk1_params(float *in) {
-    u32 size = sizeof(unknown_0x334[0]);
-    u32 stride = sizeof(unknown_0x334[0]) / sizeof(*in);
-    memcpy(&unknown_0x334[0], in + 0 * stride, size);
-    memcpy(&unknown_0x334[3], in + 1 * stride, size);
-    memcpy(&unknown_0x334[6], in + 2 * stride, size);
-    memcpy(&unknown_0x334[1], in + 3 * stride, size);
-    memcpy(&unknown_0x334[4], in + 4 * stride, size);
-    memcpy(&unknown_0x334[7], in + 5 * stride, size);
-    memcpy(&unknown_0x334[2], in + 6 * stride, size);
-    memcpy(&unknown_0x334[5], in + 7 * stride, size);
-    memcpy(&unknown_0x334[8], in + 8 * stride, size);
+float *base_stage::compile_lights(float *in) {
+    u32 size = sizeof(lights[0].position);
+    u32 stride = size / sizeof(*in);
+    memcpy(&lights[0].position, in + 0 * stride, size);
+    memcpy(&lights[1].position, in + 1 * stride, size);
+    memcpy(&lights[2].position, in + 2 * stride, size);
+    memcpy(&lights[0].diffuse_color, in + 3 * stride, size);
+    memcpy(&lights[1].diffuse_color, in + 4 * stride, size);
+    memcpy(&lights[2].diffuse_color, in + 5 * stride, size);
+    memcpy(&lights[0].ambient_color, in + 6 * stride, size);
+    memcpy(&lights[1].ambient_color, in + 7 * stride, size);
+    memcpy(&lights[2].ambient_color, in + 8 * stride, size);
     return in + 9 * stride;
 }
 

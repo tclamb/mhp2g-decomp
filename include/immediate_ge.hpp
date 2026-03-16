@@ -82,6 +82,23 @@
 #define GE_CMD_AMBIENTALPHA         0x5D
 #define GE_CMD_LIGHTMODE            0x5E
 
+#define GE_CMD_LIGHTTYPE0 0x5F
+#define GE_CMD_LIGHTTYPE1 0x60
+#define GE_CMD_LIGHTTYPE2 0x61
+#define GE_CMD_LIGHTTYPE3 0x62
+#define GE_CMD_LX0 0x63
+#define GE_CMD_LY0 0x64
+#define GE_CMD_LZ0 0x65
+#define GE_CMD_LX1 0x66
+#define GE_CMD_LY1 0x67
+#define GE_CMD_LZ1 0x68
+#define GE_CMD_LX2 0x69
+#define GE_CMD_LY2 0x6A
+#define GE_CMD_LZ2 0x6B
+#define GE_CMD_LX3 0x6C
+#define GE_CMD_LY3 0x6D
+#define GE_CMD_LZ3 0x6E
+
 #define GE_CMD_LAC0 0x8F
 #define GE_CMD_LDC0 0x90
 #define GE_CMD_LSC0 0x91
@@ -205,6 +222,8 @@
 #define GE_VTYPE_IDX_NONE 0
 
 #define GE_VTYPE_THROUGH 1
+
+#define GE_LIGHTTYPE_DIRECTIONAL 0
 
 extern u32 *DRAWABLE_WRITE_HEAD;
 
@@ -481,14 +500,34 @@ namespace immediate_ge {
             impl::emit((GE_CMD_LIGHTMODE << 24) | mode);
         }
 
+        // 0x6X (+ 0x5F)
+
+        inline void lighttype(int index, u8 type) {
+            impl::emit(((GE_CMD_LIGHTTYPE0 + index) << 24) | type);
+        }
+
+        inline void lightposition(int index, ScePspVector4 *position) {
+            impl::emit(((GE_CMD_LX0 + 3 * index) << 24) | ((u32)position->iv.x >> 8));
+            impl::emit(((GE_CMD_LY0 + 3 * index) << 24) | ((u32)position->iv.y >> 8));
+            impl::emit(((GE_CMD_LZ0 + 3 * index) << 24) | ((u32)position->iv.z >> 8));
+        }
+
         // 0x9X (+ 0x8F)
 
         inline void lightambientcolor(int index, u8 r, u8 g, u8 b) {
             impl::emit(((GE_CMD_LAC0 + 3 * index) << 24) | (b << 16) | (g << 8) | r);
         }
 
+        inline void lightambientcolor(int index, u32 color) {
+            impl::emit(((GE_CMD_LAC0 + 3 * index) << 24) | (color & 0xFFFFFF));
+        }
+
         inline void lightdiffusecolor(int index, u8 r, u8 g, u8 b) {
             impl::emit(((GE_CMD_LDC0 + 3 * index) << 24) | (b << 16) | (g << 8) | r);
+        }
+
+        inline void lightdiffusecolor(int index, u32 color) {
+            impl::emit(((GE_CMD_LDC0 + 3 * index) << 24) | (color & 0xFFFFFF));
         }
 
         inline void lightspecularcolor(int index, u8 r, u8 g, u8 b) {

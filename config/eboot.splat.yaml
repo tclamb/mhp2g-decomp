@@ -110,7 +110,7 @@ segments:
       - [0x5924c, asmtu, global_08a5dd20]
       - [0x5ade8, asmtu, global_08a5dd24]
       - [0x5ddf4, cpp, bone]
-      - [0x5ed14, asmtu, global_08a5dd28]
+      - [0x5ed14, cpp, lighting_manager]
       - [0x5fa88, cpp, model]
       - [0x629ec, asmtu, object_089b5c10] # base class for em & player; embedded linked list next:0x1C4 prev:0x1C8
       - [0x64864, asmtu, global_08a5dd2c] # manager for the em/player objects; 15(?) linked list heads at 0x80028, 2:player, 3:ems, 7:npcs
@@ -235,7 +235,7 @@ segments:
       - [0x1987c8, .int4, state/start_state]
       - [0x1987ec, .data, global_08a5dd20]
       - [0x1a11d4, .data, global_08a5dd24]
-      - [0x1a11e4, .data, global_08a5dd28]
+      - [0x1a11e4, .data, lighting_manager]
       - [0x1a1298, .data, model]
       - [0x1a169c, .data, object_089b5c10]
       - [0x1a16b4, .data, global_08a5dd2c]

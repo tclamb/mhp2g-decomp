@@ -2,17 +2,9 @@
 
 #include "singleton.hpp"
 #include "drawable.hpp"
+#include "character.hpp"
 
 extern u32 *DRAWABLE_WRITE_HEAD;
-
-// stub for type with vtable at D_eboot_089B5C10
-struct character : model {
-    u8 padding_0x1C0[0x200 - 0x1C0];
-    ScePspFVector4 position;
-    u8 padding_0x1E0[0x10];
-    ScePspFVector4 scale;
-    u8 alpha;
-};
 
 struct render_group {
     enum {

@@ -88,6 +88,12 @@ struct stage_inline_vertex_data {
     s16 x, y, z;
 };
 
+struct stage_light {
+    ScePspFVector3 position;
+    ScePspFVector3 diffuse_color;
+    ScePspFVector3 ambient_color;
+};
+
 struct base_stage : model {
     typedef void (base_stage::*ptmf)(void);
 
@@ -148,7 +154,7 @@ struct base_stage : model {
     skeleton prop_skeleton;
     u8 unknown_0x330;
     u8 undefined_0x331[3];
-    ScePspFVector3 unknown_0x334[9];
+    stage_light lights[3];
     s16 flash_state;
     s16 flash_frames;
     ScePspFVector3 sky_gradient_origin;
@@ -176,7 +182,7 @@ struct base_stage : model {
     stage_definitions_0x28_t *method_088CEDC0();
     stage_definitions_0x2C_t *method_088CEDF0();
     float *compile_fog_params(float *);
-    float *compile_unk1_params(float *);
+    float *compile_lights(float *);
     float *compile_sky_gradient(float *);
 
 

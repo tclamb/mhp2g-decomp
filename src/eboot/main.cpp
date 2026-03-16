@@ -4,6 +4,7 @@
 #include "game.hpp"
 #include "singleton.hpp"
 #include "ge_manager.hpp"
+#include "lighting_manager.hpp"
 #include "cache.hpp"
 #include "tagged_cache.hpp"
 
@@ -24,7 +25,7 @@ void *D_eboot_08A5DD20; // singleton
 
 void *D_eboot_08A5DD24; // singleton
 
-void *D_eboot_08A5DD28; // singleton
+lighting_manager *singleton<lighting_manager>::INSTANCE;
 
 void *D_eboot_08A5DD2C; // singleton
 

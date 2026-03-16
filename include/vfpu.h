@@ -6,6 +6,43 @@
 extern "C" {
 #endif
 
+inline void vtfm3_q(ScePspFVector4 *v, ScePspFMatrix4 *m, ScePspFVector4 *p) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C100, %2"
+        "lv.q C200, 0x0(%1)"
+        "lv.q C210, 0x10(%1)"
+        "lv.q C220, 0x20(%1)"
+        "vmov.s S003, S103"
+        "vtfm3.t C000, E200, C100"
+        "sv.q C000, %0"
+        : "=m" (*v)
+        : "m" (*m), "m" (*p)
+    );
+#else
+    v->x = m->x.x * p->x + m->x.y * p->y + m->x.z * p->z;
+    v->y = m->y.x * p->x + m->y.y * p->y + m->y.z * p->z;
+    v->z = m->z.x * p->x + m->z.y * p->y + m->z.z * p->z;
+    v->w = p->w;
+#endif
+}
+
+inline void copy_q(ScePspFVector4 *v, ScePspFVector4 *src) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C000, %1"
+        "sv.q C000, %0"
+        : "=m"(*v)
+        : "m"(*src)
+    );
+#else
+    v->x = src->x;
+    v->y = src->y;
+    v->z = src->z;
+    v->w = src->w;
+#endif
+}
+
 inline void sv_q(ScePspFVector4 *v, float x, float y, float z, float w) {
 #if defined(__MWERKS__)
     __asm__ (
