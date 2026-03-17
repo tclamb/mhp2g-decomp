@@ -180,7 +180,6 @@ u32 pac_header::size(int index) {
 }
 
 // render loading screen
-extern "C"
 INCLUDE_ASM("asm/eboot/nonmatchings/base_data_loader", draw_loading_screen_impl__16base_data_loaderFv);
 
 

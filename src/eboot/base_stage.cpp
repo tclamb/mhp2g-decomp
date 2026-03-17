@@ -175,8 +175,6 @@ void base_stage::execute_prop_draw_commands() {
     }
 }
 
-extern "C" {
-
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x54__10base_stageFP3pmoPvUc);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x58__10base_stageFP3pmoPvUc);
@@ -210,7 +208,6 @@ INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x8C__10base_stageFP3pmo
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x90__10base_stageFP3pmoPvUc);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x94__10base_stageFP3pmoPvUc);
-}
 
 void base_stage::vtable_0x98(pmo *, void *) {
     // empty
@@ -397,7 +394,6 @@ void base_stage::emit_fog() {
     }
 }
 #else
-extern "C"
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", emit_fog__10base_stageFv);
 #endif
 

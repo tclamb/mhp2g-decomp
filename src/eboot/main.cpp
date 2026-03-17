@@ -102,15 +102,12 @@ u8 D_eboot_09A07294[0x4];
 u8 D_eboot_09A07298[0x4];
 u8 D_eboot_09A0729C[0x4];
 
-extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889ACA0);
-}
 
 data_loader::~data_loader() {
     // empty
 }
 
-extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889AD5C);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889B1D4);
@@ -138,13 +135,11 @@ INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889B280);
 INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889B290);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889B2A0);
-}
 
 data_loader::data_loader() {
     // empty
 }
 
-extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889B32C);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889B33C);
@@ -152,4 +147,3 @@ INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889B33C);
 INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889B394);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889B3A4);
-}

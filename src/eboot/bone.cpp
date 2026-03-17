@@ -4,8 +4,6 @@
 
 #include "bone.hpp"
 
-extern "C" {
-
 INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885F840);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885F8E0);
@@ -54,6 +52,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FE3C);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FF54);
 
+extern "C"
 void func_eboot_088633C4(ScePspFMatrix4*, ScePspFMatrix3*, ScePspFMatrix3*, ScePspFMatrix4*, u16*, float);
 
 void bone::func_eboot_0885FFB4(ScePspFVector4 *arg1, s32 arg2, float arg3, float arg4) {
@@ -133,6 +132,4 @@ void *bone::operator new(u32 size, void *p) {
 
 void bone::operator delete(void *p) {
     return;
-}
-
 }

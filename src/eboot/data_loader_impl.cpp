@@ -238,7 +238,6 @@ void data_loader_impl::vtable_0x48() {
     // empty
 }
 
-extern "C" {
 char install_block_path_format[] = "ms0:\\.\\PSP\\SAVEDATA\\ULJM05500DAT\\%08d";
 INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", fake_rofs_loader);
 
@@ -259,7 +258,6 @@ INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884E79C);
 INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884E7C8);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884E8DC);
-}
 
 void data_loader_impl::decrypt_buffer(u8 *data, s32 size, s32 prevSize) {
     u8 *var_s4;
@@ -291,9 +289,7 @@ void data_loader_impl::decrypt_buffer(u8 *data, s32 size, s32 prevSize) {
     }
 }
 
-extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884EA44);
-}
 
 void data_loader_impl::set_decryption_key(u32 key) {
     key_lower = key & 0xffff;
@@ -633,12 +629,10 @@ bool data_loader_impl::is_loading(u8 unknown_flag) {
 }
 
 
-extern "C" {
 char install_folder_path[] = "ms0:\\.\\PSP\\SAVEDATA\\ULJM05500DAT";
 INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884F538);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884F5B4);
-}
 
 char* data_loader_impl::data_bin_path() {
     return "disc0:/PSP_GAME/USRDIR/DATA.BIN";

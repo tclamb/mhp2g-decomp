@@ -211,9 +211,7 @@ int pmo::compile(void *buffer, pmo_header *header, pmo_mesh_data *mesh_data) {
     return 1;
 }
 #else
-extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/model", compile__3pmoFPvP10pmo_headerP13pmo_mesh_data);
-}
 #endif
 
 int model::compile_pmo(void *buffer, pmo_header *header, pmo_mesh_data *mesh_data) {
@@ -483,7 +481,6 @@ float spline(float t, float x0, float t0, float dxdt0, float x1, float t1, float
     return result;
 }
 
-extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088630C8);
 
 static int log2table[257] = {
@@ -532,4 +529,3 @@ INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088642F4);
 INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08864340);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08864400);
-}

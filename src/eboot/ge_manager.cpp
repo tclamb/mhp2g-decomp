@@ -298,7 +298,6 @@ void ge_manager::initialize() {
   waiting_for_ge = 0;
 }
 
-extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08858FD0);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08859094);
@@ -306,7 +305,6 @@ INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08859094);
 INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_088590A8);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08859138);
-}
 
 void ge_manager::swap_buffers() {
   active_buffer ^= 1;
@@ -315,9 +313,7 @@ void ge_manager::swap_buffers() {
   clear_display_list();
 }
 
-extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_088591C8);
-}
 
 static ge_command FINISH_END_DISPLAY_LIST[2] = {
     0xf000000, // FINISH 000000
@@ -341,11 +337,9 @@ void ge_manager::clear_display_list() {
 }
 #pragma opt_unroll_loops reset
 
-extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_088593A0);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_088595E8);
-}
 
 void ge_manager::render() {
     GE_END_REACHED = 0;
@@ -396,8 +390,6 @@ void ge_manager::set_write_head(ge_command *value) {
     active_write_head = value;
 }
 
-extern "C" {
 INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_0885973C);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08859768);
-}
