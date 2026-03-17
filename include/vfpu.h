@@ -80,6 +80,24 @@ inline void vsub_q(ScePspFVector4 *v, ScePspFVector4 *a, ScePspFVector4 *b) {
 #endif
 }
 
+inline void vscl_t(ScePspFVector4 *v, ScePspFVector4 *a, float b) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C000, %1"
+        "lv.s S010, %2"
+        "vscl.t C000, C000, S010"
+        "sv.q C000, %0"
+        : "=m"(*v)
+        : "m"(*a), "m"(b)
+    );
+#else
+    v->x = a->x * b;
+    v->y = a->y * b;
+    v->z = a->z * b;
+    v->w = a->w;
+#endif
+}
+
 inline void vscl_q(ScePspFVector4 *v, ScePspFVector4 *a, float b) {
 #if defined(__MWERKS__)
     __asm__ (
@@ -98,6 +116,25 @@ inline void vscl_q(ScePspFVector4 *v, ScePspFVector4 *a, float b) {
 #endif
 }
 
+inline void vadd_t(ScePspFVector4 *v, ScePspFVector4 *a, ScePspFVector4 *b) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C000, %1"
+        "lv.q C010, %2"
+        "vadd.t C000, C000, C010"
+        "sv.q C000, %0"
+        : "=m"(*v)
+        : "m"(*a), "m"(*b)
+    );
+#else
+    v->x = a->x + b->x;
+    v->y = a->y + b->y;
+    v->z = a->z + b->z;
+    v->w = a->w;
+#endif
+}
+
+// oops
 void vadd_q(ScePspFVector4 *v, ScePspFVector4 *a, ScePspFVector4 *b);
 /*
 void vadd_q(ScePspFVector4 *v, ScePspFVector4 *a, ScePspFVector4 *b) {
@@ -478,11 +515,42 @@ inline float atan2f_s(float y, float x) {
     return result;
 }
 
+inline float distanceSquared(ScePspFVector4 *p, ScePspFVector4 *q) {
+    float result;
+#if defined (__MWERKS__)
+    __asm__ (
+        "lv.q C000, %1"
+        "lv.q C010, %2"
+        "vsub.t C000, C000, C010"
+        "vdot.t S010, C000, C000"
+        "sv.s S010, %0"
+        : "=m"(result)
+        : "m"(*p), "m"(*q)
+    );
+#else
+    result = (p->x - q->x) * (p->x - q->x) +
+             (p->y - q->y) * (p->y - q->y) +
+             (p->z - q->z) * (p->z - q->z);
+#endif
+    return result;
+}
+
 inline void scaleMatrix(ScePspFMatrix4 *out, float x, float y, float z) {
     vmidt_q(out);
     out->x.x = x;
     out->y.y = y;
     out->z.z = z;
+}
+
+inline void setPosition(ScePspFMatrix4 *out, float x, float y, float z) {
+    out->w.x = x;
+    out->w.y = y;
+    out->w.z = z;
+}
+
+inline void positionMatrix(ScePspFMatrix4 *out, float x, float y, float z) {
+    vmidt_q(out);
+    setPosition(out, x, y, z);
 }
 
 inline void rotateXYZ(ScePspFMatrix4 *out, ScePspFVector3 * angle) {

@@ -2,6 +2,8 @@
 
 #define INCLUDE_ASM(path, function)
 
+#define ext(x, pos, size) (((x) >> (pos)) & ((1 << (size)) - 1))
+
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
 typedef signed short int16_t;

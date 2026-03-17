@@ -197,6 +197,7 @@
 
 #define GE_BLENDMODE_MUL_AND_ADD 0
 #define GE_BLENDMODE_MUL_AND_SUBTRACT 1
+#define GE_BLENDMODE_MUL_AND_SUBTRACT_REVERSE 2
 
 #define GE_SRCBLEND_SRCALPHA 2
 #define GE_SRCBLEND_FIXA 10
@@ -428,13 +429,36 @@ namespace immediate_ge {
             impl::emit((GE_CMD_TEXSCALEV << 24) | (a.ui >> 8));
         }
 
+        inline void texoffset(ScePspUnion32 &u, ScePspUnion32 &v) {
+            impl::emit((GE_CMD_TEXOFFSETU << 24) | (u.ui >> 8));
+            impl::emit((GE_CMD_TEXOFFSETV << 24) | (v.ui >> 8));
+        }
+
         inline void texoffset() {
             impl::emit((GE_CMD_TEXOFFSETU << 24));
             impl::emit((GE_CMD_TEXOFFSETV << 24));
         }
 
+        inline void texoffsetu(ScePspUnion32 &offset) {
+            impl::emit((GE_CMD_TEXOFFSETU << 24) | (offset.ui >> 8));
+        }
+
+        inline void texoffsetu(float offset) {
+            ScePspUnion32 o; o.f = offset;
+            impl::emit((GE_CMD_TEXOFFSETU << 24) | (o.ui >> 8));
+        }
+
         inline void texoffsetu() {
             impl::emit((GE_CMD_TEXOFFSETU << 24));
+        }
+
+        inline void texoffsetv(ScePspUnion32 &offset) {
+            impl::emit((GE_CMD_TEXOFFSETV << 24) | (offset.ui >> 8));
+        }
+
+        inline void texoffsetv(float offset) {
+            ScePspUnion32 o; o.f = offset;
+            impl::emit((GE_CMD_TEXOFFSETV << 24) | (o.ui >> 8));
         }
 
         inline void texoffsetv() {

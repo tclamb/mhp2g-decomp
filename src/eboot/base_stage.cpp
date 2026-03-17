@@ -6,6 +6,8 @@
 #include "stage_manager.hpp"
 #include "immediate_ge.hpp"
 #include "lighting_manager.hpp"
+#include "player.hpp"
+#include "game.hpp"
 
 using namespace immediate_ge;
 
@@ -22,7 +24,9 @@ base_stage::~base_stage() {
 extern struct global_089C7508 {
     u8 padding_0x0[0x1C];
     u16 short_0x1C;
-    u8 padding_0x1E[0x2E - 0x1E];
+    u8 padding_0x1E[0x28 - 0x1E];
+    u8 player_id;
+    u8 padding_0x29[0x2E - 0x29];
     u8 byte_0x2E;
     u8 padding_0x2F[0x422-0x2F];
     bool allow_hidden_flag;
@@ -190,16 +194,11 @@ void base_stage::vtable_0x54(pmo *pmo, void *data, u8 mesh_index) {
     } else {
         t = unknown_0x1C0;
     }
-
     float angle = ((((float)((u16)t % args->period) * 360.0f) / args->period) / 360.0f) * 6.2831855f;
 
     ScePspFMatrix4 local_transform;
-    ScePspFVector4 *p = &args->position;
-    float z = p->z, y = p->y,  x = p->x;
-    vmidt_q(&local_transform);
-    local_transform.w.x = x;
-    local_transform.w.y = y;
-    local_transform.w.z = z;
+    ScePspFVector4 *pos = &args->position;
+    positionMatrix(&local_transform, pos->x, pos->y, pos->z);
 
     if ((args->flags & 1) != 0) {
         rotateX(&local_transform, angle);
@@ -211,41 +210,552 @@ void base_stage::vtable_0x54(pmo *pmo, void *data, u8 mesh_index) {
 
     emit_world_model(&local_transform, &pmo->scale);
     pmo->draw_mesh(NULL, &model_tmh, mesh_index);
-
     emit_world_model(&this->transform, &pmo->scale);
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x58__10base_stageFP3pmoPvUc);
+void base_stage::vtable_0x58(pmo *pmo, void *data, u8 mesh_index) {
+    ScePspFMatrix4 local_transform;
+    ScePspFVector4 *pos = (ScePspFVector4 *)data;
+    positionMatrix(&local_transform, pos->x, pos->y, pos->z);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x5C__10base_stageFP3pmoPvUc);
+    emit_world_model(&local_transform, &pmo->scale);
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    emit_world_model(&this->transform, &pmo->scale);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x60__10base_stageFP3pmoPvUc);
+struct vtable_0x5C_params {
+    u16 flags;
+    float angle;
+    ScePspFVector4 position;
+};
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x64__10base_stageFP3pmoPvUc);
+void base_stage::vtable_0x5C(pmo *pmo, void *data, u8 mesh_index) {
+    vtable_0x5C_params *args = (vtable_0x5C_params *)data;
+    ScePspFMatrix4 local_transform;
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x68__10base_stageFP3pmoPvUc);
+    ScePspFVector4 *pos = &args->position;
+    positionMatrix(&local_transform, pos->x, pos->y, pos->z);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x6C__10base_stageFP3pmoPvUc);
+    if ((args->flags & 1) != 0) {
+        rotateX(&local_transform, args->angle);
+    } else if ((args->flags & 2) != 0) {
+        rotateY(&local_transform, args->angle);
+    } else if ((args->flags & 4) != 0) {
+        rotateZ(&local_transform, args->angle);
+    }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x70__10base_stageFP3pmoPvUc);
+    emit_world_model(&local_transform, &pmo->scale);
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    emit_world_model(&this->transform, &pmo->scale);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x74__10base_stageFP3pmoPvUc);
+struct vtable_0x60_params {
+    u16 flags;
+    float angle;
+    ScePspFVector4 position;
+    ScePspFVector3 scale;
+};
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x78__10base_stageFP3pmoPvUc);
+void base_stage::vtable_0x60(pmo *pmo, void *data, u8 mesh_index) {
+    vtable_0x60_params *args = (vtable_0x60_params *)data;
+    ScePspFMatrix4 local_transform;
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x7C__10base_stageFP3pmoPvUc);
+    ScePspFVector3 *sca = &args->scale;
+    scaleMatrix(&local_transform, sca->x, sca->y, sca->z);
+    ScePspFVector4 *pos = &args->position;
+    setPosition(&local_transform, pos->x, pos->y, pos->z);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x80__10base_stageFP3pmoPvUc);
+    if ((args->flags & 1) != 0) {
+        rotateX(&local_transform, args->angle);
+    } else if ((args->flags & 2) != 0) {
+        rotateY(&local_transform, args->angle);
+    } else if ((args->flags & 4) != 0) {
+        rotateZ(&local_transform, args->angle);
+    }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x84__10base_stageFP3pmoPvUc);
+    emit_world_model(&local_transform, &pmo->scale);
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    emit_world_model(&this->transform, &pmo->scale);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x88__10base_stageFP3pmoPv);
+struct vtable_0x64_params {
+    u16 flags;
+    u16 u_period;
+    u16 v_period;
+};
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x8C__10base_stageFP3pmoPvUc);
+void base_stage::vtable_0x64(pmo *pmo, void *data, u8 mesh_index) {
+    vtable_0x64_params *args = (vtable_0x64_params *)data;
+    u16 u_period = args->u_period;
+    if (u_period != 0) {
+        ScePspUnion32 u_offset;
+        u_offset.f = (unknown_0x1C0 % u_period) / (float)u_period;
+        if ((args->flags & 8) != 0) {
+            u_offset.f = 1.0f - u_offset.f;
+        }
+        ge::texoffsetu(u_offset);
+    }
+    u16 v_period = args->v_period;
+    if (v_period != 0) {
+        ScePspUnion32 v_offset;
+        v_offset.f = (unknown_0x1C0 % v_period) / (float)v_period;
+        if ((args->flags & 8) != 0) {
+            v_offset.f = 1.0f - v_offset.f;
+        }
+        ge::texoffsetv(v_offset);
+    }
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    ge::texoffset();
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x90__10base_stageFP3pmoPvUc);
+struct vtable_0x68_params {
+    u16 u_period;
+    u16 u_frequency;
+    float u_phase;
+    float u_amplitude;
+    u16 v_period;
+    u16 v_frequency;
+    float v_phase;
+    float v_amplitude;
+};
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x94__10base_stageFP3pmoPvUc);
+void base_stage::vtable_0x68(pmo *pmo, void *data, u8 mesh_index) {
+    vtable_0x68_params *args = (vtable_0x68_params *)data;
+    u16 u_period = args->u_period;
+    if (u_period != 0) {
+        ScePspUnion32 u_offset;
+        float t = vsin_s(6.2831855f * (((360.0f * (args->u_frequency * (unknown_0x1C0 % u_period))) / 65536.0f) / 360.0f));
+        u_offset.f = args->u_phase + args->u_amplitude * t;
+        ge::texoffsetu(u_offset);
+    }
+    u16 v_period = args->v_period;
+    if (v_period != 0) {
+        ScePspUnion32 v_offset;
+        float t = vsin_s(6.2831855f * (((360.0f * (args->v_frequency * (unknown_0x1C0 % v_period))) / 65536.0f) / 360.0f));
+        v_offset.f = args->v_phase + args->v_amplitude * t;
+        ge::texoffsetv(v_offset);
+    }
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    ge::texoffset();
+}
+
+struct vtable_0x6C_params {
+    u16 flags;
+    u16 u_period;
+    u16 v_period;
+    s16 coarseness;
+    ScePspFVector4 position;
+};
+
+void base_stage::vtable_0x6C(pmo *pmo, void *data, u8 mesh_index) {
+    vtable_0x6C_params *args = (vtable_0x6C_params *)data;
+    ScePspFMatrix4 local_transform;
+
+    u16 u_period = args->u_period;
+    if (u_period != 0) {
+        ScePspUnion32 u_offset;
+        u_offset.f = (unknown_0x1C0 % u_period) / (float)u_period;
+        if ((args->flags & 8) != 0) {
+            u_offset.f = 1.0f - u_offset.f;
+        }
+        ge::texoffsetu(u_offset);
+    }
+    u16 v_period = args->v_period;
+    if (v_period != 0) {
+        ScePspUnion32 v_offset;
+        v_offset.f = (unknown_0x1C0 % v_period) / (float)v_period;
+        if ((args->flags & 8) != 0) {
+            v_offset.f = 1.0f - v_offset.f;
+        }
+        ge::texoffsetv(v_offset);
+    }
+
+    u16 t;
+    if ((args->flags & 8) != 0) {
+        t = ~unknown_0x1C0 & 0xFFFF;
+    } else {
+        t = unknown_0x1C0;
+    }
+    s16 shift = args->coarseness;
+    float angle = (((((t & (0xFFFF >> shift)) << shift) * 360.0f) / 65536.0f) / 360.0f) * 6.2831855f;
+
+    ScePspFVector4 *pos = &args->position;
+    positionMatrix(&local_transform, pos->x, pos->y, pos->z);
+
+    if ((args->flags & 1) != 0) {
+        rotateX(&local_transform, angle);
+    } else if ((args->flags & 2) != 0) {
+        rotateY(&local_transform, angle);
+    } else if ((args->flags & 4) != 0) {
+        rotateZ(&local_transform, angle);
+    }
+
+    emit_world_model(&local_transform, &pmo->scale);
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    ge::texoffset();
+    emit_world_model(&this->transform, &pmo->scale);
+}
+
+struct vtable_0x70_params {
+    u16 flags;
+    u16 u_period;
+    u16 v_period;
+    ScePspFVector4 position;
+};
+
+void base_stage::vtable_0x70(pmo *pmo, void *data, u8 mesh_index) {
+    vtable_0x70_params *args = (vtable_0x70_params *)data;
+    ScePspFMatrix4 local_transform;
+
+    u16 u_period = args->u_period;
+    if (u_period != 0) {
+        ScePspUnion32 u_offset;
+        u_offset.f = (unknown_0x1C0 % u_period) / (float)u_period;
+        if ((args->flags & 8) != 0) {
+            u_offset.f = 1.0f - u_offset.f;
+        }
+        ge::texoffsetu(u_offset);
+    }
+    u16 v_period = args->v_period;
+    if (v_period != 0) {
+        ScePspUnion32 v_offset;
+        v_offset.f = (unknown_0x1C0 % v_period) / (float)v_period;
+        if ((args->flags & 8) != 0) {
+            v_offset.f = 1.0f - v_offset.f;
+        }
+        ge::texoffsetv(v_offset);
+    }
+
+    ScePspFVector4 *pos = &args->position;
+    positionMatrix(&local_transform, pos->x, pos->y, pos->z);
+
+    emit_world_model(&local_transform, &pmo->scale);
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    emit_world_model(&this->transform, &pmo->scale);
+    ge::texoffset();
+}
+
+struct vtable_0x74_params {
+    u16 flags;
+    u16 u_period;
+    u16 v_period;
+    float angle;
+    ScePspFVector4 position;
+};
+
+void base_stage::vtable_0x74(pmo *pmo, void *data, u8 mesh_index) {
+    vtable_0x74_params *args = (vtable_0x74_params *)data;
+    ScePspFMatrix4 local_transform;
+
+    u16 u_period = args->u_period;
+    if (u_period != 0) {
+        ScePspUnion32 u_offset;
+        u_offset.f = (unknown_0x1C0 % u_period) / (float)u_period;
+        if ((args->flags & 8) != 0) {
+            u_offset.f = 1.0f - u_offset.f;
+        }
+        ge::texoffsetu(u_offset);
+    }
+    u16 v_period = args->v_period;
+    if (v_period != 0) {
+        ScePspUnion32 v_offset;
+        v_offset.f = (unknown_0x1C0 % v_period) / (float)v_period;
+        if ((args->flags & 8) != 0) {
+            v_offset.f = 1.0f - v_offset.f;
+        }
+        ge::texoffsetv(v_offset);
+    }
+
+    ScePspFVector4 *pos = &args->position;
+    positionMatrix(&local_transform, pos->x, pos->y, pos->z);
+
+    if ((args->flags & 1) != 0) {
+        rotateX(&local_transform, args->angle);
+    } else if ((args->flags & 2) != 0) {
+        rotateY(&local_transform, args->angle);
+    } else if ((args->flags & 4) != 0) {
+        rotateZ(&local_transform, args->angle);
+    }
+
+    emit_world_model(&local_transform, &pmo->scale);
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    emit_world_model(&this->transform, &pmo->scale);
+    ge::texoffset();
+}
+
+void base_stage::vtable_0x78(pmo *pmo, void *data, u8 mesh_index) {
+    u16 flags = *(u16 *)data;
+    if ((flags & 0x100) != 0) {
+        ScePspUnion32 u_offset; u_offset.f = ext(unknown_0x1C0, 0, 2) * 0.25f;
+        ScePspUnion32 v_offset; v_offset.f = ext(unknown_0x1C0, 2, 2) * 0.25f;
+        ge::texoffset(u_offset, v_offset);
+    } else if ((flags & 0x200) != 0) {
+        ScePspUnion32 u_offset; u_offset.f = ext(unknown_0x1C0, 0, 3) * 0.125f;
+        ScePspUnion32 v_offset; v_offset.f = ext(unknown_0x1C0, 3, 2) * 0.125f;
+        ge::texoffset(u_offset, v_offset);
+    } else if ((flags & 0x400) != 0) {
+        ScePspUnion32 u_offset; u_offset.f = ext(unknown_0x1C0, 0, 3) * 0.125f;
+        ScePspUnion32 v_offset; v_offset.f = ext(unknown_0x1C0, 3, 3) * 0.125f;
+        ge::texoffset(u_offset, v_offset);
+    }
+
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    ge::texoffset();
+}
+
+struct vtable_0x7C_params {
+    ScePspFVector4 position;
+    ScePspFVector4 bbox_min;
+    ScePspFVector4 bbox_max;
+};
+
+extern "C" {
+    extern void *D_eboot_09A4AE04;
+    player *func_eboot_088DF804(void *, int);
+}
+
+void base_stage::vtable_0x7C(pmo *pmo, void *data, u8 mesh_index) {
+    u8 player_id = D_eboot_089C7508->player_id;
+    player *p = func_eboot_088DF804(D_eboot_09A4AE04, player_id);
+    vtable_0x7C_params *args = (vtable_0x7C_params *)data;
+    if (p != 0) {
+        if (p->position.x < args->bbox_min.x ||
+            args->bbox_max.x < p->position.x ||
+            p->position.y < args->bbox_min.y ||
+            args->bbox_max.y < p->position.y ||
+            p->position.z < args->bbox_min.z ||
+            args->bbox_max.z < p->position.z) {
+                return;
+        }
+    }
+
+    ScePspFMatrix4 local_transform;
+    ScePspFVector4 *pos = &args->position;
+    positionMatrix(&local_transform, pos->x, pos->y, pos->z);
+
+    emit_world_model(&local_transform, &pmo->scale);
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    emit_world_model(&this->transform, &pmo->scale);
+}
+
+struct vtable_0x80_params {
+    u16 period;
+    ScePspFVector4 phase;
+    ScePspFVector4 amplitude;
+};
+
+void base_stage::vtable_0x80(pmo *pmo, void *data, u8 mesh_index) {
+    vtable_0x80_params *args = (vtable_0x80_params *)data;
+
+    float t = 6.2830896f * ((unknown_0x1C0 % args->period) / (float)args->period);
+    float f = vsin_s(t);
+    ScePspFVector4 position;
+    vscl_t(&position, &args->amplitude, f);
+    vadd_t(&position, &position, &args->phase);
+
+    ScePspFMatrix4 local_transform;
+    positionMatrix(&local_transform, position.x, position.y, position.z);
+
+    emit_world_model(&local_transform, &pmo->scale);
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    emit_world_model(&this->transform, &pmo->scale);
+}
+
+struct vtable_0x84_params {
+    u16 period;
+    ScePspFVector4 position;
+    ScePspFVector4 phase;
+    ScePspFVector4 amplitude;
+};
+
+void base_stage::vtable_0x84(pmo *pmo, void *data, u8 mesh_index) {
+    vtable_0x84_params *args = (vtable_0x84_params *)data;
+
+    float t = 6.2830896f * ((unknown_0x1C0 % args->period) / (float)args->period);
+    float f = vsin_s(t);
+    ScePspFVector4 scale;
+    vscl_t(&scale, &args->amplitude, f);
+    vadd_t(&scale, &scale, &args->phase);
+
+    ScePspFMatrix4 local_transform;
+    ScePspFVector4 *pos = &args->position;
+    scaleMatrix(&local_transform, scale.x, scale.y, scale.z);
+    setPosition(&local_transform, pos->x, pos->y, pos->z);
+
+    emit_world_model(&local_transform, &pmo->scale);
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    emit_world_model(&this->transform, &pmo->scale);
+}
+
+struct vtable_0x88_params {
+    s16 count;
+    u8 far_mesh_index;
+    u8 near_mesh_index;
+    float cutoff;
+    ScePspFVector4 *positions;
+};
+
+extern "C" {
+    int func_eboot_08816E20(global_089C6CB4 *, ScePspFVector4 *, float);
+    void func_eboot_08814E84(global_089C6CB4 *, ScePspFVector4 *);
+}
+
+void base_stage::vtable_0x88(pmo *pmo, void *data) {
+    vtable_0x88_params *args = (vtable_0x88_params *)data;
+    ScePspFVector4 *position = &args->positions[0];
+
+    ScePspFMatrix4 local_transform;
+    float one = 1.0f;
+    scaleMatrix(&local_transform, one, one, one);
+
+    for (int i = 0; i < args->count; ++i, ++position) {
+        if ((u8)func_eboot_08816E20(D_eboot_089C6CB4, position, args->cutoff) == true) {
+            setPosition(&local_transform, position->x, position->y, position->z);
+            emit_world_model(&local_transform, &pmo->scale);
+
+            ScePspFVector4 camera_position;
+            func_eboot_08814E84(D_eboot_089C6CB4, &camera_position);
+
+            float d2 = distanceSquared(position, &camera_position);
+            if (d2 <= 2250000.0f + args->cutoff * args->cutoff) {
+                pmo->draw_mesh(NULL, &model_tmh, args->near_mesh_index);
+            } else {
+                pmo->draw_mesh(NULL, &model_tmh, args->far_mesh_index);
+            }
+        }
+    }
+    emit_world_model(&this->transform, &pmo->scale);
+}
+
+struct vtable_0x8C_params {
+    u16 v_period;
+    ScePspFVector4 position;
+};
+
+extern "C" {
+    // vfpu trunc?? effectively: return (float)(u32)x;
+    float func_eboot_08899DF8(float x);
+}
+
+void base_stage::vtable_0x8C(pmo *pmo, void *data, u8 mesh_index) {
+    vtable_0x8C_params *args = (vtable_0x8C_params *)data;
+
+    ScePspUnion32 u_offset;
+    u_offset.f = 0.033333335f * ((360.0f * unknown_0x1C2) / 65536.0f);
+    u_offset.f -= func_eboot_08899DF8(u_offset.f);
+    ge::texoffsetu(u_offset);
+
+    u16 v_period = args->v_period;
+    if (v_period != 0) {
+        ScePspUnion32 v_offset;
+        v_offset.f = (unknown_0x1C0 % v_period) / (float)v_period;
+        ge::texoffsetv(v_offset);
+    }
+
+    ScePspFMatrix4 local_transform;
+    positionMatrix(&local_transform, args->position.x, args->position.y, args->position.z);
+    rotateY(&local_transform, 6.2831855f * (((360.0f * unknown_0x1C2) / 65536.0f) / 360.0f));
+
+    emit_world_model(&local_transform, &pmo->scale);
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    ge::texoffset();
+    emit_world_model(&this->transform, &pmo->scale);
+}
+
+struct vtable_0x90_params {
+    u16 flags;
+    u16 phase;
+    float amplitude;
+    float angle;
+    ScePspFVector4 position;
+};
+
+inline float sinu16(int x) {
+    return vsin_s(6.2831855f * (((360.0f * x) / 65536.0f) / 360.0f));
+}
+
+inline void handle_rotate(ScePspFMatrix4 *transform, u16 flags, float angle) {
+    if ((flags & 1) != 0) {
+        rotateX(transform, angle);
+    } else if ((flags & 2) != 0) {
+        rotateY(transform, angle);
+    } else if ((flags & 4) != 0) {
+        rotateZ(transform, angle);
+    }
+}
+
+inline void rotate_y(ScePspFMatrix4 *transform, float angle) {
+    rotateY(transform, angle);
+}
+
+void base_stage::vtable_0x90(pmo *pmo, void *data, u8 mesh_index) {
+    ScePspFMatrix4 local_transform;
+    vtable_0x90_params *args = (vtable_0x90_params *)data;
+
+    u16 t = unknown_0x1C0 + args->phase;
+    u16 a = t & 0xFFF;
+    float c = sinu16((u16)(a * sinu16(a << 2)) << 10);
+    float e = 0.5f * args->amplitude;
+    float f = e * c;
+    float g = e * sinu16((u16)a << 10);
+    float angle = f + g;
+
+    ScePspFVector4 *pos = &args->position;
+    positionMatrix(&local_transform, pos->x, pos->y, pos->z);
+
+    handle_rotate(&local_transform, args->flags, angle);
+
+    rotate_y(&local_transform, args->angle);
+
+    emit_world_model(&local_transform, &pmo->scale);
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    emit_world_model(&this->transform, &pmo->scale);
+}
+
+extern "C" {
+    int func_eboot_088566DC(global_089C7508 *);
+}
+
+struct vtable_0x94_params {
+    u8 a, b, c, d;
+    s16 e;
+};
+
+void base_stage::vtable_0x94(pmo *pmo, void *data, u8 mesh_index) {
+    vtable_0x94_params *state = (vtable_0x94_params *)data;
+
+    if ((u8)func_eboot_088566DC(D_eboot_089C7508) == 0) {
+        switch (state->c) {
+        case 0:
+            if (--state->e < 0) {
+                state->e = (game::instance->next_index(1) % 60) + 30;
+                ++state->c;
+            }
+            break;
+        case 1:
+            state->d = state->a + (game::instance->next_index(1) % (state->b - state->a));
+            if (--state->e < 0) {
+                ++state->c;
+            }
+            break;
+        case 2:
+            if (state->d > 0xFF - 4) {
+                state->e = (game::instance->next_index(1) % 180) + 180;
+                state->d = 0xFF;
+                state->c = 0;
+            } else {
+                state->d += 4;
+            }
+            break;
+        }
+    }
+
+    pmo->set_mesh_blend_mode(mesh_index, GE_BLENDMODE_MUL_AND_SUBTRACT_REVERSE);
+    pmo->set_mesh_color(mesh_index, 0xFF, 0xFF, 0xFF);
+    pmo->set_mesh_shadow_color(mesh_index, 0xFF, 0xFF, 0xFF);
+    pmo->set_mesh_alpha(mesh_index, state->d);
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+}
 
 void base_stage::vtable_0x98(pmo *, void *) {
     // empty

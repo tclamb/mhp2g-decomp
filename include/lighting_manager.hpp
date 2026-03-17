@@ -2,8 +2,7 @@
 
 #include "singleton.hpp"
 #include "character.hpp"
-
-struct player;
+#include "player.hpp"
 
 struct light_data {
     ScePspFVector3 diffuse;

@@ -3,16 +3,9 @@
 #include "vfpu.h"
 #include "stage_manager.hpp"
 #include "immediate_ge.hpp"
-
 #include "lighting_manager.hpp"
 
 using namespace immediate_ge;
-
-// stub for type with vtable at D_eboot_089B5E78
-struct player : character {
-    u8 padding_0x480[0x614 - 0x480];
-    u32 lighting_flags;
-};
 
 lighting_manager::lighting_manager() {
     memset(&data, 0, sizeof(data));
