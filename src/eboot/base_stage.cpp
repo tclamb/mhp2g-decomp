@@ -175,7 +175,45 @@ void base_stage::execute_prop_draw_commands() {
     }
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x54__10base_stageFP3pmoPvUc);
+struct vtable_0x54_params {
+    u16 flags;
+    u32 period;
+    ScePspFVector4 position;
+};
+
+void base_stage::vtable_0x54(pmo *pmo, void *data, u8 mesh_index) {
+    vtable_0x54_params *args = (vtable_0x54_params *)data;
+
+    u32 t;
+    if ((args->flags & 8) != 0) {
+        t = ~unknown_0x1C0 & 0xFFFF;
+    } else {
+        t = unknown_0x1C0;
+    }
+
+    float angle = ((((float)((u16)t % args->period) * 360.0f) / args->period) / 360.0f) * 6.2831855f;
+
+    ScePspFMatrix4 local_transform;
+    ScePspFVector4 *p = &args->position;
+    float z = p->z, y = p->y,  x = p->x;
+    vmidt_q(&local_transform);
+    local_transform.w.x = x;
+    local_transform.w.y = y;
+    local_transform.w.z = z;
+
+    if ((args->flags & 1) != 0) {
+        rotateX(&local_transform, angle);
+    } else if ((args->flags & 2) != 0) {
+        rotateY(&local_transform, angle);
+    } else if ((args->flags & 4) != 0) {
+        rotateZ(&local_transform, angle);
+    }
+
+    emit_world_model(&local_transform, &pmo->scale);
+    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+
+    emit_world_model(&this->transform, &pmo->scale);
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", vtable_0x58__10base_stageFP3pmoPvUc);
 
