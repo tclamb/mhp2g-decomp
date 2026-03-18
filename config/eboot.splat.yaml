@@ -841,9 +841,9 @@ segments:
       - [0x1c4dfc, vtables, stage2/stage263]
       - [0x1c4eb8, vtables, stage2/stage264]
       - [0x1c4f74, vtables, stage2/stage265]
-      - [0x1c5030, vtables, stage2/stage266]
+      - [0x1c5030, .vtables, stage2/stage266]
       - [0x1c50ec, pad]
-      - [0x1c50f4, bin, omit_overlay_addresses]
+      - [0x1c50f4, .bin, omit_overlay_addresses]
       - {start: 0x1c5114, type: .bss, vram: 0x089c6b60, name: lib/crt0} # FIXME: split
       - {start: 0x1c5114, type: .bss, vram: 0x089c70cc, name: drawable_manager}
       - {start: 0x1c5114, type: .bss, vram: 0x089c70ec, name: state/edit_state}

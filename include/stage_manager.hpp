@@ -48,6 +48,18 @@ struct base_prop : drawable {
     }
 };
 
+struct prop_089B94DC_data {
+    u16 mesh_index;
+    u16 period;
+    ScePspFVector4 position;
+};
+
+struct prop_089B975C_data {
+    u8 mesh_index;
+    ScePspFVector4 min_position;
+    ScePspFVector4 spawn_box;
+};
+
 struct stage_manager : singleton<stage_manager> {
     base_stage *stage;
     u8 unknown_0x4[640];
@@ -101,8 +113,8 @@ struct stage_manager : singleton<stage_manager> {
     void push_prop_089B947C(prop_params *params);
     void push_prop_089B949C(prop_params *params);
     void push_prop_089B94BC(prop_params *params, u32 arg3);
-    void push_prop_089B94DC(prop_params *params);
-    void push_prop_089B94FC(prop_params *params, u32 *arg3, u32 arg4, u32 arg5, u8 arg6, u16 arg7, int pmo_index);
+    void push_prop_089B94DC(prop_089B94DC_data *data);
+    void push_prop_089B94FC(u32, ScePspFVector4 *, u32, u32, u8, u16, int);
     void push_prop_089B951C(u8 arg2);
     void push_prop_089B953C(prop_params *params);
     void push_prop_089B955C();
@@ -133,13 +145,13 @@ struct stage_manager : singleton<stage_manager> {
     void push_prop_089C41C8();
     void push_prop_089B971C(prop_params *params, int pmo_index);
     void push_prop_089B973C(prop_params *params);
-    void push_prop_089B975C(prop_params *params);
+    void push_prop_089B975C(prop_089B975C_data *data);
 
     void stage_clear();
     void stage_destroy();
     u32 stage_unknown_0x444();
     u32 stage_unknown_0x444_thunk();
-    u32 stage_vtable_0xA8();
+    bool stage_vtable_0xA8();
     u16 farm_stage_file_id();
     void unknown_0xA2E8_clear();
     u32 register_sound(u32 arg2, u32 arg3, u32 arg4, u32 arg5, u32 arg6, ScePspFVector4 *arg7, u32 arg8);

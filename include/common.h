@@ -26,6 +26,7 @@ extern "C" {
 struct stages {
     enum {
         GREAT_FOREST_N_2 = 259,
+        GREAT_FOREST_N_7 = 264,
         TOWER_3 = 130,
     };
 

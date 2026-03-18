@@ -1,6 +1,6 @@
 push_prop_089B927C__13stage_managerFP11prop_params = 0x088C5E94; // type:func
 push_prop_089B92BC__13stage_managerFP11prop_paramsUi = 0x088C5F88; // type:func
-push_prop_089B94FC__13stage_managerFP11prop_paramsPUiUiUiUcUsi = 0x088C7284; // type:func
+push_prop_089B94FC__13stage_managerFUiP14ScePspFVector4UiUiUcUsi = 0x088C7284; // type:func
 __ct__10base_stageFv = 0x088CA15C; // type:func
 __dt__10base_stageFv = 0x088CA1E4; // type:func
 vtable_0x5C__10base_stageFv = 0x088CAD38;

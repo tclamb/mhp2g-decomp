@@ -1,5 +1,5 @@
 push_prop_089B927C__13stage_managerFP11prop_params = 0x088C5E94; // type:func
-push_prop_089B94DC__13stage_managerFP11prop_params = 0x088C718C; // type:func
+push_prop_089B94DC__13stage_managerFP18prop_089B94DC_data = 0x088C718C; // type:func
 push_prop_089B95DC__13stage_managerFP11prop_params = 0x088C79C4; // type:func
 push_prop_089B96BC__13stage_managerFP11prop_params = 0x088C82DC; // type:func
 __ct__10base_stageFv = 0x088CA15C; // type:func

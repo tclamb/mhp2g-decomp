@@ -352,21 +352,21 @@ void stage_manager::push_prop_089B94BC(prop_params *params, u32 arg3) {
 }
 
 
-extern "C" void func_game_sub_09CBECB8(prop_089B94DC *prop, prop_params *params);
+extern "C" void func_game_sub_09CBECB8(prop_089B94DC *prop, prop_089B94DC_data *params);
 
-void stage_manager::push_prop_089B94DC(prop_params *params) {
+void stage_manager::push_prop_089B94DC(prop_089B94DC_data *data) {
     prop_089B94DC *prop = alloc_and_push_prop<prop_089B94DC>();
     link_model(prop, true);
-    func_game_sub_09CBECB8(prop, params);
+    func_game_sub_09CBECB8(prop, data);
 }
 
 
-extern "C" void func_game_sub_09CBF188(prop_089B94FC *prop, prop_params *params, u32 *arg3, u32 arg4, u32 arg5, u8 arg6, u16 arg7);
+extern "C" void func_game_sub_09CBF188(prop_089B94FC *prop, u32 flags, ScePspFVector4 *position, u32 arg4, u32 arg5, u8 arg6, u16 arg7);
 
-void stage_manager::push_prop_089B94FC(prop_params *params, u32 *arg3, u32 arg4, u32 arg5, u8 arg6, u16 arg7, int pmo_index) {
+void stage_manager::push_prop_089B94FC(u32 flags, ScePspFVector4 *position, u32 arg4, u32 arg5, u8 arg6, u16 arg7, int pmo_index) {
     prop_089B94FC *prop = alloc_and_push_prop<prop_089B94FC>();
     link_model(prop, pmo_index);
-    func_game_sub_09CBF188(prop, params, arg3, arg4, arg5, arg6, arg7);
+    func_game_sub_09CBF188(prop, flags, position, arg4, arg5, arg6, arg7);
 }
 
 
@@ -641,12 +641,12 @@ void stage_manager::push_prop_089B973C(prop_params *params) {
 }
 
 
-extern "C" void func_game_sub_09CC9850(prop_089B975C *prop, prop_params *params);
+extern "C" void func_game_sub_09CC9850(prop_089B975C *prop, prop_089B975C_data *data);
 
-void stage_manager::push_prop_089B975C(prop_params *params) {
+void stage_manager::push_prop_089B975C(prop_089B975C_data *data) {
     prop_089B975C *prop = alloc_and_push_prop<prop_089B975C>();
     link_model(prop, true);
-    func_game_sub_09CC9850(prop, params);
+    func_game_sub_09CC9850(prop, data);
 }
 
 
@@ -669,7 +669,7 @@ u32 stage_manager::stage_unknown_0x444_thunk() {
     return stage_unknown_0x444();
 }
 
-u32 stage_manager::stage_vtable_0xA8() {
+bool stage_manager::stage_vtable_0xA8() {
     return stage->vtable_0xA8();
 }
 

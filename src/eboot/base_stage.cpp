@@ -179,12 +179,6 @@ void base_stage::execute_prop_draw_commands() {
     }
 }
 
-struct vtable_0x54_params {
-    u16 flags;
-    u32 period;
-    ScePspFVector4 position;
-};
-
 void base_stage::vtable_0x54(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x54_params *args = (vtable_0x54_params *)data;
 
@@ -223,12 +217,6 @@ void base_stage::vtable_0x58(pmo *pmo, void *data, u8 mesh_index) {
     emit_world_model(&this->transform, &pmo->scale);
 }
 
-struct vtable_0x5C_params {
-    u16 flags;
-    float angle;
-    ScePspFVector4 position;
-};
-
 void base_stage::vtable_0x5C(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x5C_params *args = (vtable_0x5C_params *)data;
     ScePspFMatrix4 local_transform;
@@ -248,13 +236,6 @@ void base_stage::vtable_0x5C(pmo *pmo, void *data, u8 mesh_index) {
     pmo->draw_mesh(NULL, &model_tmh, mesh_index);
     emit_world_model(&this->transform, &pmo->scale);
 }
-
-struct vtable_0x60_params {
-    u16 flags;
-    float angle;
-    ScePspFVector4 position;
-    ScePspFVector3 scale;
-};
 
 void base_stage::vtable_0x60(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x60_params *args = (vtable_0x60_params *)data;
@@ -277,12 +258,6 @@ void base_stage::vtable_0x60(pmo *pmo, void *data, u8 mesh_index) {
     pmo->draw_mesh(NULL, &model_tmh, mesh_index);
     emit_world_model(&this->transform, &pmo->scale);
 }
-
-struct vtable_0x64_params {
-    u16 flags;
-    u16 u_period;
-    u16 v_period;
-};
 
 void base_stage::vtable_0x64(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x64_params *args = (vtable_0x64_params *)data;
@@ -308,17 +283,6 @@ void base_stage::vtable_0x64(pmo *pmo, void *data, u8 mesh_index) {
     ge::texoffset();
 }
 
-struct vtable_0x68_params {
-    u16 u_period;
-    u16 u_frequency;
-    float u_phase;
-    float u_amplitude;
-    u16 v_period;
-    u16 v_frequency;
-    float v_phase;
-    float v_amplitude;
-};
-
 void base_stage::vtable_0x68(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x68_params *args = (vtable_0x68_params *)data;
     u16 u_period = args->u_period;
@@ -338,14 +302,6 @@ void base_stage::vtable_0x68(pmo *pmo, void *data, u8 mesh_index) {
     pmo->draw_mesh(NULL, &model_tmh, mesh_index);
     ge::texoffset();
 }
-
-struct vtable_0x6C_params {
-    u16 flags;
-    u16 u_period;
-    u16 v_period;
-    s16 coarseness;
-    ScePspFVector4 position;
-};
 
 void base_stage::vtable_0x6C(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x6C_params *args = (vtable_0x6C_params *)data;
@@ -396,13 +352,6 @@ void base_stage::vtable_0x6C(pmo *pmo, void *data, u8 mesh_index) {
     emit_world_model(&this->transform, &pmo->scale);
 }
 
-struct vtable_0x70_params {
-    u16 flags;
-    u16 u_period;
-    u16 v_period;
-    ScePspFVector4 position;
-};
-
 void base_stage::vtable_0x70(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x70_params *args = (vtable_0x70_params *)data;
     ScePspFMatrix4 local_transform;
@@ -434,14 +383,6 @@ void base_stage::vtable_0x70(pmo *pmo, void *data, u8 mesh_index) {
     emit_world_model(&this->transform, &pmo->scale);
     ge::texoffset();
 }
-
-struct vtable_0x74_params {
-    u16 flags;
-    u16 u_period;
-    u16 v_period;
-    float angle;
-    ScePspFVector4 position;
-};
 
 void base_stage::vtable_0x74(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x74_params *args = (vtable_0x74_params *)data;
@@ -503,12 +444,6 @@ void base_stage::vtable_0x78(pmo *pmo, void *data, u8 mesh_index) {
     ge::texoffset();
 }
 
-struct vtable_0x7C_params {
-    ScePspFVector4 position;
-    ScePspFVector4 bbox_min;
-    ScePspFVector4 bbox_max;
-};
-
 extern "C" {
     extern void *D_eboot_09A4AE04;
     player *func_eboot_088DF804(void *, int);
@@ -538,12 +473,6 @@ void base_stage::vtable_0x7C(pmo *pmo, void *data, u8 mesh_index) {
     emit_world_model(&this->transform, &pmo->scale);
 }
 
-struct vtable_0x80_params {
-    u16 period;
-    ScePspFVector4 phase;
-    ScePspFVector4 amplitude;
-};
-
 void base_stage::vtable_0x80(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x80_params *args = (vtable_0x80_params *)data;
 
@@ -560,13 +489,6 @@ void base_stage::vtable_0x80(pmo *pmo, void *data, u8 mesh_index) {
     pmo->draw_mesh(NULL, &model_tmh, mesh_index);
     emit_world_model(&this->transform, &pmo->scale);
 }
-
-struct vtable_0x84_params {
-    u16 period;
-    ScePspFVector4 position;
-    ScePspFVector4 phase;
-    ScePspFVector4 amplitude;
-};
 
 void base_stage::vtable_0x84(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x84_params *args = (vtable_0x84_params *)data;
@@ -586,14 +508,6 @@ void base_stage::vtable_0x84(pmo *pmo, void *data, u8 mesh_index) {
     pmo->draw_mesh(NULL, &model_tmh, mesh_index);
     emit_world_model(&this->transform, &pmo->scale);
 }
-
-struct vtable_0x88_params {
-    s16 count;
-    u8 far_mesh_index;
-    u8 near_mesh_index;
-    float cutoff;
-    ScePspFVector4 *positions;
-};
 
 extern "C" {
     int func_eboot_08816E20(global_089C6CB4 *, ScePspFVector4 *, float);
@@ -627,11 +541,6 @@ void base_stage::vtable_0x88(pmo *pmo, void *data) {
     emit_world_model(&this->transform, &pmo->scale);
 }
 
-struct vtable_0x8C_params {
-    u16 v_period;
-    ScePspFVector4 position;
-};
-
 extern "C" {
     // vfpu trunc?? effectively: return (float)(u32)x;
     float func_eboot_08899DF8(float x);
@@ -661,14 +570,6 @@ void base_stage::vtable_0x8C(pmo *pmo, void *data, u8 mesh_index) {
     ge::texoffset();
     emit_world_model(&this->transform, &pmo->scale);
 }
-
-struct vtable_0x90_params {
-    u16 flags;
-    u16 phase;
-    float amplitude;
-    float angle;
-    ScePspFVector4 position;
-};
 
 inline float sinu16(int x) {
     return vsin_s(6.2831855f * (((360.0f * x) / 65536.0f) / 360.0f));
@@ -715,11 +616,6 @@ void base_stage::vtable_0x90(pmo *pmo, void *data, u8 mesh_index) {
 extern "C" {
     int func_eboot_088566DC(global_089C7508 *);
 }
-
-struct vtable_0x94_params {
-    u8 a, b, c, d;
-    s16 e;
-};
 
 void base_stage::vtable_0x94(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x94_params *state = (vtable_0x94_params *)data;

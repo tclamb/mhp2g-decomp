@@ -23,7 +23,8 @@ struct stage_exit {
     float size;
     float height;
     ScePspFVector3 q;
-    u8 undefined_0x24[0x10];
+    ScePspFVector3 destination_position;
+    u8 unknown_0x30[4];
 };
 
 struct stage_definitions_0x28_t {
@@ -59,7 +60,6 @@ struct stage_definitions {
     u8 unknown_0x40;
     u8 unknown_0x41;
     u16 unknown_0x42;
-    u8 undefined_0x44[0xFC];
 };
 
 struct stage_draw_command {
@@ -137,9 +137,9 @@ struct base_stage : model {
     virtual void vtable_0x94(pmo *, void *, u8);
     virtual void vtable_0x98(pmo *, void *);
     virtual void draw_sky_gradient();
-    virtual void vtable_0xA0();
+    virtual bool vtable_0xA0();
     virtual bool vtable_0xA4();
-    virtual u32 vtable_0xA8() { return 0; }
+    virtual bool vtable_0xA8() { return false; }
     virtual int vtable_0xAC();
     virtual stage_sound *vtable_0xB0();
     virtual u8 vtable_0xB4();
@@ -195,4 +195,109 @@ protected:
 
 private:
     ScePspUnion32 lerp_bgra8888(u8 *, u8 *, float);
+};
+
+
+struct vtable_0x54_params {
+    u16 flags;
+    u32 period;
+    ScePspFVector4 position;
+};
+
+struct vtable_0x5C_params {
+    u16 flags;
+    float angle;
+    ScePspFVector4 position;
+};
+
+struct vtable_0x60_params {
+    u16 flags;
+    float angle;
+    ScePspFVector4 position;
+    ScePspFVector3 scale;
+};
+
+struct vtable_0x64_params {
+    u16 flags;
+    u16 u_period;
+    u16 v_period;
+};
+
+struct vtable_0x68_params {
+    u16 u_period;
+    u16 u_frequency;
+    float u_phase;
+    float u_amplitude;
+    u16 v_period;
+    u16 v_frequency;
+    float v_phase;
+    float v_amplitude;
+};
+
+struct vtable_0x6C_params {
+    u16 flags;
+    u16 u_period;
+    u16 v_period;
+    s16 coarseness;
+    ScePspFVector4 position;
+};
+
+struct vtable_0x70_params {
+    u16 flags;
+    u16 u_period;
+    u16 v_period;
+    ScePspFVector4 position;
+};
+
+struct vtable_0x74_params {
+    u16 flags;
+    u16 u_period;
+    u16 v_period;
+    float angle;
+    ScePspFVector4 position;
+};
+
+struct vtable_0x7C_params {
+    ScePspFVector4 position;
+    ScePspFVector4 bbox_min;
+    ScePspFVector4 bbox_max;
+};
+
+struct vtable_0x80_params {
+    u16 period;
+    ScePspFVector4 phase;
+    ScePspFVector4 amplitude;
+};
+
+struct vtable_0x84_params {
+    u16 period;
+    ScePspFVector4 position;
+    ScePspFVector4 phase;
+    ScePspFVector4 amplitude;
+};
+
+struct vtable_0x88_params {
+    s16 count;
+    u8 far_mesh_index;
+    u8 near_mesh_index;
+    float cutoff;
+    ScePspFVector4 *positions;
+};
+
+struct vtable_0x8C_params {
+    u16 v_period;
+    ScePspFVector4 position;
+};
+
+struct vtable_0x90_params {
+    u16 flags;
+    u16 phase;
+    float amplitude;
+    float angle;
+    ScePspFVector4 position;
+};
+
+struct vtable_0x94_params {
+    u8 a, b, c, d;
+    s16 e;
 };
