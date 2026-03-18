@@ -14,6 +14,7 @@ import dataclasses
 import pycdlib
 import urllib.request
 import zipfile
+import re
 
 import ninja_syntax
 import splat
@@ -828,6 +829,7 @@ SECTIONS
 }
 """)
 
+    overlay_vtable_pattern = re.compile('build/asm/eboot/data/((task|sub|stage[012]|em)/([^/.]+))')
     objects_by_module_name: Dict[str, List[str]] = dict()
     for module_name, linker_entries in linker_entries_by_module_name.items():
         seen = set()
@@ -838,8 +840,13 @@ SECTIONS
             if entry.object_path is None:
                 continue
 
-            objects = objects_by_module_name.setdefault(module_name, [])
             o = str(entry.object_path)
+            match = overlay_vtable_pattern.match(o)
+            group = module_name
+            if module_name == EBOOT_MODULE.name and match:
+                group = match.group(3) + ".ovl"
+
+            objects = objects_by_module_name.setdefault(group, [])
             if not o in seen:
                 objects.append(o)
             seen.add(o)

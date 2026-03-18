@@ -317,261 +317,261 @@ segments:
       - [0x1b4548, .vtables, state/movie_state]
       - [0x1b455c, .vtables, lib/runtime/NMWException]
       # referenced from edit_task.ovl
-      - [0x1b457c, vtables, edit/unknown_vtable]
+      - [0x1b457c, vtables, task/edit_task/unknown_vtable]
       # lobby_task.ovl
-      - [0x1b45bc, vtables, lobby/unknown_vtable_01]
-      - [0x1b4638, vtables, lobby/unknown_vtable_02]
-      - [0x1b46b4, vtables, lobby/unknown_vtable_03]
-      - [0x1b46f4, vtables, lobby/unknown_vtable_04]
+      - [0x1b45bc, vtables, task/lobby_task/unknown_vtable_01]
+      - [0x1b4638, vtables, task/lobby_task/unknown_vtable_02]
+      - [0x1b46b4, vtables, task/lobby_task/unknown_vtable_03]
+      - [0x1b46f4, vtables, task/lobby_task/unknown_vtable_04]
       # game_sub.ovl, contains lobby.ovl function pointers
-      - [0x1b471c, vtables, lobby/unknown_vtable_05]
-      - [0x1b4744, vtables, lobby/unknown_vtable_06]
-      - [0x1b476c, vtables, lobby/unknown_vtable_07]
-      - [0x1b4794, vtables, lobby/unknown_vtable_08]
+      - [0x1b471c, vtables, task/lobby_task/unknown_vtable_05]
+      - [0x1b4744, vtables, task/lobby_task/unknown_vtable_06]
+      - [0x1b476c, vtables, task/lobby_task/unknown_vtable_07]
+      - [0x1b4794, vtables, task/lobby_task/unknown_vtable_08]
       # lobby_task.ovl
-      - [0x1b47bc, vtables, lobby/unknown_vtable_09]
-      - [0x1b47dc, vtables, lobby/unknown_vtable_10]
-      - [0x1b47ec, vtables, lobby/unknown_vtable_11]
-      - [0x1b480c, vtables, lobby/unknown_vtable_12]
-      - [0x1b482c, vtables, lobby/unknown_vtable_13]
-      - [0x1b484c, vtables, lobby/unknown_vtable_14]
-      - [0x1b486c, vtables, lobby/unknown_vtable_15]
-      - [0x1b488c, vtables, lobby/unknown_vtable_16]
-      - [0x1b48ac, vtables, lobby/unknown_vtable_17]
-      - [0x1b48cc, vtables, lobby/unknown_vtable_18]
-      - [0x1b48ec, vtables, lobby/unknown_vtable_19]
-      - [0x1b490c, vtables, lobby/unknown_vtable_20]
+      - [0x1b47bc, vtables, task/lobby_task/unknown_vtable_09]
+      - [0x1b47dc, vtables, task/lobby_task/unknown_vtable_10]
+      - [0x1b47ec, vtables, task/lobby_task/unknown_vtable_11]
+      - [0x1b480c, vtables, task/lobby_task/unknown_vtable_12]
+      - [0x1b482c, vtables, task/lobby_task/unknown_vtable_13]
+      - [0x1b484c, vtables, task/lobby_task/unknown_vtable_14]
+      - [0x1b486c, vtables, task/lobby_task/unknown_vtable_15]
+      - [0x1b488c, vtables, task/lobby_task/unknown_vtable_16]
+      - [0x1b48ac, vtables, task/lobby_task/unknown_vtable_17]
+      - [0x1b48cc, vtables, task/lobby_task/unknown_vtable_18]
+      - [0x1b48ec, vtables, task/lobby_task/unknown_vtable_19]
+      - [0x1b490c, vtables, task/lobby_task/unknown_vtable_20]
       # game_task.ovl
-      - [0x1b492c, vtables, game/unknown_vtable_01]
-      - [0x1b49b0, vtables, game/unknown_vtable_02]
+      - [0x1b492c, vtables, task/game_task/unknown_vtable_01]
+      - [0x1b49b0, vtables, task/game_task/unknown_vtable_02]
       # game_task.ovl, game_sub.ovl
-      - [0x1b4a34, vtables, game/unknown_vtable_03]
-      - [0x1b4a5c, vtables, game/unknown_vtable_04]
-      - [0x1b4a84, vtables, game/unknown_vtable_05]
-      - [0x1b4aac, vtables, game/unknown_vtable_06]
-      - [0x1b4ad4, vtables, game/unknown_vtable_07]
-      - [0x1b4afc, vtables, game/unknown_vtable_08]
+      - [0x1b4a34, vtables, task/game_task/unknown_vtable_03]
+      - [0x1b4a5c, vtables, task/game_task/unknown_vtable_04]
+      - [0x1b4a84, vtables, task/game_task/unknown_vtable_05]
+      - [0x1b4aac, vtables, task/game_task/unknown_vtable_06]
+      - [0x1b4ad4, vtables, task/game_task/unknown_vtable_07]
+      - [0x1b4afc, vtables, task/game_task/unknown_vtable_08]
       # game_task.ovl, emXX.ovl
       # conspicuously absent is em32 (poogie)
-      - [0x1b4b24, vtables, game/unknown_em83_vtable] # em83
-      - [0x1b4c20, vtables, game/unknown_em82_vtable] # em82
-      - [0x1b4d1c, vtables, game/unknown_em75_vtable] # em75, 76, 81, 88
-      - [0x1b4e18, vtables, game/unknown_em40_vtable] # em40, 78
-      - [0x1b4f14, vtables, game/unknown_em33_vtable] # em33
-      - [0x1b5010, vtables, game/unknown_em21_vtable] # em21, 46
-      - [0x1b510c, vtables, game/unknown_em20_vtable] # em06, 20, 38, 39
-      - [0x1b5208, vtables, game/unknown_em17_vtable] # em17, 22, 47
-      - [0x1b5304, vtables, game/unknown_em15_vtable] # em15, 45
-      - [0x1b5400, vtables, game/unknown_em14_vtable] # em14, 26, 43, 44
-      - [0x1b54fc, vtables, game/unknown_em01_vtable] # em01, 11, 37, 41, 42, 49
+      - [0x1b4b24, vtables, task/game_task/unknown_em83_vtable] # em83
+      - [0x1b4c20, vtables, task/game_task/unknown_em82_vtable] # em82
+      - [0x1b4d1c, vtables, task/game_task/unknown_em75_vtable] # em75, 76, 81, 88
+      - [0x1b4e18, vtables, task/game_task/unknown_em40_vtable] # em40, 78
+      - [0x1b4f14, vtables, task/game_task/unknown_em33_vtable] # em33
+      - [0x1b5010, vtables, task/game_task/unknown_em21_vtable] # em21, 46
+      - [0x1b510c, vtables, task/game_task/unknown_em20_vtable] # em06, 20, 38, 39
+      - [0x1b5208, vtables, task/game_task/unknown_em17_vtable] # em17, 22, 47
+      - [0x1b5304, vtables, task/game_task/unknown_em15_vtable] # em15, 45
+      - [0x1b5400, vtables, task/game_task/unknown_em14_vtable] # em14, 26, 43, 44
+      - [0x1b54fc, vtables, task/game_task/unknown_em01_vtable] # em01, 11, 37, 41, 42, 49
       # game_task.ovl
-      - [0x1b55f8, vtables, game/base_emmodel]
-      - [0x1b56f4, vtables, game/unknown_vtable_10] # em03, 69
-      - [0x1b57f0, vtables, game/unknown_vtable_11] # em04, 05
-      - [0x1b58ec, vtables, game/unknown_vtable_12] # em08, 34
-      - [0x1b59e8, vtables, game/unknown_vtable_13] # em09, 23
-      - [0x1b5ae4, vtables, game/unknown_vtable_14] # em10
-      - [0x1b5be0, vtables, game/unknown_vtable_15] # em12, 25, 70
-      - [0x1b5cdc, vtables, game/unknown_vtable_16] # em13, 16, 30, 35
-      - [0x1b5dd8, vtables, game/unknown_vtable_17] # em18
-      - [0x1b5ed4, vtables, game/unknown_vtable_18] # em19, 24, 80
-      - [0x1b5fd0, vtables, game/unknown_vtable_19] # em27, 28, 31, 77
-      - [0x1b60cc, vtables, game/unknown_vtable_20] # em29
-      - [0x1b61c8, vtables, game/unknown_vtable_21] # em48, 66, 67, 73, 86, 87
-      - [0x1b62c4, vtables, game/unknown_vtable_22] # em51, 52, 53, 61, 62, 84, 85, 89
-      - [0x1b63c0, vtables, game/unknown_vtable_23] # em56
-      - [0x1b64bc, vtables, game/unknown_vtable_24] # em57, 79
-      - [0x1b65b8, vtables, game/unknown_vtable_25] # em63
-      - [0x1b66b4, vtables, game/unknown_vtable_26] # em68
-      - [0x1b67b0, vtables, game/unknown_vtable_27] # em74
-      - [0x1b68ac, vtables, game/unknown_vtable_28]
-      - [0x1b68bc, vtables, game/unknown_vtable_29]
-      - [0x1b68cc, vtables, game/unknown_vtable_30]
-      - [0x1b6910, vtables, game/unknown_vtable_31]
-      - [0x1b6954, vtables, game/unknown_vtable_32]
-      - [0x1b6998, vtables, game/unknown_vtable_33]
-      - [0x1b69dc, vtables, game/unknown_vtable_34]
-      - [0x1b6a20, vtables, game/unknown_vtable_35]
-      - [0x1b6a64, vtables, game/unknown_vtable_36]
-      - [0x1b6aa8, vtables, game/unknown_vtable_37]
-      - [0x1b6aec, vtables, game/unknown_vtable_38]
-      - [0x1b6b30, vtables, game/unknown_vtable_39]
-      - [0x1b6b84, vtables, game/unknown_vtable_40]
-      - [0x1b6bc8, vtables, game/unknown_vtable_41]
-      - [0x1b6c14, vtables, game/unknown_vtable_42]
-      - [0x1b6c58, vtables, game/unknown_vtable_43]
-      - [0x1b6c9c, vtables, game/unknown_vtable_44]
-      - [0x1b6ce0, vtables, game/unknown_vtable_45]
-      - [0x1b6d24, vtables, game/unknown_vtable_46]
-      - [0x1b6d68, vtables, game/unknown_vtable_47]
-      - [0x1b6dac, vtables, game/unknown_vtable_48]
-      - [0x1b6df0, vtables, game/unknown_vtable_49]
-      - [0x1b6e34, vtables, game/unknown_vtable_50]
-      - [0x1b6e78, vtables, game/unknown_vtable_51]
-      - [0x1b6ebc, vtables, game/unknown_vtable_52]
-      - [0x1b6f00, vtables, game/unknown_vtable_53]
-      - [0x1b6f44, vtables, game/unknown_vtable_54]
-      - [0x1b6f88, vtables, game/unknown_vtable_55]
-      - [0x1b6fcc, vtables, game/unknown_vtable_56]
-      - [0x1b7010, vtables, game/unknown_vtable_57]
-      - [0x1b7054, vtables, game/unknown_vtable_58]
-      - [0x1b7098, vtables, game/unknown_vtable_59]
-      - [0x1b70dc, vtables, game/unknown_vtable_60]
-      - [0x1b7130, vtables, game/unknown_vtable_61]
+      - [0x1b55f8, vtables, task/game_task/base_emmodel]
+      - [0x1b56f4, vtables, task/game_task/unknown_vtable_10] # em03, 69
+      - [0x1b57f0, vtables, task/game_task/unknown_vtable_11] # em04, 05
+      - [0x1b58ec, vtables, task/game_task/unknown_vtable_12] # em08, 34
+      - [0x1b59e8, vtables, task/game_task/unknown_vtable_13] # em09, 23
+      - [0x1b5ae4, vtables, task/game_task/unknown_vtable_14] # em10
+      - [0x1b5be0, vtables, task/game_task/unknown_vtable_15] # em12, 25, 70
+      - [0x1b5cdc, vtables, task/game_task/unknown_vtable_16] # em13, 16, 30, 35
+      - [0x1b5dd8, vtables, task/game_task/unknown_vtable_17] # em18
+      - [0x1b5ed4, vtables, task/game_task/unknown_vtable_18] # em19, 24, 80
+      - [0x1b5fd0, vtables, task/game_task/unknown_vtable_19] # em27, 28, 31, 77
+      - [0x1b60cc, vtables, task/game_task/unknown_vtable_20] # em29
+      - [0x1b61c8, vtables, task/game_task/unknown_vtable_21] # em48, 66, 67, 73, 86, 87
+      - [0x1b62c4, vtables, task/game_task/unknown_vtable_22] # em51, 52, 53, 61, 62, 84, 85, 89
+      - [0x1b63c0, vtables, task/game_task/unknown_vtable_23] # em56
+      - [0x1b64bc, vtables, task/game_task/unknown_vtable_24] # em57, 79
+      - [0x1b65b8, vtables, task/game_task/unknown_vtable_25] # em63
+      - [0x1b66b4, vtables, task/game_task/unknown_vtable_26] # em68
+      - [0x1b67b0, vtables, task/game_task/unknown_vtable_27] # em74
+      - [0x1b68ac, vtables, task/game_task/unknown_vtable_28]
+      - [0x1b68bc, vtables, task/game_task/unknown_vtable_29]
+      - [0x1b68cc, vtables, task/game_task/unknown_vtable_30]
+      - [0x1b6910, vtables, task/game_task/unknown_vtable_31]
+      - [0x1b6954, vtables, task/game_task/unknown_vtable_32]
+      - [0x1b6998, vtables, task/game_task/unknown_vtable_33]
+      - [0x1b69dc, vtables, task/game_task/unknown_vtable_34]
+      - [0x1b6a20, vtables, task/game_task/unknown_vtable_35]
+      - [0x1b6a64, vtables, task/game_task/unknown_vtable_36]
+      - [0x1b6aa8, vtables, task/game_task/unknown_vtable_37]
+      - [0x1b6aec, vtables, task/game_task/unknown_vtable_38]
+      - [0x1b6b30, vtables, task/game_task/unknown_vtable_39]
+      - [0x1b6b84, vtables, task/game_task/unknown_vtable_40]
+      - [0x1b6bc8, vtables, task/game_task/unknown_vtable_41]
+      - [0x1b6c14, vtables, task/game_task/unknown_vtable_42]
+      - [0x1b6c58, vtables, task/game_task/unknown_vtable_43]
+      - [0x1b6c9c, vtables, task/game_task/unknown_vtable_44]
+      - [0x1b6ce0, vtables, task/game_task/unknown_vtable_45]
+      - [0x1b6d24, vtables, task/game_task/unknown_vtable_46]
+      - [0x1b6d68, vtables, task/game_task/unknown_vtable_47]
+      - [0x1b6dac, vtables, task/game_task/unknown_vtable_48]
+      - [0x1b6df0, vtables, task/game_task/unknown_vtable_49]
+      - [0x1b6e34, vtables, task/game_task/unknown_vtable_50]
+      - [0x1b6e78, vtables, task/game_task/unknown_vtable_51]
+      - [0x1b6ebc, vtables, task/game_task/unknown_vtable_52]
+      - [0x1b6f00, vtables, task/game_task/unknown_vtable_53]
+      - [0x1b6f44, vtables, task/game_task/unknown_vtable_54]
+      - [0x1b6f88, vtables, task/game_task/unknown_vtable_55]
+      - [0x1b6fcc, vtables, task/game_task/unknown_vtable_56]
+      - [0x1b7010, vtables, task/game_task/unknown_vtable_57]
+      - [0x1b7054, vtables, task/game_task/unknown_vtable_58]
+      - [0x1b7098, vtables, task/game_task/unknown_vtable_59]
+      - [0x1b70dc, vtables, task/game_task/unknown_vtable_60]
+      - [0x1b7130, vtables, task/game_task/unknown_vtable_61]
       # game_task.ovl, game_sub.ovl
-      - [0x1b7174, vtables, game/unknown_vtable_62]
+      - [0x1b7174, vtables, task/game_task/unknown_vtable_62]
       # game_sub.ovl
-      - [0x1b719c, vtables, gsub/unknown_vtable_01]
-      - [0x1b71a8, vtables, gsub/unknown_vtable_02]
-      - [0x1b71b8, vtables, gsub/unknown_vtable_03]
-      - [0x1b71e0, vtables, gsub/unknown_vtable_04]
-      - [0x1b71f0, vtables, gsub/unknown_vtable_05]
-      - [0x1b7218, vtables, gsub/unknown_vtable_06]
-      - [0x1b7240, vtables, gsub/unknown_vtable_07]
-      - [0x1b7268, vtables, gsub/unknown_vtable_08]
-      - [0x1b7290, vtables, gsub/unknown_vtable_09]
-      - [0x1b72b8, vtables, gsub/unknown_vtable_10]
-      - [0x1b72e0, vtables, gsub/unknown_vtable_11]
-      - [0x1b7308, vtables, gsub/unknown_vtable_12]
-      - [0x1b7330, vtables, gsub/unknown_vtable_13]
-      - [0x1b7358, vtables, gsub/unknown_vtable_14]
-      - [0x1b7380, vtables, gsub/unknown_vtable_15]
-      - [0x1b73a8, vtables, gsub/unknown_vtable_16]
-      - [0x1b73d0, vtables, gsub/unknown_vtable_17]
-      - [0x1b73f8, vtables, gsub/unknown_vtable_18]
-      - [0x1b7420, vtables, gsub/unknown_vtable_19]
-      - [0x1b7448, vtables, gsub/unknown_vtable_20]
-      - [0x1b7470, vtables, gsub/unknown_vtable_21]
-      - [0x1b7498, vtables, gsub/unknown_vtable_22]
-      - [0x1b74c0, vtables, gsub/unknown_vtable_23]
-      - [0x1b74e8, vtables, gsub/unknown_vtable_24]
-      - [0x1b7510, vtables, gsub/unknown_vtable_25]
-      - [0x1b7538, vtables, gsub/unknown_vtable_26]
-      - [0x1b7560, vtables, gsub/unknown_vtable_27]
-      - [0x1b7588, vtables, gsub/unknown_vtable_28]
-      - [0x1b75b0, vtables, gsub/unknown_vtable_29]
-      - [0x1b75d8, vtables, gsub/unknown_vtable_30]
-      - [0x1b7600, vtables, gsub/unknown_vtable_31]
-      - [0x1b7628, vtables, gsub/unknown_vtable_32]
-      - [0x1b7650, vtables, gsub/unknown_vtable_33]
-      - [0x1b7678, vtables, gsub/unknown_vtable_34]
-      - [0x1b76a0, vtables, gsub/unknown_vtable_35]
-      - [0x1b76c8, vtables, gsub/unknown_vtable_36]
-      - [0x1b76f0, vtables, gsub/unknown_vtable_37]
-      - [0x1b7718, vtables, gsub/unknown_vtable_38]
-      - [0x1b7740, vtables, gsub/unknown_vtable_39]
-      - [0x1b7768, vtables, gsub/unknown_vtable_40]
-      - [0x1b7790, vtables, gsub/unknown_vtable_41]
-      - [0x1b77b8, vtables, gsub/unknown_vtable_42]
-      - [0x1b77e0, vtables, gsub/unknown_vtable_43]
-      - [0x1b7808, vtables, gsub/unknown_vtable_44]
-      - [0x1b7830, vtables, gsub/unknown_vtable_45]
-      - [0x1b7850, vtables, gsub/unknown_vtable_46]
-      - [0x1b7870, vtables, gsub/unknown_vtable_47]
-      - [0x1b7890, vtables, gsub/unknown_vtable_48]
-      - [0x1b78b0, vtables, gsub/unknown_vtable_49]
-      - [0x1b78d0, vtables, gsub/unknown_vtable_50]
-      - [0x1b78f0, vtables, gsub/unknown_vtable_51]
-      - [0x1b7910, vtables, gsub/unknown_vtable_52]
-      - [0x1b7930, vtables, gsub/unknown_vtable_53]
-      - [0x1b7950, vtables, gsub/unknown_vtable_54]
-      - [0x1b7970, vtables, gsub/unknown_vtable_55]
-      - [0x1b7990, vtables, gsub/unknown_vtable_56]
-      - [0x1b79b0, vtables, gsub/unknown_vtable_57]
-      - [0x1b79d0, vtables, gsub/unknown_vtable_58]
-      - [0x1b79f0, vtables, gsub/unknown_vtable_59]
-      - [0x1b7a10, vtables, gsub/unknown_vtable_60]
-      - [0x1b7a30, vtables, gsub/unknown_vtable_61]
-      - [0x1b7a50, vtables, gsub/unknown_vtable_62]
-      - [0x1b7a70, vtables, gsub/unknown_vtable_63]
-      - [0x1b7a90, vtables, gsub/unknown_vtable_64]
-      - [0x1b7ab0, vtables, gsub/unknown_vtable_65]
-      - [0x1b7ad0, vtables, gsub/unknown_vtable_66]
-      - [0x1b7af0, vtables, gsub/unknown_vtable_67]
-      - [0x1b7b10, vtables, gsub/unknown_vtable_68]
-      - [0x1b7b30, vtables, gsub/unknown_vtable_69]
-      - [0x1b7b50, vtables, gsub/unknown_vtable_70]
-      - [0x1b7b70, vtables, gsub/unknown_vtable_71]
-      - [0x1b7b90, vtables, gsub/unknown_vtable_72]
-      - [0x1b7bb0, vtables, gsub/unknown_vtable_73]
-      - [0x1b7bd0, vtables, gsub/unknown_vtable_74]
-      - [0x1b7bf0, vtables, gsub/unknown_vtable_75]
-      - [0x1b7c10, vtables, gsub/unknown_vtable_76]
-      - [0x1b7c30, vtables, gsub/unknown_vtable_77]
-      - [0x1b7c50, vtables, gsub/unknown_vtable_78]
-      - [0x1b7c70, vtables, gsub/unknown_vtable_79]
-      - [0x1b7c90, vtables, gsub/unknown_vtable_80]
-      - [0x1b7cb0, vtables, gsub/unknown_vtable_81]
-      - [0x1b7cd0, vtables, gsub/unknown_vtable_82]
-      - [0x1b7cf0, vtables, gsub/unknown_vtable_83]
-      - [0x1b7d10, vtables, gsub/unknown_vtable_84]
+      - [0x1b719c, vtables, sub/game_sub/unknown_vtable_01]
+      - [0x1b71a8, vtables, sub/game_sub/unknown_vtable_02]
+      - [0x1b71b8, vtables, sub/game_sub/unknown_vtable_03]
+      - [0x1b71e0, vtables, sub/game_sub/unknown_vtable_04]
+      - [0x1b71f0, vtables, sub/game_sub/unknown_vtable_05]
+      - [0x1b7218, vtables, sub/game_sub/unknown_vtable_06]
+      - [0x1b7240, vtables, sub/game_sub/unknown_vtable_07]
+      - [0x1b7268, vtables, sub/game_sub/unknown_vtable_08]
+      - [0x1b7290, vtables, sub/game_sub/unknown_vtable_09]
+      - [0x1b72b8, vtables, sub/game_sub/unknown_vtable_10]
+      - [0x1b72e0, vtables, sub/game_sub/unknown_vtable_11]
+      - [0x1b7308, vtables, sub/game_sub/unknown_vtable_12]
+      - [0x1b7330, vtables, sub/game_sub/unknown_vtable_13]
+      - [0x1b7358, vtables, sub/game_sub/unknown_vtable_14]
+      - [0x1b7380, vtables, sub/game_sub/unknown_vtable_15]
+      - [0x1b73a8, vtables, sub/game_sub/unknown_vtable_16]
+      - [0x1b73d0, vtables, sub/game_sub/unknown_vtable_17]
+      - [0x1b73f8, vtables, sub/game_sub/unknown_vtable_18]
+      - [0x1b7420, vtables, sub/game_sub/unknown_vtable_19]
+      - [0x1b7448, vtables, sub/game_sub/unknown_vtable_20]
+      - [0x1b7470, vtables, sub/game_sub/unknown_vtable_21]
+      - [0x1b7498, vtables, sub/game_sub/unknown_vtable_22]
+      - [0x1b74c0, vtables, sub/game_sub/unknown_vtable_23]
+      - [0x1b74e8, vtables, sub/game_sub/unknown_vtable_24]
+      - [0x1b7510, vtables, sub/game_sub/unknown_vtable_25]
+      - [0x1b7538, vtables, sub/game_sub/unknown_vtable_26]
+      - [0x1b7560, vtables, sub/game_sub/unknown_vtable_27]
+      - [0x1b7588, vtables, sub/game_sub/unknown_vtable_28]
+      - [0x1b75b0, vtables, sub/game_sub/unknown_vtable_29]
+      - [0x1b75d8, vtables, sub/game_sub/unknown_vtable_30]
+      - [0x1b7600, vtables, sub/game_sub/unknown_vtable_31]
+      - [0x1b7628, vtables, sub/game_sub/unknown_vtable_32]
+      - [0x1b7650, vtables, sub/game_sub/unknown_vtable_33]
+      - [0x1b7678, vtables, sub/game_sub/unknown_vtable_34]
+      - [0x1b76a0, vtables, sub/game_sub/unknown_vtable_35]
+      - [0x1b76c8, vtables, sub/game_sub/unknown_vtable_36]
+      - [0x1b76f0, vtables, sub/game_sub/unknown_vtable_37]
+      - [0x1b7718, vtables, sub/game_sub/unknown_vtable_38]
+      - [0x1b7740, vtables, sub/game_sub/unknown_vtable_39]
+      - [0x1b7768, vtables, sub/game_sub/unknown_vtable_40]
+      - [0x1b7790, vtables, sub/game_sub/unknown_vtable_41]
+      - [0x1b77b8, vtables, sub/game_sub/unknown_vtable_42]
+      - [0x1b77e0, vtables, sub/game_sub/unknown_vtable_43]
+      - [0x1b7808, vtables, sub/game_sub/unknown_vtable_44]
+      - [0x1b7830, vtables, sub/game_sub/unknown_vtable_45]
+      - [0x1b7850, vtables, sub/game_sub/unknown_vtable_46]
+      - [0x1b7870, vtables, sub/game_sub/unknown_vtable_47]
+      - [0x1b7890, vtables, sub/game_sub/unknown_vtable_48]
+      - [0x1b78b0, vtables, sub/game_sub/unknown_vtable_49]
+      - [0x1b78d0, vtables, sub/game_sub/unknown_vtable_50]
+      - [0x1b78f0, vtables, sub/game_sub/unknown_vtable_51]
+      - [0x1b7910, vtables, sub/game_sub/unknown_vtable_52]
+      - [0x1b7930, vtables, sub/game_sub/unknown_vtable_53]
+      - [0x1b7950, vtables, sub/game_sub/unknown_vtable_54]
+      - [0x1b7970, vtables, sub/game_sub/unknown_vtable_55]
+      - [0x1b7990, vtables, sub/game_sub/unknown_vtable_56]
+      - [0x1b79b0, vtables, sub/game_sub/unknown_vtable_57]
+      - [0x1b79d0, vtables, sub/game_sub/unknown_vtable_58]
+      - [0x1b79f0, vtables, sub/game_sub/unknown_vtable_59]
+      - [0x1b7a10, vtables, sub/game_sub/unknown_vtable_60]
+      - [0x1b7a30, vtables, sub/game_sub/unknown_vtable_61]
+      - [0x1b7a50, vtables, sub/game_sub/unknown_vtable_62]
+      - [0x1b7a70, vtables, sub/game_sub/unknown_vtable_63]
+      - [0x1b7a90, vtables, sub/game_sub/unknown_vtable_64]
+      - [0x1b7ab0, vtables, sub/game_sub/unknown_vtable_65]
+      - [0x1b7ad0, vtables, sub/game_sub/unknown_vtable_66]
+      - [0x1b7af0, vtables, sub/game_sub/unknown_vtable_67]
+      - [0x1b7b10, vtables, sub/game_sub/unknown_vtable_68]
+      - [0x1b7b30, vtables, sub/game_sub/unknown_vtable_69]
+      - [0x1b7b50, vtables, sub/game_sub/unknown_vtable_70]
+      - [0x1b7b70, vtables, sub/game_sub/unknown_vtable_71]
+      - [0x1b7b90, vtables, sub/game_sub/unknown_vtable_72]
+      - [0x1b7bb0, vtables, sub/game_sub/unknown_vtable_73]
+      - [0x1b7bd0, vtables, sub/game_sub/unknown_vtable_74]
+      - [0x1b7bf0, vtables, sub/game_sub/unknown_vtable_75]
+      - [0x1b7c10, vtables, sub/game_sub/unknown_vtable_76]
+      - [0x1b7c30, vtables, sub/game_sub/unknown_vtable_77]
+      - [0x1b7c50, vtables, sub/game_sub/unknown_vtable_78]
+      - [0x1b7c70, vtables, sub/game_sub/unknown_vtable_79]
+      - [0x1b7c90, vtables, sub/game_sub/unknown_vtable_80]
+      - [0x1b7cb0, vtables, sub/game_sub/unknown_vtable_81]
+      - [0x1b7cd0, vtables, sub/game_sub/unknown_vtable_82]
+      - [0x1b7cf0, vtables, sub/game_sub/unknown_vtable_83]
+      - [0x1b7d10, vtables, sub/game_sub/unknown_vtable_84]
       # em02.ovl, game_task.ovl
-      - [0x1b7d30, vtables, em/unknown_em02_vtable_1] # em02, 36, 71
-      - [0x1b7e2c, vtables, em/unknown_em02_vtable_2]
+      - [0x1b7d30, vtables, em/em02/unknown_vtable_1] # em02, 36, 71
+      - [0x1b7e2c, vtables, em/em02/unknown_vtable_2]
       # em07.ovl, game_task.ovl
-      - [0x1b7e70, vtables, em/unknown_em07_vtable_1] # em07, 50
-      - [0x1b7f6c, vtables, em/unknown_em07_vtable_2]
+      - [0x1b7e70, vtables, em/em07/unknown_vtable_1] # em07, 50
+      - [0x1b7f6c, vtables, em/em07/unknown_vtable_2]
       # em14.ovl, game_task.ovl
-      - [0x1b7fb0, vtables, em/unknown_em14_vtable]
+      - [0x1b7fb0, vtables, em/em14/unknown_vtable]
       # em15.ovl, game_task.ovl
-      - [0x1b7ff4, vtables, em/unknown_em15_vtable]
+      - [0x1b7ff4, vtables, em/em15/unknown_vtable]
       # em17.ovl, game_task.ovl
-      - [0x1b8038, vtables, em/unknown_em17_vtable_1]
-      - [0x1b807c, vtables, em/unknown_em17_vtable_2]
-      - [0x1b80a4, vtables, em/unknown_em17_vtable_3]
+      - [0x1b8038, vtables, em/em17/unknown_vtable_1]
+      - [0x1b807c, vtables, em/em17/unknown_vtable_2]
+      - [0x1b80a4, vtables, em/em17/unknown_vtable_3]
       # em20.ovl, game_task.ovl
-      - [0x1b80cc, vtables, em/unknown_em20_vtable]
+      - [0x1b80cc, vtables, em/em20/unknown_vtable]
       # em21.ovl, game_task.ovl
-      - [0x1b8110, vtables, em/unknown_em21_vtable]
+      - [0x1b8110, vtables, em/em21/unknown_vtable]
       # em33.ovl, game_task.ovl
-      - [0x1b8154, vtables, em/unknown_em33_vtable_1]
-      - [0x1b817c, vtables, em/unknown_em33_vtable_2]
+      - [0x1b8154, vtables, em/em33/unknown_vtable_1]
+      - [0x1b817c, vtables, em/em33/unknown_vtable_2]
       # em40.ovl, game_task.ovl
-      - [0x1b81a4, vtables, em/unknown_em40_vtable_1]
-      - [0x1b81e8, vtables, em/unknown_em40_vtable_2]
+      - [0x1b81a4, vtables, em/em40/unknown_vtable_1]
+      - [0x1b81e8, vtables, em/em40/unknown_vtable_2]
       # em54.ovl, game_task.ovl
-      - [0x1b8210, vtables, em/unknown_em54_vtable_1]
-      - [0x1b8254, vtables, em/unknown_em54_vtable_2]
-      - [0x1b8298, vtables, em/unknown_em54_vtable_3]
-      - [0x1b82dc, vtables, em/unknown_em54_vtable_4]
-      - [0x1b8320, vtables, em/unknown_em54_vtable_5] # em54, 60, 64, 65
-      - [0x1b841c, vtables, em/unknown_em54_vtable_6]
+      - [0x1b8210, vtables, em/em54/unknown_vtable_1]
+      - [0x1b8254, vtables, em/em54/unknown_vtable_2]
+      - [0x1b8298, vtables, em/em54/unknown_vtable_3]
+      - [0x1b82dc, vtables, em/em54/unknown_vtable_4]
+      - [0x1b8320, vtables, em/em54/unknown_vtable_5] # em54, 60, 64, 65
+      - [0x1b841c, vtables, em/em54/unknown_vtable_6]
       # em55.ovl, game_task.ovl
-      - [0x1b8444, vtables, em/unknown_em55_vtable_1]
-      - [0x1b8488, vtables, em/unknown_em55_vtable_2] # em55
+      - [0x1b8444, vtables, em/em55/unknown_vtable_1]
+      - [0x1b8488, vtables, em/em55/unknown_vtable_2] # em55
       # em58.ovl, game_task.ovl
-      - [0x1b8584, vtables, em/unknown_em58_vtable_1] # em58
-      - [0x1b8680, vtables, em/unknown_em58_vtable_2]
-      - [0x1b86c4, vtables, em/unknown_em58_vtable_3]
-      - [0x1b86ec, vtables, em/unknown_em58_vtable_4]
+      - [0x1b8584, vtables, em/em58/unknown_vtable_1] # em58
+      - [0x1b8680, vtables, em/em58/unknown_vtable_2]
+      - [0x1b86c4, vtables, em/em58/unknown_vtable_3]
+      - [0x1b86ec, vtables, em/em58/unknown_vtable_4]
       # em59.ovl, game_task.ovl
-      - [0x1b8714, vtables, em/unknown_em59_vtable_1]
-      - [0x1b8758, vtables, em/unknown_em59_vtable_2] # em59, the extra special case (yama tsukami)
+      - [0x1b8714, vtables, em/em59/unknown_vtable_1]
+      - [0x1b8758, vtables, em/em59/unknown_vtable_2] # em59, the extra special case (yama tsukami)
       # em75.ovl, game_task.ovl
-      - [0x1b8854, vtables, em/unknown_em75_vtable_01]
-      - [0x1b887c, vtables, em/unknown_em75_vtable_02]
-      - [0x1b88a4, vtables, em/unknown_em75_vtable_03]
-      - [0x1b88cc, vtables, em/unknown_em75_vtable_04]
-      - [0x1b88f4, vtables, em/unknown_em75_vtable_05]
-      - [0x1b891c, vtables, em/unknown_em75_vtable_06]
-      - [0x1b8944, vtables, em/unknown_em75_vtable_07]
-      - [0x1b896c, vtables, em/unknown_em75_vtable_08]
-      - [0x1b8994, vtables, em/unknown_em75_vtable_09]
-      - [0x1b89bc, vtables, em/unknown_em75_vtable_10]
-      - [0x1b89e4, vtables, em/unknown_em75_vtable_11]
-      - [0x1b8a0c, vtables, em/unknown_em75_vtable_12]
-      - [0x1b8a34, vtables, em/unknown_em75_vtable_13]
-      - [0x1b8a78, vtables, em/unknown_em75_vtable_14]
-      - [0x1b8abc, vtables, em/unknown_em75_vtable_15]
-      - [0x1b8b00, vtables, em/unknown_em75_vtable_16]
-      - [0x1b8b44, vtables, em/unknown_em75_vtable_17]
+      - [0x1b8854, vtables, em/em75/unknown_vtable_01]
+      - [0x1b887c, vtables, em/em75/unknown_vtable_02]
+      - [0x1b88a4, vtables, em/em75/unknown_vtable_03]
+      - [0x1b88cc, vtables, em/em75/unknown_vtable_04]
+      - [0x1b88f4, vtables, em/em75/unknown_vtable_05]
+      - [0x1b891c, vtables, em/em75/unknown_vtable_06]
+      - [0x1b8944, vtables, em/em75/unknown_vtable_07]
+      - [0x1b896c, vtables, em/em75/unknown_vtable_08]
+      - [0x1b8994, vtables, em/em75/unknown_vtable_09]
+      - [0x1b89bc, vtables, em/em75/unknown_vtable_10]
+      - [0x1b89e4, vtables, em/em75/unknown_vtable_11]
+      - [0x1b8a0c, vtables, em/em75/unknown_vtable_12]
+      - [0x1b8a34, vtables, em/em75/unknown_vtable_13]
+      - [0x1b8a78, vtables, em/em75/unknown_vtable_14]
+      - [0x1b8abc, vtables, em/em75/unknown_vtable_15]
+      - [0x1b8b00, vtables, em/em75/unknown_vtable_16]
+      - [0x1b8b44, vtables, em/em75/unknown_vtable_17]
       # em82.ovl, game_task.ovl
-      - [0x1b8b88, vtables, em/unknown_em82_vtable_1]
-      - [0x1b8bb0, vtables, em/unknown_em82_vtable_2]
+      - [0x1b8b88, vtables, em/em82/unknown_vtable_1]
+      - [0x1b8bb0, vtables, em/em82/unknown_vtable_2]
       # em83.ovl, game_task.ovl
-      - [0x1b8bf4, vtables, em/unknown_em83_vtable_1]
-      - [0x1b8c38, vtables, em/unknown_em83_vtable_2]
-      - [0x1b8c60, vtables, em/unknown_em83_vtable_3]
+      - [0x1b8bf4, vtables, em/em83/unknown_vtable_1]
+      - [0x1b8c38, vtables, em/em83/unknown_vtable_2]
+      - [0x1b8c60, vtables, em/em83/unknown_vtable_3]
       - [0x1b8c88, vtables, stage0/stage000]
       - [0x1b8d44, vtables, stage0/stage001]
       - [0x1b8e00, vtables, stage0/stage002]
