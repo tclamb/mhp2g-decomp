@@ -1,19 +1,19 @@
 #pragma once
 
 template<typename T>
-struct singleton
+struct Singleton
 {
-    static T *INSTANCE;
+    static T *objectPtr;
 
-    inline singleton() {
-        INSTANCE = (T*) this;
+    inline Singleton() {
+        objectPtr = (T*) this;
     }
 
-    inline ~singleton() {
-        INSTANCE = 0;
+    inline ~Singleton() {
+        objectPtr = 0;
     }
 
     inline static T *get() {
-        return INSTANCE;
+        return objectPtr;
     }
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ge_manager.hpp"
+#include "ge.hpp"
 
 #define GE_CMD_NOP              0x00
 #define GE_CMD_VADDR            0x01

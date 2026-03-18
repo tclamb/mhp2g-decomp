@@ -1,10 +1,8 @@
-#ifndef MHP2G_DECOMP__GAME_HPP
-#define MHP2G_DECOMP__GAME_HPP
+#pragma once
 
-typedef struct game game;
+#include "singleton.hpp"
 
-struct game {
-    static game *instance;
+struct System : Singleton<System> {
 
     u16 next_index(u32 type);
 
@@ -14,5 +12,3 @@ struct game {
     SceUID sha1_thread_id;
     u8 unknown_flag;
 };
-
-#endif

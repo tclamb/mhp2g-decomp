@@ -150,7 +150,7 @@ struct pmo {
     ScePspFVector4 scale;
 
     void draw(skeleton *skeleton, tmh *tmh, ScePspFMatrix4 *transform);
-    void draw_mesh(skeleton *skeleton, tmh *tmh, u8 mesh);
+    void drawMesh(skeleton *skeleton, tmh *tmh, u8 mesh);
     void draw_alpha(tmh *tmh, ScePspFMatrix4 *transform, u32 mesh, u32 blend_mode, u8 alpha);
     void draw_rgba8888(tmh *tmh, ScePspFMatrix4 *transform, u32 mesh, u32 blend_mode, u32 color);
     int compile(void *, pmo_header *, pmo_mesh_data *);

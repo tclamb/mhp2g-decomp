@@ -14,7 +14,7 @@
 #include <pspge.h>
 #include <pspdisplay.h>
 
-#include "ge_manager.hpp"
+#include "ge.hpp"
 
 s16 BLANK_BUFFER_VERTEX_DATA[2][4] = {
     {0, 0, 0, -1},
@@ -277,7 +277,7 @@ static ge_command INITIALIZE_GE_DISPLAY_LIST[221] = {
 
 void ge_finish_callback(int, void*);
 
-void ge_manager::initialize() {
+void Ge::initialize() {
   sceDisplaySetMode(0,0x1e0,0x110);
   sceGeEdramSetAddrTranslation(0x400);
 
@@ -298,22 +298,22 @@ void ge_manager::initialize() {
   waiting_for_ge = 0;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08858FD0);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_08858FD0);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08859094);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_08859094);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_088590A8);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_088590A8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08859138);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_08859138);
 
-void ge_manager::swap_buffers() {
+void Ge::swap_buffers() {
   active_buffer ^= 1;
   sceGeListSync(sceGeListEnQueue(BLANK_BUFFER_DISPLAY_LISTS[active_buffer],(void *)0x0,-1,(PspGeListArgs *)0x0),0);
   active_write_head = slab[active_buffer];
   clear_display_list();
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_088591C8);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_088591C8);
 
 static ge_command FINISH_END_DISPLAY_LIST[2] = {
     0xf000000, // FINISH 000000
@@ -321,7 +321,7 @@ static ge_command FINISH_END_DISPLAY_LIST[2] = {
 };
 
 #pragma opt_unroll_loops on
-void ge_manager::clear_display_list() {
+void Ge::clear_display_list() {
     display_list cur = &root_display_lists[active_buffer][0];
     display_list temp, target;
     int i;
@@ -337,11 +337,11 @@ void ge_manager::clear_display_list() {
 }
 #pragma opt_unroll_loops reset
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_088593A0);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_088593A0);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_088595E8);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_088595E8);
 
-void ge_manager::render() {
+void Ge::render() {
     GE_END_REACHED = 0;
     sceGeListEnQueue(root_display_lists[active_buffer ^ 1], 0, ge_callback_id, 0);
 }
@@ -371,7 +371,7 @@ void ge_finish_callback(int, void*) {
     GE_END_REACHED = 1;
 }
 
-void ge_manager::spinlock_until_ge_end() {
+void Ge::spinlock_until_ge_end() {
     while (!GE_END_REACHED) {
 #ifdef __MWERKS__
         asm __volatile__ (
@@ -382,14 +382,14 @@ void ge_manager::spinlock_until_ge_end() {
     }
 }
 
-ge_command *ge_manager::write_head() {
+ge_command *Ge::write_head() {
     return active_write_head;
 }
 
-void ge_manager::set_write_head(ge_command *value) {
+void Ge::set_write_head(ge_command *value) {
     active_write_head = value;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_0885973C);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_0885973C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge_manager", func_eboot_08859768);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_08859768);

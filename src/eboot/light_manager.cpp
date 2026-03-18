@@ -3,20 +3,20 @@
 #include "vfpu.h"
 #include "stage_manager.hpp"
 #include "immediate_ge.hpp"
-#include "lighting_manager.hpp"
+#include "light_manager.hpp"
 
 using namespace immediate_ge;
 
-lighting_manager::lighting_manager() {
+LightManager::LightManager() {
     memset(&data, 0, sizeof(data));
     unknown_0x15C = -1;
 }
 
-lighting_manager::~lighting_manager() {
+LightManager::~LightManager() {
     // empty
 }
 
-void lighting_manager::method_088607F0() {
+void LightManager::method_088607F0() {
     for (int i = 0; i < 2; ++i) {
         lighting_data *lighting = &data.lighting[i];
         if (i == 1U) {
@@ -43,9 +43,9 @@ ScePspFVector4Unaligned D_eboot_089A2C84[3] = {
     {0.3, 0.3, 0.3, 0}
 };
 
-void lighting_manager::method_08860840(light_data *light, s16 index, u16 operation) {
+void LightManager::method_08860840(light_data *light, s16 index, u16 operation) {
     if (unknown_0x15C != 0) {
-        base_stage *stage = stage_manager::get()->stage;
+        StageBase *stage = StageManager::get()->stage;
         switch (operation) {
         case 0:
             light->position.x = -1.0f * stage->lights[index].position.x;
@@ -84,7 +84,7 @@ void lighting_manager::method_08860840(light_data *light, s16 index, u16 operati
     }
 }
 
-void lighting_manager::method_088609FC(s16 index) {
+void LightManager::method_088609FC(s16 index) {
     memset(&data, 0, sizeof(data));
     unknown_0x15C = index;
 
@@ -98,7 +98,7 @@ void lighting_manager::method_088609FC(s16 index) {
     }
 }
 
-void lighting_manager::method_08860A70(character *c) {
+void LightManager::method_08860A70(character *c) {
     lighting_data *lighting = &data.lighting[1];
     for (int i = 0; i < 3; ++i) {
         light_data *light = &lighting->lights[i];
@@ -119,7 +119,7 @@ ScePspFVector4Unaligned D_eboot_089A2CB4[3] = {
     {0.1, 0.1, 0.2, 0}
 };
 
-void lighting_manager::method_08860B1C(player *p) {
+void LightManager::method_08860B1C(player *p) {
     lighting_data *lighting = &data.lighting[1];
     for (int i = 0; i < 3; ++i) {
         light_data *light = &lighting->lights[i];
@@ -149,14 +149,14 @@ void lighting_manager::method_08860B1C(player *p) {
     }
 }
 
-void lighting_manager::method_08860C4C() {
+void LightManager::method_08860C4C() {
     lighting_data *lighting = &data.lighting[1];
     for (int i = 0; i < 3; ++i) {
         method_08860840(&lighting->lights[i], i, 1);
     }
 }
 
-ScePspUnion32 lighting_manager::method_08860CA8(character *c, int i) {
+ScePspUnion32 LightManager::method_08860CA8(character *c, int i) {
     float b, g, r;
     lighting_data *lighting = &data.lighting[1];
     light_data *light = &lighting->lights[i];
@@ -181,7 +181,7 @@ ScePspUnion32 lighting_manager::method_08860CA8(character *c, int i) {
     return color;
 }
 
-void lighting_manager::method_08860EB8(character *c) {
+void LightManager::method_08860EB8(character *c) {
     lighting_data &lighting = data.lighting[1];
     for (int i = 0; i < 3; ++i) {
         light_data &light = lighting.lights[i];
@@ -205,7 +205,7 @@ void lighting_manager::method_08860EB8(character *c) {
     ge::lightingenable(true);
 }
 
-void lighting_manager::method_0886117C(s8 flag) {
+void LightManager::method_0886117C(s8 flag) {
     lighting_data &lighting = data.lighting[flag];
     for (int i = 0; i < 3; ++i) {
         light_data &light = lighting.lights[i];

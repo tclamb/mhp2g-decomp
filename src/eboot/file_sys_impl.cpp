@@ -1,7 +1,7 @@
 #include "common.h"
 
-#include "data_loader_impl.hpp"
-#include "game.hpp"
+#include "file_sys_impl.hpp"
+#include "system.hpp"
 
 #include <pspge.h>
 #include <pspthreadman.h>
@@ -11,8 +11,8 @@
 #include <pspumd.h>
 #include <pspiofilemgr_stat.h>
 
-#include "data_loader_impl.file_sha1_digests.inc.cpp"
-#include "data_loader_impl.decrypt_table.inc.cpp"
+#include "file_sys_impl.file_sha1_digests.inc.cpp"
+#include "file_sys_impl.decrypt_table.inc.cpp"
 
 extern "C" {
     int fake_rofs_loader(SceSize, void*);
@@ -31,17 +31,17 @@ extern "C" {
     int sprintf(char*, const char*, ...);
 }
 
-void data_loader_impl::initialize() {
+void FileSysImpl::initialize() {
     struct {
         SceIoStat sp10;
         u32 uVar3;
         u32 dummy;
-        data_loader_impl *local_4;
+        FileSysImpl *local_4;
     } sp;
-    game *puVar1;
+    System *puVar1;
     int SVar5;
 
-    base_data_loader::initialize();
+    BaseFileSys::initialize();
     sceUmdActivate(1, "disc0:");
 loop_1:
     if (sceUmdGetErrorStat() != 0) {
@@ -96,7 +96,7 @@ loop_18:
     sha1_thread_id = sceKernelCreateThread("sha1Thread", sha1_thread, 0x31, 0x1000, 0, 0);
     sp.local_4 = this;
     sceKernelStartThread(sha1_thread_id, 4, &sp.local_4);
-    puVar1 = game::instance;
+    puVar1 = System::get();
     puVar1->sha1_thread_id = sha1_thread_id;
     puVar1->unknown_flag = 1;
     transfer_event_flag_id = sceKernelCreateEventFlag("transferEventFlag", 0x200, 0, 0);
@@ -109,7 +109,7 @@ loop_18:
     unknown_0x2fa0c = 0;
 }
 
-void data_loader_impl::stop() {
+void FileSysImpl::stop() {
     sceKernelDeleteThread(loader_thread_id);
     sceUmdDeactivate(2, "disc0:");
 
@@ -149,7 +149,7 @@ extern global_089C7508 *D_eboot_089C7508;
 extern global_08A5DD34 *D_eboot_08A5DD34;
 
 // appears to be
-void data_loader_impl::draw_loading_screen() {
+void FileSysImpl::draw_loading_screen() {
     static char buffer[0x400];
     s32 format_string_argument_id;
     s32 format_string_id;
@@ -234,32 +234,32 @@ void data_loader_impl::draw_loading_screen() {
     draw_loading_screen_impl();
 }
 
-void data_loader_impl::vtable_0x48() {
+void FileSysImpl::vtable_0x48() {
     // empty
 }
 
 char install_block_path_format[] = "ms0:\\.\\PSP\\SAVEDATA\\ULJM05500DAT\\%08d";
-INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", fake_rofs_loader);
+INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", fake_rofs_loader);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884E3BC);
+INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", func_eboot_0884E3BC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", sha1_thread);
+INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", sha1_thread);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", transfer_thread);
+INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", transfer_thread);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884E670);
+INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", func_eboot_0884E670);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884E6CC);
+INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", func_eboot_0884E6CC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884E740);
+INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", func_eboot_0884E740);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884E79C);
+INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", func_eboot_0884E79C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884E7C8);
+INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", func_eboot_0884E7C8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884E8DC);
+INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", func_eboot_0884E8DC);
 
-void data_loader_impl::decrypt_buffer(u8 *data, s32 size, s32 prevSize) {
+void FileSysImpl::decrypt_buffer(u8 *data, s32 size, s32 prevSize) {
     u8 *var_s4;
     u8 *var_s3;
     u8 *var_s2;
@@ -289,9 +289,9 @@ void data_loader_impl::decrypt_buffer(u8 *data, s32 size, s32 prevSize) {
     }
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884EA44);
+INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", func_eboot_0884EA44);
 
-void data_loader_impl::set_decryption_key(u32 key) {
+void FileSysImpl::set_decryption_key(u32 key) {
     key_lower = key & 0xffff;
     key_upper = (key >> 0x10) & 0xffff;
     if (key_lower == 0) {
@@ -302,17 +302,17 @@ void data_loader_impl::set_decryption_key(u32 key) {
     }
 }
 
-u32 data_loader_impl::next_decryption_key() {
+u32 FileSysImpl::next_decryption_key() {
     u32 next_upper;
     key_lower = (key_lower * 0x7f8d) % 0xfff1;
     key_upper = (next_upper = (key_upper * 0x2345) % 0xffd9);
     return (next_upper << 0x10) + key_lower;
 }
 
-u32 data_loader_impl::file_size(u32 file_id) {
+u32 FileSysImpl::file_size(u32 file_id) {
     s32 temp_v1 = file_id & 0xffff;
     s32 var_a3;
-    data_loader_impl *var_a2;
+    FileSysImpl *var_a2;
 
     if (temp_v1 == 0xffff) {
         return 0;
@@ -325,14 +325,14 @@ loop_5:
         return file_size_pairs[var_a3].size;
     }
     var_a3++;
-    var_a2 = (data_loader_impl*)((u8*)var_a2 + sizeof(file_size_pair));
+    var_a2 = (FileSysImpl*)((u8*)var_a2 + sizeof(file_size_pair));
     if (var_a3 >= 0x32C) {
         return (file_id_to_first_block[temp_v1 + 1] - file_id_to_first_block[(u16)file_id]) * 0x800;
     }
     goto loop_5;
 }
 
-u32 data_loader_impl::file_blocks_size(u32 file_id) {
+u32 FileSysImpl::file_blocks_size(u32 file_id) {
   u32 uVar1;
   u32 uVar2;
 
@@ -350,7 +350,7 @@ inline static u32 inline_fn(u32 arg0) {
     return arg0;
 }
 
-u32 data_loader_impl::load_file_blocking(s32 arg1, u8 *arg2, u32 arg3) {
+u32 FileSysImpl::load_file_blocking(s32 arg1, u8 *arg2, u32 arg3) {
     s32 temp_s0;
     s32 temp_s5;
     u32 var_s1;
@@ -387,7 +387,7 @@ loop_7:
     return new_var3;
 }
 
-int data_loader_impl::load_file_async(s32 file_id, u8* buf, SceSize len, u8 unknown_flag, u32 *cancellation_ptr, u8 wakeup_loader_thread) {
+int FileSysImpl::load_file_async(s32 file_id, u8* buf, SceSize len, u8 unknown_flag, u32 *cancellation_ptr, u8 wakeup_loader_thread) {
     u8 sp3F;
     s32 sp38;
     u32 sp34;
@@ -411,7 +411,7 @@ int data_loader_impl::load_file_async(s32 file_id, u8* buf, SceSize len, u8 unkn
     var_s2 = 0;
     var_s1 = 1;
     var_s0 = 0;
-    if ((is_data_file_encrypted != 0) && (((s32) (game::instance->next_index(1) & 0xFFFF) % 100) < 5)) {
+    if ((is_data_file_encrypted != 0) && (((s32) (System::get()->next_index(1) & 0xFFFF) % 100) < 5)) {
         var_s0 = 1;
     }
 loop_1:
@@ -453,7 +453,7 @@ loop_2:
     return 1;
 }
 
-void data_loader_impl::movie_open(u16 arg1) {
+void FileSysImpl::movie_open(u16 arg1) {
     s32 temp_s2;
     s32 temp_s3;
     s32 temp_v0;
@@ -486,7 +486,7 @@ loop_1:
     set_decryption_key(var_a1);
 }
 
-void data_loader_impl::movie_read(u8* buf, SceSize len) {
+void FileSysImpl::movie_read(u8* buf, SceSize len) {
     u32 uVar1;
     u8 *new_var;
 
@@ -509,7 +509,7 @@ loop_2:
     movie_open_pos += len;
 }
 
-void data_loader_impl::movie_seek(int arg1) {
+void FileSysImpl::movie_seek(int arg1) {
     s32 new_var;
     s32 temp_s1;
     s32 temp_s2;
@@ -529,12 +529,12 @@ loop_1:
     goto loop_1;
 }
 
-void data_loader_impl::movie_close() {
+void FileSysImpl::movie_close() {
     is_playing_movie = 0;
     movie_pos = 0;
 }
 
-SceUID data_loader_impl::load_libfont(u32 file_id, SceUID param_3) {
+SceUID FileSysImpl::load_libfont(u32 file_id, SceUID param_3) {
     SceUID fid;
     u32 first_block;
     SceUID modid;
@@ -567,14 +567,14 @@ modid = sceKernelLoadModuleByID(fid, 0, &opt);
 }
 
 
-int data_loader_impl::file_has_sha1(u32 file_id) {
+int FileSysImpl::file_has_sha1(u32 file_id) {
     static u8 null_sha1_digest[20];
     int iVar1;
     iVar1 = memcmp(file_sha1_digests[file_id & 0xffff], &null_sha1_digest, 20);
     return iVar1 != 0;
 }
 
-void data_loader_impl::calculate_install_block_offsets() {
+void FileSysImpl::calculate_install_block_offsets() {
   u32 s16;
   s32 iVar1;
   u32 wVar2;
@@ -607,33 +607,33 @@ void data_loader_impl::calculate_install_block_offsets() {
   }
 }
 
-bool data_loader_impl::is_loading() {
+bool FileSysImpl::is_loading() {
     if (unknown_0x2fa04 != 0 && unknown_0x2fa08 != 0) {
         return true;
     }
-    return base_data_loader::is_loading();
+    return BaseFileSys::is_loading();
 }
 
-bool data_loader_impl::is_loading(u16 file_id) {
+bool FileSysImpl::is_loading(u16 file_id) {
     if (unknown_0x2fa04 != 0 && unknown_0x2fa08 != 0) {
         return true;
     }
-    return base_data_loader::is_loading(file_id);
+    return BaseFileSys::is_loading(file_id);
 }
 
-bool data_loader_impl::is_loading(u8 unknown_flag) {
+bool FileSysImpl::is_loading(u8 unknown_flag) {
     if (unknown_0x2fa04 != 0 && unknown_0x2fa08 != 0) {
         return true;
     }
-    return base_data_loader::is_loading(unknown_flag);
+    return BaseFileSys::is_loading(unknown_flag);
 }
 
 
 char install_folder_path[] = "ms0:\\.\\PSP\\SAVEDATA\\ULJM05500DAT";
-INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884F538);
+INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", func_eboot_0884F538);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/data_loader_impl", func_eboot_0884F5B4);
+INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", func_eboot_0884F5B4);
 
-char* data_loader_impl::data_bin_path() {
+char* FileSysImpl::data_bin_path() {
     return "disc0:/PSP_GAME/USRDIR/DATA.BIN";
 }

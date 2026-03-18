@@ -3,7 +3,7 @@
 #include "cache.hpp"
 #include "singleton.hpp"
 
-struct tagged_cache : singleton<tagged_cache> {
+struct ResourceManager : Singleton<ResourceManager> {
 
     cache cache;
     u32 padding[5];
@@ -14,8 +14,8 @@ struct tagged_cache : singleton<tagged_cache> {
         u32 size;
     } index[0x200];
 
-    tagged_cache();
-    ~tagged_cache();
+    ResourceManager();
+    ~ResourceManager();
 
     void reset(u32 size);
     u8 *alloc(int tag, u32 size);

@@ -98,19 +98,19 @@ segments:
       - [0x15610, asmtu, global_089c6cb8]
       - [0x15dd4, asmtu, global_089c6cbc]
       - [0x4943c, cpp, state/cont_state]
-      - [0x49654, cpp, drawable_manager]
+      - [0x49654, cpp, draw_manager]
       - [0x4b524, asmtu, state/edit_state]
       - [0x4b714, asmtu, state/loading_state]
-      - [0x4bd30, cpp, data_loader_impl]
+      - [0x4bd30, cpp, file_sys_impl]
       - [0x4ddcc, asmtu, global_089c7508] # string manager?
-      - [0x574c8, cpp, ge_manager] # tmh parsing emitted here (header?)
+      - [0x574c8, cpp, ge] # tmh parsing emitted here (header?)
       - [0x57fb8, cpp, cache]
       - [0x581e8, asmtu, toast_notification]
       - [0x58f40, asmtu, state/start_state]
       - [0x5924c, asmtu, global_08a5dd20]
       - [0x5ade8, asmtu, global_08a5dd24]
       - [0x5ddf4, cpp, bone]
-      - [0x5ed14, cpp, lighting_manager]
+      - [0x5ed14, cpp, light_manager]
       - [0x5fa88, cpp, model]
       - [0x629ec, asmtu, object_089b5c10] # base class for em & player; embedded linked list next:0x1C4 prev:0x1C8
       - [0x64864, asmtu, global_08a5dd2c] # manager for the em/player objects; 15(?) linked list heads at 0x80028, 2:player, 3:ems, 7:npcs
@@ -134,7 +134,7 @@ segments:
       - [0x975ac, asm, lib/libfpu]
       - [0x97914, asm, lib/libvfpu]
       - [0x99254, cpp, main] # root object for application, most globals are its members, a lot of constructors/destructors are emitted here
-      - [0x99968, cpp, tagged_cache]
+      - [0x99968, cpp, resource_manager]
       - [0x99d24, asmtu, global_09a07284] # netplay layer 3
       - [0x9fc80, asmtu, csepsp] # "Capcom Sound Engine for [PSP] Ver1.8", "Capcom Sound Engine CORE Ver2.0"
       - [0xa8424, asmtu, state/lobby_state]
@@ -145,14 +145,14 @@ segments:
       - [0xb4ac4, asmtu, global_09a1bb18_3]
       - [0xb91c0, asm, global_09a1bb18_4] # weird angle functions
       - [0xb96c0, asmtu, state/option_state]
-      - [0xb9894, cpp, base_data_loader]
+      - [0xb9894, cpp, base_file_sys]
       - [0xbab08, asmtu, state/game_state]
       - [0xbae58, asmtu, state/initial_state]
       - [0xbb0f4, asmtu, state/gallery_state]
       - [0xbb408, asmtu, state/download_state]
       - [0xbb5ec, asmtu, global_09a4099c] # player data?
       - [0xc4034, cpp, stage_manager]
-      - [0xc8710, cpp, base_stage]
+      - [0xc8710, cpp, stage_base]
       - [0xcd454, asmtu, lib/crti] # _init
       - [0xcd45c, asm, lib/crtn] # _fini
       - [0xcd464, asmtu, state/arcade_state]
@@ -161,7 +161,7 @@ segments:
       - [0xdbe14, asmtu, global_09a4ae04] # game player state?
       - [0xdde38, asmtu, object_089b5ef4] # multiplayer models?
       - [0xde2e8, asm, lib/libccc]
-      - [0xdf060, cpp, file_cache]
+      - [0xdf060, cpp, data_manager]
       - [0xe00a0, asmtu, lib/libjpeg] # JPEG_LIB_VERSION=62, only decoder, used by download_task.ovl
       - [0xf0ff8, asmtu, jpg_create]
       - [0xf1264, asm, utility_osk]
@@ -187,7 +187,7 @@ segments:
       - [0x10c578, .rodata, global_089c6cb4]
       - [0x10c620, .rodata, global_089c6cb8]
       - [0x12c620, .rodata, global_089c6cbc]
-      - [0x12cff8, .rodata, data_loader_impl]
+      - [0x12cff8, .rodata, file_sys_impl]
       - [0x12d02c, .rodata, global_089c7508]
       - [0x12d0e4, .rodata, toast_notification]
       - [0x12d12c, .rodata, global_08a5dd20]
@@ -209,7 +209,7 @@ segments:
       - [0x12de28, .rodata, global_09a1bb18_3]
       - [0x12de7c, .rodata, state/gallery_state]
       - [0x12de98, .rodata, global_09a4099c]
-      - [0x12dfec, .rodata, base_stage]
+      - [0x12dfec, .rodata, stage_base]
       - [0x12e03c, .rodata, global_09a4adac]
       - [0x12e06c, .rodata, object_089b5e78]
       - [0x12e158, .rodata, global_09a4ae04]
@@ -225,17 +225,17 @@ segments:
       - [0x12f664, .data, global_089c6cb4]
       - [0x13406c, .data, global_089c6cbc]
       - [0x137254, .data, state/cont_state]
-      - [0x13726c, .data, drawable_manager]
+      - [0x13726c, .data, draw_manager]
       - [0x1372b0, .data, state/edit_state]
       - [0x1372c8, .data, state/loading_state] # thought it was global_08a5dd24 ?
-      - [0x1752b4, .data, data_loader_impl]
+      - [0x1752b4, .data, file_sys_impl]
       - [0x195860, .data, global_089c7508]
-      - [0x198378, .data, ge_manager]
+      - [0x198378, .data, ge]
       - [0x198764, .data, toast_notification]
       - [0x1987c8, .int4, state/start_state]
       - [0x1987ec, .data, global_08a5dd20]
       - [0x1a11d4, .data, global_08a5dd24]
-      - [0x1a11e4, .data, lighting_manager]
+      - [0x1a11e4, .data, light_manager]
       - [0x1a1298, .data, model]
       - [0x1a169c, .data, object_089b5c10]
       - [0x1a16b4, .data, global_08a5dd2c]
@@ -254,14 +254,14 @@ segments:
       - [0x1adea0, .data, global_09a1bb18]
       - [0x1adec4, .data, global_09a1bb18_1]
       - [0x1ae0b8, .int4, state/option_state]
-      - [0x1ae0d0, .data, base_data_loader]
+      - [0x1ae0d0, .data, base_file_sys]
       - [0x1ae1ac, .int4, state/game_state]
       - [0x1ae1c4, .int4, state/initial_state]
       - [0x1ae1dc, .int4, state/gallery_state]
       - [0x1ae1f4, .int4, state/download_state]
       - [0x1ae20c, .data, global_09a4099c]
       - [0x1ae690, .data, stage_manager]
-      - [0x1aeabc, .data, base_stage]
+      - [0x1aeabc, .data, stage_base]
       - [0x1aead4, .data, lib/crti]
       - [0x1aeaf0, .data, state/arcade_state] # some unencapsulated tables here before the ptmfs
       - [0x1aed84, .data, global_09a4adac]
@@ -273,14 +273,14 @@ segments:
       - [0x1b280c, .data, state/install_state]
       - [0x1b2824, .data, state/movie_state] # inline binary file with magic bytes "SPUMAPDT"?
       - [0x1b28cc, .data, lib/runtime/NMWException]
-      - [0x1b2938, .init, ge_manager]
+      - [0x1b2938, .init, ge]
       - [0x1b2988, .init, global_08a5de5c]
       - [0x1b29a4, .init, global_08a5e270]
       - [0x1b2bd8, .init, stage_manager]
       - [0x1b2c14, .init, global_09a4adac]
       - [0x1b4058, .init, global_09a4ae04]
       - [0x1b4094, .init, global_09a4e178]
-      - [0x1b40d0, .ctor, ge_manager]
+      - [0x1b40d0, .ctor, ge]
       - [0x1b40d4, .ctor, global_08a5de5c]
       - [0x1b40d8, .ctor, global_08a5e270]
       - [0x1b40dc, .ctor, stage_manager]
@@ -292,7 +292,7 @@ segments:
       - [0x1b40ec, .vtables, state/cont_state]
       - [0x1b4100, .vtables, state/edit_state]
       - [0x1b4114, .vtables, state/loading_state]
-      - [0x1b4128, .vtables, data_loader_impl]
+      - [0x1b4128, .vtables, file_sys_impl]
       - [0x1b4174, .vtables, state/start_state]
       - [0x1b4188, .vtables, bone] # FIXME
       - [0x1b4198, .vtables, model]
@@ -302,13 +302,13 @@ segments:
       - [0x1b422c, .vtables, main]
       - [0x1b4278, .vtables, state/lobby_state]
       - [0x1b428c, .vtables, state/option_state]
-      - [0x1b42a0, .vtables, base_data_loader]
+      - [0x1b42a0, .vtables, base_file_sys]
       - [0x1b42ec, .vtables, state/game_state]
       - [0x1b4300, .vtables, state/initial_state]
       - [0x1b4314, .vtables, state/gallery_state]
       - [0x1b4328, .vtables, state/download_state]
       - [0x1b433c, .vtables, stage_manager]
-      - [0x1b435c, .vtables, base_stage]
+      - [0x1b435c, .vtables, stage_base]
       - [0x1b4418, .vtables, state/arcade_state]
       - [0x1b442c, .vtables, object_089b5e78] # base player type
       - [0x1b44a8, .vtables, object_089b5ef4] # cont_task.ovl player type
@@ -845,14 +845,14 @@ segments:
       - [0x1c50ec, pad]
       - [0x1c50f4, .bin, omit_overlay_addresses]
       - {start: 0x1c5114, type: .bss, vram: 0x089c6b60, name: lib/crt0} # FIXME: split
-      - {start: 0x1c5114, type: .bss, vram: 0x089c70cc, name: drawable_manager}
+      - {start: 0x1c5114, type: .bss, vram: 0x089c70cc, name: draw_manager}
       - {start: 0x1c5114, type: .bss, vram: 0x089c70ec, name: state/edit_state}
-      - {start: 0x1c5114, type: .bss, vram: 0x089c70f0, name: data_loader_impl}
+      - {start: 0x1c5114, type: .bss, vram: 0x089c70f0, name: file_sys_impl}
       - {start: 0x1c5114, type: .bss, vram: 0x089c7504, name: main} # FIXME: most of bss is allocated by the singletons defined here
       - {start: 0x1c5114, type: .bss, vram: 0x09a072a0, name: csepsp} # FIXME: split
       - {start: 0x1c5114, type: .bss, vram: 0x09a409a0, name: stage_manager}
       - {start: 0x1c5114, type: .bss, vram: 0x09a4ada4, name: lib/crti} # FIXME: split
-      - {start: 0x1c5114, type: .bss, vram: 0x09a4ae1c, name: file_cache}
+      - {start: 0x1c5114, type: .bss, vram: 0x09a4ae1c, name: data_manager}
       - {start: 0x1c5114, type: .bss, vram: 0x09a4ae20, name: lib/crt0_elf} # FIXME: split
 
   - [0x1c5114, bin, omit_elf_footer]

@@ -1,18 +1,18 @@
 #include "common.h"
 
-#include "tagged_cache.hpp"
+#include "resource_manager.hpp"
 
 #pragma opt_unroll_loops on
 
-tagged_cache::tagged_cache() {
+ResourceManager::ResourceManager() {
     /// empty
 }
 
-tagged_cache::~tagged_cache() {
+ResourceManager::~ResourceManager() {
     // empty
 }
 
-void tagged_cache::reset(u32 size) {
+void ResourceManager::reset(u32 size) {
     cache.reset(slab, size);
 
     int i = 0;
@@ -23,7 +23,7 @@ void tagged_cache::reset(u32 size) {
     }
 }
 
-u8 *tagged_cache::alloc(int tag, u32 size) {
+u8 *ResourceManager::alloc(int tag, u32 size) {
     s32 i = next_empty_index();
     if (i != -1) {
         index[i].address = cache.alloc(size, 0x10);
@@ -36,7 +36,7 @@ u8 *tagged_cache::alloc(int tag, u32 size) {
     return 0;
 }
 
-void tagged_cache::free_all(int tag) {
+void ResourceManager::free_all(int tag) {
     s32 i = 0;
     while (i < 0x200) {
         if (index[i].tag == tag) {
@@ -47,7 +47,7 @@ void tagged_cache::free_all(int tag) {
     }
 }
 
-void tagged_cache::free(void *addr) {
+void ResourceManager::free(void *addr) {
     int i = 0;
     while (i < 0x200) {
         if (index[i].address == addr) {
@@ -59,7 +59,7 @@ void tagged_cache::free(void *addr) {
     }
 }
 
-int tagged_cache::next_empty_index() {
+int ResourceManager::next_empty_index() {
     int i = 0;
     while (i < 0x200) {
         if (index[i].tag == -1) {
@@ -70,7 +70,7 @@ int tagged_cache::next_empty_index() {
     return -1;
 }
 
-u8 *tagged_cache::find(int tag) {
+u8 *ResourceManager::find(int tag) {
     int i = 0;
     while (i < 0x200) {
         if (index[i].tag == tag) {

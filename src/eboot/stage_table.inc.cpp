@@ -1,9 +1,9 @@
-struct base_stage;
+struct StageBase;
 
-typedef base_stage *base_stage_ptr;
+typedef StageBase *base_stage_ptr;
 
 extern "C"
-extern base_stage
+extern StageBase
     D_stage000_09D5E290,
     D_stage001_09D5E790,
     D_stage002_09D5E590,

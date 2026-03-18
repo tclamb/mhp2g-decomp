@@ -34,7 +34,7 @@ private:
     render_group();
 };
 
-struct drawable_manager : singleton<drawable_manager> {
+struct DrawManager : Singleton<DrawManager> {
     drawable *z_index[111]; // 111 == sum(z_index_bucket_length)
     drawable **z_index_buckets[render_group::GROUP_COUNT];
     u8 writing;
@@ -45,8 +45,8 @@ struct drawable_manager : singleton<drawable_manager> {
     void *vram_transfer_dst;
     u8 padding_0x21C[12];
 
-    drawable_manager();
-    ~drawable_manager();
+    DrawManager();
+    ~DrawManager();
     void reset();
     void clear();
     void draw();

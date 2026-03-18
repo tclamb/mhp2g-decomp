@@ -94,11 +94,11 @@ struct stage_light {
     ScePspFVector3 ambient_color;
 };
 
-struct base_stage : model {
-    typedef void (base_stage::*ptmf)(void);
+struct StageBase : model {
+    typedef void (StageBase::*ptmf)(void);
 
-    base_stage();
-    virtual ~base_stage();
+    StageBase();
+    virtual ~StageBase();
     virtual void draw();
 
     virtual void clear();
@@ -170,8 +170,8 @@ struct base_stage : model {
     u32 unknown_0x444;
     stage_fog fog;
 
-    void execute_model_draw_commands();
-    void execute_prop_draw_commands();
+    void drawStg();
+    void drawSet();
     void emit_fog();
     void method_088CD61C();
     void compile_environment_params(stage_environment_params *);

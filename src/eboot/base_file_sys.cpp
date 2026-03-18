@@ -16,17 +16,17 @@ typedef unsigned long uint64_t;
 
 #include "pac.hpp"
 #include "singleton.hpp"
-#include "tagged_cache.hpp"
-#include "base_data_loader.hpp"
+#include "resource_manager.hpp"
+#include "base_file_sys.hpp"
 
-void base_data_loader::initialize() {
+void BaseFileSys::initialize() {
     ge_edram_start = sceGeEdramGetAddr();
     ge_edram_end = (void*)((u32)ge_edram_start + sceGeEdramGetSize());
     flag_0x29208 = 0;
     fake_rofs_semaphore = sceKernelCreateSema("fakeRofsSema", 0x100, 1, 1, NULL);
 }
 
-void base_data_loader::clear() {
+void BaseFileSys::clear() {
     load_request *req = load_request_ringbuf;
     do {
         req++->state = 0;
@@ -36,17 +36,17 @@ void base_data_loader::clear() {
     load_thread_status = 0;
 }
 
-void base_data_loader::complete_one() {
+void BaseFileSys::complete_one() {
     load_request_ringbuf[load_request_load_head].state = LOAD_REQUEST_COMPLETE;
     advance(load_request_load_head);
     load_thread_status = 0;
 }
 
-bool base_data_loader::is_loading() {
+bool BaseFileSys::is_loading() {
     return load_request_ringbuf[load_request_load_head].state != LOAD_REQUEST_COMPLETE;
 }
 
-bool base_data_loader::is_loading(u16 file_id) {
+bool BaseFileSys::is_loading(u16 file_id) {
     load_request *r = &load_request_ringbuf[0];
     for (int i = 0; i < 0x80; ++i, ++r) {
         if (r->state == LOAD_REQUEST_INCOMPLETE && r->file_id == file_id) {
@@ -56,7 +56,7 @@ bool base_data_loader::is_loading(u16 file_id) {
     return false;
 }
 
-bool base_data_loader::is_loading(u8 unknown_flag) {
+bool BaseFileSys::is_loading(u8 unknown_flag) {
     load_request *r = &load_request_ringbuf[0];
     for (int i = 0; i < 0x80; ++i, ++r) {
         if (r->state == LOAD_REQUEST_INCOMPLETE && r->unknown_flag == unknown_flag) {
@@ -66,7 +66,7 @@ bool base_data_loader::is_loading(u8 unknown_flag) {
     return false;
 }
 
-void base_data_loader::unload_module(SceUID module) {
+void BaseFileSys::unload_module(SceUID module) {
     if (module > 0) {
         int status;
         sceKernelStopModule(module, 0, 0, &status, 0);
@@ -74,7 +74,7 @@ void base_data_loader::unload_module(SceUID module) {
     }
 }
 
-void base_data_loader::cancel_all() {
+void BaseFileSys::cancel_all() {
     int state = sceKernelSuspendDispatchThread();
 
     load_request *r = &load_request_ringbuf[0];
@@ -96,7 +96,7 @@ void base_data_loader::cancel_all() {
     sceKernelResumeDispatchThread(state);
 }
 
-void base_data_loader::update_ringbuf(u8 unknown_flag) {
+void BaseFileSys::update_ringbuf(u8 unknown_flag) {
     int state = sceKernelSuspendDispatchThread();
 
     load_request *r = &load_request_ringbuf[load_request_load_head];
@@ -135,7 +135,7 @@ void base_data_loader::update_ringbuf(u8 unknown_flag) {
     sceKernelResumeDispatchThread(state);
 }
 
-void base_data_loader::cancel(int i) {
+void BaseFileSys::cancel(int i) {
     for (int j = next(i); j != load_request_load_head; i = next(i), j = next(j)) {
         load_request &cur = load_request_ringbuf[j];
         load_request &prev = load_request_ringbuf[i];
@@ -180,10 +180,10 @@ u32 pac_header::size(int index) {
 }
 
 // render loading screen
-INCLUDE_ASM("asm/eboot/nonmatchings/base_data_loader", draw_loading_screen_impl__16base_data_loaderFv);
+INCLUDE_ASM("asm/eboot/nonmatchings/base_file_sys", draw_loading_screen_impl__11BaseFileSysFv);
 
 
-void base_data_loader::set_flags(int flag, u32 argument) {\
+void BaseFileSys::set_flags(int flag, u32 argument) {\
     if (flag_0x2920C == 0) {
         flag_0x29210 = 0;
         flag_0x2920C = 1;
@@ -205,7 +205,7 @@ void base_data_loader::set_flags(int flag, u32 argument) {\
     }
 }
 
-void base_data_loader::clear_flags() {
+void BaseFileSys::clear_flags() {
     flag_0x2920C = 0;
     flag_0x29208 = 0;
 }

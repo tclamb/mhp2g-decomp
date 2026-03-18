@@ -31,8 +31,8 @@ struct file_size_pair {
     u32 size;
 };
 
-struct base_data_loader {
-    virtual ~base_data_loader() {}
+struct BaseFileSys {
+    virtual ~BaseFileSys() {}
     virtual void initialize();
     virtual void stop() = 0;
     virtual void draw_loading_screen() = 0;

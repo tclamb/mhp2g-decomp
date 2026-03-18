@@ -18,16 +18,16 @@ struct file_size_pair {
     u32 size;
 };
 
-#include "../src/eboot/data_loader_impl.decrypt_table.inc.cpp"
+#include "../src/eboot/file_sys_impl.decrypt_table.inc.cpp"
 
-struct data_loader_impl {
+struct FileSysImpl {
     std::ifstream &in;
     file_size_pair file_size_pairs[812];
     u32 file_id_to_first_block[6603];
     u32 key_lower;
     u32 key_upper;
 
-    data_loader_impl(std::ifstream &in) : in(in) {}
+    FileSysImpl(std::ifstream &in) : in(in) {}
 
     void initialize();
     void decrypt_buffer(u8 *, s32, s32);
@@ -37,7 +37,7 @@ struct data_loader_impl {
     u32 file_size(u32 file_id);
 };
 
-void data_loader_impl::initialize() {
+void FileSysImpl::initialize() {
     in.read((char*)file_id_to_first_block, 0x672C);
     set_decryption_key(0);
     decrypt_buffer((u8*)file_id_to_first_block, 0x672C, 0);
@@ -46,7 +46,7 @@ void data_loader_impl::initialize() {
     decrypt_buffer((u8*)file_size_pairs, 0x1960, 0x672c);
 }
 
-void data_loader_impl::decrypt_buffer(u8 *data, s32 size, s32 prevSize) {
+void FileSysImpl::decrypt_buffer(u8 *data, s32 size, s32 prevSize) {
     u8 *var_s4;
     u8 *var_s3;
     u8 *var_s2;
@@ -76,7 +76,7 @@ void data_loader_impl::decrypt_buffer(u8 *data, s32 size, s32 prevSize) {
     }
 }
 
-void data_loader_impl::set_decryption_key(u32 key) {
+void FileSysImpl::set_decryption_key(u32 key) {
     key_lower = key & 0xffff;
     key_upper = (key >> 0x10) & 0xffff;
     if (key_lower == 0) {
@@ -87,17 +87,17 @@ void data_loader_impl::set_decryption_key(u32 key) {
     }
 }
 
-u32 data_loader_impl::next_decryption_key() {
+u32 FileSysImpl::next_decryption_key() {
     u32 next_upper;
     key_lower = (key_lower * 0x7f8d) % 0xfff1;
     key_upper = (next_upper = (key_upper * 0x2345) % 0xffd9);
     return (next_upper << 0x10) + key_lower;
 }
 
-u32 data_loader_impl::file_size(u32 file_id) {
+u32 FileSysImpl::file_size(u32 file_id) {
     s32 temp_v1 = file_id & 0xffff;
     s32 var_a3;
-    data_loader_impl *var_a2;
+    FileSysImpl *var_a2;
 
     if (temp_v1 == 0xffff) {
         return 0;
@@ -110,14 +110,14 @@ loop_5:
         return file_size_pairs[var_a3].size;
     }
     var_a3++;
-    var_a2 = (data_loader_impl*)((u8*)var_a2 + sizeof(file_size_pair));
+    var_a2 = (FileSysImpl*)((u8*)var_a2 + sizeof(file_size_pair));
     if (var_a3 >= 0x32C) {
         return (file_id_to_first_block[temp_v1 + 1] - file_id_to_first_block[(u16)file_id]) * 0x800;
     }
     goto loop_5;
 }
 
-u32 data_loader_impl::load_file_blocking(s32 arg1, u8 *arg2, u32 arg3) {
+u32 FileSysImpl::load_file_blocking(s32 arg1, u8 *arg2, u32 arg3) {
     s32 temp_s0;
     s32 temp_s5;
     u32 var_s1;
@@ -168,7 +168,7 @@ int main(int argc, char** argv) {
     }
 
     auto in = std::ifstream{data_bin_path, std::ios_base::in | std::ios_base::binary};
-    auto loader = data_loader_impl{in};
+    auto loader = FileSysImpl{in};
     loader.initialize();
     u32 len = loader.file_size(file_id);
     auto buf = std::vector<u8>(len);

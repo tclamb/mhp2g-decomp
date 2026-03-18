@@ -5,7 +5,7 @@
 typedef u32 ge_command;
 typedef ge_command *display_list;
 
-struct ge_manager : singleton<ge_manager> {
+struct Ge : Singleton<Ge> {
     float norm;
     u32 active_buffer;
     ge_command root_display_lists[2][2*20];

@@ -339,6 +339,58 @@ inline void rotateZ(ScePspFMatrix4 *m, float angle) {
 #endif
 }
 
+inline void eulerRotation(ScePspFMatrix4 *out, ScePspFMatrix4 *in, float alpha, float beta, float gamma) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q    C000, 0x0 (%1)"
+        "lv.q    C010, 0x10(%1)"
+        "lv.q    C020, 0x20(%1)"
+        "lv.q    C030, 0x30(%1)"
+        "lv.s    S100, %2"
+        "lv.s    S101, %3"
+        "lv.s    S102, %4"
+        "vcst.s  S103, VFPU_2_PI"
+        "vscl.t  C130, C100, S103"
+        "vsin.t  C110, C130"
+        "vcos.t  C120, C130"
+        "vmul.s  S000, S122, S121"
+        "vmul.s  S130, S112, S120"
+        "vmul.s  S010, S111, S122"
+        "vmul.s  S010, S010, S110"
+        "vsub.s  S010, S010, S130"
+        "vmul.s  S020, S110, S112"
+        "vmul.s  S131, S111, S122"
+        "vmul.s  S131, S131, S120"
+        "vadd.s  S020, S020, S131"
+        "vmul.s  S001, S112, S121"
+        "vmul.s  S011, S122, S120"
+        "vmul.s  S131, S111, S112"
+        "vmul.s  S131, S131, S110"
+        "vadd.s  S011, S011, S131"
+        "vmul.s  S130, S110, S122"
+        "vmul.s  S021, S111, S112"
+        "vmul.s  S021, S021, S120"
+        "vsub.s  S021, S021, S130"
+        "vneg.s  S002, S111"
+        "vmul.s  S012, S110, S121"
+        "vmul.s  S022, S121, S120"
+        "sv.q    C000, 0x0 (%0)"
+        "sv.q    C010, 0x10(%0)"
+        "sv.q    C020, 0x20(%0)"
+        "sv.q    C030, 0x30(%0)"
+        : "=m" (*out)
+        : "m" (*in), "m" (alpha), "m" (beta), "m" (gamma)
+    );
+#else
+    float sa = sin(alpha), sb = sin(beta), sc = sin(gamma),
+          ca = cos(alpha), cb = cos(beta), cc = cos(gamma);
+    out->x.x = cb*cc;   out->x.y = sa*sb*cc - ca*sc; out->x.z = ca*sb*cc + sa*sc; out->x.w = in->x.w;
+    out->y.x = cb*sc;   out->y.y = sa*sb*sc + ca*cc; out->y.z = ca*sb*sc - sa*cc; out->x.w = in->y.w;
+    out->z.x = -sb;     out->z.y = sa*cb;            out->z.z = ca*cb;            out->x.w = in->y.w;
+    out->w.x = in->w.x; out->w.y = in->w.y;          out->w.z = in->w.z;          out->w.w = in->w.w;
+#endif
+}
+
 inline void normalize(ScePspFVector4 *out, ScePspFVector4 *v) {
 #if defined(__MWERKS__)
     __asm__ (

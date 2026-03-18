@@ -1,7 +1,7 @@
-#include "base_data_loader.hpp"
+#include "base_file_sys.hpp"
 
-struct data_loader_impl : base_data_loader {
-    virtual ~data_loader_impl() {}
+struct FileSysImpl : BaseFileSys {
+    virtual ~FileSysImpl() {}
     virtual void initialize();
     virtual void stop();
     virtual void draw_loading_screen();

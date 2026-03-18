@@ -4,8 +4,8 @@
 
 #include "cache.hpp"
 #include "drawable.hpp"
-#include "tagged_cache.hpp"
-#include "base_stage.hpp"
+#include "resource_manager.hpp"
+#include "stage_base.hpp"
 #include "pac.hpp"
 
 struct prop_params {
@@ -60,8 +60,8 @@ struct prop_089B975C_data {
     ScePspFVector4 spawn_box;
 };
 
-struct stage_manager : singleton<stage_manager> {
-    base_stage *stage;
+struct StageManager : Singleton<StageManager> {
+    StageBase *stage;
     u8 unknown_0x4[640];
     u32 map_id;
     u16 stage_id;
@@ -84,8 +84,8 @@ struct stage_manager : singleton<stage_manager> {
     u8 unknown_0xA3E9;
     u8 unknown_0xA3EA[6];
 
-    stage_manager();
-    ~stage_manager();
+    StageManager();
+    ~StageManager();
     void reset();
     void unload();
     void call_stage_ptmf_0x3D8();
@@ -194,17 +194,17 @@ private:
 
     inline void link_model(base_prop *prop, int pmo_index) {
         if (pmo_index == 0) {
-            base_stage *st = stage;
+            StageBase *st = stage;
             prop->prop_pmo = &st->model_pmo;
             prop->prop_tmh = &st->model_tmh;
         } else if (pmo_index == 1) {
-            base_stage *st = stage;
+            StageBase *st = stage;
             prop->prop_pmo = &st->prop_pmo;
             prop->prop_tmh = &st->model_tmh;
         }
     }
 
-    template<pmo base_stage::*P>
+    template<pmo StageBase::*P>
     inline void compile_stage_pmo(pmo_header *header);
 
     // distance of point P to rectangle in the XZ plane with center (A+B)/2, width |AB|, and height |2t|

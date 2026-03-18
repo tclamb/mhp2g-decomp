@@ -20,13 +20,13 @@ struct lighting_manager_data {
     lighting_data lighting[2];
 };
 
-struct lighting_manager : singleton<lighting_manager> {
+struct LightManager : Singleton<LightManager> {
     lighting_manager_data data;
     u8 unknown_0x150[0xC];
     u16 unknown_0x15C;
 
-    lighting_manager();
-    ~lighting_manager();
+    LightManager();
+    ~LightManager();
 
     void method_088607F0();
     void method_08860840(light_data *, s16, u16);

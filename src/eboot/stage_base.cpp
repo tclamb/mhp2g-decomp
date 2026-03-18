@@ -1,23 +1,23 @@
 #include "common.h"
 
-#include "base_stage.hpp"
+#include "stage_base.hpp"
 #include "vfpu.h"
-#include "drawable_manager.hpp"
+#include "draw_manager.hpp"
 #include "stage_manager.hpp"
 #include "immediate_ge.hpp"
-#include "lighting_manager.hpp"
+#include "light_manager.hpp"
 #include "player.hpp"
-#include "game.hpp"
+#include "system.hpp"
 
 using namespace immediate_ge;
 
 #pragma opt_unroll_loops on
 
-base_stage::base_stage() {
+StageBase::StageBase() {
 
 }
 
-base_stage::~base_stage() {
+StageBase::~StageBase() {
     // empty
 }
 
@@ -36,7 +36,7 @@ extern struct global_089C7508 {
     u32 flags_0x6AF14;
 } *D_eboot_089C7508;
 
-void base_stage::execute_model_draw_commands() {
+void StageBase::drawStg() {
     pmo *pmo = &model_pmo;
     stage_draw_command *command = vtable_0x48()->model_commands;
     emit_world_model(&transform, &pmo->scale);
@@ -53,7 +53,7 @@ void base_stage::execute_model_draw_commands() {
             case 0:
                 break;
             case 1:
-                pmo->draw_mesh(0, &model_tmh, command->mesh_index);
+                pmo->drawMesh(0, &model_tmh, command->mesh_index);
                 break;
             case 2:
                 vtable_0x54(pmo, command->data, command->mesh_index);
@@ -101,7 +101,7 @@ void base_stage::execute_model_draw_commands() {
     }
 }
 
-void base_stage::execute_prop_draw_commands() {
+void StageBase::drawSet() {
     pmo *pmo = &prop_pmo;
     stage_draw_command *command = vtable_0x48()->prop_commands;
     emit_world_model(&transform, &pmo->scale);
@@ -116,7 +116,7 @@ void base_stage::execute_prop_draw_commands() {
             }
             switch (command->opcode) {
             case 1:
-                pmo->draw_mesh(0, &model_tmh, command->mesh_index);
+                pmo->drawMesh(0, &model_tmh, command->mesh_index);
                 break;
             case 2:
                 vtable_0x54(pmo, command->data, command->mesh_index);
@@ -179,7 +179,7 @@ void base_stage::execute_prop_draw_commands() {
     }
 }
 
-void base_stage::vtable_0x54(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x54(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x54_params *args = (vtable_0x54_params *)data;
 
     u32 t;
@@ -203,21 +203,21 @@ void base_stage::vtable_0x54(pmo *pmo, void *data, u8 mesh_index) {
     }
 
     emit_world_model(&local_transform, &pmo->scale);
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     emit_world_model(&this->transform, &pmo->scale);
 }
 
-void base_stage::vtable_0x58(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x58(pmo *pmo, void *data, u8 mesh_index) {
     ScePspFMatrix4 local_transform;
     ScePspFVector4 *pos = (ScePspFVector4 *)data;
     positionMatrix(&local_transform, pos->x, pos->y, pos->z);
 
     emit_world_model(&local_transform, &pmo->scale);
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     emit_world_model(&this->transform, &pmo->scale);
 }
 
-void base_stage::vtable_0x5C(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x5C(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x5C_params *args = (vtable_0x5C_params *)data;
     ScePspFMatrix4 local_transform;
 
@@ -233,11 +233,11 @@ void base_stage::vtable_0x5C(pmo *pmo, void *data, u8 mesh_index) {
     }
 
     emit_world_model(&local_transform, &pmo->scale);
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     emit_world_model(&this->transform, &pmo->scale);
 }
 
-void base_stage::vtable_0x60(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x60(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x60_params *args = (vtable_0x60_params *)data;
     ScePspFMatrix4 local_transform;
 
@@ -255,11 +255,11 @@ void base_stage::vtable_0x60(pmo *pmo, void *data, u8 mesh_index) {
     }
 
     emit_world_model(&local_transform, &pmo->scale);
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     emit_world_model(&this->transform, &pmo->scale);
 }
 
-void base_stage::vtable_0x64(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x64(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x64_params *args = (vtable_0x64_params *)data;
     u16 u_period = args->u_period;
     if (u_period != 0) {
@@ -279,11 +279,11 @@ void base_stage::vtable_0x64(pmo *pmo, void *data, u8 mesh_index) {
         }
         ge::texoffsetv(v_offset);
     }
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     ge::texoffset();
 }
 
-void base_stage::vtable_0x68(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x68(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x68_params *args = (vtable_0x68_params *)data;
     u16 u_period = args->u_period;
     if (u_period != 0) {
@@ -299,11 +299,11 @@ void base_stage::vtable_0x68(pmo *pmo, void *data, u8 mesh_index) {
         v_offset.f = args->v_phase + args->v_amplitude * t;
         ge::texoffsetv(v_offset);
     }
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     ge::texoffset();
 }
 
-void base_stage::vtable_0x6C(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x6C(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x6C_params *args = (vtable_0x6C_params *)data;
     ScePspFMatrix4 local_transform;
 
@@ -347,12 +347,12 @@ void base_stage::vtable_0x6C(pmo *pmo, void *data, u8 mesh_index) {
     }
 
     emit_world_model(&local_transform, &pmo->scale);
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     ge::texoffset();
     emit_world_model(&this->transform, &pmo->scale);
 }
 
-void base_stage::vtable_0x70(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x70(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x70_params *args = (vtable_0x70_params *)data;
     ScePspFMatrix4 local_transform;
 
@@ -379,12 +379,12 @@ void base_stage::vtable_0x70(pmo *pmo, void *data, u8 mesh_index) {
     positionMatrix(&local_transform, pos->x, pos->y, pos->z);
 
     emit_world_model(&local_transform, &pmo->scale);
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     emit_world_model(&this->transform, &pmo->scale);
     ge::texoffset();
 }
 
-void base_stage::vtable_0x74(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x74(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x74_params *args = (vtable_0x74_params *)data;
     ScePspFMatrix4 local_transform;
 
@@ -419,12 +419,12 @@ void base_stage::vtable_0x74(pmo *pmo, void *data, u8 mesh_index) {
     }
 
     emit_world_model(&local_transform, &pmo->scale);
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     emit_world_model(&this->transform, &pmo->scale);
     ge::texoffset();
 }
 
-void base_stage::vtable_0x78(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x78(pmo *pmo, void *data, u8 mesh_index) {
     u16 flags = *(u16 *)data;
     if ((flags & 0x100) != 0) {
         ScePspUnion32 u_offset; u_offset.f = ext(unknown_0x1C0, 0, 2) * 0.25f;
@@ -440,7 +440,7 @@ void base_stage::vtable_0x78(pmo *pmo, void *data, u8 mesh_index) {
         ge::texoffset(u_offset, v_offset);
     }
 
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     ge::texoffset();
 }
 
@@ -449,7 +449,7 @@ extern "C" {
     player *func_eboot_088DF804(void *, int);
 }
 
-void base_stage::vtable_0x7C(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x7C(pmo *pmo, void *data, u8 mesh_index) {
     u8 player_id = D_eboot_089C7508->player_id;
     player *p = func_eboot_088DF804(D_eboot_09A4AE04, player_id);
     vtable_0x7C_params *args = (vtable_0x7C_params *)data;
@@ -469,11 +469,11 @@ void base_stage::vtable_0x7C(pmo *pmo, void *data, u8 mesh_index) {
     positionMatrix(&local_transform, pos->x, pos->y, pos->z);
 
     emit_world_model(&local_transform, &pmo->scale);
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     emit_world_model(&this->transform, &pmo->scale);
 }
 
-void base_stage::vtable_0x80(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x80(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x80_params *args = (vtable_0x80_params *)data;
 
     float t = 6.2830896f * ((unknown_0x1C0 % args->period) / (float)args->period);
@@ -486,11 +486,11 @@ void base_stage::vtable_0x80(pmo *pmo, void *data, u8 mesh_index) {
     positionMatrix(&local_transform, position.x, position.y, position.z);
 
     emit_world_model(&local_transform, &pmo->scale);
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     emit_world_model(&this->transform, &pmo->scale);
 }
 
-void base_stage::vtable_0x84(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x84(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x84_params *args = (vtable_0x84_params *)data;
 
     float t = 6.2830896f * ((unknown_0x1C0 % args->period) / (float)args->period);
@@ -505,7 +505,7 @@ void base_stage::vtable_0x84(pmo *pmo, void *data, u8 mesh_index) {
     setPosition(&local_transform, pos->x, pos->y, pos->z);
 
     emit_world_model(&local_transform, &pmo->scale);
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     emit_world_model(&this->transform, &pmo->scale);
 }
 
@@ -514,7 +514,7 @@ extern "C" {
     void func_eboot_08814E84(global_089C6CB4 *, ScePspFVector4 *);
 }
 
-void base_stage::vtable_0x88(pmo *pmo, void *data) {
+void StageBase::vtable_0x88(pmo *pmo, void *data) {
     vtable_0x88_params *args = (vtable_0x88_params *)data;
     ScePspFVector4 *position = &args->positions[0];
 
@@ -532,9 +532,9 @@ void base_stage::vtable_0x88(pmo *pmo, void *data) {
 
             float d2 = distanceSquared(position, &camera_position);
             if (d2 <= 2250000.0f + args->cutoff * args->cutoff) {
-                pmo->draw_mesh(NULL, &model_tmh, args->near_mesh_index);
+                pmo->drawMesh(NULL, &model_tmh, args->near_mesh_index);
             } else {
-                pmo->draw_mesh(NULL, &model_tmh, args->far_mesh_index);
+                pmo->drawMesh(NULL, &model_tmh, args->far_mesh_index);
             }
         }
     }
@@ -546,7 +546,7 @@ extern "C" {
     float func_eboot_08899DF8(float x);
 }
 
-void base_stage::vtable_0x8C(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x8C(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x8C_params *args = (vtable_0x8C_params *)data;
 
     ScePspUnion32 u_offset;
@@ -566,7 +566,7 @@ void base_stage::vtable_0x8C(pmo *pmo, void *data, u8 mesh_index) {
     rotateY(&local_transform, 6.2831855f * (((360.0f * unknown_0x1C2) / 65536.0f) / 360.0f));
 
     emit_world_model(&local_transform, &pmo->scale);
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     ge::texoffset();
     emit_world_model(&this->transform, &pmo->scale);
 }
@@ -589,7 +589,7 @@ inline void rotate_y(ScePspFMatrix4 *transform, float angle) {
     rotateY(transform, angle);
 }
 
-void base_stage::vtable_0x90(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x90(pmo *pmo, void *data, u8 mesh_index) {
     ScePspFMatrix4 local_transform;
     vtable_0x90_params *args = (vtable_0x90_params *)data;
 
@@ -609,7 +609,7 @@ void base_stage::vtable_0x90(pmo *pmo, void *data, u8 mesh_index) {
     rotate_y(&local_transform, args->angle);
 
     emit_world_model(&local_transform, &pmo->scale);
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
     emit_world_model(&this->transform, &pmo->scale);
 }
 
@@ -617,26 +617,26 @@ extern "C" {
     int func_eboot_088566DC(global_089C7508 *);
 }
 
-void base_stage::vtable_0x94(pmo *pmo, void *data, u8 mesh_index) {
+void StageBase::vtable_0x94(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x94_params *state = (vtable_0x94_params *)data;
 
     if ((u8)func_eboot_088566DC(D_eboot_089C7508) == 0) {
         switch (state->c) {
         case 0:
             if (--state->e < 0) {
-                state->e = (game::instance->next_index(1) % 60) + 30;
+                state->e = (System::get()->next_index(1) % 60) + 30;
                 ++state->c;
             }
             break;
         case 1:
-            state->d = state->a + (game::instance->next_index(1) % (state->b - state->a));
+            state->d = state->a + (System::get()->next_index(1) % (state->b - state->a));
             if (--state->e < 0) {
                 ++state->c;
             }
             break;
         case 2:
             if (state->d > 0xFF - 4) {
-                state->e = (game::instance->next_index(1) % 180) + 180;
+                state->e = (System::get()->next_index(1) % 180) + 180;
                 state->d = 0xFF;
                 state->c = 0;
             } else {
@@ -650,14 +650,14 @@ void base_stage::vtable_0x94(pmo *pmo, void *data, u8 mesh_index) {
     pmo->set_mesh_color(mesh_index, 0xFF, 0xFF, 0xFF);
     pmo->set_mesh_shadow_color(mesh_index, 0xFF, 0xFF, 0xFF);
     pmo->set_mesh_alpha(mesh_index, state->d);
-    pmo->draw_mesh(NULL, &model_tmh, mesh_index);
+    pmo->drawMesh(NULL, &model_tmh, mesh_index);
 }
 
-void base_stage::vtable_0x98(pmo *, void *) {
+void StageBase::vtable_0x98(pmo *, void *) {
     // empty
 }
 
-void base_stage::clear() {
+void StageBase::clear() {
     memset(&prop_pmo, 0, sizeof(prop_pmo));
     memset(&prop_skeleton, 0, sizeof(prop_skeleton));
     reset_transform();
@@ -667,7 +667,7 @@ void base_stage::clear() {
     unknown_0x1C0 = 0; // animation timer?
     unknown_0x1C2 = 0;
     method_088CDCAC();
-    set_ptmf_0x3D8(&base_stage::vtable_0x4C);
+    set_ptmf_0x3D8(&StageBase::vtable_0x4C);
 }
 
 extern "C" {
@@ -683,7 +683,7 @@ extern "C" {
     bool func_eboot_088D0824(void *, u32, u8);
 }
 
-void base_stage::vtable_0x1C() {
+void StageBase::vtable_0x1C() {
     int i;
     stage_sound *sound = vtable_0xB0();
     for (i = 0; i < vtable_0xAC(); ++i, ++sound) {
@@ -694,7 +694,7 @@ void base_stage::vtable_0x1C() {
                 continue;
             }
             if (sound->unknown_0x0 == 0) {
-                stage_manager::get()->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC);
+                StageManager::get()->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC);
             } else {
                 func_eboot_08883858(D_eboot_08A5DE5C, sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC, 0, 0, false);
             }
@@ -702,19 +702,19 @@ void base_stage::vtable_0x1C() {
     }
 }
 
-int base_stage::vtable_0xAC() {
+int StageBase::vtable_0xAC() {
     return definitions()->sound_count;
 }
 
-stage_sound *base_stage::vtable_0xB0() {
+stage_sound *StageBase::vtable_0xB0() {
     return definitions()->sounds;
 }
 
-void base_stage::vtable_0x20() {
+void StageBase::vtable_0x20() {
     if ((bool)(D_eboot_089C7508->flags_0x6AF14 & 1) != true) {
         int i;
-        u16 *shorts = stage_manager::get()->stage->definitions()->unknown_0x10;
-        for (i = 0; i < (int)stage_manager::get()->stage->definitions()->unknown_0x3E; ++i, shorts += 12) {
+        u16 *shorts = StageManager::get()->stage->definitions()->unknown_0x10;
+        for (i = 0; i < (int)StageManager::get()->stage->definitions()->unknown_0x3E; ++i, shorts += 12) {
             int global_sound = 0;
             if (shorts[1] == 0x17 && shorts[11] == 0) {
                 ScePspFVector4 *position = vtable_0x44();
@@ -736,7 +736,7 @@ void base_stage::vtable_0x20() {
                         }
                     }
                     if (global_sound == 0) {
-                        stage_manager::get()->register_sound(6, 0x11, 0, 0xC0, 0, position, 9);
+                        StageManager::get()->register_sound(6, 0x11, 0, 0xC0, 0, position, 9);
                     }
                 }
                 break;
@@ -752,7 +752,7 @@ void base_stage::vtable_0x20() {
             }
         } else if (func_eboot_088D0824(D_eboot_09A4ADAC, sound->unknown_0x8, 1) == 0) {
             if (sound->unknown_0x0 == 0) {
-                stage_manager::get()->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC);
+                StageManager::get()->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC);
             } else {
                 if (D_eboot_089C7508->short_0x1C % sound->unknown_0x0 == 0) {
                     func_eboot_08883858(D_eboot_08A5DE5C, sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC, 0, 0, false);
@@ -765,13 +765,13 @@ void base_stage::vtable_0x20() {
     }
 }
 
-void base_stage::call_ptmf_0x3D8() {
+void StageBase::call_ptmf_0x3D8() {
     if (ptmf_0x3D8 != 0) {
         (this->*ptmf_0x3D8)();
     }
 }
 
-void base_stage::destroy() {
+void StageBase::destroy() {
     func_eboot_08885198(D_eboot_08A5DE5C, 6, 0xC0, 0, 0);
     int i;
     stage_sound *sound = vtable_0xB0();
@@ -780,31 +780,31 @@ void base_stage::destroy() {
     }
 }
 
-void base_stage::draw() {
+void StageBase::draw() {
     if (D_eboot_089C7508->stage_id != 0) {
         if (vtable_0x48() != 0) {
             vmidt_q(&transform);
             if (vtable_0x48()->model_commands != 0) {
-                execute_model_draw_commands();
+                drawStg();
             }
             if (vtable_0x48()->prop_commands != 0) {
-                execute_prop_draw_commands();
+                drawSet();
             }
         }
 
         ge::texoffsetu();
         ge::texoffsetv();
         ge::atest(0xFF, 0, GE_OP_GREATER_THAN);
-        lighting_manager::get()->method_08860C4C();
-        lighting_manager::get()->method_0886117C(1);
+        LightManager::get()->method_08860C4C();
+        LightManager::get()->method_0886117C(1);
     }
 }
 
-stage_definitions *base_stage::definitions() {
+stage_definitions *StageBase::definitions() {
     return 0;
 }
 
-stage_exit *base_stage::exits(u32 ignored_map_id) {
+stage_exit *StageBase::exits(u32 ignored_map_id) {
     stage_definitions *d = definitions();
     if (d != 0) {
         return d->exits;
@@ -812,7 +812,7 @@ stage_exit *base_stage::exits(u32 ignored_map_id) {
     return 0;
 }
 
-s8 base_stage::exit_count(u32 ignored_map_id) {
+s8 StageBase::exit_count(u32 ignored_map_id) {
     stage_definitions *d = definitions();
     u8 count;
     if (d != 0) {
@@ -825,30 +825,30 @@ s8 base_stage::exit_count(u32 ignored_map_id) {
 
 #ifdef BUILD_NONMATCHING
 // score 45: 9 regswaps on the args passed to ge::fog; when is ft0 used??
-void base_stage::emit_fog() {
+void StageBase::emit_fog() {
     stage_fog *fog = &this->fog;
-    if (drawable_manager::get()->start_fragment(render_group::RESET)) {
+    if (DrawManager::get()->start_fragment(render_group::RESET)) {
         float begin = fog->begin;
         float end = fog->end;
-        float norm = ge_manager::get()->norm;
+        float norm = Ge::get()->norm;
         begin *= norm;
         end *= norm;
         ge::fog(fog->color, begin, end);
-        drawable_manager::get()->end_fragment();
+        DrawManager::get()->end_fragment();
     }
 }
 #else
-INCLUDE_ASM("asm/eboot/nonmatchings/base_stage", emit_fog__10base_stageFv);
+INCLUDE_ASM("asm/eboot/nonmatchings/stage_base", emit_fog__9StageBaseFv);
 #endif
 
-void base_stage::vtable_0x24() {
+void StageBase::vtable_0x24() {
     method_088CEA2C();
 }
 
-void base_stage::method_088CD61C() {
+void StageBase::method_088CD61C() {
     if (flag_0x3D4 != 0) {
         ge::ditherenable(true);
-        drawable_manager::get()->dither_matrix(0);
+        DrawManager::get()->dither_matrix(0);
 
         ge::alphatestenable(false);
         ge::lightingenable(false);
@@ -877,7 +877,7 @@ void base_stage::method_088CD61C() {
     }
 }
 
-void base_stage::compile_environment_params(stage_environment_params *environment) {
+void StageBase::compile_environment_params(stage_environment_params *environment) {
     unknown_0x330 = environment->type;
 
     float *in;
@@ -899,11 +899,11 @@ void base_stage::compile_environment_params(stage_environment_params *environmen
     }
 }
 
-void base_stage::operator delete(void *) {
+void StageBase::operator delete(void *) {
     // empty
 }
 
-void base_stage::vtable_0x4C() {
+void StageBase::vtable_0x4C() {
     sky_gradient_vdata[2].x = 0;
     sky_gradient_vdata[0].x = 0;
     sky_gradient_vdata[3].x = 480;
@@ -915,7 +915,7 @@ void base_stage::vtable_0x4C() {
     flags |= drawable::VISIBLE;
     vtable_0x1C();
     method_088CDCAC();
-    set_ptmf_0x3D8(&base_stage::vtable_0x50);
+    set_ptmf_0x3D8(&StageBase::vtable_0x50);
 }
 
 extern "C" {
@@ -950,7 +950,7 @@ extern "C" {
 }
 
 
-void base_stage::vtable_0x50() {
+void StageBase::vtable_0x50() {
     if (flash_state != 0) {
         if (flash_state == 1) {
             if (--flash_frames <= 0) {
@@ -976,7 +976,7 @@ void base_stage::vtable_0x50() {
     if (node) {
         while (node->position.x != -1.0f) {
             if (node->remaining > 0 && node->type == resource_type::BUG_NET) {
-                stage_definitions *assets = stage_manager::get()->stage->definitions();
+                stage_definitions *assets = StageManager::get()->stage->definitions();
                 if (assets->bug_mesh_index != -1 && (unknown_0x1C0 & 0x7F) == 0) {
                     ScePspFVector4 spawn_center, spawn_box;
                     sv_q(&spawn_center, node->position.x, node->position.y + 65.0f, node->position.z, 0.0f);
@@ -984,15 +984,15 @@ void base_stage::vtable_0x50() {
                     switch (D_eboot_089C7508->stage_id) {
                         case stages::TOWER_3:
                         case stages::GREAT_FOREST_N_2: {
-                            stage_definitions *assets = stage_manager::get()->stage->definitions();
+                            stage_definitions *assets = StageManager::get()->stage->definitions();
                             u32 flags = bug_flag::RANDOM_SPAWN_POSITION;
-                            stage_manager::get()->push_prop_089B969C(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
+                            StageManager::get()->push_prop_089B969C(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
                             break;
                         }
                         default: {
-                            stage_definitions *assets = stage_manager::get()->stage->definitions();
+                            stage_definitions *assets = StageManager::get()->stage->definitions();
                             u32 flags = bug_flag::RANDOM_SPAWN_POSITION | bug_flag::SCALE_WITH_ALPHA;
-                            stage_manager::get()->push_prop_089B969C(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
+                            StageManager::get()->push_prop_089B969C(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
                             break;
                         }
                     }
@@ -1013,7 +1013,7 @@ extern "C" {
 }
 
 
-bool base_stage::method_088CDC74() {
+bool StageBase::method_088CDC74() {
     return func_game_task_09AAEE58(D_game_task_09C0D430, 54, false, false) == true;
 }
 
@@ -1022,7 +1022,7 @@ extern "C" {
     int func_eboot_0886A354(void *, bool);
 }
 
-void base_stage::method_088CDCAC() {
+void StageBase::method_088CDCAC() {
     if (vtable_0xA4() == false) {
         unknown_0x444 = 0;
         return;
@@ -1050,7 +1050,7 @@ void base_stage::method_088CDCAC() {
     unknown_0x444 = 1;
 }
 
-bool base_stage::vtable_0xA4() {
+bool StageBase::vtable_0xA4() {
     return false;
 }
 
@@ -1058,7 +1058,7 @@ inline u16 atan2s16(float y, float x) {
     return (int)((65536.0f * atan2f_s(y, x)) / 6.2831855f + 0.5f);
 }
 
-void base_stage::draw_sky_gradient() {
+void StageBase::draw_sky_gradient() {
     u16 camera_angle = atan2s16(-D_eboot_089C6CB4->position.x, -D_eboot_089C6CB4->position.z);
     u16 sun_angle = atan2s16(sky_gradient_origin.x, sky_gradient_origin.z);
     u16 dtheta = sun_angle - camera_angle;
@@ -1113,7 +1113,7 @@ inline T lerp(T a, T b, U t) {
     return a + (T) (t * (b - a));
 }
 
-ScePspUnion32 base_stage::lerp_bgra8888(u8 *a, u8 *b, float t) {
+ScePspUnion32 StageBase::lerp_bgra8888(u8 *a, u8 *b, float t) {
     ScePspUnion32 result;
     result.uc[0] = lerp(a[2], b[2], t);
     result.uc[1] = lerp(a[1], b[1], t);
@@ -1122,7 +1122,7 @@ ScePspUnion32 base_stage::lerp_bgra8888(u8 *a, u8 *b, float t) {
     return result;
 }
 
-void base_stage::draw_flash() {
+void StageBase::draw_flash() {
     if (flash_state != 0) {
         ge::vertextype(
             GE_VTYPE_TC_NONE,
@@ -1169,7 +1169,7 @@ void base_stage::draw_flash() {
     }
 }
 
-void base_stage::method_088CEA2C() {
+void StageBase::method_088CEA2C() {
     flash_state = 0;
     flash_frames = 0;
 
@@ -1194,14 +1194,14 @@ extern "C" {
 }
 
 
-float *base_stage::compile_fog_params(float *in) {
+float *StageBase::compile_fog_params(float *in) {
     memcpy(&fog.color, in++, sizeof(fog.color));
     memcpy(&fog.begin, in++, sizeof(fog.begin));
     memcpy(&fog.end, in++, sizeof(fog.end));
     return in;
 }
 
-float *base_stage::compile_lights(float *in) {
+float *StageBase::compile_lights(float *in) {
     u32 size = sizeof(lights[0].position);
     u32 stride = size / sizeof(*in);
     memcpy(&lights[0].position, in + 0 * stride, size);
@@ -1220,7 +1220,7 @@ inline u32 from_bgra8888(ScePspUnion32 &x) {
     return (x.uc[3] << 24) | (x.uc[0] << 16) |  (x.uc[1] << 8) | x.uc[2];
 }
 
-float *base_stage::compile_sky_gradient(float *in) {
+float *StageBase::compile_sky_gradient(float *in) {
     memcpy(&sky_gradient_origin, in, 0xC);
     memcpy(&sky_gradient_top, in + 3, 4);
     ScePspUnion32 x;
@@ -1235,7 +1235,7 @@ float *base_stage::compile_sky_gradient(float *in) {
     return in + 12;
 }
 
-stage_definitions_0x28_t *base_stage::method_088CEDC0() {
+stage_definitions_0x28_t *StageBase::method_088CEDC0() {
     stage_definitions *d = definitions();
     stage_definitions_0x28_t *result;
     if (d != 0) {
@@ -1246,7 +1246,7 @@ stage_definitions_0x28_t *base_stage::method_088CEDC0() {
     return result;
 }
 
-stage_definitions_0x2C_t *base_stage::method_088CEDF0() {
+stage_definitions_0x2C_t *StageBase::method_088CEDF0() {
     stage_definitions *d = definitions();
     stage_definitions_0x2C_t *result;
     if (d != 0) {
@@ -1257,34 +1257,34 @@ stage_definitions_0x2C_t *base_stage::method_088CEDF0() {
     return result;
 }
 
-stage_definitions_0x28_t *base_stage::vtable_0x34() {
+stage_definitions_0x28_t *StageBase::vtable_0x34() {
     return NULL;
 }
 
-void *base_stage::vtable_0x38() {
+void *StageBase::vtable_0x38() {
     return NULL;
 }
 
-stage_draw_commands *base_stage::vtable_0x48() {
+stage_draw_commands *StageBase::vtable_0x48() {
     return NULL;
 }
 
-void *base_stage::vtable_0x3C() {
+void *StageBase::vtable_0x3C() {
     return NULL;
 }
 
-void *base_stage::vtable_0x40() {
+void *StageBase::vtable_0x40() {
     return NULL;
 }
 
-ScePspFVector4 *base_stage::vtable_0x44() {
+ScePspFVector4 *StageBase::vtable_0x44() {
     return NULL;
 }
 
-u8 base_stage::vtable_0xB4() {
+u8 StageBase::vtable_0xB4() {
     return definitions()->unknown_0x40;
 }
 
-stage_definitions_0x38_t *base_stage::vtable_0xB8() {
+stage_definitions_0x38_t *StageBase::vtable_0xB8() {
     return definitions()->unknown_0x38;
 }

@@ -1,21 +1,21 @@
 #include "common.h"
 
-#include "data_loader.hpp"
-#include "game.hpp"
+#include "file_sys.hpp"
+#include "system.hpp"
 #include "singleton.hpp"
-#include "ge_manager.hpp"
-#include "lighting_manager.hpp"
+#include "ge.hpp"
+#include "light_manager.hpp"
 #include "cache.hpp"
-#include "tagged_cache.hpp"
+#include "resource_manager.hpp"
 
-data_loader *singleton<data_loader>::INSTANCE;
+FileSys *Singleton<FileSys>::objectPtr;
 
 void *D_eboot_089C7508; // singleton
 u8 D_eboot_089C7510[0x90000] __attribute__((aligned(16)));
 u8 D_eboot_08A57510[0x24];
 u8 D_eboot_08A57534[0x67DC];
 
-ge_manager *singleton<ge_manager>::INSTANCE;
+Ge *Singleton<Ge>::objectPtr;
 u8 D_eboot_08A5DD14;
 volatile bool GE_END_REACHED;
 u32 D_eboot_08A5DD18;
@@ -25,7 +25,7 @@ void *D_eboot_08A5DD20; // singleton
 
 void *D_eboot_08A5DD24; // singleton
 
-lighting_manager *singleton<lighting_manager>::INSTANCE;
+LightManager *Singleton<LightManager>::objectPtr;
 
 void *D_eboot_08A5DD2C; // singleton
 
@@ -61,7 +61,7 @@ void *D_eboot_08A5DE60;
 void *D_eboot_08A5DE64;
 ScePspFMatrix4 D_eboot_08A5DE70[0x10];
 
-game *game::instance;
+System *Singleton<System>::objectPtr;
 SceUID D_eboot_08A5E274;
 
 void *D_eboot_08A5E278; // singleton
@@ -92,7 +92,7 @@ u8 D_eboot_08A883E0[0xC];
 u8 D_eboot_08A883EC[0x14];
 u8 D_eboot_08A88400[0xF7EE80];
 
-tagged_cache *singleton<tagged_cache>::INSTANCE;
+ResourceManager *Singleton<ResourceManager>::objectPtr;
 
 u8 D_eboot_09A07284[0x4];
 u8 D_eboot_09A07288[0x4];
@@ -104,7 +104,7 @@ u8 D_eboot_09A0729C[0x4];
 
 INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889ACA0);
 
-data_loader::~data_loader() {
+FileSys::~FileSys() {
     // empty
 }
 
@@ -136,7 +136,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889B290);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889B2A0);
 
-data_loader::data_loader() {
+FileSys::FileSys() {
     // empty
 }
 

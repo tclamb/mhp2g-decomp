@@ -1,10 +1,10 @@
 #include "common.h"
-#include "base_stage.hpp"
+#include "stage_base.hpp"
 #include "stage_manager.hpp"
 
-struct stage266 : base_stage {
-    stage266();
-    virtual ~stage266();
+struct Stage266 : StageBase {
+    Stage266();
+    virtual ~Stage266();
 
     virtual void vtable_0x24();
     virtual stage_definitions *definitions();
@@ -134,62 +134,62 @@ prop_089B975C_data D_stage266_09D5E520 = {
     {6300, 1000, 1000}
 };
 
-stage266 D_stage266_09D5E610;
+Stage266 D_stage266_09D5E610;
 
 ScePspFVector4 D_stage266_09D5EA70;
 
-stage266::stage266() {
+Stage266::Stage266() {
     // empty
 }
 
-stage266::~stage266() {
+Stage266::~Stage266() {
     // empty
 }
 
-void stage266::vtable_0x24() {
-    stage_manager::get()->push_prop_089B94DC(&D_stage266_09D5E4D0);
-    stage_manager::get()->push_prop_089B94FC(1, &D_stage266_09D5EA70, 0, 0x100, 0, 0, 1);
-    stage_manager::get()->push_prop_089B975C(&D_stage266_09D5E4F0);
-    stage_manager::get()->push_prop_089B975C(&D_stage266_09D5E520);
-    base_stage::vtable_0x24();
+void Stage266::vtable_0x24() {
+    StageManager::get()->push_prop_089B94DC(&D_stage266_09D5E4D0);
+    StageManager::get()->push_prop_089B94FC(1, &D_stage266_09D5EA70, 0, 0x100, 0, 0, 1);
+    StageManager::get()->push_prop_089B975C(&D_stage266_09D5E4F0);
+    StageManager::get()->push_prop_089B975C(&D_stage266_09D5E520);
+    StageBase::vtable_0x24();
 }
 
-stage_definitions *stage266::definitions() {
+stage_definitions *Stage266::definitions() {
     return &D_stage266_09D5E380;
 }
 
-void stage266::operator delete(void *) {
+void Stage266::operator delete(void *) {
     // empty
 }
 
-stage_draw_commands *stage266::vtable_0x48() {
+stage_draw_commands *Stage266::vtable_0x48() {
     return &D_stage266_09D5E4B8;
 }
 
-bool stage266::vtable_0xA0() {
+bool Stage266::vtable_0xA0() {
     return true;
 }
 
-bool stage266::vtable_0xA4() {
+bool Stage266::vtable_0xA4() {
     return false;
 }
 
-bool stage266::vtable_0xA8() {
+bool Stage266::vtable_0xA8() {
     return false;
 }
 
-int stage266::vtable_0xAC() {
+int Stage266::vtable_0xAC() {
     return definitions()->sound_count;
 }
 
-stage_sound *stage266::vtable_0xB0() {
+stage_sound *Stage266::vtable_0xB0() {
     return definitions()->sounds;
 }
 
-u8 stage266::vtable_0xB4() {
+u8 Stage266::vtable_0xB4() {
     return definitions()->unknown_0x40;
 }
 
-stage_definitions_0x38_t *stage266::vtable_0xB8() {
+stage_definitions_0x38_t *Stage266::vtable_0xB8() {
     return definitions()->unknown_0x38;
 }

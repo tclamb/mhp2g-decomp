@@ -9,7 +9,7 @@
 //#define BUILD_NONMATCHING
 
 #include "model.hpp"
-#include "drawable_manager.hpp"
+#include "draw_manager.hpp"
 #include "immediate_ge.hpp"
 
 using namespace immediate_ge;
@@ -33,11 +33,11 @@ void emit_world_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale);
 void pmo::draw(skeleton *skeleton, tmh *tmh, ScePspFMatrix4 *transform) {
     emit_world_model(transform, &scale);
     for (int i = 0; i < header->mesh_count; ++i) {
-        draw_mesh(skeleton, tmh,  i);
+        drawMesh(skeleton, tmh,  i);
     }
 }
 
-void pmo::draw_mesh(skeleton *skeleton, tmh *tmh, u8 mesh_index) {
+void pmo::drawMesh(skeleton *skeleton, tmh *tmh, u8 mesh_index) {
     pmo_header *header = this->header;
     pmo_mesh_header *mesh = header->mesh_header(mesh_index);
     pmo_mesh_lighting *lighting = mesh_lighting(mesh_index);
@@ -101,7 +101,7 @@ void pmo::draw_alpha(tmh *tmh, ScePspFMatrix4 *transform, u32 mesh_index, u32 bl
     emit_world_model(transform, &scale);
     set_mesh_alpha(mesh_index_16, alpha);
     set_mesh_shadow_color(mesh_index_16, 0xFF, 0xFF, 0xFF);
-    draw_mesh(0, tmh, mesh_index);
+    drawMesh(0, tmh, mesh_index);
     ge::atest(0xFF, 0x80, GE_OP_AT_LEAST);
 }
 
@@ -115,7 +115,7 @@ void pmo::draw_rgba8888(tmh *tmh, ScePspFMatrix4 *transform, u32 mesh_index, u32
     set_mesh_color(mesh_index_16, r, g, b);
     set_mesh_shadow_color(mesh_index_16, r, g, b);
     set_mesh_alpha(mesh_index_16, a);
-    draw_mesh(0, tmh, mesh_index);
+    drawMesh(0, tmh, mesh_index);
     ge::atest(0xFF, 0x80, GE_OP_AT_LEAST);
 }
 
@@ -172,7 +172,7 @@ void emit_world_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale) {
     ScePspFMatrix4 o;
     scaleMatrix(&n, scale->x, scale->y, scale->z);
     vmmulr_q(&o, transform, &n);
-    drawable_manager::get()->world_model(&o);
+    DrawManager::get()->world_model(&o);
 }
 
 #ifdef BUILD_NONMATCHING
@@ -229,8 +229,8 @@ extern "C" {
         u32 palette_height;
     };
 
-    int func_eboot_08859768(ge_manager *, tmh_header *, s32, u32, u32, texture *);
-    u32 func_eboot_0885973C(ge_manager *, u32);
+    int func_eboot_08859768(Ge *, tmh_header *, s32, u32, u32, texture *);
+    u32 func_eboot_0885973C(Ge *, u32);
 }
 
 int tmh::compile(void *buffer, tmh_header *header, u8 index) {
@@ -238,7 +238,7 @@ int tmh::compile(void *buffer, tmh_header *header, u8 index) {
     if (this != 0) {
         this->fragments = (tmh_fragment*)buffer;
         for (int i = 0; i < header->picture_count; ++i) {
-            if (func_eboot_08859768(ge_manager::get(), header, i, 0, 0, &t) == 0) {
+            if (func_eboot_08859768(Ge::get(), header, i, 0, 0, &t) == 0) {
                 return 0;
             }
 
@@ -248,9 +248,9 @@ int tmh::compile(void *buffer, tmh_header *header, u8 index) {
             out->commands[1] = (GE_CMD_TEXADDR0 << 24) |      ((u32)t.data & 0x00FFFFFF);
             out->commands[2] = (GE_CMD_TEXBUFWIDTH0 << 24) | (((u32)t.data & 0xFF000000) >> 8) | t.width;
 
-            u32 halign = func_eboot_0885973C(ge_manager::get(), t.height);
+            u32 halign = func_eboot_0885973C(Ge::get(), t.height);
             u32 texsize = (GE_CMD_TEXSIZE << 24) | halign << 8;
-            u32 walign = func_eboot_0885973C(ge_manager::get(), t.width);
+            u32 walign = func_eboot_0885973C(Ge::get(), t.width);
             texsize |= walign;
             out->commands[3] = texsize;
 
@@ -498,7 +498,12 @@ static int log2table[257] = {
 
 INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08863190);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088632D0);
+extern "C"
+void func_eboot_088632D0(ScePspFMatrix4 *, ScePspFMatrix4 *out, ScePspFMatrix3 *args) {
+    vmidt_q(out);
+    eulerRotation(out, out, args->y.x, args->y.y, args->y.z);
+    out->w.x = args->z.x; out->w.y = args->z.y; out->w.z = args->z.z;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088633C4);
 

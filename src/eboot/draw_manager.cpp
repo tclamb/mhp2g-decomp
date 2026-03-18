@@ -4,7 +4,7 @@
 
 #include "drawable.hpp"
 #include "model.hpp"
-#include "drawable_manager.hpp"
+#include "draw_manager.hpp"
 #include "stage_manager.hpp"
 #include "vfpu.h"
 
@@ -12,14 +12,14 @@
 
 using namespace immediate_ge;
 
-drawable_manager *singleton<drawable_manager>::INSTANCE;
+DrawManager *Singleton<DrawManager>::objectPtr;
 u32 *DRAWABLE_WRITE_HEAD;
 u16 D_eboot_089C70D4[2];
 ScePspFVector3 D_eboot_089C70D8;
 float D_eboot_089C70E4;
 float D_eboot_089C70E8;
 
-drawable_manager::drawable_manager() {
+DrawManager::DrawManager() {
     z_index_buckets[render_group::GROUP_0] = NULL;
     z_index_buckets[render_group::RESET] = NULL;
     z_index_buckets[render_group::GROUP_2] = &z_index[0];
@@ -46,11 +46,11 @@ drawable_manager::drawable_manager() {
     vram_transfer_queued = false;
 }
 
-drawable_manager::~drawable_manager() {
+DrawManager::~DrawManager() {
     // empty
 }
 
-void drawable_manager::reset() {
+void DrawManager::reset() {
     clear();
     if (start_fragment(render_group::RESET)) {
         global_089C6CB4 *global = D_eboot_089C6CB4;
@@ -117,7 +117,7 @@ void drawable_manager::reset() {
         ge::fogenable(false);
 
         ScePspUnion32 incolor; incolor.ui = 0;
-        float distance = 65000.0f * ge_manager::get()->norm;
+        float distance = 65000.0f * Ge::get()->norm;
         ge::fog(incolor.f, distance, distance);
 
         end_fragment();
@@ -137,7 +137,7 @@ s8 z_index_bucket_length[render_group::GROUP_COUNT] = {
     [render_group::GROUP_18] = 1,
 };
 
-void drawable_manager::clear() {
+void DrawManager::clear() {
     for (int i = 0; i < render_group::GROUP_COUNT; ++i) {
         for (int j = 0; j < z_index_bucket_length[i]; ++j) {
             z_index_buckets[i][j] = 0;
@@ -152,7 +152,7 @@ extern "C" {
     } *D_eboot_089C7508;
 }
 
-void drawable_manager::draw() {
+void DrawManager::draw() {
     for (int i = 0; i < render_group::GROUP_COUNT; ++i) {
         if (start_fragment(i)) {
             if (i == 1) {
@@ -171,7 +171,7 @@ void drawable_manager::draw() {
             }
 
             if (i == 8 && D_eboot_089C7508->stage_id != 0) {
-                base_stage *stage = stage_manager::get()->stage;
+                StageBase *stage = StageManager::get()->stage;
                 if (stage != 0 && stage->flag_0x3D4 == true) {
                     stage->method_088CD61C();
                 }
@@ -197,14 +197,14 @@ extern "C" {
     bool func_eboot_08813364(void *global_089C6CB0, u8 buffer_index, vram_transfer_request *out);
 
     // copies a display list fragment to the write head and calls that copy at the specified index
-    bool func_eboot_088593A0(ge_manager *, u32 *display_list, s32 length, s32 fragment_index);
+    bool func_eboot_088593A0(Ge *, u32 *display_list, s32 length, s32 fragment_index);
 }
 
-bool drawable_manager::vram_transfer() {
+bool DrawManager::vram_transfer() {
     vram_transfer_request req;
     u32 display_list[16];
 
-    func_eboot_08813364(D_eboot_089C6CB0, ge_manager::get()->active_buffer ^ 1, &req);
+    func_eboot_08813364(D_eboot_089C6CB0, Ge::get()->active_buffer ^ 1, &req);
 
     // TODO: immediate_ge with destination parameter
     u16 transfer_height = 272;
@@ -223,10 +223,10 @@ bool drawable_manager::vram_transfer() {
     *write_head++ = GE_CMD_BASE << 24;
     *write_head++ = GE_CMD_JUMP << 24;
 
-    return func_eboot_088593A0(ge_manager::get(), display_list, 12, vram_transfer_fragment_index);
+    return func_eboot_088593A0(Ge::get(), display_list, 12, vram_transfer_fragment_index);
 }
 
-void drawable_manager::initialize() {
+void DrawManager::initialize() {
     if (start_fragment(render_group::RESET)) {
         ge::ztestenable(true);
         ge::ztest(GE_OP_AT_MOST);
@@ -327,7 +327,7 @@ u32 dither_matrices[3*4] = {
                     0, -4,  1, -3,
                    -2,  2, -1,  3  ) };
 
-void drawable_manager::dither_matrix(u8 i) {
+void DrawManager::dither_matrix(u8 i) {
     ge::ditherenable(true);
     i *= 4;
     ge::impl::emit(dither_matrices[i]);
@@ -336,11 +336,11 @@ void drawable_manager::dither_matrix(u8 i) {
     ge::impl::emit(dither_matrices[i + 3]);
 }
 
-bool drawable_manager::start_fragment(u8 group) {
+bool DrawManager::start_fragment(u8 group) {
     if ((bool)writing != false) {
         end_fragment();
     }
-    DRAWABLE_WRITE_HEAD = ge_manager::get()->write_head();
+    DRAWABLE_WRITE_HEAD = Ge::get()->write_head();
     if (DRAWABLE_WRITE_HEAD != NULL) {
         writing = true;
         fragment_start = DRAWABLE_WRITE_HEAD;
@@ -350,15 +350,15 @@ bool drawable_manager::start_fragment(u8 group) {
 }
 
 extern "C"
-void func_eboot_088595E8(ge_manager *, ge_command *, int, u32);
+void func_eboot_088595E8(Ge *, ge_command *, int, u32);
 
-void drawable_manager::end_fragment() {
+void DrawManager::end_fragment() {
     if ((bool)writing != 0) {
         int length = DRAWABLE_WRITE_HEAD - fragment_start;
         if (length != 0) {
             DRAWABLE_WRITE_HEAD += 2;
-            func_eboot_088595E8(ge_manager::get(), fragment_start, length + 2, fragment_group);
-            ge_manager::get()->set_write_head(DRAWABLE_WRITE_HEAD);
+            func_eboot_088595E8(Ge::get(), fragment_start, length + 2, fragment_group);
+            Ge::get()->set_write_head(DRAWABLE_WRITE_HEAD);
         }
         DRAWABLE_WRITE_HEAD = NULL;
         fragment_start = NULL;
@@ -374,7 +374,7 @@ inline float max(float x, float y) {
     return result;
 }
 
-int drawable_manager::add(u8 group, character *character, bool no_culling) {
+int DrawManager::add(u8 group, character *character, bool no_culling) {
     int result;
     do {
         character->flags &= ~drawable::VISIBLE;
@@ -407,7 +407,7 @@ int drawable_manager::add(u8 group, character *character, bool no_culling) {
     return result;
 }
 
-int drawable_manager::add(u8 group, model *model, bool no_culling) {
+int DrawManager::add(u8 group, model *model, bool no_culling) {
     int result;
     model->flags &= ~drawable::VISIBLE;
     if (no_culling != false ||
@@ -420,11 +420,11 @@ int drawable_manager::add(u8 group, model *model, bool no_culling) {
     return result;
 }
 
-inline drawable **drawable_manager::head(u8 group, int index) {
+inline drawable **DrawManager::head(u8 group, int index) {
     return &z_index_buckets[group][(z_index_bucket_length[group] - 1) - index];
 }
 
-int drawable_manager::add(u8 group, drawable *object, ScePspFVector4 *position, bool no_culling) {
+int DrawManager::add(u8 group, drawable *object, ScePspFVector4 *position, bool no_culling) {
     if (0 > group || group >= render_group::GROUP_COUNT) {
         return false;
     }
@@ -487,7 +487,7 @@ int drawable_manager::add(u8 group, drawable *object, ScePspFVector4 *position, 
     return true;
 }
 
-bool drawable_manager::queue_vram_transfer(void *dst, u8 fragment_index) {
+bool DrawManager::queue_vram_transfer(void *dst, u8 fragment_index) {
     if (vram_transfer_queued == false) {
         vram_transfer_fragment_index = fragment_index;
         vram_transfer_dst = dst;
@@ -497,9 +497,9 @@ bool drawable_manager::queue_vram_transfer(void *dst, u8 fragment_index) {
     return false;
 }
 
-void drawable_manager::world_model(ScePspFMatrix4 *transform) {
+void DrawManager::world_model(ScePspFMatrix4 *transform) {
     ScePspFMatrix4 m;
-    float norm = ge_manager::get()->norm;
+    float norm = Ge::get()->norm;
     scaleMatrix(&m, norm, norm, norm);
     vmmul_q(&m, transform, &m);
     vmmul_q(&m, &m, &D_eboot_089C6CB4->world);
