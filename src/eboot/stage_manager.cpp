@@ -28,7 +28,7 @@ StageManager::~StageManager() {
 void StageManager::reset() {
     cache.reset(slab, sizeof(slab));
     unknown_0xA2B8 = 0;
-    func_eboot_08812F04(VramManager::objectPtr, 6, 0x4e200, -1);
+    VramManager::objectPtr->method_08812F04(6, 0x4e200, VramManager::INVALID_ADRS);
     vram_start = VramManager::objectPtr->method_088133D0(6);
     vram_transfer_size = 0;
     unknown_0x28A = -1;
@@ -41,7 +41,7 @@ void StageManager::reset() {
 void StageManager::unload() {
     ResourceManager::get()->free_all(1);
     unknown_0xA2B8 = 0;
-    func_eboot_08813024(VramManager::objectPtr, 6);
+    VramManager::objectPtr->method_08813024(6);
     vram_transfer_size = 0;
 }
 

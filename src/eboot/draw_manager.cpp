@@ -197,7 +197,7 @@ bool DrawManager::vram_transfer() {
     VramAllocation allocation;
     u32 display_list[16];
 
-    func_eboot_08813364(VramManager::objectPtr, Ge::get()->active_buffer ^ 1, &allocation);
+    VramManager::objectPtr->method_08813364(Ge::get()->active_buffer ^ 1, &allocation);
 
     // TODO: immediate_ge with destination parameter
     u16 transfer_height = 272;
