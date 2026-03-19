@@ -172,7 +172,7 @@ void emit_world_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale) {
     ScePspFMatrix4 o;
     scaleMatrix(&n, scale->x, scale->y, scale->z);
     vmmulr_q(&o, transform, &n);
-    DrawManager::get()->world_model(&o);
+    DrawManager::objectPtr->world_model(&o);
 }
 
 #ifdef BUILD_NONMATCHING
@@ -238,7 +238,7 @@ int tmh::compile(void *buffer, tmh_header *header, u8 index) {
     if (this != 0) {
         this->fragments = (tmh_fragment*)buffer;
         for (int i = 0; i < header->picture_count; ++i) {
-            if (func_eboot_08859768(Ge::get(), header, i, 0, 0, &t) == 0) {
+            if (func_eboot_08859768(Ge::objectPtr, header, i, 0, 0, &t) == 0) {
                 return 0;
             }
 
@@ -248,9 +248,9 @@ int tmh::compile(void *buffer, tmh_header *header, u8 index) {
             out->commands[1] = (GE_CMD_TEXADDR0 << 24) |      ((u32)t.data & 0x00FFFFFF);
             out->commands[2] = (GE_CMD_TEXBUFWIDTH0 << 24) | (((u32)t.data & 0xFF000000) >> 8) | t.width;
 
-            u32 halign = func_eboot_0885973C(Ge::get(), t.height);
+            u32 halign = func_eboot_0885973C(Ge::objectPtr, t.height);
             u32 texsize = (GE_CMD_TEXSIZE << 24) | halign << 8;
-            u32 walign = func_eboot_0885973C(Ge::get(), t.width);
+            u32 walign = func_eboot_0885973C(Ge::objectPtr, t.width);
             texsize |= walign;
             out->commands[3] = texsize;
 

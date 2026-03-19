@@ -21,12 +21,12 @@ void cont_state::load() {
     switch (status) {
     case 0:
         func_eboot_0884D658(D_eboot_089C70EC, 1, 0, 1);
-        func_eboot_0888FE4C(System::get(), 0x2D, 1);
+        func_eboot_0888FE4C(System::objectPtr, 0x2D, 1);
         status = (s32) (status + 1);
         return;
     case 1:
-        if (func_eboot_0888FEE8(System::get()) == 0) {
-            func_eboot_0888FF00(System::get(), 0x2D, 1);
+        if (func_eboot_0888FEE8(System::objectPtr) == 0) {
+            func_eboot_0888FF00(System::objectPtr, 0x2D, 1);
             status = 0;
             base_state::mem_fn next = (base_state::mem_fn)&cont_state::on_load;
             if (next != 0) {

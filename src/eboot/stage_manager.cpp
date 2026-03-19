@@ -39,7 +39,7 @@ void StageManager::reset() {
 }
 
 void StageManager::unload() {
-    ResourceManager::get()->free_all(1);
+    ResourceManager::objectPtr->free_all(1);
     unknown_0xA2B8 = 0;
     VramManager::objectPtr->method_08813024(6);
     vram_transfer_size = 0;
@@ -53,7 +53,7 @@ void StageManager::call_stage_ptmf_0x3D8() {
 
 void StageManager::register_drawable() {
     if (stage != 0 && stage->model_pmo.header != 0) {
-        DrawManager::get()->add(render_group::STAGE, stage, true);
+        DrawManager::objectPtr->add(render_group::STAGE, stage, true);
     }
 }
 
@@ -740,7 +740,7 @@ void StageManager::register_lobby_sounds() {
     if (sound != 0) {
         for (index = 0; index < stage->definitions()->sound_count; ++index, ++sound) {
             if (sound->unknown_0x0 == 0) {
-                get()->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, index + 1, &sound->position, sound->unknown_0xC);
+                StageManager::objectPtr->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, index + 1, &sound->position, sound->unknown_0xC);
             }
         }
     }

@@ -12,8 +12,4 @@ struct Singleton
     inline ~Singleton() {
         objectPtr = 0;
     }
-
-    inline static T *get() {
-        return objectPtr;
-    }
 };

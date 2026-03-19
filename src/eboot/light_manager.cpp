@@ -45,7 +45,7 @@ ScePspFVector4Unaligned D_eboot_089A2C84[3] = {
 
 void LightManager::method_08860840(light_data *light, s16 index, u16 operation) {
     if (unknown_0x15C != 0) {
-        StageBase *stage = StageManager::get()->stage;
+        StageBase *stage = StageManager::objectPtr->stage;
         switch (operation) {
         case 0:
             light->position.x = -1.0f * stage->lights[index].position.x;

@@ -96,7 +96,7 @@ loop_18:
     sha1_thread_id = sceKernelCreateThread("sha1Thread", sha1_thread, 0x31, 0x1000, 0, 0);
     sp.local_4 = this;
     sceKernelStartThread(sha1_thread_id, 4, &sp.local_4);
-    puVar1 = System::get();
+    puVar1 = System::objectPtr;
     puVar1->sha1_thread_id = sha1_thread_id;
     puVar1->unknown_flag = 1;
     transfer_event_flag_id = sceKernelCreateEventFlag("transferEventFlag", 0x200, 0, 0);
@@ -411,7 +411,7 @@ int FileSysImpl::load_file_async(s32 file_id, u8* buf, SceSize len, u8 unknown_f
     var_s2 = 0;
     var_s1 = 1;
     var_s0 = 0;
-    if ((is_data_file_encrypted != 0) && (((s32) (System::get()->next_index(1) & 0xFFFF) % 100) < 5)) {
+    if ((is_data_file_encrypted != 0) && (((s32) (System::objectPtr->next_index(1) & 0xFFFF) % 100) < 5)) {
         var_s0 = 1;
     }
 loop_1:

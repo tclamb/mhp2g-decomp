@@ -171,7 +171,7 @@ void DrawManager::draw() {
             }
 
             if (i == 8 && D_eboot_089C7508->stage_id != 0) {
-                StageBase *stage = StageManager::get()->stage;
+                StageBase *stage = StageManager::objectPtr->stage;
                 if (stage != 0 && stage->flag_0x3D4 == true) {
                     stage->method_088CD61C();
                 }
@@ -196,7 +196,7 @@ bool DrawManager::vram_transfer() {
     VramAllocation allocation;
     u32 display_list[16];
 
-    VramManager::objectPtr->method_08813364(Ge::get()->active_buffer ^ 1, &allocation);
+    VramManager::objectPtr->method_08813364(Ge::objectPtr->active_buffer ^ 1, &allocation);
 
     // TODO: immediate_ge with destination parameter
     u16 transfer_height = 272;
@@ -215,7 +215,7 @@ bool DrawManager::vram_transfer() {
     *write_head++ = GE_CMD_BASE << 24;
     *write_head++ = GE_CMD_JUMP << 24;
 
-    return func_eboot_088593A0(Ge::get(), display_list, 12, vram_transfer_fragment_index);
+    return func_eboot_088593A0(Ge::objectPtr, display_list, 12, vram_transfer_fragment_index);
 }
 
 void DrawManager::initialize() {
@@ -332,7 +332,7 @@ bool DrawManager::start_fragment(u8 group) {
     if ((bool)writing != false) {
         end_fragment();
     }
-    DRAWABLE_WRITE_HEAD = Ge::get()->write_head();
+    DRAWABLE_WRITE_HEAD = Ge::objectPtr->write_head();
     if (DRAWABLE_WRITE_HEAD != NULL) {
         writing = true;
         fragment_start = DRAWABLE_WRITE_HEAD;
@@ -349,8 +349,8 @@ void DrawManager::end_fragment() {
         int length = DRAWABLE_WRITE_HEAD - fragment_start;
         if (length != 0) {
             DRAWABLE_WRITE_HEAD += 2;
-            func_eboot_088595E8(Ge::get(), fragment_start, length + 2, fragment_group);
-            Ge::get()->set_write_head(DRAWABLE_WRITE_HEAD);
+            func_eboot_088595E8(Ge::objectPtr, fragment_start, length + 2, fragment_group);
+            Ge::objectPtr->set_write_head(DRAWABLE_WRITE_HEAD);
         }
         DRAWABLE_WRITE_HEAD = NULL;
         fragment_start = NULL;
@@ -491,7 +491,7 @@ bool DrawManager::queue_vram_transfer(void *dst, u8 fragment_index) {
 
 void DrawManager::world_model(ScePspFMatrix4 *transform) {
     ScePspFMatrix4 m;
-    float norm = Ge::get()->norm;
+    float norm = Ge::objectPtr->norm;
     scaleMatrix(&m, norm, norm, norm);
     vmmul_q(&m, transform, &m);
     vmmul_q(&m, &m, &D_eboot_089C6CB4->world);

@@ -147,10 +147,10 @@ Stage266::~Stage266() {
 }
 
 void Stage266::vtable_0x24() {
-    StageManager::get()->push_prop_089B94DC(&D_stage266_09D5E4D0);
-    StageManager::get()->push_prop_089B94FC(1, &D_stage266_09D5EA70, 0, 0x100, 0, 0, 1);
-    StageManager::get()->push_prop_089B975C(&D_stage266_09D5E4F0);
-    StageManager::get()->push_prop_089B975C(&D_stage266_09D5E520);
+    StageManager::objectPtr->push_prop_089B94DC(&D_stage266_09D5E4D0);
+    StageManager::objectPtr->push_prop_089B94FC(1, &D_stage266_09D5EA70, 0, 0x100, 0, 0, 1);
+    StageManager::objectPtr->push_prop_089B975C(&D_stage266_09D5E4F0);
+    StageManager::objectPtr->push_prop_089B975C(&D_stage266_09D5E520);
     StageBase::vtable_0x24();
 }
 

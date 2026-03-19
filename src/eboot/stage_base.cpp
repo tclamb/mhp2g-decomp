@@ -624,19 +624,19 @@ void StageBase::vtable_0x94(pmo *pmo, void *data, u8 mesh_index) {
         switch (state->c) {
         case 0:
             if (--state->e < 0) {
-                state->e = (System::get()->next_index(1) % 60) + 30;
+                state->e = (System::objectPtr->next_index(1) % 60) + 30;
                 ++state->c;
             }
             break;
         case 1:
-            state->d = state->a + (System::get()->next_index(1) % (state->b - state->a));
+            state->d = state->a + (System::objectPtr->next_index(1) % (state->b - state->a));
             if (--state->e < 0) {
                 ++state->c;
             }
             break;
         case 2:
             if (state->d > 0xFF - 4) {
-                state->e = (System::get()->next_index(1) % 180) + 180;
+                state->e = (System::objectPtr->next_index(1) % 180) + 180;
                 state->d = 0xFF;
                 state->c = 0;
             } else {
@@ -694,7 +694,7 @@ void StageBase::vtable_0x1C() {
                 continue;
             }
             if (sound->unknown_0x0 == 0) {
-                StageManager::get()->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC);
+                StageManager::objectPtr->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC);
             } else {
                 func_eboot_08883858(D_eboot_08A5DE5C, sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC, 0, 0, false);
             }
@@ -713,8 +713,8 @@ stage_sound *StageBase::vtable_0xB0() {
 void StageBase::vtable_0x20() {
     if ((bool)(D_eboot_089C7508->flags_0x6AF14 & 1) != true) {
         int i;
-        u16 *shorts = StageManager::get()->stage->definitions()->unknown_0x10;
-        for (i = 0; i < (int)StageManager::get()->stage->definitions()->unknown_0x3E; ++i, shorts += 12) {
+        u16 *shorts = StageManager::objectPtr->stage->definitions()->unknown_0x10;
+        for (i = 0; i < (int)StageManager::objectPtr->stage->definitions()->unknown_0x3E; ++i, shorts += 12) {
             int global_sound = 0;
             if (shorts[1] == 0x17 && shorts[11] == 0) {
                 ScePspFVector4 *position = vtable_0x44();
@@ -736,7 +736,7 @@ void StageBase::vtable_0x20() {
                         }
                     }
                     if (global_sound == 0) {
-                        StageManager::get()->register_sound(6, 0x11, 0, 0xC0, 0, position, 9);
+                        StageManager::objectPtr->register_sound(6, 0x11, 0, 0xC0, 0, position, 9);
                     }
                 }
                 break;
@@ -752,7 +752,7 @@ void StageBase::vtable_0x20() {
             }
         } else if (func_eboot_088D0824(D_eboot_09A4ADAC, sound->unknown_0x8, 1) == 0) {
             if (sound->unknown_0x0 == 0) {
-                StageManager::get()->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC);
+                StageManager::objectPtr->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC);
             } else {
                 if (D_eboot_089C7508->short_0x1C % sound->unknown_0x0 == 0) {
                     func_eboot_08883858(D_eboot_08A5DE5C, sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC, 0, 0, false);
@@ -795,8 +795,8 @@ void StageBase::draw() {
         ge::texoffsetu();
         ge::texoffsetv();
         ge::atest(0xFF, 0, GE_OP_GREATER_THAN);
-        LightManager::get()->method_08860C4C();
-        LightManager::get()->method_0886117C(1);
+        LightManager::objectPtr->method_08860C4C();
+        LightManager::objectPtr->method_0886117C(1);
     }
 }
 
@@ -839,7 +839,7 @@ void StageBase::vtable_0x24() {
 void StageBase::method_088CD61C() {
     if (flag_0x3D4 != 0) {
         ge::ditherenable(true);
-        DrawManager::get()->dither_matrix(0);
+        DrawManager::objectPtr->dither_matrix(0);
 
         ge::alphatestenable(false);
         ge::lightingenable(false);
@@ -967,7 +967,7 @@ void StageBase::vtable_0x50() {
     if (node) {
         while (node->position.x != -1.0f) {
             if (node->remaining > 0 && node->type == resource_type::BUG_NET) {
-                stage_definitions *assets = StageManager::get()->stage->definitions();
+                stage_definitions *assets = StageManager::objectPtr->stage->definitions();
                 if (assets->bug_mesh_index != -1 && (unknown_0x1C0 & 0x7F) == 0) {
                     ScePspFVector4 spawn_center, spawn_box;
                     sv_q(&spawn_center, node->position.x, node->position.y + 65.0f, node->position.z, 0.0f);
@@ -975,15 +975,15 @@ void StageBase::vtable_0x50() {
                     switch (D_eboot_089C7508->stage_id) {
                         case stages::TOWER_3:
                         case stages::GREAT_FOREST_N_2: {
-                            stage_definitions *assets = StageManager::get()->stage->definitions();
+                            stage_definitions *assets = StageManager::objectPtr->stage->definitions();
                             u32 flags = bug_flag::RANDOM_SPAWN_POSITION;
-                            StageManager::get()->push_prop_089B969C(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
+                            StageManager::objectPtr->push_prop_089B969C(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
                             break;
                         }
                         default: {
-                            stage_definitions *assets = StageManager::get()->stage->definitions();
+                            stage_definitions *assets = StageManager::objectPtr->stage->definitions();
                             u32 flags = bug_flag::RANDOM_SPAWN_POSITION | bug_flag::SCALE_WITH_ALPHA;
-                            StageManager::get()->push_prop_089B969C(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
+                            StageManager::objectPtr->push_prop_089B969C(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
                             break;
                         }
                     }
