@@ -118,8 +118,7 @@ void DrawManager::reset() {
         ge::fogenable(false);
 
         ScePspUnion32 incolor; incolor.ui = 0;
-        float distance = 65000.0f * Ge::get()->norm;
-        ge::fog(incolor.f, distance, distance);
+        ge::fog(incolor.f, 65000.0f, 65000.0f);
 
         end_fragment();
     }

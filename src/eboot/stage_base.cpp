@@ -823,23 +823,14 @@ s8 StageBase::exit_count(u32 ignored_map_id) {
     return count;
 }
 
-#ifdef BUILD_NONMATCHING
-// score 45: 9 regswaps on the args passed to ge::fog; when is ft0 used??
 void StageBase::emit_fog() {
     stage_fog *fog = &this->fog;
-    if (DrawManager::get()->start_fragment(render_group::RESET)) {
-        float begin = fog->begin;
-        float end = fog->end;
-        float norm = Ge::get()->norm;
-        begin *= norm;
-        end *= norm;
-        ge::fog(fog->color, begin, end);
-        DrawManager::get()->end_fragment();
+    if (DrawManager::objectPtr->start_fragment(1)) {
+        ge::fog(fog->color, fog->begin, fog->end);
+
+        DrawManager::objectPtr->end_fragment();
     }
 }
-#else
-INCLUDE_ASM("asm/eboot/nonmatchings/stage_base", emit_fog__9StageBaseFv);
-#endif
 
 void StageBase::vtable_0x24() {
     method_088CEA2C();
