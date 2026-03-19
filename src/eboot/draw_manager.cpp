@@ -6,6 +6,7 @@
 #include "model.hpp"
 #include "draw_manager.hpp"
 #include "stage_manager.hpp"
+#include "vram_manager.hpp"
 #include "vfpu.h"
 
 #pragma opt_unroll_loops on
@@ -188,31 +189,23 @@ void DrawManager::draw() {
 }
 
 extern "C" {
-    struct vram_transfer_request {
-        u8 pad_0x0[0x8];
-        void *src;
-        u8 pad_0xC[0xC];
-    };
-    extern void *D_eboot_089C6CB0;
-    bool func_eboot_08813364(void *global_089C6CB0, u8 buffer_index, vram_transfer_request *out);
-
     // copies a display list fragment to the write head and calls that copy at the specified index
     bool func_eboot_088593A0(Ge *, u32 *display_list, s32 length, s32 fragment_index);
 }
 
 bool DrawManager::vram_transfer() {
-    vram_transfer_request req;
+    VramAllocation allocation;
     u32 display_list[16];
 
-    func_eboot_08813364(D_eboot_089C6CB0, Ge::get()->active_buffer ^ 1, &req);
+    func_eboot_08813364(VramManager::objectPtr, Ge::get()->active_buffer ^ 1, &allocation);
 
     // TODO: immediate_ge with destination parameter
     u16 transfer_height = 272;
     u16 transfer_width = 256;
     u32 *write_head = &display_list[0];
     *write_head++ = GE_CMD_TEXSYNC << 24;
-    *write_head++ = (GE_CMD_TRANSFERSRC << 24) | ((u32)req.src & 0xFFFFFF);
-    *write_head++ = (GE_CMD_TRANSFERSRCW << 24) | (((u32)req.src & 0xFF000000)) >> 8 | transfer_width;
+    *write_head++ = (GE_CMD_TRANSFERSRC << 24) | ((u32)allocation.texture.vramAddress & 0xFFFFFF);
+    *write_head++ = (GE_CMD_TRANSFERSRCW << 24) | (((u32)allocation.texture.vramAddress & 0xFF000000)) >> 8 | transfer_width;
     *write_head++ = (GE_CMD_TRANSFERDST << 24) | ((u32)vram_transfer_dst & 0xFFFFFF);
     *write_head++ = (GE_CMD_TRANSFERDSTW << 24) | (((u32)vram_transfer_dst & 0xFF000000)) >> 8 | transfer_width;
     *write_head++ = GE_CMD_TRANSFERSRCPOS << 24;

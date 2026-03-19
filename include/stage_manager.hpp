@@ -71,7 +71,7 @@ struct StageManager : Singleton<StageManager> {
     u8 unknown_0xA2A8[12];
     u32 unknown_0xA2B4;
     u32 unknown_0xA2B8;
-    u8 *vram_start;
+    void *vram_start;
     u32 vram_transfer_size;
     u8 unknown_0xA2C4[4];
     u8 unknown_0xA2C8;

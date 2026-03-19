@@ -93,7 +93,7 @@ segments:
       - [0x2c2c, asm, lib/kernel_bridge]
       - [0x2c94, asmtu, lib/libm]
       - [0x7d24, asmtu, lib/libc]
-      - [0x10ff8, asmtu, global_089c6cb0]
+      - [0x10ff8, cpp, vram_manager]
       - [0x11cac, asmtu, global_089c6cb4]
       - [0x15610, asmtu, global_089c6cb8]
       - [0x15dd4, asmtu, global_089c6cbc]
@@ -183,7 +183,7 @@ segments:
       - [0x10b944, .rodata, lib/crt0]
       - [0x10b988, .rodata, lib/libm]
       - [0x10bfb8, .rodata, lib/libc]
-      - [0x10c54c, .rodata, global_089c6cb0]
+      - [0x10c54c, .rodata, vram_manager]
       - [0x10c578, .rodata, global_089c6cb4]
       - [0x10c620, .rodata, global_089c6cb8]
       - [0x12c620, .rodata, global_089c6cbc]
@@ -845,6 +845,10 @@ segments:
       - [0x1c50ec, pad]
       - [0x1c50f4, .bin, omit_overlay_addresses]
       - {start: 0x1c5114, type: .bss, vram: 0x089c6b60, name: lib/crt0} # FIXME: split
+      - {start: 0x1c5144, type: .bss, vram: 0x089c6cb0, name: vram_manager}
+      - {start: 0x1c5144, type: .bss, vram: 0x089c6cb4, name: global_089c6cb4}
+      - {start: 0x1c5144, type: .bss, vram: 0x089c6cb8, name: global_089c6cb8}
+      - {start: 0x1c5144, type: .bss, vram: 0x089c6cbc, name: global_089c6cbc}
       - {start: 0x1c5114, type: .bss, vram: 0x089c70cc, name: draw_manager}
       - {start: 0x1c5114, type: .bss, vram: 0x089c70ec, name: state/edit_state}
       - {start: 0x1c5114, type: .bss, vram: 0x089c70f0, name: file_sys_impl}

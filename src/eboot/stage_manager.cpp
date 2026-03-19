@@ -4,6 +4,7 @@
 #include "singleton.hpp"
 #include "draw_manager.hpp"
 #include "resource_manager.hpp"
+#include "vram_manager.hpp"
 #include "pac.hpp"
 #include "vfpu.h"
 
@@ -13,7 +14,7 @@ StageManager global_stage_manager;
 StageManager *Singleton<StageManager>::objectPtr;
 
 StageManager::StageManager() {
-    vram_start = 0;
+    vram_start = NULL;
     vram_transfer_size = 0;
     unknown_0xA2B4 = 0;
     unknown_0xA2B8 = 0;
@@ -21,22 +22,14 @@ StageManager::StageManager() {
 }
 
 StageManager::~StageManager() {
-
     // empty
-}
-
-extern "C" {
-    extern void *D_eboot_089C6CB0;
-    extern void func_eboot_08812F04(void *, s32, s32, s32);
-    extern u8 *func_eboot_088133D0(void *, u32);
-    extern void func_eboot_08813024(void *, u32);
 }
 
 void StageManager::reset() {
     cache.reset(slab, sizeof(slab));
     unknown_0xA2B8 = 0;
-    func_eboot_08812F04(D_eboot_089C6CB0, 6, 0x4e200, -1);
-    vram_start = func_eboot_088133D0(D_eboot_089C6CB0, 6);
+    func_eboot_08812F04(VramManager::objectPtr, 6, 0x4e200, -1);
+    vram_start = VramManager::objectPtr->method_088133D0(6);
     vram_transfer_size = 0;
     unknown_0x28A = -1;
     unknown_0xA2C8 = 0;
@@ -48,7 +41,7 @@ void StageManager::reset() {
 void StageManager::unload() {
     ResourceManager::get()->free_all(1);
     unknown_0xA2B8 = 0;
-    func_eboot_08813024(D_eboot_089C6CB0, 6);
+    func_eboot_08813024(VramManager::objectPtr, 6);
     vram_transfer_size = 0;
 }
 
@@ -846,7 +839,7 @@ u8 *StageManager::vram_alloc(s32 size) {
     if (misalignment != 0) {
         size += 0x10 - misalignment;
     }
-    u8 *block = vram_start + vram_transfer_size;
+    u8 *block = (u8 *)vram_start + vram_transfer_size;
     vram_transfer_size += size;
     return block;
 }

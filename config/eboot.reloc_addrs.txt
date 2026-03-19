@@ -16,6 +16,18 @@ rom:0x12d288 reloc:MIPS_32 symbol:world_matrix addend:0x2FC
 rom:0x12d28c reloc:MIPS_32 symbol:world_matrix addend:0x70
 rom:0x12d290 reloc:MIPS_32 symbol:world_matrix addend:0x164
 
+rom:0x10c54c reloc:MIPS_32 symbol:method_08812BD8__11VramManagerFUcUsUsUsUsUi addend:0xC8
+rom:0x10c550 reloc:MIPS_32 symbol:method_08812BD8__11VramManagerFUcUsUsUsUsUi addend:0xC8
+rom:0x10c554 reloc:MIPS_32 symbol:method_08812BD8__11VramManagerFUcUsUsUsUsUi addend:0xC8
+rom:0x10c558 reloc:MIPS_32 symbol:method_08812BD8__11VramManagerFUcUsUsUsUsUi addend:0x128
+rom:0x10c55c reloc:MIPS_32 symbol:method_08812BD8__11VramManagerFUcUsUsUsUsUi addend:0x188
+rom:0x10c560 reloc:MIPS_32 symbol:method_08812BD8__11VramManagerFUcUsUsUsUsUi addend:0x214
+rom:0x10c564 reloc:MIPS_32 symbol:method_08812BD8__11VramManagerFUcUsUsUsUsUi addend:0x290
+rom:0x10c568 reloc:MIPS_32 symbol:method_08812BD8__11VramManagerFUcUsUsUsUsUi addend:0x290
+rom:0x10c56c reloc:MIPS_32 symbol:method_08812BD8__11VramManagerFUcUsUsUsUsUi addend:0x290
+rom:0x10c570 reloc:MIPS_32 symbol:method_08812BD8__11VramManagerFUcUsUsUsUsUi addend:0x290
+rom:0x10c574 reloc:MIPS_32 symbol:method_08812BD8__11VramManagerFUcUsUsUsUsUi addend:0x290
+
 rom:0x12dfec reloc:MIPS_32 symbol:drawSet__9StageBaseFv addend:0x388
 rom:0x12dff0 reloc:MIPS_32 symbol:drawSet__9StageBaseFv addend:0x13c
 rom:0x12dff4 reloc:MIPS_32 symbol:drawSet__9StageBaseFv addend:0x158

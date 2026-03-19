@@ -5,6 +5,7 @@
 #include "singleton.hpp"
 #include "ge.hpp"
 #include "light_manager.hpp"
+#include "vram_manager.hpp"
 #include "cache.hpp"
 #include "resource_manager.hpp"
 
@@ -134,7 +135,9 @@ INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889B280);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889B290);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/main", func_eboot_0889B2A0);
+VramManager::VramManager() {
+    // empty
+}
 
 FileSys::FileSys() {
     // empty
