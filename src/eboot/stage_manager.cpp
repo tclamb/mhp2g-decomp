@@ -11,6 +11,7 @@
 #include "stage_table.inc.cpp"
 
 StageManager global_stage_manager;
+template<>
 StageManager *Singleton<StageManager>::objectPtr;
 
 StageManager::StageManager() {
@@ -913,13 +914,14 @@ stage_exit *StageManager::intersecting_exit(ScePspFVector4 *position) {
     for (s8 i = 0; i < stage_exit_count(); ++i, ++exit) {
         if (position->y >= exit->p.y && position->y < exit->p.y + exit->height) {
             switch (exit->shape) {
-            case 0:
+            case 0: {
                 float dx = position->x - exit->p.x;
                 float dz = position->z - exit->p.z;
                 if (dx * dx + dz * dz <= exit->size * exit->size) {
                     return exit;
                 }
                 break;
+            }
             case 1:
                 ScePspFVector4 p, q;
                 p.x = exit->p.x;    p.y = exit->p.y;    p.z = exit->p.z;    p.w = 0;

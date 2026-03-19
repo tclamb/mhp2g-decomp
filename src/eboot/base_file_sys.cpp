@@ -15,8 +15,6 @@ typedef unsigned long uint64_t;
 #include <pspmodulemgr.h>
 
 #include "pac.hpp"
-#include "singleton.hpp"
-#include "resource_manager.hpp"
 #include "base_file_sys.hpp"
 
 void BaseFileSys::initialize() {

@@ -13,8 +13,8 @@ typedef unsigned int uint32_t;
 typedef signed long int64_t;
 typedef unsigned long uint64_t;
 
-#include <psptypes.h>
-#include <pspkerneltypes.h>
+#include <psptypes.h> // IWYU pragma: export
+#include <pspkerneltypes.h> // IWYU pragma: export
 
 extern "C" {
     void *memset(void*, int,  long unsigned int);

@@ -2,6 +2,8 @@
 
 #include <pspgecmd.h>
 
+#include "ge.hpp"
+
 #define emit(out, cmd) do { \
     *out++ = cmd; \
 } while(0)
@@ -14,7 +16,6 @@
 #include <pspge.h>
 #include <pspdisplay.h>
 
-#include "ge.hpp"
 
 s16 BLANK_BUFFER_VERTEX_DATA[2][4] = {
     {0, 0, 0, -1},

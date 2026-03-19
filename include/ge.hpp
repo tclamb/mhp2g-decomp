@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common.h"
 #include "singleton.hpp"
 
 typedef u32 ge_command;

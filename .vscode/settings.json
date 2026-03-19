@@ -1,0 +1,14 @@
+
+{
+    "clangd.fallbackFlags": [
+        "-I${workspaceFolder}/include",
+        "-I${workspaceFolder}/include/pspsdk",
+        "-Wno-undefined-var-template",
+        "-Wno-c99-designator",
+        "-Wno-initializer-overrides",
+        "-Wno-tautological-undefined-compare",
+        "-Wno-tautological-constant-out-of-range-compare",
+        "-Wno-c++11-narrowing",
+        "--target=mipsel-linux-gnu",
+    ]
+}

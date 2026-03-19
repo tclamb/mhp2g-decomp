@@ -13,6 +13,7 @@
 
 using namespace immediate_ge;
 
+template<>
 DrawManager *Singleton<DrawManager>::objectPtr;
 u32 *DRAWABLE_WRITE_HEAD;
 u16 D_eboot_089C70D4[2];

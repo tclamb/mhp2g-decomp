@@ -92,6 +92,7 @@ private:
     inline s32 next_pac_index();
 };
 
+template<>
 DataManager *Singleton<DataManager>::objectPtr;
 
 void DataManager::entry::reset() {
@@ -118,6 +119,9 @@ typedef int (*callback)(int, event_t, DataManager *);
 
 extern "C"
 void func_eboot_088AFDFC(callback, void *);
+
+int on_power_down(int error, event_t event, DataManager *cache);
+int on_power_up(int error, event_t event, DataManager *cache);
 
 void DataManager::register_power_callbacks() {
     func_eboot_088AFDFC(on_power_down, this);

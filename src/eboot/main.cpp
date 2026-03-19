@@ -9,6 +9,7 @@
 #include "cache.hpp"
 #include "resource_manager.hpp"
 
+template<>
 FileSys *Singleton<FileSys>::objectPtr;
 
 void *D_eboot_089C7508; // singleton
@@ -16,6 +17,7 @@ u8 D_eboot_089C7510[0x90000] __attribute__((aligned(16)));
 u8 D_eboot_08A57510[0x24];
 u8 D_eboot_08A57534[0x67DC];
 
+template<>
 Ge *Singleton<Ge>::objectPtr;
 u8 D_eboot_08A5DD14;
 volatile bool GE_END_REACHED;
@@ -26,6 +28,7 @@ void *D_eboot_08A5DD20; // singleton
 
 void *D_eboot_08A5DD24; // singleton
 
+template<>
 LightManager *Singleton<LightManager>::objectPtr;
 
 void *D_eboot_08A5DD2C; // singleton
@@ -62,6 +65,7 @@ void *D_eboot_08A5DE60;
 void *D_eboot_08A5DE64;
 ScePspFMatrix4 D_eboot_08A5DE70[0x10];
 
+template<>
 System *Singleton<System>::objectPtr;
 SceUID D_eboot_08A5E274;
 
@@ -93,6 +97,7 @@ u8 D_eboot_08A883E0[0xC];
 u8 D_eboot_08A883EC[0x14];
 u8 D_eboot_08A88400[0xF7EE80];
 
+template<>
 ResourceManager *Singleton<ResourceManager>::objectPtr;
 
 u8 D_eboot_09A07284[0x4];

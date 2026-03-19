@@ -1,7 +1,6 @@
 #include "common.h"
 
 #include "drawable.hpp"
-#include "bone.hpp"
 
 #include "vfpu.h"
 
@@ -15,9 +14,9 @@
 using namespace immediate_ge;
 
 model::model() {
-    memset(&model_pmo, 0, sizeof(model_pmo));
-    memset(&model_skeleton, 0, sizeof(model_skeleton));
-    memset(&model_tmh, 0, sizeof(model_tmh));
+    memset((void *)&model_pmo, 0, sizeof(model_pmo));
+    memset((void *)&model_skeleton, 0, sizeof(model_skeleton));
+    memset((void *)&model_tmh, 0, sizeof(model_tmh));
 }
 
 model::~model() {

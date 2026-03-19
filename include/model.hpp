@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common.h"
+
 #include "bone.hpp"
 
 #include "drawable.hpp"

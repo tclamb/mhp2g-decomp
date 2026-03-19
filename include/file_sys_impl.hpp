@@ -24,7 +24,7 @@ struct FileSysImpl : BaseFileSys {
     u32 next_decryption_key();
     void decrypt_buffer(u8 *data, s32 size, s32 prevSize);
     void set_decryption_key(u32 key);
-    char *data_bin_path();
+    const char *data_bin_path();
 
     u32 unknown_0x29220[8];
     s32 movie_pos;

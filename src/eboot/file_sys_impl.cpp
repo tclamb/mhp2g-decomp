@@ -52,7 +52,7 @@ loop_1:
 loop_4:
     sceKernelDelayThreadCB(10000);
 loop_6:
-    if ((0 < (u32)(sceUmdGetDriveStat() & 0x20)) ^ 1 != 0) {
+    if (((0 < (u32)(sceUmdGetDriveStat() & 0x20)) ^ 1) != 0) {
         goto loop_4;
     }
 loop_5:
@@ -634,6 +634,6 @@ INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", func_eboot_0884F538);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_impl", func_eboot_0884F5B4);
 
-char* FileSysImpl::data_bin_path() {
+const char* FileSysImpl::data_bin_path() {
     return "disc0:/PSP_GAME/USRDIR/DATA.BIN";
 }

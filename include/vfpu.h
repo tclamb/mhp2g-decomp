@@ -2,6 +2,15 @@
 
 #include "common.h"
 
+#if !defined(__MWERKS__)
+extern "C" {
+    float sinf(float);
+    float cosf(float);
+    float sqrtf(float);
+    float atan2f(float, float);
+}
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -382,8 +391,8 @@ inline void eulerRotation(ScePspFMatrix4 *out, ScePspFMatrix4 *in, float alpha, 
         : "m" (*in), "m" (alpha), "m" (beta), "m" (gamma)
     );
 #else
-    float sa = sin(alpha), sb = sin(beta), sc = sin(gamma),
-          ca = cos(alpha), cb = cos(beta), cc = cos(gamma);
+    float sa = sinf(alpha), sb = sinf(beta), sc = sinf(gamma),
+          ca = cosf(alpha), cb = cosf(beta), cc = cosf(gamma);
     out->x.x = cb*cc;   out->x.y = sa*sb*cc - ca*sc; out->x.z = ca*sb*cc + sa*sc; out->x.w = in->x.w;
     out->y.x = cb*sc;   out->y.y = sa*sb*sc + ca*cc; out->y.z = ca*sb*sc - sa*cc; out->x.w = in->y.w;
     out->z.x = -sb;     out->z.y = sa*cb;            out->z.z = ca*cb;            out->x.w = in->y.w;
@@ -412,7 +421,7 @@ inline void normalize(ScePspFVector4 *out, ScePspFVector4 *v) {
     if (f == 0.0f) {
         out->x = out->y = out->z = out->w = 0.0f;
     }
-    f = 1.0f / sqrt(f);
+    f = 1.0f / sqrtf(f);
     out->x = v->x * f;
     out->y = v->y * f;
     out->z = v->z * f;
@@ -431,7 +440,7 @@ inline float vsqrt_s(float x) {
         : "m"(x)
     );
 #else
-    result = sqrt(x);
+    result = sqrtf(x);
 #endif
     return result;
 }
@@ -449,7 +458,7 @@ inline float vsin_s(float radians) {
         : "m"(radians)
     );
 #else
-    result = sinf(x);
+    result = sinf(radians);
 #endif
     return result;
 }

@@ -5,6 +5,7 @@
 #include <pspsdk/pspge.h>
 #include "vram_manager.hpp"
 
+template <>
 VramManager *Singleton<VramManager>::objectPtr;
 
 void VramManager::method_08812A44() {
@@ -133,7 +134,7 @@ u8 VramManager::method_08812F04(u8 vramId, s32 size, u32 vramOffset) {
     method_08813298(blockStart, blockCount);
     allocation.blockCount = blockCount;
     allocation.flags = 5;
-    *(u32*)&allocation.texture = (blockCount << 7);
+    allocation.data[0].ui = (blockCount << 7);
     return vramId;
 }
 
@@ -244,11 +245,7 @@ template<typename T> inline T *dummy(T *t) { return t; }
 
 int VramManager::method_08813364(u8 vramId, VramAllocation *out) {
     if (allocations[vramId].flags != 0) {
-        VramAllocation &allocation = allocations[vramId];
-        out->id = allocation.id;
-        out->flags = allocation.flags;
-        out->blockCount = allocation.blockCount;
-        out->data = allocation.data;
+        *out = allocations[vramId];
         return 1;
     }
     return 0;

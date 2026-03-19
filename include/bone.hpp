@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common.h"
+
 struct bind_pose {
     ScePspFMatrix4 transform;
     ScePspFVector3 scale;
