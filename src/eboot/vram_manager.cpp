@@ -3,9 +3,11 @@
 #include "common.h"
 
 #include <pspsdk/pspge.h>
+#include "ge.hpp"
 #include "vram_manager.hpp"
+#include "immediate_ge.hpp"
 
-template <>
+template<>
 VramManager *Singleton<VramManager>::objectPtr;
 
 void VramManager::method_08812A44() {
@@ -258,4 +260,87 @@ void *VramManager::method_088133D0(u8 vramId) {
     return (void *)INVALID_ADRS;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/vram_manager", func_eboot_088133FC);
+u8 VramManager::method_088133FC(u8 vramId, tmh_header *tmh, u32 textureIndex, u32 imageIndex, u32 paletteIndex) {
+    GeTexture texture;
+    if ((u8)func_eboot_08859768(Ge::objectPtr, tmh, textureIndex, imageIndex, paletteIndex, &texture) == 0) {
+        return INVALID_ID;
+    }
+
+    u8 copyId = method_08812BD8(vramId, texture.width, texture.height, texture.format, texture.palette_width, INVALID_ADRS);
+    if (copyId == INVALID_ID) {
+        return INVALID_ID;
+    }
+
+    VramAllocation allocation;
+    if ((u8) method_08813364(copyId, &allocation) == 0) {
+        method_08813024(copyId);
+        return INVALID_ID;
+    }
+    
+    u32 width;
+    u32 height;
+    switch (allocation.texture.imageFormat) {
+    case 1:
+        width = texture.width / 2;
+        height = texture.height;
+        break;
+    case 3:
+        width = texture.width;
+        height = texture.height;
+        break;
+    case 4:
+        width = texture.width / 8;
+        height = texture.height;
+        break;
+    case 5:
+        width = texture.width / 4;
+        height = texture.height;
+        break;
+    default:
+        method_08813024(copyId);
+        return INVALID_ID;
+    }
+
+    ge_command display_list[32];
+    u32 *write_head = &display_list[0];
+    *write_head++ = (GE_CMD_TRANSFERSRC << 24) | ((u32)texture.data & 0xFFFFFF);
+    *write_head++ = (GE_CMD_TRANSFERSRCW << 24) | (((u32)texture.data & 0xFF000000)) >> 8 | width;
+    *write_head++ = (GE_CMD_TRANSFERDST << 24) | ((u32)allocation.texture.vramAddress & 0xFFFFFF);
+    *write_head++ = (GE_CMD_TRANSFERDSTW << 24) | (((u32)allocation.texture.vramAddress & 0xFF000000)) >> 8 | width;
+    *write_head++ = GE_CMD_TRANSFERSRCPOS << 24;
+    *write_head++ = GE_CMD_TRANSFERDSTPOS << 24;
+    *write_head++ = (GE_CMD_TRANSFERSIZE << 24) | ((height - 1) << 10) | (width - 1);
+    *write_head++ = (GE_CMD_TRANSFERSTART << 24) | GE_TRANSFER_BPP_4;
+
+    if (texture.palette_data != NULL) {
+        u32 palette_size;
+        switch (allocation.texture.paletteWidth) {
+        case 1:
+            palette_size = texture.palette_height / 2;
+            break;
+        case 3:
+            palette_size = texture.palette_height;
+            break;
+        default:
+            method_08813024(copyId);
+            return INVALID_ID;
+        }
+
+        *write_head++ = (GE_CMD_TRANSFERSRC << 24) | ((u32)texture.palette_data & 0xFFFFFF);
+        *write_head++ = (GE_CMD_TRANSFERSRCW << 24) | (((u32)texture.palette_data & 0xFF000000)) >> 8 | palette_size;
+        *write_head++ = (GE_CMD_TRANSFERDST << 24) | ((u32)allocation.texture.vramBlockAddress & 0xFFFFFF);
+        *write_head++ = (GE_CMD_TRANSFERDSTW << 24) | (((u32)allocation.texture.vramBlockAddress & 0xFF000000)) >> 8 | palette_size;
+        *write_head++ = GE_CMD_TRANSFERSRCPOS << 24;
+        *write_head++ = GE_CMD_TRANSFERDSTPOS << 24;
+        *write_head++ = (GE_CMD_TRANSFERSIZE << 24) | (palette_size - 1);
+        *write_head++ = (GE_CMD_TRANSFERSTART << 24) | GE_TRANSFER_BPP_4;
+    }
+
+    *write_head++ = GE_CMD_TEXSYNC << 24;
+    *write_head++ = GE_CMD_BASE << 24;
+    *write_head++ = GE_CMD_JUMP << 24;
+
+    func_eboot_088593A0(Ge::objectPtr, display_list, write_head - &display_list[0], 1);
+
+    return copyId;
+}

@@ -188,11 +188,6 @@ void DrawManager::draw() {
     }
 }
 
-extern "C" {
-    // copies a display list fragment to the write head and calls that copy at the specified index
-    bool func_eboot_088593A0(Ge *, u32 *display_list, s32 length, s32 fragment_index);
-}
-
 bool DrawManager::vram_transfer() {
     VramAllocation allocation;
     u32 display_list[16];

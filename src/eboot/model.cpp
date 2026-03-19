@@ -217,23 +217,8 @@ int model::compile_pmo(void *buffer, pmo_header *header, pmo_mesh_data *mesh_dat
     return model_pmo.compile(buffer, header, mesh_data);
 }
 
-extern "C" {
-    struct texture {
-        tmh_image_header *data;
-        u32 format;
-        u16 width;
-        u16 height;
-        float *palette_data;
-        u32 palette_width;
-        u32 palette_height;
-    };
-
-    int func_eboot_08859768(Ge *, tmh_header *, s32, u32, u32, texture *);
-    u32 func_eboot_0885973C(Ge *, u32);
-}
-
 int tmh::compile(void *buffer, tmh_header *header, u8 index) {
-    texture t;
+    GeTexture t;
     if (this != 0) {
         this->fragments = (tmh_fragment*)buffer;
         for (int i = 0; i < header->picture_count; ++i) {

@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "singleton.hpp"
+#include "model.hpp" // FIXME: move tmh structs into proper header
 
 struct VramTexture {
     u16 alignedWidth;
@@ -50,4 +51,5 @@ struct VramManager : Singleton<VramManager> {
     void method_088132FC(u32 blockStart, u32 blockCount);
     int method_08813364(u8 vramId, VramAllocation *out);
     void *method_088133D0(u8 vramId);
+    u8 method_088133FC(u8 vramId, tmh_header *tmh, u32 textureIndex, u32 imageIndex, u32 paletteIndex);
 };

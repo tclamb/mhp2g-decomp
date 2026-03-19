@@ -60,6 +60,7 @@ method_0881322C__11VramManagerFPv = 0x0881322C; // type:func
 method_08813298__11VramManagerFUii = 0x08813298; // type:func
 method_088132FC__11VramManagerFUiUi = 0x088132FC; // type:func
 method_08813364__11VramManagerFUcP14VramAllocation = 0x08813364; // type:func
+method_088133FC__11VramManagerFUcP10tmh_headerUiUiUi = 0x088133FC; // type:func
 vtable_0xA0__9StageBaseFv = 0x08827744; // type:func
 __ct__10cont_stateFv = 0x0884AE88; // type:func
 __dt__10base_stateFv = 0x0884AF14;
