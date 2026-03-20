@@ -33,23 +33,3 @@ struct stages {
 private:
     stages();
 };
-
-extern "C" {
-    // camera?
-    extern struct global_089C6CB4 {
-        float near_z;
-        float far_z;
-        u8 padding_0x8[0xB80 - 0x8];
-        ScePspFMatrix4 perspective; // unsure
-        ScePspFMatrix4 world;
-        ScePspFMatrix4 projection;
-        u8 padding_0xC40[0xCA0 - 0xC40];
-        ScePspFVector4 position;
-        u8 padding_0xCB0[0xDA0 - 0xCB0];
-        ScePspVector3 viewport_scale;
-        ScePspVector3 viewport_center;
-    } *D_eboot_089C6CB4;
-
-    // clipping test; objects are clipped when false
-    int func_eboot_08816EA8(global_089C6CB4 *, ScePspFVector4 *position, float clipping_distance);
-}

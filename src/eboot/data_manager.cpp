@@ -1,7 +1,11 @@
-#include "common.h"
+#include "data_manager.hpp"
+
+#include "quest.hpp"
 #include "resource_manager.hpp"
+#include "singleton.hpp"
 #include "file_sys.hpp"
 #include "singleton.hpp"
+#include "game_sys.hpp"
 
 #include <pspsdk/pspthreadman.h>
 #include <pspsdk/pspsuspend.h>
@@ -10,89 +14,9 @@ extern "C" {
     #include <pspsdk/pspdmac.h>
 }
 
-#define NUM_ENTRIES 0x2B
 #pragma opt_unroll_loops on
 
-enum language_id {
-    LANGUAGE_DEFAULT,
-    LANGUAGE_ENGLISH,
-    LANGUAGE_GERMAN,
-    LANGUAGE_FRENCH,
-    LANGUAGE_SPANISH,
-    LANGUAGE_ITALIAN,
-};
-
-enum event_t {
-    POWER_SUSPENDING = 1,
-    POWER_STANDBY,
-    POWER_RESUME_COMPLETE = 4,
-};
-
-struct DataManager : Singleton<DataManager> {
-    struct entry {
-        u16 flags;
-        u16 file_id;
-        u8 *buffer;
-        u32 was_cancelled;
-
-        void reset();
-    };
-
-    entry entries[NUM_ENTRIES];
-    int volatile_memory_size;
-    u8 *volatile_memory;
-    u8 *write_head;
-    int remaining_bytes;
-    bool loading_flag;
-    bool ready_flag;
-    bool f0x216_flag;
-    u32 counter;
-    u8 f0x21C[0xC];
-    SceUID check_exit_game_thread;
-    u32 f0x22C;
-    u16 rng_state[3];
-    language_id language;
-    u32 f0x23C;
-
-    DataManager();
-    ~DataManager();
-    void reset();
-    void register_power_callbacks();
-    void clear();
-    void clear_pacs();
-    void update();
-    void load(s32 slot, s32 file_id, u32 size);
-    void duplicate(s32 dst_slot, s32 src_slot);
-    u32 copy(void *dst, s32 src_slot, u32 size);
-    void cache_emmodel(u8 em_id);
-    bool is_loaded(s32 index);
-    void free(s32 index);
-    u8 *emmodel_pac(u8 em_id);
-    bool is_pac_cached(u8 em_id);
-    s32 find_pac(u16 file_id);
-    s8 find_emmodel(u8 em_id);
-    void load_emmodel(u8 em_id, u32 size, s32 index);
-    void load_em_with_sfx(u8 em_id, int n);
-    void load_emmodel(u8 em_id);
-    void free_emmodel(u8 em_id);
-    void free_all_emmodels();
-    bool allocate_volatile_memory();
-    void release_volatile_memory();
-    void cache_stage(u16 st_id);
-    bool some_test();
-
-    friend int on_power_down(int, event_t, DataManager*);
-    friend int on_power_up(int, event_t, DataManager*);
-
-private:
-    inline void clear_entries();
-    inline void reset_pointers();
-    inline void clear_pacs_inner();
-    inline s32 next_emmodel_index();
-    inline s32 next_pac_index();
-};
-
-DataManager *Singleton<DataManager>::objectPtr;
+template<> DataManager *Singleton<DataManager>::objectPtr;
 
 void DataManager::entry::reset() {
     flags = 0;
@@ -114,7 +38,10 @@ void DataManager::reset() {
     ready_flag = true;
 }
 
-typedef int (*callback)(int, event_t, DataManager *);
+typedef int (*callback)(int, int, DataManager *);
+
+int on_power_down(int error, int event, DataManager *cache);
+int on_power_up(int error, int event, DataManager *cache);
 
 extern "C"
 void func_eboot_088AFDFC(callback, void *);
@@ -154,7 +81,7 @@ inline void DataManager::clear_pacs_inner() {
         entries[i].flags &= ~(1 << 1);
     }
 
-    FileSys::objectPtr->update_ringbuf(1);
+    Singleton<FileSys>::objectPtr->update_ringbuf(1);
 }
 
 void DataManager::clear_pacs() {
@@ -167,23 +94,9 @@ void DataManager::clear_pacs() {
     clear_entries();
 }
 
-extern "C" {
-    struct global_089C7508 {
-        u8 pad_0x0[0x2A];
-        u8 flag_0x2A;
-        u8 pad_0x2B[0x480 - 0x2B];
-        bool flag_f0x480;
-        u8 pad_0x481[0x6addd - 0x481];
-        s8 flag_0x6ADDD;
-        u8 pad_0x6ADDE[0x6af0c - 0x6adde];
-        bool flag_0x6AF0C;
-    };
-    extern struct global_089C7508 *D_eboot_089C7508;
-}
-
 void DataManager::update() {
     if (f0x216_flag) {
-        if (!D_eboot_089C7508->flag_f0x480) {
+        if (!Singleton<GameSys>::objectPtr->flag_0x480) {
             if (ready_flag && !loading_flag && allocate_volatile_memory()) {
                 loading_flag = true;
                 clear_pacs_inner();
@@ -194,7 +107,7 @@ void DataManager::update() {
         u16 flags = entries[i].flags;
         if (((flags & 1) != 0)
           && ((flags & 2) == 0)
-          && !FileSys::objectPtr->is_loading(entries[i].file_id)) {
+          && !Singleton<FileSys>::objectPtr->is_loading(entries[i].file_id)) {
             if (entries[i].was_cancelled != 1) {
                 entries[i].flags &= ~1;
                 entries[i].flags |= 2;
@@ -206,7 +119,7 @@ void DataManager::update() {
 }
 
 void DataManager::load(s32 index, s32 file_id, u32 size) {
-    u32 load_size = FileSys::objectPtr->file_size(file_id);
+    u32 load_size = Singleton<FileSys>::objectPtr->file_size(file_id);
     if (size != 0) {
         load_size = size;
     }
@@ -227,11 +140,11 @@ void DataManager::load(s32 index, s32 file_id, u32 size) {
         }
         notify_on_cancel = true;
     } else {
-        e.buffer = ResourceManager::objectPtr->alloc(0x14, load_size);
+        e.buffer = Singleton<ResourceManager>::objectPtr->alloc(0x14, load_size);
         notify_on_cancel = false;
     }
     e.was_cancelled = false;
-    FileSys::objectPtr->load_file_async(file_id, e.buffer, -1, notify_on_cancel, &e.was_cancelled, true);
+    Singleton<FileSys>::objectPtr->load_file_async(file_id, e.buffer, -1, notify_on_cancel, &e.was_cancelled, true);
     e.flags |= 1;
     e.file_id = file_id;
 }
@@ -240,8 +153,8 @@ void DataManager::duplicate(s32 destination_index, s32 source_index) {
     entry &destination = entries[destination_index];
     entry &source = entries[source_index];
 
-    u32 size = FileSys::objectPtr->file_size(source.file_id);
-    destination.buffer = ResourceManager::objectPtr->alloc(0x14, size);
+    u32 size = Singleton<FileSys>::objectPtr->file_size(source.file_id);
+    destination.buffer = Singleton<ResourceManager>::objectPtr->alloc(0x14, size);
 
     sceKernelDcacheWritebackInvalidateAll();
     sceDmacMemcpy(destination.buffer, source.buffer, size);
@@ -253,50 +166,21 @@ void DataManager::duplicate(s32 destination_index, s32 source_index) {
 u32 DataManager::copy(void *dst, s32 source_index, u32 size) {
     entry &source = entries[source_index];
     if (size == -1) {
-        size = FileSys::objectPtr->file_size(source.file_id);
+        size = Singleton<FileSys>::objectPtr->file_size(source.file_id);
     }
     sceKernelDcacheWritebackInvalidateAll();
     sceDmacMemcpy(dst, source.buffer, size);
     return size;
 }
 
-extern "C" {
-    struct mission_target {
-        typedef void *target_definition;
-        target_definition definitions[5];
-        s8 em_ids_0x14[5];
-        u8 bytes_0x19[5];
-        volatile s8 count_0x1e;
-        u8 unknown_0x1f[11];
-    };
-
-    struct global_08a5dd4c {
-        u8 padding_0x0[0x768];
-        mission_target targets[2];
-    };
-
-    extern struct global_08a5dd4c *D_eboot_08A5DD4C;
-}
-
-inline s32 large_em_count(global_08a5dd4c &global, int target_0_count) {
-    s32 result = 0;
-    if (target_0_count > 0) {
-        result += 1;
-    }
-    if ((global.targets[1].count_0x1e > 0) && (global.targets[0].em_ids_0x14[0] != global.targets[1].em_ids_0x14[0])) {
-        result += 1;
-    }
-    return result;
-}
-
 inline s32 DataManager::next_emmodel_index() {
     s32 offset;
 
-    global_08a5dd4c &global = *D_eboot_08A5DD4C;
+    Quest &global = *Singleton<Quest>::objectPtr;
     int target_0_count = global.targets[0].count_0x1e;
 
-    entry *e = &entries[large_em_count(global, target_0_count) + 9];
-    for (offset = large_em_count(global, target_0_count); offset < 4; ++offset) {
+    entry *e = &entries[global.largeEnemyCount(target_0_count) + 9];
+    for (offset = global.largeEnemyCount(target_0_count); offset < 4; ++offset) {
         if ((e->flags & 3) == 0) {
             break;
         }
@@ -306,10 +190,10 @@ inline s32 DataManager::next_emmodel_index() {
 }
 
 inline s32 DataManager::next_pac_index() {
-    global_08a5dd4c &global = *D_eboot_08A5DD4C;
+    Quest &global = *Singleton<Quest>::objectPtr;
     int target_0_count = global.targets[0].count_0x1e;
-    entry *e = &entries[large_em_count(global, target_0_count) + 9];
-    for (s32 offset = large_em_count(global, target_0_count); offset < 4; ++offset) {
+    entry *e = &entries[global.largeEnemyCount(target_0_count) + 9];
+    for (s32 offset = global.largeEnemyCount(target_0_count); offset < 4; ++offset) {
         if ((e->flags & 3) == 0) {
             return offset;
         }
@@ -340,7 +224,7 @@ bool DataManager::is_loaded(s32 index) {
 
 void DataManager::free(s32 index) {
     entry &e = entries[index];
-    ResourceManager::objectPtr->free(e.buffer);
+    Singleton<ResourceManager>::objectPtr->free(e.buffer);
     e.reset();
 }
 
@@ -386,10 +270,10 @@ s8 DataManager::find_emmodel(u8 em_id) {
 void DataManager::load_emmodel(u8 em_id, u32 size, s32 index) {
     if (index == -1) {
         if (emmodel_pac(em_id) == 0) {
-            global_08a5dd4c &global = *D_eboot_08A5DD4C;
+            Quest &global = *Singleton<Quest>::objectPtr;
             int target_0_count = global.targets[0].count_0x1e;
-            entry *e = &entries[large_em_count(global, target_0_count) + 9];
-            for (s32 offset = large_em_count(global, target_0_count); offset < 4; ++offset) {
+            entry *e = &entries[global.largeEnemyCount(target_0_count) + 9];
+            for (s32 offset = global.largeEnemyCount(target_0_count); offset < 4; ++offset) {
                 if ((e->flags & 3) == 0) {
                     u16 file_id = em_id + 0x17AB;
                     load(offset + 9, file_id, size);
@@ -432,11 +316,11 @@ void DataManager::load_emmodel(u8 em_id) {
     u8 *pac = emmodel_pac(em_id);
     if (pac == 0) {
 
-        global_08a5dd4c &global = *D_eboot_08A5DD4C;
+        Quest &global = *Singleton<Quest>::objectPtr;
         int target_0_count = global.targets[0].count_0x1e;
 
-        entry *e = &entries[large_em_count(global, target_0_count) + 0x16];
-        for (s32 offset = large_em_count(global, target_0_count); offset < 4; ++offset) {
+        entry *e = &entries[global.largeEnemyCount(target_0_count) + 0x16];
+        for (s32 offset = global.largeEnemyCount(target_0_count); offset < 4; ++offset) {
             if ((e->flags & 3) == 0) {
                 u16 file_id = em_id + 0x17AB;
                 load(offset + 0x16, file_id, 0);
@@ -498,14 +382,14 @@ void DataManager::release_volatile_memory() {
 extern "C"
 void func_eboot_0884EA44(void *);
 
-int on_power_down(int error, event_t event, DataManager *cache) {
-    if (event != POWER_STANDBY && event != POWER_SUSPENDING) {
+int on_power_down(int error, int event, DataManager *cache) {
+    if (event != PowerEventType::STANDBY && event != PowerEventType::SUSPENDING) {
         return 0;
     }
-    D_eboot_089C7508->flag_0x2A |= 1;
+    Singleton<GameSys>::objectPtr->flag_0x2A |= 1;
     cache->ready_flag = false;
     if (cache->loading_flag != 0) {
-        func_eboot_0884EA44(FileSys::objectPtr);
+        func_eboot_0884EA44(Singleton<FileSys>::objectPtr);
         u32 handle = sceKernelSuspendDispatchThread();
         cache->loading_flag = false;
         cache->clear_pacs_inner();
@@ -515,12 +399,12 @@ int on_power_down(int error, event_t event, DataManager *cache) {
     return 0;
 }
 
-int on_power_up(int error, event_t event, DataManager *cache) {
-    if (event != POWER_RESUME_COMPLETE) {
+int on_power_up(int error, int event, DataManager *cache) {
+    if (event != PowerEventType::RESUME_COMPLETE) {
         return 0;
     }
-    D_eboot_089C7508->flag_0x2A &= 0xF0;
-    D_eboot_089C7508->flag_0x6AF0C = true;
+    Singleton<GameSys>::objectPtr->flag_0x2A &= 0xF0;
+    Singleton<GameSys>::objectPtr->flag_0x6AF0C = true;
     cache->ready_flag = true;
     return 0;
 }
@@ -533,19 +417,17 @@ extern "C" {
 
     extern struct short_pair D_game_sub_09CDF7B8[267];
     extern struct short_pair D_eboot_089A6470[267];
-
-    void func_eboot_088711B8(struct global_08a5dd4c *, u16 st_id);
 }
 
 void DataManager::cache_stage(u16 st_id) {
     load(0x15, (u16)(st_id + 0x167C), 0); // st pac
     load(0x29, (u16)(st_id + 0x1572), 0); // st ovl
-    func_eboot_088711B8(D_eboot_08A5DD4C, st_id);
+    func_eboot_088711B8(Singleton<Quest>::objectPtr, st_id);
     load(0x26, D_game_sub_09CDF7B8[st_id].left, 0);
     load(0x27, D_eboot_089A6470[st_id].left, 0);
     load(0x28, D_eboot_089A6470[st_id].right, 0);
 }
 
 bool DataManager::some_test() {
-    return D_eboot_089C7508->flag_0x6ADDD && !D_eboot_089C7508->flag_f0x480;
+    return Singleton<GameSys>::objectPtr->unknownTest();
 }

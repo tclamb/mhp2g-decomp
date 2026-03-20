@@ -1,7 +1,9 @@
 #pragma once
 
-struct drawable {
-    virtual ~drawable() {}
+#include "common.h"
+
+struct Draw {
+    virtual ~Draw() {}
     virtual void draw() = 0;
 
     enum {
@@ -10,7 +12,7 @@ struct drawable {
     };
 
     u32 flags;
-    drawable *next;
+    Draw *next;
     float zindex;
 
     static inline void operator delete(void *) {}

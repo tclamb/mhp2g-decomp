@@ -1,17 +1,23 @@
-#include "common.h"
-
 #include "stage_base.hpp"
+
+#include "evdemo.hpp"
+#include "camera.hpp"
+#include "game_sys.hpp"
+#include "quest.hpp"
+#include "singleton.hpp"
+#include "sound.hpp"
 #include "vfpu.h"
 #include "draw_manager.hpp"
 #include "stage_manager.hpp"
+#include "player_manager.hpp"
 #include "immediate_ge.hpp"
 #include "light_manager.hpp"
 #include "player.hpp"
 #include "system.hpp"
 
-using namespace immediate_ge;
-
 #pragma opt_unroll_loops on
+
+using namespace immediate_ge;
 
 StageBase::StageBase() {
 
@@ -21,28 +27,13 @@ StageBase::~StageBase() {
     // empty
 }
 
-extern struct global_089C7508 {
-    u8 padding_0x0[0x1C];
-    u16 short_0x1C;
-    u8 padding_0x1E[0x28 - 0x1E];
-    u8 player_id;
-    u8 padding_0x29[0x2E - 0x29];
-    u8 byte_0x2E;
-    u8 padding_0x2F[0x422-0x2F];
-    bool allow_hidden_flag;
-    u8 padding_0x423[0x6AF0E - 0x423];
-    u16 stage_id;
-    u8 padding_0x6AF10[0x6AF14 - 0x6AF10];
-    u32 flags_0x6AF14;
-} *D_eboot_089C7508;
-
 void StageBase::drawStg() {
     pmo *pmo = &model_pmo;
     stage_draw_command *command = vtable_0x48()->model_commands;
     emit_world_model(&transform, &pmo->scale);
     for (int i = 0; i < vtable_0x48()->model_commands_length; ++i, ++command) {
         ge::atest(0xFF, command->alpha_threshold, GE_OP_AT_LEAST);
-        if ((command->flags & 1) == 0 || !D_eboot_089C7508->allow_hidden_flag) {
+        if ((command->flags & 1) == 0 || !Singleton<GameSys>::objectPtr->allow_hidden_flag) {
             if ((command->flags & 4) != 0) {
                 ge::ztest(GE_OP_ALWAYS);
             }
@@ -107,7 +98,7 @@ void StageBase::drawSet() {
     emit_world_model(&transform, &pmo->scale);
     for (int i = 0; i < vtable_0x48()->prop_commands_length; ++i, ++command) {
         ge::atest(0xFF, command->alpha_threshold, GE_OP_AT_LEAST);
-        if ((command->flags & 1) == 0 || !D_eboot_089C7508->allow_hidden_flag) {
+        if ((command->flags & 1) == 0 || !Singleton<GameSys>::objectPtr->allow_hidden_flag) {
             if ((command->flags & 4) != 0) {
                 ge::ztest(GE_OP_ALWAYS);
             }
@@ -444,14 +435,9 @@ void StageBase::vtable_0x78(pmo *pmo, void *data, u8 mesh_index) {
     ge::texoffset();
 }
 
-extern "C" {
-    extern void *D_eboot_09A4AE04;
-    player *func_eboot_088DF804(void *, int);
-}
-
 void StageBase::vtable_0x7C(pmo *pmo, void *data, u8 mesh_index) {
-    u8 player_id = D_eboot_089C7508->player_id;
-    player *p = func_eboot_088DF804(D_eboot_09A4AE04, player_id);
+    u8 player_id = Singleton<GameSys>::objectPtr->player_id;
+    Player *p = func_eboot_088DF804(Singleton<PlayerManager>::objectPtr, player_id);
     vtable_0x7C_params *args = (vtable_0x7C_params *)data;
     if (p != 0) {
         if (p->position.x < args->bbox_min.x ||
@@ -509,11 +495,6 @@ void StageBase::vtable_0x84(pmo *pmo, void *data, u8 mesh_index) {
     emit_world_model(&this->transform, &pmo->scale);
 }
 
-extern "C" {
-    int func_eboot_08816E20(global_089C6CB4 *, ScePspFVector4 *, float);
-    void func_eboot_08814E84(global_089C6CB4 *, ScePspFVector4 *);
-}
-
 void StageBase::vtable_0x88(pmo *pmo, void *data) {
     vtable_0x88_params *args = (vtable_0x88_params *)data;
     ScePspFVector4 *position = &args->positions[0];
@@ -523,12 +504,12 @@ void StageBase::vtable_0x88(pmo *pmo, void *data) {
     scaleMatrix(&local_transform, one, one, one);
 
     for (int i = 0; i < args->count; ++i, ++position) {
-        if ((u8)func_eboot_08816E20(D_eboot_089C6CB4, position, args->cutoff) == true) {
+        if ((u8)func_eboot_08816E20(Singleton<Camera>::objectPtr, position, args->cutoff) == true) {
             setPosition(&local_transform, position->x, position->y, position->z);
             emit_world_model(&local_transform, &pmo->scale);
 
             ScePspFVector4 camera_position;
-            func_eboot_08814E84(D_eboot_089C6CB4, &camera_position);
+            func_eboot_08814E84(Singleton<Camera>::objectPtr, &camera_position);
 
             float d2 = distanceSquared(position, &camera_position);
             if (d2 <= 2250000.0f + args->cutoff * args->cutoff) {
@@ -613,30 +594,26 @@ void StageBase::vtable_0x90(pmo *pmo, void *data, u8 mesh_index) {
     emit_world_model(&this->transform, &pmo->scale);
 }
 
-extern "C" {
-    int func_eboot_088566DC(global_089C7508 *);
-}
-
 void StageBase::vtable_0x94(pmo *pmo, void *data, u8 mesh_index) {
     vtable_0x94_params *state = (vtable_0x94_params *)data;
 
-    if ((u8)func_eboot_088566DC(D_eboot_089C7508) == 0) {
+    if ((u8)func_eboot_088566DC(Singleton<GameSys>::objectPtr) == 0) {
         switch (state->c) {
         case 0:
             if (--state->e < 0) {
-                state->e = (System::objectPtr->next_index(1) % 60) + 30;
+                state->e = (Singleton<System>::objectPtr->next_index(1) % 60) + 30;
                 ++state->c;
             }
             break;
         case 1:
-            state->d = state->a + (System::objectPtr->next_index(1) % (state->b - state->a));
+            state->d = state->a + (Singleton<System>::objectPtr->next_index(1) % (state->b - state->a));
             if (--state->e < 0) {
                 ++state->c;
             }
             break;
         case 2:
             if (state->d > 0xFF - 4) {
-                state->e = (System::objectPtr->next_index(1) % 180) + 180;
+                state->e = (Singleton<System>::objectPtr->next_index(1) % 180) + 180;
                 state->d = 0xFF;
                 state->c = 0;
             } else {
@@ -658,45 +635,32 @@ void StageBase::vtable_0x98(pmo *, void *) {
 }
 
 void StageBase::clear() {
-    memset(&prop_pmo, 0, sizeof(prop_pmo));
-    memset(&prop_skeleton, 0, sizeof(prop_skeleton));
+    memset((void *)&prop_pmo, 0, sizeof(prop_pmo));
+    memset((void *)&prop_skeleton, 0, sizeof(prop_skeleton));
     reset_transform();
     unknown_0x330 = 0; // environment_params->type
     flag_0x3D4 = false;
-    flags &= ~drawable::VISIBLE;
+    flags &= ~Draw::VISIBLE;
     unknown_0x1C0 = 0; // animation timer?
     unknown_0x1C2 = 0;
     method_088CDCAC();
     set_ptmf_0x3D8(&StageBase::vtable_0x4C);
 }
 
-extern "C" {
-    extern void *D_eboot_08A5DE5C;
-    int func_eboot_08885198(void *, u32, u8, u32, u8);
-    void func_eboot_08883858(void *, u32, u32, u32, u32, u32, ScePspFVector4*, u32, u32, u32, bool);
-    int func_eboot_088852C8(void *, u32, u32, u32);
-    void func_eboot_0888444C(void *, u32, u32, u32, u32, ScePspFVector4 *, u32, u32, u32);
-
-    bool func_eboot_0884F9A0(void *, int);
-
-    extern void *D_eboot_09A4ADAC;
-    bool func_eboot_088D0824(void *, u32, u8);
-}
-
 void StageBase::vtable_0x1C() {
     int i;
     stage_sound *sound = vtable_0xB0();
     for (i = 0; i < vtable_0xAC(); ++i, ++sound) {
-        if ((bool)(D_eboot_089C7508->flags_0x6AF14 & 1) == false && func_eboot_0884F9A0(D_eboot_089C7508, 0) == true) {
-            func_eboot_08885198(D_eboot_08A5DE5C, sound->unknown_0x4, 0xC0, i + 1, 0);
+        if ((bool)(Singleton<GameSys>::objectPtr->flags_0x6AF14 & 1) == false && func_eboot_0884F9A0(Singleton<GameSys>::objectPtr, 0) == true) {
+            func_eboot_08885198(Singleton<Sound>::objectPtr, sound->unknown_0x4, 0xC0, i + 1, 0);
         } else {
-            if (func_eboot_088D0824(D_eboot_09A4ADAC, sound->unknown_0x8, 0) != false) {
+            if (func_eboot_088D0824(Singleton<Evdemo>::objectPtr, sound->unknown_0x8, 0) != false) {
                 continue;
             }
             if (sound->unknown_0x0 == 0) {
                 StageManager::objectPtr->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC);
             } else {
-                func_eboot_08883858(D_eboot_08A5DE5C, sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC, 0, 0, false);
+                func_eboot_08883858(Singleton<Sound>::objectPtr, sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC, 0, 0, false);
             }
         }
     }
@@ -711,7 +675,7 @@ stage_sound *StageBase::vtable_0xB0() {
 }
 
 void StageBase::vtable_0x20() {
-    if ((bool)(D_eboot_089C7508->flags_0x6AF14 & 1) != true) {
+    if ((bool)(Singleton<GameSys>::objectPtr->flags_0x6AF14 & 1) != true) {
         int i;
         u16 *shorts = StageManager::objectPtr->stage->definitions()->unknown_0x10;
         for (i = 0; i < (int)StageManager::objectPtr->stage->definitions()->unknown_0x3E; ++i, shorts += 12) {
@@ -719,8 +683,8 @@ void StageBase::vtable_0x20() {
             if (shorts[1] == 0x17 && shorts[11] == 0) {
                 ScePspFVector4 *position = vtable_0x44();
                 if (position != NULL) {
-                    if ((0 < (D_eboot_089C7508->flags_0x6AF14 & 1)) == 0) {
-                        u8 byte_0x2E = D_eboot_089C7508->byte_0x2E;
+                    if ((0 < (Singleton<GameSys>::objectPtr->flags_0x6AF14 & 1)) == 0) {
+                        u8 byte_0x2E = Singleton<GameSys>::objectPtr->byte_0x2E;
                         switch (byte_0x2E) {
                         default:
                             break;
@@ -728,8 +692,8 @@ void StageBase::vtable_0x20() {
                         case 5:
                         case 7:
                         case 8:
-                            if (func_eboot_088852C8(D_eboot_08A5DE5C, 6, 0xC0, 0) != false) {
-                                func_eboot_08885198(D_eboot_08A5DE5C, 6, 0xC0, 0, 0);
+                            if (func_eboot_088852C8(Singleton<Sound>::objectPtr, 6, 0xC0, 0) != false) {
+                                func_eboot_08885198(Singleton<Sound>::objectPtr, 6, 0xC0, 0, 0);
                             }
                             global_sound = 1;
                             break;
@@ -745,21 +709,21 @@ void StageBase::vtable_0x20() {
     }
     stage_sound *sound = vtable_0xB0();
     for (int i = 0; i < vtable_0xAC(); ++i, ++sound) {
-        if ((0 < (D_eboot_089C7508->flags_0x6AF14 & 1)) == 0 &&
-            func_eboot_0884F9A0(D_eboot_089C7508, 0) == 1) {
-            if (func_eboot_088852C8(D_eboot_08A5DE5C, sound->unknown_0x4, 0xC0, i + 1) != 0) {
-                func_eboot_08885198(D_eboot_08A5DE5C, sound->unknown_0x4, 0xC0, i + 1, 0);
+        if ((0 < (Singleton<GameSys>::objectPtr->flags_0x6AF14 & 1)) == 0 &&
+            func_eboot_0884F9A0(Singleton<GameSys>::objectPtr, 0) == 1) {
+            if (func_eboot_088852C8(Singleton<Sound>::objectPtr, sound->unknown_0x4, 0xC0, i + 1) != 0) {
+                func_eboot_08885198(Singleton<Sound>::objectPtr, sound->unknown_0x4, 0xC0, i + 1, 0);
             }
-        } else if (func_eboot_088D0824(D_eboot_09A4ADAC, sound->unknown_0x8, 1) == 0) {
+        } else if (func_eboot_088D0824(Singleton<Evdemo>::objectPtr, sound->unknown_0x8, 1) == 0) {
             if (sound->unknown_0x0 == 0) {
                 StageManager::objectPtr->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC);
             } else {
-                if (D_eboot_089C7508->short_0x1C % sound->unknown_0x0 == 0) {
-                    func_eboot_08883858(D_eboot_08A5DE5C, sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC, 0, 0, false);
+                if (Singleton<GameSys>::objectPtr->short_0x1C % sound->unknown_0x0 == 0) {
+                    func_eboot_08883858(Singleton<Sound>::objectPtr, sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC, 0, 0, false);
                 }
             }
             if (sound->unknown_0x0 != 0 && sound->unknown_0x8 != 0x50) {
-                func_eboot_0888444C(D_eboot_08A5DE5C, sound->unknown_0x4, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC, 0, 0);
+                func_eboot_0888444C(Singleton<Sound>::objectPtr, sound->unknown_0x4, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC, 0, 0);
             }
         }
     }
@@ -772,16 +736,16 @@ void StageBase::call_ptmf_0x3D8() {
 }
 
 void StageBase::destroy() {
-    func_eboot_08885198(D_eboot_08A5DE5C, 6, 0xC0, 0, 0);
+    func_eboot_08885198(Singleton<Sound>::objectPtr, 6, 0xC0, 0, 0);
     int i;
     stage_sound *sound = vtable_0xB0();
     for (i = 0; i < vtable_0xAC(); ++i, ++sound) {
-        func_eboot_08885198(D_eboot_08A5DE5C, sound->unknown_0x4, 0xC0, i + 1, 0);
+        func_eboot_08885198(Singleton<Sound>::objectPtr, sound->unknown_0x4, 0xC0, i + 1, 0);
     }
 }
 
 void StageBase::draw() {
-    if (D_eboot_089C7508->stage_id != 0) {
+    if (Singleton<GameSys>::objectPtr->stage_id != 0) {
         if (vtable_0x48() != 0) {
             vmidt_q(&transform);
             if (vtable_0x48()->model_commands != 0) {
@@ -903,43 +867,20 @@ void StageBase::vtable_0x4C() {
     sky_gradient_vdata[1].z = 0;
     sky_gradient_vdata[2].z = 0;
     sky_gradient_vdata[0].z = 0;
-    flags |= drawable::VISIBLE;
+    flags |= Draw::VISIBLE;
     vtable_0x1C();
     method_088CDCAC();
     set_ptmf_0x3D8(&StageBase::vtable_0x50);
 }
 
-extern "C" {
-    struct resource_type {
-        enum {
-            PICKAXE = 3,
-            BUG_NET = 4,
-        };
-    private: resource_type();
+struct BugDrawFlag {
+    enum {
+        SCALE_WITH_ALPHA = 1,
+        PERSISTENT = 2,
+        RANDOM_SPAWN_POSITION = 4,
     };
-
-    struct resource_node {
-        ScePspFVector3 position;
-        float unknown_0xC; // interaction distance?
-        u16 unknown_0x10; // loot table?
-        u16 remaining;
-        u16 type;
-        u16 unknown_0x16; // high tier rolls?
-    };
-
-    extern void *D_eboot_08A5DD4C;
-    resource_node *func_eboot_08869568(void *, int);
-
-    struct bug_flag {
-        enum {
-            SCALE_WITH_ALPHA = 1,
-            PERSISTENT = 2,
-            RANDOM_SPAWN_POSITION = 4,
-        };
-    private: bug_flag();
-    };
-}
-
+private: BugDrawFlag();
+};
 
 void StageBase::vtable_0x50() {
     if (flash_state != 0) {
@@ -960,29 +901,29 @@ void StageBase::vtable_0x50() {
             }
         }
     }
-    resource_node *node = NULL;
-    if ((bool)(D_eboot_089C7508->flags_0x6AF14 & 1) != true) {
-        node = func_eboot_08869568(D_eboot_08A5DD4C, D_eboot_089C7508->stage_id);
+    ResourceNode *node = NULL;
+    if ((bool)(Singleton<GameSys>::objectPtr->flags_0x6AF14 & 1) != true) {
+        node = func_eboot_08869568(Singleton<Quest>::objectPtr, Singleton<GameSys>::objectPtr->stage_id);
     }
     if (node) {
         while (node->position.x != -1.0f) {
-            if (node->remaining > 0 && node->type == resource_type::BUG_NET) {
+            if (node->remaining > 0 && node->type == ResourceType::BUG_NET) {
                 stage_definitions *assets = StageManager::objectPtr->stage->definitions();
                 if (assets->bug_mesh_index != -1 && (unknown_0x1C0 & 0x7F) == 0) {
                     ScePspFVector4 spawn_center, spawn_box;
                     sv_q(&spawn_center, node->position.x, node->position.y + 65.0f, node->position.z, 0.0f);
                     sv_q(&spawn_box, 64.0f, 64.0f, 64.0f, 0.0f);
-                    switch (D_eboot_089C7508->stage_id) {
+                    switch (Singleton<GameSys>::objectPtr->stage_id) {
                         case stages::TOWER_3:
                         case stages::GREAT_FOREST_N_2: {
                             stage_definitions *assets = StageManager::objectPtr->stage->definitions();
-                            u32 flags = bug_flag::RANDOM_SPAWN_POSITION;
+                            u32 flags = BugDrawFlag::RANDOM_SPAWN_POSITION;
                             StageManager::objectPtr->push_prop_089B969C(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
                             break;
                         }
                         default: {
                             stage_definitions *assets = StageManager::objectPtr->stage->definitions();
-                            u32 flags = bug_flag::RANDOM_SPAWN_POSITION | bug_flag::SCALE_WITH_ALPHA;
+                            u32 flags = BugDrawFlag::RANDOM_SPAWN_POSITION | BugDrawFlag::SCALE_WITH_ALPHA;
                             StageManager::objectPtr->push_prop_089B969C(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
                             break;
                         }
@@ -999,18 +940,17 @@ void StageBase::vtable_0x50() {
 }
 
 extern "C" {
-    extern void *D_game_task_09C0D430;
-    u8 func_game_task_09AAEE58(void *, u8, bool, bool);
+    struct EnemyManager;
+    u8 func_game_task_09AAEE58(EnemyManager *, u8, bool, bool);
 }
 
 
 bool StageBase::method_088CDC74() {
-    return func_game_task_09AAEE58(D_game_task_09C0D430, 54, false, false) == true;
+    return func_game_task_09AAEE58(Singleton<EnemyManager>::objectPtr, 54, false, false) == true;
 }
 
 extern "C" {
-    bool func_eboot_0886A304(void *, bool);
-    int func_eboot_0886A354(void *, bool);
+
 }
 
 void StageBase::method_088CDCAC() {
@@ -1019,21 +959,21 @@ void StageBase::method_088CDCAC() {
         return;
     }
 
-    if (func_eboot_0886A304(D_eboot_08A5DD4C, true)) {
+    if (func_eboot_0886A304(Singleton<Quest>::objectPtr, true)) {
         return;
     }
 
-    if (func_game_task_09AAEE58(D_game_task_09C0D430, 54, true, true) == true) {
+    if (func_game_task_09AAEE58(Singleton<EnemyManager>::objectPtr, 54, true, true) == true) {
         unknown_0x444 = 2;
         return;
     }
 
-    if (func_eboot_0886A354(D_eboot_08A5DD4C, true) - func_eboot_0886A354(D_eboot_08A5DD4C, false) < 900) {
+    if (func_eboot_0886A354(Singleton<Quest>::objectPtr, true) - func_eboot_0886A354(Singleton<Quest>::objectPtr, false) < 900) {
         unknown_0x444 = 0;
         return;
     }
 
-    if ((func_eboot_0886A354(D_eboot_08A5DD4C, false) / 7200 & 1) != 0) {
+    if ((func_eboot_0886A354(Singleton<Quest>::objectPtr, false) / 7200 & 1) != 0) {
         unknown_0x444 = 0;
         return;
     }
@@ -1050,7 +990,7 @@ inline u16 atan2s16(float y, float x) {
 }
 
 void StageBase::draw_sky_gradient() {
-    u16 camera_angle = atan2s16(-D_eboot_089C6CB4->position.x, -D_eboot_089C6CB4->position.z);
+    u16 camera_angle = atan2s16(-Singleton<Camera>::objectPtr->position.x, -Singleton<Camera>::objectPtr->position.z);
     u16 sun_angle = atan2s16(sky_gradient_origin.x, sky_gradient_origin.z);
     u16 dtheta = sun_angle - camera_angle;
     u16 top = sky_gradient_top;

@@ -1,3 +1,5 @@
+// FIXME: delete this file
+
 #ifndef MHP2G_DECOMP__IO_HPP
 #define MHP2G_DECOMP__IO_HPP
 
@@ -10,8 +12,6 @@
 #include <pspthreadman_kernel.h>
 #include <pspumd.h>
 #include <pspiofilemgr_stat.h>
-
-#include "file_sys.hpp"
 
 extern "C" {
     //#include <pspiofilemgr.h> # sceIoLseek needs to take 64-bit offset for byte-matching

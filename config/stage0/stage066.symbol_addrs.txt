@@ -23,5 +23,5 @@ func_game_task_09A74750 = 0x09A74750; // type:func
 func_game_sub_09C16AE8 = 0x09C16AE8; // type:func
 func_game_sub_09CB1620 = 0x09CB1620; // type:func
 func_game_sub_09CB16F0 = 0x09CB16F0; // type:func
-D_game_sub_09CF6818 = 0x09CF6818;
+objectPtr__19Singleton<7Kitchen> = 0x09CF6818; // filename:D_game_sub_09CF6818
 D_stageXXX_09D5EC00 = 0x09D5EC00; // ignore:true

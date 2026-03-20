@@ -1,30 +1,19 @@
-#define INCLUDE_ASM(path, function)
+#include "file_sys_base.hpp"
 
-typedef signed char int8_t;
-typedef unsigned char uint8_t;
-typedef signed short int16_t;
-typedef unsigned short uint16_t;
-typedef signed int int32_t;
-typedef unsigned int uint32_t;
-typedef signed long int64_t;
-typedef unsigned long uint64_t;
+#include "pac.hpp"
 
-#include <psptypes.h>
 #include <pspge.h>
 #include <pspthreadman.h>
 #include <pspmodulemgr.h>
 
-#include "pac.hpp"
-#include "base_file_sys.hpp"
-
-void BaseFileSys::initialize() {
+void FileSysBase::initialize() {
     ge_edram_start = sceGeEdramGetAddr();
     ge_edram_end = (void*)((u32)ge_edram_start + sceGeEdramGetSize());
     flag_0x29208 = 0;
     fake_rofs_semaphore = sceKernelCreateSema("fakeRofsSema", 0x100, 1, 1, NULL);
 }
 
-void BaseFileSys::clear() {
+void FileSysBase::clear() {
     load_request *req = load_request_ringbuf;
     do {
         req++->state = 0;
@@ -34,17 +23,17 @@ void BaseFileSys::clear() {
     load_thread_status = 0;
 }
 
-void BaseFileSys::complete_one() {
+void FileSysBase::complete_one() {
     load_request_ringbuf[load_request_load_head].state = LOAD_REQUEST_COMPLETE;
     advance(load_request_load_head);
     load_thread_status = 0;
 }
 
-bool BaseFileSys::is_loading() {
+bool FileSysBase::is_loading() {
     return load_request_ringbuf[load_request_load_head].state != LOAD_REQUEST_COMPLETE;
 }
 
-bool BaseFileSys::is_loading(u16 file_id) {
+bool FileSysBase::is_loading(u16 file_id) {
     load_request *r = &load_request_ringbuf[0];
     for (int i = 0; i < 0x80; ++i, ++r) {
         if (r->state == LOAD_REQUEST_INCOMPLETE && r->file_id == file_id) {
@@ -54,7 +43,7 @@ bool BaseFileSys::is_loading(u16 file_id) {
     return false;
 }
 
-bool BaseFileSys::is_loading(u8 unknown_flag) {
+bool FileSysBase::is_loading(u8 unknown_flag) {
     load_request *r = &load_request_ringbuf[0];
     for (int i = 0; i < 0x80; ++i, ++r) {
         if (r->state == LOAD_REQUEST_INCOMPLETE && r->unknown_flag == unknown_flag) {
@@ -64,7 +53,7 @@ bool BaseFileSys::is_loading(u8 unknown_flag) {
     return false;
 }
 
-void BaseFileSys::unload_module(SceUID module) {
+void FileSysBase::unload_module(SceUID module) {
     if (module > 0) {
         int status;
         sceKernelStopModule(module, 0, 0, &status, 0);
@@ -72,7 +61,7 @@ void BaseFileSys::unload_module(SceUID module) {
     }
 }
 
-void BaseFileSys::cancel_all() {
+void FileSysBase::cancel_all() {
     int state = sceKernelSuspendDispatchThread();
 
     load_request *r = &load_request_ringbuf[0];
@@ -94,7 +83,7 @@ void BaseFileSys::cancel_all() {
     sceKernelResumeDispatchThread(state);
 }
 
-void BaseFileSys::update_ringbuf(u8 unknown_flag) {
+void FileSysBase::update_ringbuf(u8 unknown_flag) {
     int state = sceKernelSuspendDispatchThread();
 
     load_request *r = &load_request_ringbuf[load_request_load_head];
@@ -133,7 +122,7 @@ void BaseFileSys::update_ringbuf(u8 unknown_flag) {
     sceKernelResumeDispatchThread(state);
 }
 
-void BaseFileSys::cancel(int i) {
+void FileSysBase::cancel(int i) {
     for (int j = next(i); j != load_request_load_head; i = next(i), j = next(j)) {
         load_request &cur = load_request_ringbuf[j];
         load_request &prev = load_request_ringbuf[i];
@@ -178,10 +167,10 @@ u32 pac_header::size(int index) {
 }
 
 // render loading screen
-INCLUDE_ASM("asm/eboot/nonmatchings/base_file_sys", draw_loading_screen_impl__11BaseFileSysFv);
+INCLUDE_ASM("asm/eboot/nonmatchings/file_sys_base", draw_loading_screen_impl__11FileSysBaseFv);
 
 
-void BaseFileSys::set_flags(int flag, u32 argument) {\
+void FileSysBase::set_flags(int flag, u32 argument) {\
     if (flag_0x2920C == 0) {
         flag_0x29210 = 0;
         flag_0x2920C = 1;
@@ -203,7 +192,7 @@ void BaseFileSys::set_flags(int flag, u32 argument) {\
     }
 }
 
-void BaseFileSys::clear_flags() {
+void FileSysBase::clear_flags() {
     flag_0x2920C = 0;
     flag_0x29208 = 0;
 }

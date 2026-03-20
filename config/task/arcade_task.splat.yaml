@@ -62,9 +62,9 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, arcade_task]
+  - [0x80, asm, arcade_task_ovl]
   - [0xf114, pad]
-  - [0xf180, data, arcade_task]
+  - [0xf180, data, arcade_task_ovl]
   type: code
   vram: 0x09a5a5c0
 - - 0xfc00

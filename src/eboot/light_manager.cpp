@@ -1,11 +1,13 @@
-#include "common.h"
+#include "light_manager.hpp"
 
+#include "camera.hpp"
 #include "vfpu.h"
 #include "stage_manager.hpp"
 #include "immediate_ge.hpp"
-#include "light_manager.hpp"
 
 using namespace immediate_ge;
+
+template<> LightManager *Singleton<LightManager>::objectPtr;
 
 LightManager::LightManager() {
     memset(&data, 0, sizeof(data));
@@ -20,7 +22,7 @@ void LightManager::method_088607F0() {
     for (int i = 0; i < 2; ++i) {
         lighting_data *lighting = &data.lighting[i];
         if (i == 1U) {
-            copy_q(&lighting->lights[2].position, &D_eboot_089C6CB4->position);
+            copy_q(&lighting->lights[2].position, &Singleton<Camera>::objectPtr->position);
         }
     }
 }
@@ -89,7 +91,7 @@ void LightManager::method_088609FC(s16 index) {
     unknown_0x15C = index;
 
     // TODO: refer to pmo implementation
-    u8 *offset = &data.unknown_0x0[sizeof(lighting_data)];
+    int offset = (int)&data.unknown_0x0 + sizeof(lighting_data);
     lighting_data *lighting = (lighting_data*)(offset);
     for (int i = 0; i < 3; ++i) {
         light_data (&lights)[3] = lighting->lights;
@@ -119,7 +121,7 @@ ScePspFVector4Unaligned D_eboot_089A2CB4[3] = {
     {0.1, 0.1, 0.2, 0}
 };
 
-void LightManager::method_08860B1C(player *p) {
+void LightManager::method_08860B1C(Player *p) {
     lighting_data *lighting = &data.lighting[1];
     for (int i = 0; i < 3; ++i) {
         light_data *light = &lighting->lights[i];
@@ -191,7 +193,7 @@ void LightManager::method_08860EB8(character *c) {
         ge::lighttype(i, GE_LIGHTTYPE_DIRECTIONAL);
 
         ScePspVector4 position;
-        vtfm3_q(&position.fv, &D_eboot_089C6CB4->world, &light.position);
+        vtfm3_q(&position.fv, &Singleton<Camera>::objectPtr->world, &light.position);
         ge::lightposition(i, &position);
 
         ge::lightdiffusecolor(i, color.ui);
@@ -210,7 +212,7 @@ void LightManager::method_0886117C(s8 flag) {
     for (int i = 0; i < 3; ++i) {
         light_data &light = lighting.lights[i];
         ScePspVector4 position;
-        vtfm3_q(&position.fv, &D_eboot_089C6CB4->world, &light.position);
+        vtfm3_q(&position.fv, &Singleton<Camera>::objectPtr->world, &light.position);
 
         ge::lightposition(i, &position);
         ge::lighttype(i, GE_LIGHTTYPE_DIRECTIONAL);

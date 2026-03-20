@@ -1,8 +1,8 @@
-#include "common.h"
-
 #include "resource_manager.hpp"
 
 #pragma opt_unroll_loops on
+
+template<> ResourceManager *Singleton<ResourceManager>::objectPtr;
 
 ResourceManager::ResourceManager() {
     /// empty

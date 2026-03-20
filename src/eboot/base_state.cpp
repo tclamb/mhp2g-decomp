@@ -1,7 +1,7 @@
 #include "common.h"
 #include "state.hpp"
 
-void base_state::update() {
+void TaskBase::update() {
     if ((u8)is_overlay_loaded() != true) {
         return;
     }
@@ -18,7 +18,7 @@ void base_state::update() {
         status |= n;    \
     } while (0)
 
-s32 base_state::is_overlay_loaded() {
+s32 TaskBase::is_overlay_loaded() {
     s32 active = 0;
     switch (STAGE(load_status)) {
     case 1:
@@ -49,10 +49,10 @@ s32 base_state::is_overlay_loaded() {
     return active;
 }
 
-void *base_state::operator new(u32, void *p) {
+void *TaskBase::operator new(u32, void *p) {
     return p;
 }
 
-void base_state::operator delete(void *) {
+void TaskBase::operator delete(void *) {
     // empty
 }

@@ -62,9 +62,9 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, install_task]
+  - [0x80, asm, install_task_ovl]
   - [0x3004, pad]
-  - [0x3080, data, install_task]
+  - [0x3080, data, install_task_ovl]
   type: code
   vram: 0x09a5a5c0
 - - 0x3200

@@ -1,14 +1,12 @@
-#pragma opt_unroll_loops on
-
-#include "common.h"
+#include "vram_manager.hpp"
 
 #include <pspsdk/pspge.h>
 #include "ge.hpp"
-#include "vram_manager.hpp"
 #include "immediate_ge.hpp"
 
-template<>
-VramManager *Singleton<VramManager>::objectPtr;
+#pragma opt_unroll_loops on
+
+template<> VramManager *Singleton<VramManager>::objectPtr;
 
 void VramManager::method_08812A44() {
     vramStart = sceGeEdramGetAddr();
@@ -262,7 +260,7 @@ void *VramManager::method_088133D0(u8 vramId) {
 
 u8 VramManager::method_088133FC(u8 vramId, tmh_header *tmh, u32 textureIndex, u32 imageIndex, u32 paletteIndex) {
     GeTexture texture;
-    if ((u8)func_eboot_08859768(Ge::objectPtr, tmh, textureIndex, imageIndex, paletteIndex, &texture) == 0) {
+    if ((u8)func_eboot_08859768(Singleton<Ge>::objectPtr, tmh, textureIndex, imageIndex, paletteIndex, &texture) == 0) {
         return INVALID_ID;
     }
 
@@ -276,7 +274,7 @@ u8 VramManager::method_088133FC(u8 vramId, tmh_header *tmh, u32 textureIndex, u3
         method_08813024(copyId);
         return INVALID_ID;
     }
-    
+
     u32 width;
     u32 height;
     switch (allocation.texture.imageFormat) {
@@ -340,7 +338,7 @@ u8 VramManager::method_088133FC(u8 vramId, tmh_header *tmh, u32 textureIndex, u3
     *write_head++ = GE_CMD_BASE << 24;
     *write_head++ = GE_CMD_JUMP << 24;
 
-    func_eboot_088593A0(Ge::objectPtr, display_list, write_head - &display_list[0], 1);
+    func_eboot_088593A0(Singleton<Ge>::objectPtr, display_list, write_head - &display_list[0], 1);
 
     return copyId;
 }

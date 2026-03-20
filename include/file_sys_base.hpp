@@ -1,3 +1,5 @@
+#pragma once
+
 #include "common.h"
 
 enum load_request_state {
@@ -31,8 +33,8 @@ struct file_size_pair {
     u32 size;
 };
 
-struct BaseFileSys {
-    virtual ~BaseFileSys() {}
+struct FileSysBase {
+    virtual ~FileSysBase() {}
     virtual void initialize();
     virtual void stop() = 0;
     virtual void draw_loading_screen() = 0;

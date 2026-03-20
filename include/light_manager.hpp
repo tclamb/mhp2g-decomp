@@ -1,7 +1,7 @@
 #pragma once
 
-#include "singleton.hpp"
 #include "character.hpp"
+#include "singleton.hpp"
 #include "player.hpp"
 
 struct light_data {
@@ -32,7 +32,7 @@ struct LightManager : Singleton<LightManager> {
     void method_08860840(light_data *, s16, u16);
     void method_088609FC(s16);
     void method_08860A70(character *);
-    void method_08860B1C(player *);
+    void method_08860B1C(Player *);
     void method_08860C4C();
     ScePspUnion32 method_08860CA8(character *, int);
     void method_08860EB8(character *);

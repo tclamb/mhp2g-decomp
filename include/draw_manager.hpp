@@ -1,8 +1,9 @@
 #pragma once
 
-#include "singleton.hpp"
-#include "drawable.hpp"
+#include "common.h"
+#include "draw.hpp"
 #include "character.hpp"
+#include "singleton.hpp"
 
 extern u32 *DRAWABLE_WRITE_HEAD;
 
@@ -35,8 +36,8 @@ private:
 };
 
 struct DrawManager : Singleton<DrawManager> {
-    drawable *z_index[111]; // 111 == sum(z_index_bucket_length)
-    drawable **z_index_buckets[render_group::GROUP_COUNT];
+    Draw *z_index[111]; // 111 == sum(z_index_bucket_length)
+    Draw **z_index_buckets[render_group::GROUP_COUNT];
     u8 writing;
     u8 fragment_group;
     u32 *fragment_start;
@@ -56,12 +57,12 @@ struct DrawManager : Singleton<DrawManager> {
     void end_fragment();
     int add(u8 group, character *character, bool no_culling);
     int add(u8 group, model *model, bool no_culling);
-    int add(u8 group, drawable *object, ScePspFVector4 *position, bool no_culling);
+    int add(u8 group, Draw *object, ScePspFVector4 *position, bool no_culling);
     bool queue_vram_transfer(void *unknown_data, u8 unknown_index);
     void world_model(ScePspFMatrix4 *transform);
 
 private:
     bool vram_transfer();
 
-    inline drawable **head(u8 group, int index);
+    inline Draw **head(u8 group, int index);
 };

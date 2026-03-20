@@ -3,8 +3,8 @@
 #include "common.h"
 
 #include "cache.hpp"
-#include "drawable.hpp"
-#include "resource_manager.hpp"
+#include "draw.hpp"
+#include "singleton.hpp"
 #include "stage_base.hpp"
 #include "pac.hpp"
 
@@ -13,7 +13,7 @@ struct prop_params {
     float floats[4];
 };
 
-struct base_prop : drawable {
+struct base_prop : Draw {
     typedef void (base_prop::*ptmf)(void);
 
     base_prop() {

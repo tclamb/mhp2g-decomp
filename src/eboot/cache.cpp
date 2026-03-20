@@ -1,5 +1,3 @@
-#include "common.h"
-
 #include "cache.hpp"
 
 void cache::reset(void *s, u32 l) {

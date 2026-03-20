@@ -1,13 +1,12 @@
 #pragma once
 
 #include "common.h"
-#include "singleton.hpp"
 #include "model.hpp" // FIXME: move tmh structs into their own header
 
 typedef u32 ge_command;
 typedef ge_command *display_list;
 
-struct Ge : Singleton<Ge> {
+struct Ge {
     float norm;
     u32 active_buffer;
     ge_command root_display_lists[2][2*20];

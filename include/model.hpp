@@ -3,8 +3,7 @@
 #include "common.h"
 
 #include "bone.hpp"
-
-#include "drawable.hpp"
+#include "draw.hpp"
 
 struct skeleton {
     inline skeleton() {
@@ -168,7 +167,7 @@ struct pmo {
 // possible wrapper class?
 void emit_world_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale);
 
-struct model : drawable {
+struct model : Draw {
     model();
     virtual ~model();
     virtual void draw();

@@ -2,13 +2,13 @@
 
 #include "common.h"
 
-struct base_state {
-    typedef void (base_state::*mem_fn)();
+struct TaskBase {
+    typedef void (TaskBase::*mem_fn)();
 
-    inline base_state() { set_action(&base_state::load); }
-    inline base_state(mem_fn action) { set_action(action); };
+    inline TaskBase() { set_action(&TaskBase::load); }
+    inline TaskBase(mem_fn action) { set_action(action); };
 
-    virtual ~base_state() {};
+    virtual ~TaskBase() {};
     virtual void update();
     virtual void load() = 0;
 
@@ -31,14 +31,4 @@ protected:
 
 private:
     s32 is_overlay_loaded();
-};
-
-struct cont_state : base_state {
-    cont_state();
-    virtual ~cont_state();
-    virtual void load();
-
-    u32 status;
-
-    void on_load();
 };

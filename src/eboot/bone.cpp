@@ -1,8 +1,6 @@
-#include "common.h"
+#include "bone.hpp"
 
 #include "vfpu.h"
-
-#include "bone.hpp"
 
 INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885F840);
 

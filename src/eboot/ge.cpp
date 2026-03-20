@@ -1,8 +1,7 @@
-#include "common.h"
+#include "ge.hpp"
+#include "singleton.hpp"
 
 #include <pspgecmd.h>
-
-#include "ge.hpp"
 
 #define emit(out, cmd) do { \
     *out++ = cmd; \
@@ -16,6 +15,11 @@
 #include <pspge.h>
 #include <pspdisplay.h>
 
+template<> Ge *Singleton<Ge>::objectPtr;
+u8 D_eboot_08A5DD14;
+volatile bool GE_END_REACHED;
+u32 D_eboot_08A5DD18;
+u32 D_eboot_08A5DD1C;
 
 s16 BLANK_BUFFER_VERTEX_DATA[2][4] = {
     {0, 0, 0, -1},

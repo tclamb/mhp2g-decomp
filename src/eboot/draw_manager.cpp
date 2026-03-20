@@ -1,20 +1,20 @@
-#include "common.h"
+#include "draw_manager.hpp"
+
+#include "camera.hpp"
 #include "singleton.hpp"
 #include "immediate_ge.hpp"
-
-#include "drawable.hpp"
+#include "draw.hpp"
 #include "model.hpp"
-#include "draw_manager.hpp"
 #include "stage_manager.hpp"
 #include "vram_manager.hpp"
 #include "vfpu.h"
+#include "game_sys.hpp"
 
 #pragma opt_unroll_loops on
 
 using namespace immediate_ge;
 
-template<>
-DrawManager *Singleton<DrawManager>::objectPtr;
+template<> DrawManager *Singleton<DrawManager>::objectPtr;
 u32 *DRAWABLE_WRITE_HEAD;
 u16 D_eboot_089C70D4[2];
 ScePspFVector3 D_eboot_089C70D8;
@@ -55,7 +55,7 @@ DrawManager::~DrawManager() {
 void DrawManager::reset() {
     clear();
     if (start_fragment(render_group::RESET)) {
-        global_089C6CB4 *global = D_eboot_089C6CB4;
+        Camera *global = Singleton<Camera>::objectPtr;
         ge::viewportscale(global->viewport_scale);
         ge::viewportcenter(global->viewport_center);
 
@@ -146,13 +146,6 @@ void DrawManager::clear() {
     }
 }
 
-extern "C" {
-    extern struct global_089C7508 {
-        u8 padding_0x0[0x6AF0E];
-        u16 stage_id;
-    } *D_eboot_089C7508;
-}
-
 void DrawManager::draw() {
     for (int i = 0; i < render_group::GROUP_COUNT; ++i) {
         if (start_fragment(i)) {
@@ -160,18 +153,18 @@ void DrawManager::draw() {
                 ScePspFMatrix4 m;
                 vmidt_q(&m);
                 ge::view(&m);
-                ge::projection(&D_eboot_089C6CB4->projection);
+                ge::projection(&Singleton<Camera>::objectPtr->projection);
             }
 
             for (int j = 0; j < z_index_bucket_length[i]; ++j) {
-                drawable *object = z_index_buckets[i][j];
+                Draw *object = z_index_buckets[i][j];
                 while (object != NULL) {
                     object->draw();
                     object = object->next;
                 }
             }
 
-            if (i == 8 && D_eboot_089C7508->stage_id != 0) {
+            if (i == 8 && GameSys::objectPtr->stage_id != 0) {
                 StageBase *stage = StageManager::objectPtr->stage;
                 if (stage != 0 && stage->flag_0x3D4 == true) {
                     stage->method_088CD61C();
@@ -192,7 +185,7 @@ bool DrawManager::vram_transfer() {
     VramAllocation allocation;
     u32 display_list[16];
 
-    VramManager::objectPtr->method_08813364(Ge::objectPtr->active_buffer ^ 1, &allocation);
+    Singleton<VramManager>::objectPtr->method_08813364(Singleton<Ge>::objectPtr->active_buffer ^ 1, &allocation);
 
     // TODO: immediate_ge with destination parameter
     u16 transfer_height = 272;
@@ -211,7 +204,7 @@ bool DrawManager::vram_transfer() {
     *write_head++ = GE_CMD_BASE << 24;
     *write_head++ = GE_CMD_JUMP << 24;
 
-    return func_eboot_088593A0(Ge::objectPtr, display_list, 12, vram_transfer_fragment_index);
+    return func_eboot_088593A0(Singleton<Ge>::objectPtr, display_list, 12, vram_transfer_fragment_index);
 }
 
 void DrawManager::initialize() {
@@ -328,7 +321,7 @@ bool DrawManager::start_fragment(u8 group) {
     if ((bool)writing != false) {
         end_fragment();
     }
-    DRAWABLE_WRITE_HEAD = Ge::objectPtr->write_head();
+    DRAWABLE_WRITE_HEAD = Singleton<Ge>::objectPtr->write_head();
     if (DRAWABLE_WRITE_HEAD != NULL) {
         writing = true;
         fragment_start = DRAWABLE_WRITE_HEAD;
@@ -345,8 +338,8 @@ void DrawManager::end_fragment() {
         int length = DRAWABLE_WRITE_HEAD - fragment_start;
         if (length != 0) {
             DRAWABLE_WRITE_HEAD += 2;
-            func_eboot_088595E8(Ge::objectPtr, fragment_start, length + 2, fragment_group);
-            Ge::objectPtr->set_write_head(DRAWABLE_WRITE_HEAD);
+            func_eboot_088595E8(Singleton<Ge>::objectPtr, fragment_start, length + 2, fragment_group);
+            Singleton<Ge>::objectPtr->set_write_head(DRAWABLE_WRITE_HEAD);
         }
         DRAWABLE_WRITE_HEAD = NULL;
         fragment_start = NULL;
@@ -365,7 +358,7 @@ inline float max(float x, float y) {
 int DrawManager::add(u8 group, character *character, bool no_culling) {
     int result;
     do {
-        character->flags &= ~drawable::VISIBLE;
+        character->flags &= ~Draw::VISIBLE;
         if (no_culling == false) {
             float s = character->scale.x;
             s = max(s, character->scale.y);
@@ -379,7 +372,7 @@ int DrawManager::add(u8 group, character *character, bool no_culling) {
             ScePspFVector4 position;
             sv_q(&position, x, y, z, 0);
 
-            result = func_eboot_08816EA8(D_eboot_089C6CB4, &position, s * character->model_pmo.header->clipping_distance);
+            result = func_eboot_08816EA8(Singleton<Camera>::objectPtr, &position, s * character->model_pmo.header->clipping_distance);
             if ((u8)result == false) {
                 break;
             }
@@ -387,9 +380,9 @@ int DrawManager::add(u8 group, character *character, bool no_culling) {
         if (character->alpha != 0xFF && group == render_group::GROUP_5) {
             group = render_group::GROUP_7;
         }
-        result = add(group, (drawable*)character, &character->position, no_culling);
+        result = add(group, (Draw*)character, &character->position, no_culling);
         if ((u8)result == true) {
-            character->flags |= drawable::VISIBLE;
+            character->flags |= Draw::VISIBLE;
         }
     } while(0);
     return result;
@@ -397,32 +390,32 @@ int DrawManager::add(u8 group, character *character, bool no_culling) {
 
 int DrawManager::add(u8 group, model *model, bool no_culling) {
     int result;
-    model->flags &= ~drawable::VISIBLE;
+    model->flags &= ~Draw::VISIBLE;
     if (no_culling != false ||
-        (result = func_eboot_08816EA8(D_eboot_089C6CB4, &model->transform.w, model->model_pmo.header->clipping_distance), (u8)result != false)) {
+        (result = func_eboot_08816EA8(Singleton<Camera>::objectPtr, &model->transform.w, model->model_pmo.header->clipping_distance), (u8)result != false)) {
         result = add(group, model, &model->transform.w, no_culling);
         if ((u8)result == true) {
-            model->flags |= drawable::VISIBLE;
+            model->flags |= Draw::VISIBLE;
         }
     }
     return result;
 }
 
-inline drawable **DrawManager::head(u8 group, int index) {
+inline Draw **DrawManager::head(u8 group, int index) {
     return &z_index_buckets[group][(z_index_bucket_length[group] - 1) - index];
 }
 
-int DrawManager::add(u8 group, drawable *object, ScePspFVector4 *position, bool no_culling) {
+int DrawManager::add(u8 group, Draw *object, ScePspFVector4 *position, bool no_culling) {
     if (0 > group || group >= render_group::GROUP_COUNT) {
         return false;
     }
     object->next = NULL;
 
     float zindex =
-        position->x * D_eboot_089C6CB4->perspective.x.z +
-        position->y * D_eboot_089C6CB4->perspective.y.z +
-        position->z * D_eboot_089C6CB4->perspective.z.z +
-                      D_eboot_089C6CB4->perspective.w.z ;
+        position->x * Singleton<Camera>::objectPtr->perspective.x.z +
+        position->y * Singleton<Camera>::objectPtr->perspective.y.z +
+        position->z * Singleton<Camera>::objectPtr->perspective.z.z +
+                      Singleton<Camera>::objectPtr->perspective.w.z ;
     zindex *= -1;
     if (zindex < 0.0f) {
         if (no_culling == true) {
@@ -437,15 +430,15 @@ int DrawManager::add(u8 group, drawable *object, ScePspFVector4 *position, bool 
     }
     object->zindex = zindex;
 
-    int index = z_index_bucket_length[group] * ((zindex - D_eboot_089C6CB4->near_z) / (D_eboot_089C6CB4->far_z - D_eboot_089C6CB4->near_z));
+    int index = z_index_bucket_length[group] * ((zindex - Singleton<Camera>::objectPtr->near_z) / (Singleton<Camera>::objectPtr->far_z - Singleton<Camera>::objectPtr->near_z));
     if (index >= z_index_bucket_length[group]) {
         return false;
     }
 
-    drawable *next = *head(group, index);
+    Draw *next = *head(group, index);
     if (group == render_group::GROUP_7) {
-        drawable *cur = next;
-        drawable *prev = NULL;
+        Draw *cur = next;
+        Draw *prev = NULL;
         if (cur != NULL) {
             while (true) {
                 if (zindex >= cur->zindex) {
@@ -487,10 +480,10 @@ bool DrawManager::queue_vram_transfer(void *dst, u8 fragment_index) {
 
 void DrawManager::world_model(ScePspFMatrix4 *transform) {
     ScePspFMatrix4 m;
-    float norm = Ge::objectPtr->norm;
+    float norm = Singleton<Ge>::objectPtr->norm;
     scaleMatrix(&m, norm, norm, norm);
     vmmul_q(&m, transform, &m);
-    vmmul_q(&m, &m, &D_eboot_089C6CB4->world);
+    vmmul_q(&m, &m, &Singleton<Camera>::objectPtr->world);
 
     ge::world(&m);
 

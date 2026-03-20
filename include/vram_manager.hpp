@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common.h"
-#include "singleton.hpp"
 #include "model.hpp" // FIXME: move tmh structs into proper header
 
 struct VramTexture {
@@ -23,7 +22,7 @@ struct VramAllocation {
     };
 };
 
-struct VramManager : Singleton<VramManager> {
+struct VramManager {
     enum {
         INVALID_ID = 0xFF,
         INVALID_ADRS = 0xFFFFFFFF,
@@ -37,7 +36,8 @@ struct VramManager : Singleton<VramManager> {
     u32 unknown_0x458[MASK_COUNT];
     u32 unknown_0xC58[10];
 
-    VramManager();
+    VramManager() {}
+    ~VramManager() {}
 
     void method_08812A44();
     u8 method_08812BD8(u8 vramId, u16 width, u16 height, u16 image_format, u16 palette_width, u32 vramOffset);
