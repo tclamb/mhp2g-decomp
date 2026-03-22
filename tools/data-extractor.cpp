@@ -18,7 +18,7 @@ struct file_size_pair {
     u32 size;
 };
 
-#include "../src/eboot/file_sys_impl.decrypt_table.inc.cpp"
+#include "../src/eboot/file_sys.decrypt_table.inc.cpp"
 
 struct FileSysImpl {
     std::ifstream &in;
