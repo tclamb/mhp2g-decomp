@@ -56,19 +56,77 @@ segments:
   - bin
   - omit_ovl_header
 - align: 4
-  bss_size: 0x8100
+  bss_size: 0x80E0
   name: game_task
   start: 0x40
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, game_task_ovl]
+  - [0x80, asmtu, game_task_ovl] # temporary
+  - [0x4818, asmtu, bgm_server_game_task] # inline methods?
+  - [0x6020, asmtu, player_089B6378] # player subclass with weapon animations
+  - [0x139d0, asmtu, player_089B63FC] # most-derived player type; local?
+  - [0x4e068, asmtu, object_089B6480]
+  - [0x4ec80, asmtu, object_089B64A8]
+  - [0x4f858, asmtu, object_089B64D0]
+  - [0x50cd8, asmtu, object_089B64F8]
+  - [0x51320, asmtu, object_089B6520]
+  - [0x51880, asmtu, object_089B6548] # vespoid effect?
+  - [0x52028, asmtu, enemy_manager] # large monster vtables here
+  - [0x65400, asmtu, enemy] # enemy base type constructor & remaining class methods
+  # - [0x7b5d8, asmtu, kelbi] # & anteka
+  # - [0x81360, asmtu, mosswine] # variant
+  # - [0x862c0, asmtu, cephalos] # & cephadrome
+  # - [0x949f8, asmtu, felyne] # & melynx
+  # - [0x9a858, asmtu, veggie_elder]
+  # - [0x9cde0, asm] # method 0x18 for vtables thru treshi, maybe these all belong in same tu?
+  # - [0x9f3b8, asmtu, aptonoth]
+  # - [0xa7d80, asmtu, velociprey] # & variants
+  # - [0xaf560, asmtu, cat_cart]
+  # - [0xafea8, asmtu, vespoid] # regular & queen
+  # - [0xb5fb8, asmtu, velocidrome] # & variants
+  # - [0xbd858, asmtu, rock]
+  # - [0xbdf48, asmtu, hermitaur] # ceanataur, daimyo, shogun, variants
+  # - [0xd1380, asmtu, blango] # conga, congalala, rajang
+  # - [0xeeb80, asmtu, great_thunderbug]
+  # - [0xf1590, asmtu. shakalaka]
+  # - [0xf7e68, asmtu, remobra]
+  # - [0xfc290, asmtu, bulldrome]
+  # - [0x101c10, asmtu, treshi]
+  - [0x103630, asmtu, shell_manager]
   - [0x157e44, pad]
-  - [0x157e80, data, game_task_ovl]
-  - [0x1b1a00, init, game_task_ovl]
-  - [0x1b1be0, ctor, game_task_ovl]
+  - [0x157e80, .data, game_task_ovl]
+  - [0x158110, .data, bgm_server_game_task]
+  - [0x1581e0, .data, player_089B6378]
+  - [0x1582b0, .data, player_089B63FC]
+  - [0x158520, .data, object_089B6480]
+  - [0x158870, .data, object_089B64A8]
+  - [0x158b18, .data, object_089B64D0]
+  - [0x158fd0, .data, object_089B64F8]
+  - [0x159398, .data, object_089B6520]
+  - [0x1594d0, .data, object_089B6548]
+  - [0x159510, .data, enemy_manager]
+  - [0x1596a0, .data, enemy]
+  - [0x19c3b0, .data, shell_manager] # may be a few bytes earlier
+  - [0x1acc80, .rodata, game_task_ovl]
+  - [0x1acda8, .rodata, bgm_server_game_task]
+  - [0x1ace00, .rodata, player_089B6378]
+  - [0x1ad010, .rodata, player_089B63FC]
+  - [0x1ad9f8, .rodata, enemy_manager]
+  - [0x1add00, .rodata, enemy]
+  - [0x1b08e8, .rodata, shell_manager]
+  - [0x1b19f4, pad]
+  - [0x1b1a00, .init, enemy_manager]
+  - [0x1b1b70, .init, enemy]
+  - [0x1b1ba0, .init, shell_manager]
+  - [0x1b1be0, .ctor, enemy_manager]
+  - [0x1b1be4, .ctor, enemy]
+  - [0x1b1be8, .ctor, shell_manager]
   - [0x1b1bec, pad]
-  - [0x1b1c00, bss, game_task_ovl]
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0C180, name: game_task_ovl}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0C190, name: enemy_manager}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D588, name: enemy}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D998, name: shell_manager}
   type: code
   vram: 0x09a5a5c0
 - - 0x1b1c00
