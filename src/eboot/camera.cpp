@@ -223,12 +223,14 @@ INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08816EB0);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08817024);
 
+
 ScePspFVector4 D_eboot_089310B0 = {0, 0, -50, 0};
 ScePspFVector4 D_eboot_089310C0 = {0, 1, 0, 0};
 float D_eboot_089310D0 = 0.075;
 u8 D_eboot_089310D4[3] = {0, 2, 20};
 u16 D_eboot_089310D8[8] = {10, 20, 30, 40, 50, 60, 70, 80};
 float D_eboot_089310E8[3] = {2000, 3000, 4000};
+u8 pad_089310F4[12] = {};
 ScePspFVector4 D_eboot_08931100 = {0, 0, 320, 0};
 ScePspFVector4 D_eboot_08931110 = {0, 0, -1000, 0};
 
@@ -266,6 +268,8 @@ SmallCameraData D_eboot_08931220[2] = {
     {0, 280, 500, 0, 170, 0, 80},
     {0, 250, 100, 0, 0, 0, 80},
 };
+
+u8 pad_08931258[8] = {};
 
 ScePspFVector4 D_eboot_08931260[8] = {
     {0, 0, 30},
