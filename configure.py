@@ -24,6 +24,7 @@ from splat.util import progress_bar, symbols
 import spimdisasm
 
 from tools.generate import generate_overlay_config
+import tools.assets
 
 ROOT = Path(__file__).parent.resolve()
 BIN_DIR = ROOT / "bin"
@@ -102,6 +103,9 @@ class ModuleInfo:
 
     def asset_path(self):
         return self.artifact_path(ASSET_DIR, "")
+
+    def assets_yaml_path(self):
+        return self.artifact_path(CONFIG_DIR, ".assets.yaml")
 
     def src_path(self):
         return self.artifact_path(SRC_DIR, "")
@@ -917,11 +921,17 @@ if __name__ == "__main__":
         linker_entries = [entry for entry in split.linker_writer.entries if not entry.segment.name.startswith('omit_')]
         linker_entries_by_module_name[module.name] = linker_entries
 
+    def extract_assets(module: ModuleInfo):
+        yamlPath = module.assets_yaml_path()
+        if yamlPath.exists():
+            tools.assets.extract(yamlPath, module.symbol_addrs_paths())
 
     extract_iso()
     decrypt_eboot()
     split_module(EBOOT_MODULE)
+    extract_assets(EBOOT_MODULE)
     extract_overlays(generate_config=args.generate_overlay_config)
     for overlay in all_overlays:
         split_module(overlay)
+        extract_assets(overlay)
     build_stuff(linker_entries_by_module_name, github_workflow=args.github_workflow)

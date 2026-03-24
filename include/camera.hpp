@@ -3,17 +3,46 @@
 #include "common.h"
 #include "singleton.hpp"
 
-struct CameraComponent {
-    ~CameraComponent();
-    u8 pad_0x0[0x1A0];
+struct SubCameraData {
+    u8 pad_0x0[0x4E];
+    u8 unknown_0x4E;
+    u8 pad_0x4F;
 };
 
-struct Camera : NoInlineConstructorSingleton<Camera> {
+struct SubCamera {
+    SubCamera() {
+        unknown_0x90 = 0;
+        unknown_0x92 = 0;
+    }
+    ~SubCamera() {}
+
+    u8 pad_0x0[0x90];
+    u8 unknown_0x90;
+    bool unknown_0x91;
+    u8 unknown_0x92;
+    u8 pad_0x93[0xA0 - 0x93];
+    SubCameraData unknown_0xA0;
+    u8 unknown_0xF0[0x13A - 0xF0];
+    bool unknown_0x13A;
+    u8 pad_0x13B[0x1A0 - 0x13B];
+};
+
+struct Camera : Singleton<Camera> {
     float near_z;
     float far_z;
-    u8 padding_0x8[0xB0 - 0x8];
-    CameraComponent components_0xB0[6];
-    u8 padding_0xA70[0xB80 - 0xA70];
+    u8 padding_0x8[0x4];
+    float unknown_0xC;
+    float unknown_0x10;
+    u8 padding_0x14[0xB0 - 0x14];
+    SubCamera subCameras[6];
+    u8 padding_0xA70[0xAAA - 0xA70];
+    bool zClipping;
+    u8 padding_0xAAB[0xB34 - 0xAAB];
+    float unknown_0xB34;
+    u8 padding_0xB38[0xB70 - 0xB38];
+    float unknown_0xB70;
+    float unknown_0xB74;
+    u8 padding_0xB78[0xB80 - 0xB78];
     ScePspFMatrix4 perspective; // unsure
     ScePspFMatrix4 world;
     ScePspFMatrix4 projection;
@@ -25,6 +54,7 @@ struct Camera : NoInlineConstructorSingleton<Camera> {
     u8 padding_0xDB8[0xDD0 - 0xDB8];
 
     Camera();
+    ~Camera() {};
 };
 
 extern "C" {

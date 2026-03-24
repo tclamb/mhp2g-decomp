@@ -94,7 +94,7 @@ segments:
       - [0x2c94, asmtu, lib/libm]
       - [0x7d24, asmtu, lib/libc]
       - [0x10ff8, cpp, vram_manager]
-      - [0x11cac, asmtu, camera]
+      - [0x11cac, cpp, camera]
       - [0x15610, asmtu, ccc]
       - [0x15dd4, asmtu, cockpit]
       - [0x4943c, cpp, cont_task]

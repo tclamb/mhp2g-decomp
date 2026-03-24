@@ -134,6 +134,7 @@ func_em58_09D20CF8 = 0x09D20CF8; // type:func
 func_em58_09D20D08 = 0x09D20D08; // type:func
 func_em58_09D20D18 = 0x09D20D18; // type:func
 D_em58_09D22FB0 = 0x09D22FB0;
+D_em58_09D23010 = 0x09D23010; // type:CameraOp size:0x2D4
 D_em58_09D23778 = 0x09D23778;
 D_em58_09D23E10 = 0x09D23E10;
 D_em58_09D23E18 = 0x09D23E18;
