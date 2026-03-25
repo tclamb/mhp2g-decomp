@@ -20,7 +20,6 @@ struct load_request {
     u8 is_final_block;
     u8 needs_decryption;
     u8 needs_hashing;
-    u8 padding[3];
 };
 
 struct install_block_offset {
@@ -58,11 +57,9 @@ struct FileSysBase {
     u32 load_thread_status;
     SceUID file_descriptor;
     u8 unused_flag_0x1014;
-    u8 padding_0x1015[3];
     u32 data_bin_first_sector;
     char libfont_path[256];
     u8 is_playing_movie;
-    u8 padding_0x111d;
     u16 movie_file_id;
     u32 unknown_0x1120[8];
     file_size_pair file_size_pairs[812];

@@ -75,14 +75,12 @@ struct StageManager : Singleton<StageManager> {
     u32 vram_transfer_size;
     u8 unknown_0xA2C4[4];
     u8 unknown_0xA2C8;
-    u8 unknown_0xA2C9[7];
     ScePspFVector4 unknown_0xA2D0;
     base_prop *prop_list;
     pac_header *stage_pac;
     u8 unknown_0xA2E8[0x100];
     u8 flag_0xA3E8;
     u8 unknown_0xA3E9;
-    u8 unknown_0xA3EA[6];
 
     StageManager();
     ~StageManager();

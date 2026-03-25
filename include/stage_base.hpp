@@ -88,7 +88,7 @@ struct stage_inline_vertex_data {
     s16 x, y, z;
 };
 
-struct stage_light {
+struct StageLight {
     ScePspFVector3 position;
     ScePspFVector3 diffuse_color;
     ScePspFVector3 ambient_color;
@@ -149,12 +149,10 @@ struct StageBase : model {
 
     u16 unknown_0x1C0;
     u16 unknown_0x1C2;
-    u8 undefined_0x1C4[12];
     pmo prop_pmo;
     skeleton prop_skeleton;
     u8 unknown_0x330;
-    u8 undefined_0x331[3];
-    stage_light lights[3];
+    StageLight lights[3];
     s16 flash_state;
     s16 flash_frames;
     ScePspFVector3 sky_gradient_origin;
@@ -162,7 +160,6 @@ struct StageBase : model {
     s16 sky_gradient_height; // in 480i scanlines: 448 for full screen height
     ScePspUnion32 sky_gradient_colors[8];
     bool flag_0x3D4;
-    u8 undefined_0x3D5[3];
     ptmf ptmf_0x3D8;
     stage_inline_vertex_data sky_gradient_vdata[4];
     stage_inline_vertex_data flash_blend_vdata[2];

@@ -42,12 +42,10 @@ struct FileSys : FileSysBase {
     volatile SceUID sha1_thread_id;
     load_request *blocking_request;
     u8 is_data_file_encrypted;
-    u8 unknown_0x2f9f5[3];
     u32 movie_open_pos;
     volatile u32 key_lower;
     volatile u32 key_upper;
     u8 unknown_0x2fa04;
-    u8 unknown_0x2fa05[3];
     u32 unknown_0x2fa08;
     u32 unknown_0x2fa0c;
     volatile SceUID transfer_event_flag_id;
