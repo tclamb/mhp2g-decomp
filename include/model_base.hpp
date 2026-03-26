@@ -2,11 +2,11 @@
 
 #include "common.h"
 
-#include "bone.hpp"
+#include "joint.hpp"
 #include "draw.hpp"
 
-struct skeleton {
-    inline skeleton() {
+struct Hierarchy {
+    inline Hierarchy() {
         for (int i = 0; i < 4; ++i) {
             roots[i] = 0;
         }
@@ -18,13 +18,13 @@ struct skeleton {
         root_count = 0;
         chain_count = 0;
     }
-    virtual ~skeleton() {}
+    virtual ~Hierarchy() {}
 
     u8 unknown_0x4[0x10C];
-    bone *roots[4];
+    Joint *roots[4];
     u16 root_count;
     u16 chain_count; // ??
-    u32 bone_count;
+    u32 joint_count;
     u8 unknown_0x128[4];
     u32 *motion_table;
     u16 unknown_0x130[4];
@@ -150,8 +150,8 @@ struct pmo {
     pmo_mesh_lighting *mesh_lighting_data;
     ScePspFVector4 scale;
 
-    void draw(skeleton *skeleton, tmh *tmh, ScePspFMatrix4 *transform);
-    void drawMesh(skeleton *skeleton, tmh *tmh, u8 mesh);
+    void draw(Hierarchy *skeleton, tmh *tmh, ScePspFMatrix4 *transform);
+    void drawMesh(Hierarchy *skeleton, tmh *tmh, u8 mesh);
     void draw_alpha(tmh *tmh, ScePspFMatrix4 *transform, u32 mesh, u32 blend_mode, u8 alpha);
     void draw_rgba8888(tmh *tmh, ScePspFMatrix4 *transform, u32 mesh, u32 blend_mode, u32 color);
     int compile(void *, pmo_header *, pmo_mesh_data *);
@@ -175,7 +175,7 @@ struct ModelBase : Draw {
     ScePspFMatrix4 transform;
     pmo model_pmo;
     tmh model_tmh;
-    skeleton model_skeleton;
+    Hierarchy hierarchy;
 
     int compile_pmo(void *, pmo_header *, pmo_mesh_data *);
     int compile_tmh(void *, tmh_header *);

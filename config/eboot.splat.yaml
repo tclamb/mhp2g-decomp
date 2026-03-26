@@ -109,7 +109,7 @@ segments:
       - [0x58f40, asmtu, start_task]
       - [0x5924c, asmtu, item_manager]
       - [0x5ade8, asmtu, equip_manager]
-      - [0x5ddf4, cpp, bone]
+      - [0x5ddf4, cpp, joint]
       - [0x5ed14, cpp, light_manager]
       - [0x5fa88, cpp, model_base]
       - [0x629ec, asmtu, obj_base] # base class for em & player; embedded linked list next:0x1C4 prev:0x1C8
@@ -294,7 +294,7 @@ segments:
       - [0x1b4114, .vtables, fade_task]
       - [0x1b4128, .vtables, file_sys]
       - [0x1b4174, .vtables, start_task]
-      - [0x1b4188, .vtables, bone] # FIXME
+      - [0x1b4188, .vtables, joint]
       - [0x1b4198, .vtables, model_base]
       - [0x1b41c4, .vtables, obj_base]
       - [0x1b4204, .vtables, demo_task]

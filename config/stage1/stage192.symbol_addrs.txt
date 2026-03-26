@@ -1,4 +1,4 @@
-drawMesh__3pmoFP8skeletonP3tmhUc = 0x08861714; // type:func
+drawMesh__3pmoFP9HierarchyP3tmhUc = 0x08861714; // type:func
 push_prop_089B92BC__12StageManagerFP11prop_paramsUi = 0x088C5F88; // type:func
 __ct__9StageBaseFv = 0x088CA15C; // type:func
 __dt__9StageBaseFv = 0x088CA1E4; // type:func

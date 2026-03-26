@@ -1,5 +1,5 @@
 func_eboot_08852544 = 0x08852544; // type:func
-drawMesh__3pmoFP8skeletonP3tmhUc = 0x08861714; // type:func
+drawMesh__3pmoFP9HierarchyP3tmhUc = 0x08861714; // type:func
 set_mesh_alpha__3pmoFUsUc = 0x08862BB0; // type:func
 next_index__6SystemFUi = 0x0888FDCC; // type:func
 push_prop_089B943C__12StageManagerFP11prop_params = 0x088C6CA4; // type:func

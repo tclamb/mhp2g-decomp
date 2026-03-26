@@ -150,7 +150,7 @@ struct StageBase : ModelBase {
     u16 unknown_0x1C0;
     u16 unknown_0x1C2;
     pmo prop_pmo;
-    skeleton prop_skeleton;
+    Hierarchy prop_hierarchy;
     u8 unknown_0x330;
     StageLight lights[3];
     s16 flash_state;

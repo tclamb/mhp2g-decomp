@@ -10,8 +10,8 @@ struct bind_pose {
     u16 f0x64[14];
 };
 
-struct bone {
-    virtual ~bone();
+struct Joint {
+    virtual ~Joint();
     virtual void update(ScePspFMatrix4 *, ScePspFMatrix4 *, float x, float y, float z);
 
     ScePspFVector3 f0x4;
@@ -26,13 +26,13 @@ struct bone {
     float f0x118;
     float f0x11c;
     ScePspFMatrix3 f0x120;
-    bone *parent;
-    bone *sibling;
-    bone *child;
+    Joint *parent;
+    Joint *sibling;
+    Joint *child;
     bind_pose bind;
     bind_pose alt_bind;
 
-    bone *func_eboot_0885F920(bone *arg1, u32 arg2);
+    Joint *func_eboot_0885F920(Joint *arg1, u32 arg2);
     void func_eboot_0885FFB4(ScePspFVector4 *arg1, s32 arg2, float arg3, float arg4);
 
     static void operator delete(void *);

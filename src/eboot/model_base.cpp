@@ -11,7 +11,7 @@ using namespace immediate_ge;
 
 ModelBase::ModelBase() {
     memset((void *)&model_pmo, 0, sizeof(model_pmo));
-    memset((void *)&model_skeleton, 0, sizeof(model_skeleton));
+    memset((void *)&hierarchy, 0, sizeof(hierarchy));
     memset((void *)&model_tmh, 0, sizeof(model_tmh));
 }
 
@@ -20,19 +20,19 @@ ModelBase::~ModelBase() {
 }
 
 void ModelBase::draw() {
-    model_pmo.draw(&model_skeleton, &model_tmh, &transform);
+    model_pmo.draw(&hierarchy, &model_tmh, &transform);
 }
 
 void emit_world_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale);
 
-void pmo::draw(skeleton *skeleton, tmh *tmh, ScePspFMatrix4 *transform) {
+void pmo::draw(Hierarchy *hierarchy, tmh *tmh, ScePspFMatrix4 *transform) {
     emit_world_model(transform, &scale);
     for (int i = 0; i < header->mesh_count; ++i) {
-        drawMesh(skeleton, tmh,  i);
+        drawMesh(hierarchy, tmh,  i);
     }
 }
 
-void pmo::drawMesh(skeleton *skeleton, tmh *tmh, u8 mesh_index) {
+void pmo::drawMesh(Hierarchy *hierarchy, tmh *tmh, u8 mesh_index) {
     pmo_header *header = this->header;
     pmo_mesh_header *mesh = header->mesh_header(mesh_index);
     pmo_mesh_lighting *lighting = mesh_lighting(mesh_index);

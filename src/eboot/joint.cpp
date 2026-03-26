@@ -1,13 +1,13 @@
-#include "bone.hpp"
+#include "joint.hpp"
 
 #include "vfpu.h"
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885F840);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_0885F840);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885F8E0);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_0885F8E0);
 
-bone *bone::func_eboot_0885F920(bone *arg1, u32 arg2) {
-    bone *temp = arg1;
+Joint *Joint::func_eboot_0885F920(Joint *arg1, u32 arg2) {
+    Joint *temp = arg1;
     while (true) {
         if (arg1->key == arg2 || arg2 == -1) {
             return arg1;
@@ -34,26 +34,26 @@ bone *bone::func_eboot_0885F920(bone *arg1, u32 arg2) {
     return arg1;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885F998);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_0885F998);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FA04);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_0885FA04);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FB4C);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_0885FB4C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FBAC);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_0885FBAC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FBEC);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_0885FBEC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FC94);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_0885FC94);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FE3C);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_0885FE3C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_0885FF54);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_0885FF54);
 
 extern "C"
 void func_eboot_088633C4(ScePspFMatrix4*, ScePspFMatrix3*, ScePspFMatrix3*, ScePspFMatrix4*, u16*, float);
 
-void bone::func_eboot_0885FFB4(ScePspFVector4 *arg1, s32 arg2, float arg3, float arg4) {
+void Joint::func_eboot_0885FFB4(ScePspFVector4 *arg1, s32 arg2, float arg3, float arg4) {
     struct {
         ScePspFMatrix4 b;
         ScePspFMatrix4 a;
@@ -81,11 +81,11 @@ void bone::func_eboot_0885FFB4(ScePspFVector4 *arg1, s32 arg2, float arg3, float
     arg1->w = 0.0f;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_08860054);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_08860054);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_08860254);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_08860254);
 
-void bone::update(ScePspFMatrix4 *parentGlobalPose, ScePspFMatrix4 *parentLocalPose, float x, float y, float z) {
+void Joint::update(ScePspFMatrix4 *parentGlobalPose, ScePspFMatrix4 *parentLocalPose, float x, float y, float z) {
     float sx, sy, sz;
     ScePspFMatrix4 invScale;
     sx = bind.scale.x * x;
@@ -112,22 +112,22 @@ void bone::update(ScePspFMatrix4 *parentGlobalPose, ScePspFMatrix4 *parentLocalP
     }
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_08860534);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_08860534);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_08860640);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_08860640);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_088606C8);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_088606C8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_088606D8);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_088606D8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/bone", func_eboot_08860700);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_08860700);
 
-bone::~bone() {}
+Joint::~Joint() {}
 
-void *bone::operator new(u32 size, void *p) {
+void *Joint::operator new(u32 size, void *p) {
     return p;
 }
 
-void bone::operator delete(void *p) {
+void Joint::operator delete(void *p) {
     return;
 }

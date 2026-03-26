@@ -1,6 +1,6 @@
 add__11DrawManagerFUcP4DrawP14ScePspFVector4b = 0x0884CADC; // type:func
 func_eboot_0884F9A0 = 0x0884F9A0; // type:func
-drawMesh__3pmoFP8skeletonP3tmhUc = 0x08861714; // type:func
+drawMesh__3pmoFP9HierarchyP3tmhUc = 0x08861714; // type:func
 emit_world_model__FP14ScePspFMatrix4P14ScePspFVector4 = 0x0886234C; // type:func
 func_eboot_08885198 = 0x08885198; // type:func
 func_eboot_088852C8 = 0x088852C8; // type:func

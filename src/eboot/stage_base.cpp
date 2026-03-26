@@ -636,7 +636,7 @@ void StageBase::vtable_0x98(pmo *, void *) {
 
 void StageBase::clear() {
     memset((void *)&prop_pmo, 0, sizeof(prop_pmo));
-    memset((void *)&prop_skeleton, 0, sizeof(prop_skeleton));
+    memset((void *)&prop_hierarchy, 0, sizeof(prop_hierarchy));
     reset_transform();
     unknown_0x330 = 0; // environment_params->type
     flag_0x3D4 = false;
