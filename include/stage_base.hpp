@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common.h"
-#include "model.hpp"
+#include "model_base.hpp"
 
 struct stage_environment_params {
     u16 type;
@@ -94,7 +94,7 @@ struct StageLight {
     ScePspFVector3 ambient_color;
 };
 
-struct StageBase : model {
+struct StageBase : ModelBase {
     typedef void (StageBase::*ptmf)(void);
 
     StageBase();

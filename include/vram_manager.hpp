@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common.h"
-#include "model.hpp" // FIXME: move tmh structs into proper header
+#include "model_base.hpp" // FIXME: move tmh structs into proper header
 
 struct VramTexture {
     u16 alignedWidth;

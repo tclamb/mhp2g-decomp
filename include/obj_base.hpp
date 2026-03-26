@@ -1,9 +1,9 @@
 #pragma once
 
-#include "model.hpp"
+#include "model_base.hpp"
 
 // stub for type with vtable at D_eboot_089B5C10
-struct character : model {
+struct ObjBase : ModelBase {
     u8 padding_0x1C0[0x1DC - 0x1C0];
     ScePspFVector4 (*diffuse_light_color_override)[3];
     u8 padding_0x1E0[0x200 - 0x1E0];

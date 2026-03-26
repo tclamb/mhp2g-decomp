@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common.h"
-#include "model.hpp" // FIXME: move tmh structs into their own header
+#include "model_base.hpp" // FIXME: move tmh structs into their own header
 
 typedef u32 ge_command;
 typedef ge_command *display_list;

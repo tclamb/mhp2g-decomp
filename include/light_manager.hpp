@@ -1,6 +1,6 @@
 #pragma once
 
-#include "character.hpp"
+#include "obj_base.hpp"
 #include "singleton.hpp"
 #include "player.hpp"
 
@@ -31,10 +31,10 @@ struct LightManager : Singleton<LightManager> {
     void method_088607F0();
     void method_08860840(light_data *, s16, u16);
     void method_088609FC(s16);
-    void method_08860A70(character *);
+    void method_08860A70(ObjBase *);
     void method_08860B1C(Player *);
     void method_08860C4C();
-    ScePspUnion32 method_08860CA8(character *, int);
-    void method_08860EB8(character *);
+    ScePspUnion32 method_08860CA8(ObjBase *, int);
+    void method_08860EB8(ObjBase *);
     void method_0886117C(s8);
 };

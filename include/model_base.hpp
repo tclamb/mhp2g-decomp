@@ -167,9 +167,9 @@ struct pmo {
 // possible wrapper class?
 void emit_world_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale);
 
-struct model : Draw {
-    model();
-    virtual ~model();
+struct ModelBase : Draw {
+    ModelBase();
+    virtual ~ModelBase();
     virtual void draw();
 
     ScePspFMatrix4 transform;

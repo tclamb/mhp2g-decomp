@@ -111,8 +111,8 @@ segments:
       - [0x5ade8, asmtu, equip_manager]
       - [0x5ddf4, cpp, bone]
       - [0x5ed14, cpp, light_manager]
-      - [0x5fa88, cpp, model]
-      - [0x629ec, asmtu, obj] # base class for em & player; embedded linked list next:0x1C4 prev:0x1C8
+      - [0x5fa88, cpp, model_base]
+      - [0x629ec, asmtu, obj_base] # base class for em & player; embedded linked list next:0x1C4 prev:0x1C8
       - [0x64864, asmtu, obj_manager] # manager for the em/player objects; 15(?) linked list heads at 0x80028, 2:player, 3:ems, 7:npcs
       - [0x66fa0, asmtu, osk]
       - [0x674b8, asmtu, pad] # input
@@ -192,7 +192,7 @@ segments:
       - [0x12d0e4, .rodata, toast_notification]
       - [0x12d12c, .rodata, item_manager]
       - [0x12d144, .rodata, equip_manager]
-      - [0x12d274, .rodata, model]
+      - [0x12d274, .rodata, model_base]
       - [0x12d294, .rodata, osk]
       - [0x12d2e4, .rodata, quest]
       - [0x12d3ec, .rodata, result_check]
@@ -236,8 +236,8 @@ segments:
       - [0x1987ec, .data, item_manager]
       - [0x1a11d4, .data, equip_manager]
       - [0x1a11e4, .data, light_manager]
-      - [0x1a1298, .data, model]
-      - [0x1a169c, .data, obj]
+      - [0x1a1298, .data, model_base]
+      - [0x1a169c, .data, obj_base]
       - [0x1a16b4, .data, obj_manager]
       - [0x1a16d0, .data, pad]
       - [0x1a16f0, .data, quest]
@@ -295,8 +295,8 @@ segments:
       - [0x1b4128, .vtables, file_sys]
       - [0x1b4174, .vtables, start_task]
       - [0x1b4188, .vtables, bone] # FIXME
-      - [0x1b4198, .vtables, model]
-      - [0x1b41c4, .vtables, obj]
+      - [0x1b4198, .vtables, model_base]
+      - [0x1b41c4, .vtables, obj_base]
       - [0x1b4204, .vtables, demo_task]
       - [0x1b4218, .vtables, task_base]
       - [0x1b422c, .vtables, main]

@@ -1,4 +1,4 @@
-#include "model.hpp"
+#include "model_base.hpp"
 
 #include "vfpu.h"
 #include "draw_manager.hpp"
@@ -9,17 +9,17 @@
 
 using namespace immediate_ge;
 
-model::model() {
+ModelBase::ModelBase() {
     memset((void *)&model_pmo, 0, sizeof(model_pmo));
     memset((void *)&model_skeleton, 0, sizeof(model_skeleton));
     memset((void *)&model_tmh, 0, sizeof(model_tmh));
 }
 
-model::~model() {
+ModelBase::~ModelBase() {
     // empty
 }
 
-void model::draw() {
+void ModelBase::draw() {
     model_pmo.draw(&model_skeleton, &model_tmh, &transform);
 }
 
@@ -206,10 +206,10 @@ int pmo::compile(void *buffer, pmo_header *header, pmo_mesh_data *mesh_data) {
     return 1;
 }
 #else
-INCLUDE_ASM("asm/eboot/nonmatchings/model", compile__3pmoFPvP10pmo_headerP13pmo_mesh_data);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", compile__3pmoFPvP10pmo_headerP13pmo_mesh_data);
 #endif
 
-int model::compile_pmo(void *buffer, pmo_header *header, pmo_mesh_data *mesh_data) {
+int ModelBase::compile_pmo(void *buffer, pmo_header *header, pmo_mesh_data *mesh_data) {
     return model_pmo.compile(buffer, header, mesh_data);
 }
 
@@ -248,15 +248,15 @@ int tmh::compile(void *buffer, tmh_header *header, u8 index) {
     return 0;
 }
 
-int model::compile_tmh(void *buffer, tmh_header *header) {
+int ModelBase::compile_tmh(void *buffer, tmh_header *header) {
     return model_tmh.compile(buffer, header, 0);
 }
 
-void model::operator delete(void *p) {
+void ModelBase::operator delete(void *p) {
     // empty
 }
 
-void model::reset_transform() {
+void ModelBase::reset_transform() {
     flags = Draw::VISIBLE | Draw::DISPOSE;
     next = 0;
     zindex = 0.0f;
@@ -461,7 +461,7 @@ float spline(float t, float x0, float t0, float dxdt0, float x1, float t1, float
     return result;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088630C8);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088630C8);
 
 static int log2table[257] = {
     [0 ... 256] =  0xff,
@@ -476,8 +476,9 @@ static int log2table[257] = {
     [256] = 8,
 };
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08863190);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863190);
 
+// only a rotation & translation, no scale
 extern "C"
 void func_eboot_088632D0(ScePspFMatrix4 *, ScePspFMatrix4 *out, ScePspFMatrix3 *args) {
     vmidt_q(out);
@@ -485,32 +486,32 @@ void func_eboot_088632D0(ScePspFMatrix4 *, ScePspFMatrix4 *out, ScePspFMatrix3 *
     out->w.x = args->z.x; out->w.y = args->z.y; out->w.z = args->z.z;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088633C4);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088633C4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08863644);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863644);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08863660);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863660);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088637BC);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088637BC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08863B68);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863B68);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08863D50);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863D50);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08863DEC);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863DEC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08863E68);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863E68);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088640F0);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088640F0);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088641B8);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088641B8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08864214);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08864214);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08864234);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08864234);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_088642F4);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088642F4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08864340);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08864340);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model", func_eboot_08864400);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08864400);

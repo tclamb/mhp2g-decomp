@@ -2,7 +2,7 @@
 
 #include "common.h"
 #include "draw.hpp"
-#include "character.hpp"
+#include "obj_base.hpp"
 #include "singleton.hpp"
 
 extern u32 *DRAWABLE_WRITE_HEAD;
@@ -55,8 +55,8 @@ struct DrawManager : Singleton<DrawManager> {
     void dither_matrix(u8);
     bool start_fragment(u8 group);
     void end_fragment();
-    int add(u8 group, character *character, bool no_culling);
-    int add(u8 group, model *model, bool no_culling);
+    int add(u8 group, ObjBase *character, bool no_culling);
+    int add(u8 group, ModelBase *model, bool no_culling);
     int add(u8 group, Draw *object, ScePspFVector4 *position, bool no_culling);
     bool queue_vram_transfer(void *unknown_data, u8 unknown_index);
     void world_model(ScePspFMatrix4 *transform);

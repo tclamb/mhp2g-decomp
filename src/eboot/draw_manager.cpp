@@ -4,7 +4,7 @@
 #include "singleton.hpp"
 #include "immediate_ge.hpp"
 #include "draw.hpp"
-#include "model.hpp"
+#include "model_base.hpp"
 #include "stage_manager.hpp"
 #include "vram_manager.hpp"
 #include "vfpu.h"
@@ -355,7 +355,7 @@ inline float max(float x, float y) {
     return result;
 }
 
-int DrawManager::add(u8 group, character *character, bool no_culling) {
+int DrawManager::add(u8 group, ObjBase *character, bool no_culling) {
     int result;
     do {
         character->flags &= ~Draw::VISIBLE;
@@ -388,7 +388,7 @@ int DrawManager::add(u8 group, character *character, bool no_culling) {
     return result;
 }
 
-int DrawManager::add(u8 group, model *model, bool no_culling) {
+int DrawManager::add(u8 group, ModelBase *model, bool no_culling) {
     int result;
     model->flags &= ~Draw::VISIBLE;
     if (no_culling != false ||

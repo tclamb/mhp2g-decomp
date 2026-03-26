@@ -100,7 +100,7 @@ void LightManager::method_088609FC(s16 index) {
     }
 }
 
-void LightManager::method_08860A70(character *c) {
+void LightManager::method_08860A70(ObjBase *c) {
     lighting_data *lighting = &data.lighting[1];
     for (int i = 0; i < 3; ++i) {
         light_data *light = &lighting->lights[i];
@@ -158,7 +158,7 @@ void LightManager::method_08860C4C() {
     }
 }
 
-ScePspUnion32 LightManager::method_08860CA8(character *c, int i) {
+ScePspUnion32 LightManager::method_08860CA8(ObjBase *c, int i) {
     float b, g, r;
     lighting_data *lighting = &data.lighting[1];
     light_data *light = &lighting->lights[i];
@@ -183,7 +183,7 @@ ScePspUnion32 LightManager::method_08860CA8(character *c, int i) {
     return color;
 }
 
-void LightManager::method_08860EB8(character *c) {
+void LightManager::method_08860EB8(ObjBase *c) {
     lighting_data &lighting = data.lighting[1];
     for (int i = 0; i < 3; ++i) {
         light_data &light = lighting.lights[i];
