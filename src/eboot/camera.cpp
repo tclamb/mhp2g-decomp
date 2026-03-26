@@ -1,5 +1,10 @@
 #include "camera.hpp"
-#include <game_sys.hpp>
+
+#include "game_sys.hpp"
+#include "ge.hpp"
+#include "player_manager.hpp"
+
+//#define BUILD_NON_MATCHING
 
 #define DEGREES_TO_VFPU(degrees) ((degrees) / 90.0f)
 #define PI 3.141592653589793238462643383279502884
@@ -15,13 +20,79 @@ Camera::Camera() {
     unknown_0xB34 = 0;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_088137C8);
+ScePspFVector4 D_eboot_089310B0 = {0, 0, -50, 0};
+ScePspFVector4 D_eboot_089310C0 = {0, 1, 0, 0};
 
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_088138DC);
+// 1 instruction swap
+#ifdef BUILD_NONMATCHING
 
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_0881395C);
+inline void *inline_memset(void *dst, int val, u32 size) {
+    u8 *p = (u8 *)dst;
+    if (p) {
+        u32 n = size;
+        while (n != 0) {
+            *p++ = val;
+            --n;
+        }
+    }
+    return dst;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08813990);
+void Camera::method_088137C8() {
+    ScePspFVector4 p, q, r;
+    p = D_eboot_089310B0;
+    inline_memset(&q, 0, sizeof(q));
+    r = D_eboot_089310C0;
+
+    Singleton<Ge>::objectPtr->norm = 1;
+    near_z = 30;
+    far_z = 65000;
+    unknown_0xC = DEGREES_TO_VFPU(78.5);
+    unknown_0x8 = (float)(30.0 / 17.0);
+    method_08817024();
+    method_08815028(&p, &q, &r);
+    unknown_0xDC0 = 0;
+    unknown_0xAA9 = 0;
+    method_0881395C();
+    unknown_0x14 = 3;
+    cameraScriptIndex = 0;
+    unknown_0xA7C = 0;
+}
+
+#else
+
+INCLUDE_ASM("asm/eboot/nonmatchings/camera", method_088137C8__6CameraFv);
+
+#endif
+
+void Camera::method_088138DC() {
+    unknown_0xB10 = 0;
+    unknown_0xB3C = 1;
+    method_0881395C();
+    unknown_0xB10 = 0;
+    player = func_eboot_088DF804(Singleton<PlayerManager>::objectPtr, Singleton<GameSys>::objectPtr->player_id);
+    unknown_0xB00 = 0;
+    unknown_0xAE0 = 0;
+    unknown_0xAC0 = 0;
+    unknown_0xA81 = 0;
+    unknown_0xA8A = 0;
+    unknown_0xA88 = 0;
+    unknown_0xA7C = 0;
+    cameraScriptIndex = 0;
+    method_08815744();
+    method_08813990();
+}
+
+void Camera::method_0881395C() {
+    near_z = 30;
+    far_z = 65000;
+    unknown_0xC = DEGREES_TO_VFPU(78.5);
+    unknown_0x8 = (float)(30.0 / 17.0);
+    unknown_0xB34 = 0;
+    method_08816108();
+}
+
+INCLUDE_ASM("asm/eboot/nonmatchings/camera", method_08813990__6CameraFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08813B78);
 
@@ -169,7 +240,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08814EC4);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08814ED4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08815028);
+INCLUDE_ASM("asm/eboot/nonmatchings/camera", method_08815028__6CameraFP14ScePspFVector4P14ScePspFVector4P14ScePspFVector4);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08815274);
 
@@ -179,7 +250,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08815434);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08815588);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08815744);
+INCLUDE_ASM("asm/eboot/nonmatchings/camera", method_08815744__6CameraFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_088157D4);
 
@@ -197,7 +268,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08815EC8);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08816020);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08816108);
+INCLUDE_ASM("asm/eboot/nonmatchings/camera", method_08816108__6CameraFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08816144);
 
@@ -221,11 +292,9 @@ INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08816EA8);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08816EB0);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08817024);
+INCLUDE_ASM("asm/eboot/nonmatchings/camera", method_08817024__6CameraFv);
 
 
-ScePspFVector4 D_eboot_089310B0 = {0, 0, -50, 0};
-ScePspFVector4 D_eboot_089310C0 = {0, 1, 0, 0};
 float D_eboot_089310D0 = 0.075;
 u8 D_eboot_089310D4[3] = {0, 2, 20};
 u16 D_eboot_089310D8[8] = {10, 20, 30, 40, 50, 60, 70, 80};
