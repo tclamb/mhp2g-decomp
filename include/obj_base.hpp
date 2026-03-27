@@ -17,13 +17,26 @@ struct ObjBase : ModelBase {
     virtual void vtable_0x24();
     virtual void vtable_0x28();
     virtual void vtable_0x2C();
-    virtual void vtable_0x30();
-    virtual void vtable_0x34();
+    virtual u8 vtable_0x30();
+    virtual void vtable_0x34(float *, float *);
     virtual void vtable_0x38() = 0;
     virtual void vtable_0x3C();
 
     static void *operator new(u32, void *);
     static void operator delete(void *);
+
+    void method_08865A24();
+    void method_08865A5C(u32 flag);
+    void method_08865A94(u32 flag);
+    void method_08865AD4(u16, int, int);
+    int inLoadedStage();
+    void updateStagePosition();
+    void toStagePosition(ScePspFVector4 *out, u16 stageId, ScePspFVector4 *in);
+    u32 method_08865C80(u32 flag);
+    int testAnimation(bool isIdle, u8 animationId);
+    void method_08865D4C();
+    void method_08865D7C();
+    int method_08865DCC(s16);
 
     u32 unknown_0x1C0;
     ObjBase *nextObj;
@@ -45,12 +58,17 @@ struct ObjBase : ModelBase {
     ScePspFVector4 unknown_0x210;
     ScePspFVector4 scale;
     u8 alpha;
-    u8 padding_0x231[0x260 - 0x231];
-    ScePspFVector3 unknown_0x260;
-    u8 padding_0x26C;
+    u8 padding_0x231[0x244 - 0x231];
+    float unknown_0x244;
+    u8 padding_0x248[0xC];
+    float unknown_0x254;
+    u8 padding_0x258[0x8];
+    ScePspFVector4 stagePosition;
     float unknown_0x270;
     s16 unknown_0x274;
-    u8 padding_0x276[10];
+    u8 padding_0x276[6];
+    u16 unknown_0x27C;
+    u8 padding_0x27E[2];
     u8 unknown_0x280;
     u8 padding_0x281[4];
     u8 unknown_0x285;
@@ -58,8 +76,8 @@ struct ObjBase : ModelBase {
     u32 unknown_0x28C;
     u8 unknown_0x290;
     u8 padding_0x291[7];
-    u8 unknown_0x298;
-    u8 animationIndex;
+    bool isIdle;
+    u8 animationId;
     u16 stageId;
     u8 padding_0x29C[0x2AC - 0x29C];
     ScePspUnion32 diffuse_light_colors[3];
@@ -68,7 +86,11 @@ struct ObjBase : ModelBase {
     u16 unknown_0x2BC;
     u8 padding_0x2BE[0x324 - 0x2BE];
     ScePspSVector4 unknown_0x324;
-    u8 padding_0x32C[0x3FC - 0x32C];
+    u8 padding_0x32C[0x33C - 0x32C];
+    u8 unknown_0x33C;
+    u8 padding_0x33D[0x396 - 0x33D];
+    u8 unknown_0x396;
+    u8 padding_0x397[0x3FC - 0x397];
     MemFn memFn;
     u32 unknown_0x408;
     u32 unknown_0x40C;

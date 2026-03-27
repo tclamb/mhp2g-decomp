@@ -1,15 +1,11 @@
 #include "camera.hpp"
 
 #include "game_sys.hpp"
-#include "ge.hpp"
 #include "player_manager.hpp"
 
 //#define BUILD_NON_MATCHING
 
-#define DEGREES_TO_VFPU(degrees) ((degrees) / 90.0f)
-#define PI 3.141592653589793238462643383279502884
-
-Camera *Singleton<Camera>::objectPtr;
+template<> Camera *Singleton<Camera>::objectPtr;
 
 Camera::Camera() {
     zClipping = true;
@@ -25,6 +21,8 @@ ScePspFVector4 D_eboot_089310C0 = {0, 1, 0, 0};
 
 // 1 instruction swap
 #ifdef BUILD_NONMATCHING
+
+#include "ge.hpp"
 
 inline void *inline_memset(void *dst, int val, u32 size) {
     u8 *p = (u8 *)dst;

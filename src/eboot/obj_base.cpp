@@ -1,7 +1,8 @@
 #include "obj_base.hpp"
+#include "common.h"
+#include "game_sys.hpp"
 #include "model_base.hpp"
 #include "draw_manager.hpp"
-
 
 ObjBase::ObjBase() {
     nextObj = NULL;
@@ -92,7 +93,14 @@ INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865528);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_088655D8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_088655F0);
+extern "C"
+void func_eboot_088655F0(ScePspFVector4 *out, u16 *in) {
+    float step = PI / 32768;
+    out->x = step * (s32)in[0];
+    out->y = step * (s32)in[2];
+    out->z = step * (s32)in[4];
+    out->w = 0;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865640);
 
@@ -106,35 +114,146 @@ void ObjBase::vtable_0x3C() {
     // empty
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865A24);
+void ObjBase::method_08865A24() {
+    if (unknown_0x396 != 0) {
+        unknown_0x33C += unknown_0x396;
+        unknown_0x396 = 0;
+    } else {
+        if (unknown_0x33C > 0) {
+            --unknown_0x33C;
+        }
+    }
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865A5C);
+void ObjBase::method_08865A5C(u32 flag) {
+    if ((flag & 0x80000000) == 0) {
+        unknown_0x288 |= flag;
+    } else {
+        unknown_0x28C |= flag & 0x7FFFFFFF;
+    }
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865A94);
+void ObjBase::method_08865A94(u32 flag) {
+    if ((flag & 0x80000000) == 0) {
+        unknown_0x288 &= ~flag;
+    } else {
+        unknown_0x28C &= ~(flag & 0x7FFFFFFF);
+    }
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865AD4);
+void ObjBase::method_08865AD4(u16 flags, int a, int b) {
+    switch(flags & 0xFF) {
+    case 1:
+        unknown_0x280 = 1;
+        break;
+    case 2:
+        unknown_0x280 = 2;
+        break;
+    default:
+        unknown_0x280 = 0;
+        break;
+    }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865BA4);
+    if ((flags & 0x8000) != 0) {
+        method_08865A94(8);
+    } else {
+        method_08865A5C(8);
+    }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865BC8);
+    if (a == 0) {
+        method_08865A94(1);
+    } else {
+        method_08865A5C(1);
+    }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865C24);
+    if (b == 0) {
+        method_08865A94(2);
+    } else {
+        method_08865A5C(2);
+    }
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865C80);
+int ObjBase::inLoadedStage() {
+    return stageId == Singleton<GameSys>::objectPtr->stage_id;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865CB0);
+extern struct StageCoordinateInfo {
+    float xOffset;
+    float zOffset;
+    float xMin; // guess
+    float zMin; // guess
+    float xMax; // guess
+    float zMax; // guess
+    float yMax; // guess
+    float yMin; // guess
+} D_game_sub_09CD9EB0[267];
+
+void ObjBase::updateStagePosition() {
+    StageCoordinateInfo &info = D_game_sub_09CD9EB0[stageId];
+    stagePosition.x = position.x + info.xOffset;
+    stagePosition.y = position.y + (info.yMax + info.yMin) / 2;
+    stagePosition.z = position.z + info.zOffset;
+}
+
+void ObjBase::toStagePosition(ScePspFVector4 *out, u16 stageId, ScePspFVector4 *in) {
+    StageCoordinateInfo &info = D_game_sub_09CD9EB0[stageId];
+    out->x = in->x + info.xOffset;
+    out->y = in->y + (info.yMax + info.yMin) / 2;
+    out->z = in->z + info.zOffset;
+}
+
+u32 ObjBase::method_08865C80(u32 flag) {
+    if ((flag & 0x80000000) != 0) {
+        return unknown_0x28C & (flag & 0x7FFFFFFF);
+    } else {
+        return unknown_0x288 & flag;
+    }
+}
+
+int ObjBase::testAnimation(bool isIdle, u8 animationId) {
+    if (this->isIdle == isIdle && this->animationId == animationId) {
+        return true;
+    }
+    return false;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865CE4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865D4C);
+void ObjBase::method_08865D4C() {
+    unknown_0x27C = D_game_task_09BB3C20[pl_type].unknown_0x54;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865D7C);
+void ObjBase::method_08865D7C() {
+    flags &= ~Draw::DISPOSE;
+    memFn = 0;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", vtable_0x30__7ObjBaseFv);
+u8 ObjBase::vtable_0x30() {
+    return alpha;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", vtable_0x34__7ObjBaseFv);
+void ObjBase::vtable_0x34(float *x, float *y) {
+    *x = 1;
+    *y = 1;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865DCC);
+#if BUILD_NONMATCHING
+
+int ObjBase::method_08865DCC(s16 x) {
+    float f = -1 * unknown_0x244;
+    x /= 2;
+    if (x <= 1 || f < 0) {
+        unknown_0x254 = f;
+        return 0;
+    } else {
+        unknown_0x254 = f / x;
+        return 1;
+    }
+}
+
+#else
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", method_08865DCC__7ObjBaseFs);
+#endif
 
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865E38);
 
