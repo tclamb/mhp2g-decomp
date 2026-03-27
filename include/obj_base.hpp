@@ -63,7 +63,12 @@ struct ObjBase : ModelBase {
     u16 stageId;
     u8 padding_0x29C[0x2AC - 0x29C];
     ScePspUnion32 diffuse_light_colors[3];
-    u8 padding_0x2B4[0x3FC - 0x2B8];
+    u8 padding_0x2B8[2];
+    u16 unknown_0x2BA;
+    u16 unknown_0x2BC;
+    u8 padding_0x2BE[0x324 - 0x2BE];
+    ScePspSVector4 unknown_0x324;
+    u8 padding_0x32C[0x3FC - 0x32C];
     MemFn memFn;
     u32 unknown_0x408;
     u32 unknown_0x40C;

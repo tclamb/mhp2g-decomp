@@ -31,6 +31,10 @@ struct Hierarchy {
     u16 unknown_0x138[4];
 };
 
+extern "C" {
+    void func_eboot_088641B8(Hierarchy *);
+}
+
 struct tmh_block_header {
     u32 size;
     u32 type;
@@ -152,6 +156,8 @@ struct pmo {
 
     void draw(Hierarchy *skeleton, tmh *tmh, ScePspFMatrix4 *transform);
     void drawMesh(Hierarchy *skeleton, tmh *tmh, u8 mesh);
+    void drawWeight(Hierarchy *skeleton, tmh *tmh, ScePspFMatrix4 *transform);
+    void drawWeightMesh(Hierarchy *skeleton, tmh *tmh, int mesh);
     void draw_alpha(tmh *tmh, ScePspFMatrix4 *transform, u32 mesh, u32 blend_mode, u8 alpha);
     void draw_rgba8888(tmh *tmh, ScePspFMatrix4 *transform, u32 mesh, u32 blend_mode, u32 color);
     int compile(void *, pmo_header *, pmo_mesh_data *);

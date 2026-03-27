@@ -1,4 +1,6 @@
 #include "obj_base.hpp"
+#include "model_base.hpp"
+#include "draw_manager.hpp"
 
 
 ObjBase::ObjBase() {
@@ -14,10 +16,6 @@ ObjBase::ObjBase() {
     setMemFn(&ObjBase::vtable_0x10);
 }
 
-u32 ptmf_eboot_089A30F4[3] = {
-    0, 0x38, 0
-};
-
 ObjBase::~ObjBase() {
 
 }
@@ -30,9 +28,33 @@ void ObjBase::operator delete(void *) {
     // empty
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", vtable_0x10__7ObjBaseFv);
+void ObjBase::vtable_0x10() {
+    reset_transform();
+    memset(&unknown_0x1F0, 0, sizeof(unknown_0x1F0));
+    memset(&position, 0, sizeof(position));
+    memset(&unknown_0x210, 0, sizeof(unknown_0x210));
+    // inline method?
+    scale.z = 1; scale.y = 1; scale.x = 1;
+    // inline method?
+    unknown_0x324.w = 0; unknown_0x324.z = 0; unknown_0x324.y = 0; unknown_0x324.x = 0;
+    diffuse_light_colors[0].ui = 0xFFFFFFFF;
+    diffuse_light_colors[1].ui = 0xFFFFFFFF;
+    diffuse_light_colors[2].ui = 0xFFFFFFFF;
+    unknown_0x2BA = 0;
+    unknown_0x2BC = 0;
+    alpha = 0xFF;
+    setMemFn(&ObjBase::vtable_0x38);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", vtable_0x14__7ObjBaseFv);
+void ObjBase::vtable_0x14() {
+    if (memFn != 0) {
+        (this->*memFn)();
+        if ((bool)(flags & Draw::DISPOSE) != false) {
+            vtable_0x18();
+            vtable_0x1C();
+        }
+    }
+}
 
 void ObjBase::vtable_0x18() {
     // empty
@@ -42,11 +64,19 @@ void ObjBase::vtable_0x1C() {
     // empty
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", draw__7ObjBaseFv);
+void ObjBase::draw() {
+    func_eboot_088641B8(&hierarchy);
+    model_pmo.drawWeight(&hierarchy, &model_tmh, &transform);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_088646E8);
+void pmo::drawWeight(Hierarchy *hierarchy, tmh *textures, ScePspFMatrix4 *transform) {
+    Singleton<DrawManager>::objectPtr->world_model(transform);
+    for (int i = 0; i < header->mesh_count; ++i) {
+        drawWeightMesh(hierarchy, textures, i);
+    }
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08864774);
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", drawWeightMesh__3pmoFP9HierarchyP3tmhi);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_0886503C);
 
