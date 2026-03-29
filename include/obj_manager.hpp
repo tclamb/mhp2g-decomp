@@ -32,7 +32,7 @@ struct ObjManager : Singleton<ObjManager> {
     void *allocateFloatMemory(u32 size);
     void releaseFixMemory();
     void releaseFloatMemory();
-    bool acquireEditPlayerModel(u8 mapId, u8 sex);
+    bool isEditPlayerModelLoaded(u8 mapId, u8 sex);
 
     int loadFile(int fileId, u16 mapId);
 

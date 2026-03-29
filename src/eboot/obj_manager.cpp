@@ -249,19 +249,12 @@ void ObjManager::releaseFloatMemory() {
 // edit player models
 extern u16 D_edit_task_09A63210[2];
 
-bool ObjManager::acquireEditPlayerModel(u8 mapId, u8 sex) {
+bool ObjManager::isEditPlayerModelLoaded(u8 mapId, u8 sex) {
     return (u8)loadFile(D_edit_task_09A63210[(u8) sex], (u8)(mapId << 3)) == true;
 }
 #else
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", acquireEditPlayerModel__10ObjManagerFUcUc);
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", isEditPlayerModelLoaded__10ObjManagerFUcUc);
 #endif
-
-
-
-
-
-
-
 
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08866E08);
 
