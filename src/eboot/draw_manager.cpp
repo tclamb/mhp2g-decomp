@@ -355,7 +355,7 @@ inline float max(float x, float y) {
     return result;
 }
 
-int DrawManager::add(u8 group, ObjBase *character, bool no_culling) {
+int DrawManager::addObj(u8 group, ObjBase *character, bool no_culling) {
     int result;
     do {
         character->flags &= ~Draw::VISIBLE;

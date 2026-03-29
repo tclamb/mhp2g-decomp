@@ -257,7 +257,7 @@ void ModelBase::operator delete(void *p) {
 }
 
 void ModelBase::reset_transform() {
-    flags = Draw::VISIBLE | Draw::DISPOSE;
+    flags = Draw::VISIBLE | Draw::ALIVE;
     next = 0;
     zindex = 0.0f;
     vmidt_q(&transform);

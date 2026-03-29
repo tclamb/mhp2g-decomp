@@ -50,7 +50,7 @@ void ObjBase::vtable_0x10() {
 void ObjBase::vtable_0x14() {
     if (memFn != 0) {
         (this->*memFn)();
-        if ((bool)(flags & Draw::DISPOSE) != false) {
+        if ((bool)(flags & Draw::ALIVE) != false) {
             vtable_0x18();
             vtable_0x1C();
         }
@@ -224,7 +224,7 @@ void ObjBase::method_08865D4C() {
 }
 
 void ObjBase::method_08865D7C() {
-    flags &= ~Draw::DISPOSE;
+    flags &= ~Draw::ALIVE;
     memFn = 0;
 }
 

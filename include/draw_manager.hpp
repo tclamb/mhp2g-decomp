@@ -55,7 +55,7 @@ struct DrawManager : Singleton<DrawManager> {
     void dither_matrix(u8);
     bool start_fragment(u8 group);
     void end_fragment();
-    int add(u8 group, ObjBase *character, bool no_culling);
+    int addObj(u8 group, ObjBase *objectPtr, bool no_culling);
     int add(u8 group, ModelBase *model, bool no_culling);
     int add(u8 group, Draw *object, ScePspFVector4 *position, bool no_culling);
     bool queue_vram_transfer(void *unknown_data, u8 unknown_index);

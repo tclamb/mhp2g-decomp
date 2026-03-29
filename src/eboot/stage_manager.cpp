@@ -86,8 +86,8 @@ void StageManager::call_prop_list_ptmf() {
     while (prop != 0) {
         prop->call_ptmf();
         base_prop *next = prop->next;
-        bool done = prop->flags & Draw::DISPOSE;
-        if (done == 0) {
+        bool alive = prop->flags & Draw::ALIVE;
+        if (alive == false) {
             free(prop);
         }
         prop = next;

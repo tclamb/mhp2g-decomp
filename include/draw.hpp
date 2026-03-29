@@ -7,8 +7,9 @@ struct Draw {
     virtual void draw() = 0;
 
     enum {
-        DISPOSE = 0x1,
+        ALIVE = 0x1,
         VISIBLE = 0x2,
+        REGISTERED = 0x4,
     };
 
     u32 flags;
