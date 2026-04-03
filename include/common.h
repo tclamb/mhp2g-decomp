@@ -1,6 +1,7 @@
 #pragma once
 
 #define INCLUDE_ASM(path, function)
+#define INCLUDE_RODATA(path, symbol)
 
 #define ext(x, pos, size) (((x) >> (pos)) & ((1 << (size)) - 1))
 
@@ -20,6 +21,7 @@ typedef unsigned long uint64_t;
 #include <pspkerneltypes.h> // IWYU pragma: export
 
 extern "C" {
+    int memcmp(const void*, const void*, long unsigned int);
     void *memset(void*, int,  long unsigned int);
     void sceKernelDcacheWritebackRange(const void *p, unsigned int size);
     void sceKernelDcacheWritebackInvalidateRange(const void *p, unsigned int size);

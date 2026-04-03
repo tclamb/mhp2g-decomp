@@ -5,6 +5,19 @@ import struct
 import re
 from sys import argv
 
+def _gen_jis2ucs_inc_hpp(symbol, data, offset):
+    lines = []
+
+    table = struct.iter_unpack('<H', data[offset:offset + 0x20000])
+    for jis, (ucs,) in enumerate(table):
+        if ucs != 0:
+            lines.append(f"    [0x{jis:X}] = 0x{ucs:X},")
+
+    return f"const u16 {symbol}[0x10000] = {{\n" \
+        + "\n".join(lines) \
+        + "\n};\n"
+
+
 def _gen_cameraop_inc_hpp(symbol, data, offset):
     lines = []
 
@@ -69,6 +82,7 @@ def _gen_cameraop_inc_hpp(symbol, data, offset):
 
 _extractors = {
     'cameraop': _gen_cameraop_inc_hpp,
+    'jis2ucs': _gen_jis2ucs_inc_hpp,
 }
 
 
@@ -112,4 +126,4 @@ if __name__ == '__main__':
     yamlPath = Path(argv[1])
     symbolAddrsPath = yamlPath.with_suffix("").with_suffix(".symbol_addrs.txt")
 
-    extract(yamlPath, symbolAddrsPath)
+    extract(yamlPath, [symbolAddrsPath])

@@ -50,7 +50,7 @@ options:
   global_vram_end:   0x09ffffff
 
   named_regs_for_c_funcs: False
-  migrate_rodata_to_functions: False
+  migrate_rodata_to_functions: True
   ld_bss_is_noload: True
   disassemble_all: True
   auto_decompile_empty_functions: true
@@ -95,7 +95,7 @@ segments:
       - [0x7d24, asmtu, lib/libc]
       - [0x10ff8, cpp, vram_manager]
       - [0x11cac, cpp, camera]
-      - [0x15610, asmtu, ccc]
+      - [0x15610, cpp, ccc]
       - [0x15dd4, asmtu, cockpit]
       - [0x4943c, cpp, cont_task]
       - [0x49654, cpp, draw_manager]

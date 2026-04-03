@@ -3,6 +3,7 @@ target_path: modules/eboot.elf
 start: 0x25b4
 vram: 0x08804000
 segments:
+  - [0x10c620, jis2ucs]
   - [0x12fde4, cameraop]
   - [0x12ff54, cameraop]
   - [0x12ff54, cameraop]

@@ -28,7 +28,6 @@ extern "C" {
     int sceIoClose(SceUID fd);
     int sceIoGetstat(const char *file, SceIoStat *stat);
 
-    int memcmp(const void*, const void*, long unsigned int);
     void *memset(void*, int,  long unsigned int);
     int sprintf(char*, const char*, ...);
 }
