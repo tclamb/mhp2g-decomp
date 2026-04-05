@@ -26,12 +26,14 @@ rom:0x106004 reloc:MIPS_26 symbol:func_em40_09D29F38
 rom:0x10636c reloc:MIPS_26 symbol:func_em54_09D15260
 rom:0x106420 reloc:MIPS_26 symbol:func_em54_09D17FD0
 rom:0x106444 reloc:MIPS_26 symbol:func_em54_09D18068
+rom:0x1064e8 reloc:MIPS_26 symbol:func_em55_09D15180
 rom:0x10650c reloc:MIPS_26 symbol:func_em55_09D15218
 rom:0x106598 reloc:MIPS_26 symbol:func_em58_09D20870
 rom:0x1065bc reloc:MIPS_26 symbol:func_em58_09D20908
 rom:0x1069f8 reloc:MIPS_26 symbol:func_em54_09D18718
 rom:0x106a1c reloc:MIPS_26 symbol:func_em54_09D187B0
 rom:0x106d54 reloc:MIPS_26 symbol:func_em54_09D18F98
+rom:0x106e00 reloc:MIPS_26 symbol:func_em59_09D15180
 rom:0x106e24 reloc:MIPS_26 symbol:func_em59_09D15218
 rom:0x106f90 reloc:MIPS_26 symbol:func_em75_09D46200
 rom:0x106fb4 reloc:MIPS_26 symbol:func_em75_09D46298
@@ -1018,5 +1020,3 @@ rom:0x1745b4 reloc:MIPS_32 symbol:D_em75_09D55500
 rom:0x1745b8 reloc:MIPS_32 symbol:D_em82_09D2E050
 rom:0x1745bc reloc:MIPS_32 symbol:D_em83_09D29E68
 rom:0x1745d0 reloc:MIPS_32 symbol:D_em75_09D558D8
-rom:0x1064e8 reloc:MIPS_26 symbol:func_em55_09D15180
-rom:0x106e00 reloc:MIPS_26 symbol:func_em59_09D15180

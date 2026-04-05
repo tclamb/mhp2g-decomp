@@ -4,6 +4,7 @@ rom:0x16ff0 reloc:MIPS_26 symbol:func_em75_09D183C0
 rom:0x17168 reloc:MIPS_26 symbol:func_em75_09D19C58
 rom:0x172d8 reloc:MIPS_26 symbol:func_em75_09D1BF90
 rom:0x18198 reloc:MIPS_26 symbol:func_em54_09D2F090
+rom:0x186a8 reloc:MIPS_26 symbol:func_em82_09D15180
 rom:0x18820 reloc:MIPS_26 symbol:func_em33_09D1ADD0
 rom:0x18998 reloc:MIPS_26 symbol:func_em75_09D1CB90
 rom:0x18b08 reloc:MIPS_26 symbol:func_em17_09D26748
@@ -19,7 +20,6 @@ rom:0x19c68 reloc:MIPS_26 symbol:func_em58_09D21880
 rom:0x19db8 reloc:MIPS_26 symbol:func_em83_09D27428
 rom:0x19f30 reloc:MIPS_26 symbol:func_em17_09D26C90
 rom:0x1a1e0 reloc:MIPS_26 symbol:func_em75_09D202F0
-rom:0x186a8 reloc:MIPS_26 symbol:func_em82_09D15180
 
 rom:0x1ece4 reloc:MIPS_HI16 symbol:D_game_task_09BB3C20 addend:0x50
 rom:0x1ece8 reloc:MIPS_LO16 symbol:D_game_task_09BB3C20 addend:0x50

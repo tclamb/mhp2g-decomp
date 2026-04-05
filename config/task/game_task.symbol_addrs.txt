@@ -751,7 +751,6 @@ func_game_task_09A73CC8 = 0x09A73CC8; // type:func
 func_game_task_09A73CD8 = 0x09A73CD8; // type:func
 func_game_task_09A74750 = 0x09A74750; // type:func
 func_game_task_09A76400 = 0x09A76400; // type:func
-func_game_task_09A769C8 = 0x09A769C8; // type:func
 func_game_task_09A769F8 = 0x09A769F8; // type:func
 func_game_task_09A76A08 = 0x09A76A08; // type:func
 func_game_task_09A76C88 = 0x09A76C88; // type:func
