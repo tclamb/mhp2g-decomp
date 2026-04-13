@@ -30,7 +30,7 @@ jobs:
           ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.ref }}
           submodules: true
       - name: Install packages
-        run: sudo apt-get install gcc-mipsel-linux-gnu cargo python3 ninja-build
+        run: sudo apt update && sudo apt-get install gcc-mipsel-linux-gnu cargo python3 ninja-build
       - name: Install cwdemangle
         run: cargo install cwdemangle-bin
       - name: Make python venv
