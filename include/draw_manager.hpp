@@ -7,34 +7,6 @@
 
 extern u32 *DRAWABLE_WRITE_HEAD;
 
-struct render_group {
-    enum {
-        GROUP_0,
-        RESET,
-        GROUP_2,
-        STAGE,
-        GROUP_4,
-        GROUP_5,
-        GROUP_6,
-        GROUP_7,
-        GROUP_8,
-        GROUP_9,
-        GROUP_10,
-        GROUP_11,
-        GROUP_12,
-        GROUP_13,
-        GROUP_14,
-        GROUP_15,
-        GROUP_16,
-        GROUP_17,
-        GROUP_18,
-        GROUP_19,
-        GROUP_COUNT
-    } value;
-private:
-    render_group();
-};
-
 struct DrawManager : Singleton<DrawManager> {
     Draw *z_index[111]; // 111 == sum(z_index_bucket_length)
     Draw **z_index_buckets[render_group::GROUP_COUNT];

@@ -96,7 +96,8 @@ segments:
       - [0x10ff8, cpp, vram_manager]
       - [0x11cac, cpp, camera]
       - [0x15610, cpp, ccc]
-      - [0x15dd4, asmtu, cockpit]
+      - [0x15dd4, cpp, cockpit] # common menus
+      - [0x31978, asmtu, cockpit2] # arcade/lobby/game specific menus?
       - [0x4943c, cpp, cont_task]
       - [0x49654, cpp, draw_manager]
       - [0x4b524, asmtu, edit_task]
@@ -187,6 +188,7 @@ segments:
       - [0x10c578, .rodata, camera]
       - [0x10c620, .rodata, ccc]
       - [0x12c620, .rodata, cockpit]
+      - [0x12cbf8, .rodata, cockpit2]
       - [0x12cff8, .rodata, file_sys]
       - [0x12d02c, .rodata, game_sys]
       - [0x12d0e4, .rodata, toast_notification]
@@ -224,6 +226,7 @@ segments:
       - [0x12edb4, .data, lib/libc]
       - [0x12f664, .data, camera]
       - [0x13406c, .data, cockpit]
+      - [0x134314, .data, cockpit2]
       - [0x137254, .data, cont_task]
       - [0x13726c, .data, draw_manager]
       - [0x1372b0, .data, edit_task]
@@ -850,6 +853,7 @@ segments:
       - {start: 0x1c5144, type: .bss, vram: 0x089c6cb4, name: camera}
       - {start: 0x1c5144, type: .bss, vram: 0x089c6cb8, name: ccc}
       - {start: 0x1c5144, type: .bss, vram: 0x089c6cbc, name: cockpit}
+      - {start: 0x1c5144, type: .bss, vram: 0x089c70c0, name: cockpit2}
       - {start: 0x1c5114, type: .bss, vram: 0x089c70cc, name: draw_manager}
       - {start: 0x1c5114, type: .bss, vram: 0x089c70ec, name: edit_task}
       - {start: 0x1c5114, type: .bss, vram: 0x089c70f0, name: file_sys}

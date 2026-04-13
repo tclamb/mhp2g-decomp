@@ -7258,12 +7258,12 @@ rom:0x64304 reloc:MIPS_HI16 symbol:D_game_task_09BB3C20 addend:0x54
 rom:0x64308 reloc:MIPS_LO16 symbol:D_game_task_09BB3C20 addend:0x54
 
 rom:0x17e90 reloc:MIPS_26 symbol:func_game_task_09A698A8
-rom:0x17fa8 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x18064 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x180cc reloc:MIPS_26 symbol:func_game_task_09A5E4E0
+rom:0x17fa8 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x18064 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x180cc reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
 rom:0x1babc reloc:MIPS_26 symbol:func_game_task_09A698A8
-rom:0x23e60 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x243f8 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
+rom:0x23e60 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x243f8 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
 rom:0x25804 reloc:MIPS_26 symbol:func_game_task_09A6AD00
 rom:0x25810 reloc:MIPS_26 symbol:func_game_task_09A698A8
 rom:0x25854 reloc:MIPS_26 symbol:func_game_task_09A6A130
@@ -7290,31 +7290,31 @@ rom:0x3f1d0 reloc:MIPS_26 symbol:func_game_task_09A6AD20
 rom:0x3f960 reloc:MIPS_26 symbol:func_game_task_09A6ACA8
 rom:0x430d8 reloc:MIPS_26 symbol:func_game_task_09AD3620
 rom:0x43508 reloc:MIPS_26 symbol:func_game_task_09B2D250
-rom:0x46e1c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x46fa4 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x4704c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x4715c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x47198 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x471c8 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x47210 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x47240 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x47a48 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x47df0 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x47e7c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x47ec8 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x47f0c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x481d0 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x48298 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x48328 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x483bc reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x48508 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x48668 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x48750 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x48830 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x48928 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x48958 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x48a20 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x48a60 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
+rom:0x46e1c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x46fa4 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x4704c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x4715c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x47198 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x471c8 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x47210 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x47240 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x47a48 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x47df0 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x47e7c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x47ec8 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x47f0c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x481d0 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x48298 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x48328 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x483bc reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x48508 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x48668 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x48750 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x48830 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x48928 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x48958 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x48a20 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x48a60 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
 rom:0x688a4 reloc:MIPS_26 symbol:func_game_task_09A60148
 rom:0x68c7c reloc:MIPS_26 symbol:func_game_task_09AAF978
 rom:0x68c9c reloc:MIPS_26 symbol:func_game_task_09AADE10
@@ -7337,118 +7337,118 @@ rom:0x70014 reloc:MIPS_26 symbol:func_game_task_09AAF978
 rom:0x70094 reloc:MIPS_26 symbol:func_game_task_09AAF978
 rom:0x701c8 reloc:MIPS_26 symbol:func_game_task_09AADC28
 rom:0x7034c reloc:MIPS_26 symbol:func_game_task_09AAE8C0
-rom:0x75120 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75144 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75170 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75220 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7524c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x752e4 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75310 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75360 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75384 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x753ec reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75434 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7547c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x754a4 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75be4 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75c08 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75c34 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75d70 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75e64 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75ec0 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75f04 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75f4c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75f94 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75fbc reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x75ffc reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x76028 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x76140 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x76178 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x76200 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7623c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x762b0 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x76328 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x76454 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x76570 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x765cc reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x76620 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7670c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x767c0 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x76824 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x76888 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x770b4 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x770ec reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x77200 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x77278 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x772d0 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x773d4 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7740c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7745c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x774d4 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x78864 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x78888 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x788d8 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7894c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x78974 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x789f0 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x78a18 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x78a58 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x78a7c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x78ae4 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x78b2c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x78b74 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x794b0 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x79534 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x79568 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x795b0 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x79964 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x79988 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x799ec reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x79a34 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x79a7c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x79aa4 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x79cd4 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x79cf8 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x79dc0 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x79e38 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7ac08 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7ac40 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7ac90 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7ad08 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7b1e8 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7b220 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7b260 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7b2b4 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7b32c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7bc94 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7bcfc reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7bd20 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7bd48 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7bd78 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7bdc0 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7be08 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7be50 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7be98 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7bf30 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7bf80 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7bfc8 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7c010 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7c034 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7c3fc reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7c420 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7c468 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7c4c4 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7c50c reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7c554 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x7c578 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
+rom:0x75120 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75144 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75170 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75220 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7524c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x752e4 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75310 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75360 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75384 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x753ec reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75434 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7547c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x754a4 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75be4 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75c08 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75c34 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75d70 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75e64 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75ec0 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75f04 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75f4c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75f94 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75fbc reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x75ffc reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x76028 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x76140 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x76178 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x76200 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7623c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x762b0 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x76328 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x76454 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x76570 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x765cc reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x76620 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7670c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x767c0 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x76824 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x76888 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x770b4 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x770ec reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x77200 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x77278 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x772d0 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x773d4 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7740c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7745c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x774d4 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x78864 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x78888 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x788d8 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7894c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x78974 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x789f0 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x78a18 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x78a58 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x78a7c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x78ae4 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x78b2c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x78b74 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x794b0 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x79534 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x79568 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x795b0 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x79964 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x79988 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x799ec reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x79a34 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x79a7c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x79aa4 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x79cd4 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x79cf8 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x79dc0 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x79e38 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7ac08 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7ac40 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7ac90 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7ad08 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7b1e8 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7b220 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7b260 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7b2b4 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7b32c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7bc94 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7bcfc reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7bd20 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7bd48 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7bd78 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7bdc0 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7be08 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7be50 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7be98 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7bf30 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7bf80 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7bfc8 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7c010 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7c034 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7c3fc reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7c420 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7c468 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7c4c4 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7c50c reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7c554 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x7c578 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
 rom:0x842e8 reloc:MIPS_26 symbol:func_game_task_09A5ED98
 rom:0x8800c reloc:MIPS_26 symbol:func_game_task_09A86B88
 rom:0x881c4 reloc:MIPS_26 symbol:func_game_task_09A86BF8
 rom:0x88238 reloc:MIPS_26 symbol:func_game_task_09A86C98
 rom:0x8c7d4 reloc:MIPS_26 symbol:func_game_task_09A6A048
 rom:0x8df40 reloc:MIPS_26 symbol:func_game_task_09A6A9B0
-rom:0x94560 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
-rom:0x945e4 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
+rom:0x94560 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
+rom:0x945e4 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
 rom:0x94d30 reloc:MIPS_26 symbol:func_game_task_09A5E4D0
 rom:0x94d88 reloc:MIPS_26 symbol:func_game_task_09A5E4D0
 rom:0xac88c reloc:MIPS_26 symbol:func_game_task_09AAE810
@@ -7484,7 +7484,7 @@ rom:0x1de20 reloc:MIPS_26 symbol:func_lobby_task_09A77218
 rom:0x24b0c reloc:MIPS_26 symbol:func_lobby_task_09A769C8
 rom:0x2e078 reloc:MIPS_26 symbol:func_lobby_task_09A769C8
 rom:0x2e08c reloc:MIPS_26 symbol:func_game_task_09A5E4D0
-rom:0x2e0a0 reloc:MIPS_26 symbol:func_game_task_09A5E4E0
+rom:0x2e0a0 reloc:MIPS_26 symbol:method_09A5E4E0__8GameTaskFUs
 rom:0x2e0b4 reloc:MIPS_26 symbol:func_lobby_task_09A769F8
 rom:0x2e0c8 reloc:MIPS_26 symbol:func_arcade_task_09A69688
 rom:0x31bd8 reloc:MIPS_26 symbol:func_lobby_task_09A769C8
@@ -9558,6 +9558,18 @@ rom:0x10C5D4 reloc:MIPS_32 symbol:func_eboot_08814BE0 addend:0x3C
 rom:0x10C5D8 reloc:MIPS_32 symbol:func_eboot_08814BE0 addend:0x3C
 rom:0x10C5DC reloc:MIPS_32 symbol:func_eboot_08814BE0 addend:0x3C
 
+rom:0x12CE14 reloc:MIPS_32 symbol:method_0883FAF0__7CockpitFv addend:0x16C
+rom:0x12CE18 reloc:MIPS_32 symbol:method_0883FAF0__7CockpitFv addend:0x17C
+rom:0x12CE1C reloc:MIPS_32 symbol:method_0883FAF0__7CockpitFv addend:0x18C
+rom:0x12CE20 reloc:MIPS_32 symbol:method_0883FAF0__7CockpitFv addend:0x19C
+rom:0x12CE24 reloc:MIPS_32 symbol:method_0883FAF0__7CockpitFv addend:0x1AC
+rom:0x12CE28 reloc:MIPS_32 symbol:method_0883FAF0__7CockpitFv addend:0x204
+rom:0x12CE2C reloc:MIPS_32 symbol:method_0883FAF0__7CockpitFv addend:0x1BC
+rom:0x12CE30 reloc:MIPS_32 symbol:method_0883FAF0__7CockpitFv addend:0x1CC
+rom:0x12CE34 reloc:MIPS_32 symbol:method_0883FAF0__7CockpitFv addend:0x1DC
+rom:0x12CE38 reloc:MIPS_32 symbol:method_0883FAF0__7CockpitFv addend:0x1EC
+rom:0x12CE3C reloc:MIPS_32 symbol:method_0883FAF0__7CockpitFv addend:0x1FC
+
 rom:0x10C5E0 reloc:MIPS_32 symbol:func_eboot_08814C50 addend:0x60
 rom:0x10C5E4 reloc:MIPS_32 symbol:func_eboot_08814C50 addend:0x60
 rom:0x10C5E8 reloc:MIPS_32 symbol:func_eboot_08814C50 addend:0x60
@@ -9575,66 +9587,92 @@ rom:0x10C614 reloc:MIPS_32 symbol:func_eboot_08814C50 addend:0x60
 rom:0x10C618 reloc:MIPS_32 symbol:func_eboot_08814C50 addend:0x60
 rom:0x10C61C reloc:MIPS_32 symbol:func_eboot_08814C50 addend:0x60
 
-ram rom:0x133e50 reloc:MIPS_32 symbol:D_em21_09D29450
-ram rom:0x133e54 reloc:MIPS_32 symbol:D_em07_09D24ED8
-ram rom:0x133e58 reloc:MIPS_32 symbol:D_em02_09D28270
-ram rom:0x133e5c reloc:MIPS_32 symbol:D_em02_09D28538
-ram rom:0x133e60 reloc:MIPS_32 symbol:D_em55_09D26948
-ram rom:0x133e64 reloc:MIPS_32 symbol:D_em54_09D3DAA8
-ram rom:0x133e68 reloc:MIPS_32 symbol:D_em59_09D25710
-ram rom:0x133e6c reloc:MIPS_32 symbol:D_em54_09D3DC40
-ram rom:0x133e70 reloc:MIPS_32 symbol:D_em75_09D57488
-ram rom:0x133e74 reloc:MIPS_32 symbol:D_em07_09D25378
-ram rom:0x133e78 reloc:MIPS_32 symbol:D_em02_09D28740
-ram rom:0x133e7c reloc:MIPS_32 symbol:D_em55_09D26C90
-ram rom:0x133e80 reloc:MIPS_32 symbol:D_em75_09D57490
-ram rom:0x133e9c reloc:MIPS_32 symbol:D_em20_09D34540
-ram rom:0x133ea4 reloc:MIPS_32 symbol:D_em20_09D34E20
-ram rom:0x133eb0 reloc:MIPS_32 symbol:D_em54_09D3C8E8
-ram rom:0x133eb4 reloc:MIPS_32 symbol:D_em15_09D2C3D0
-ram rom:0x133ebc reloc:MIPS_32 symbol:D_em21_09D295E0
-ram rom:0x133ec4 reloc:MIPS_32 symbol:D_em14_09D2AB68
-ram rom:0x133ec8 reloc:MIPS_32 symbol:D_em54_09D3CB40
-ram rom:0x133ecc reloc:MIPS_32 symbol:D_em54_09D3CF68
-ram rom:0x133ed0 reloc:MIPS_32 symbol:D_em54_09D3D358
-ram rom:0x133ed4 reloc:MIPS_32 symbol:D_em17_09D2CBD0
-ram rom:0x133ed8 reloc:MIPS_32 symbol:D_em54_09D3D7F0
-ram rom:0x133edc reloc:MIPS_32 symbol:D_em33_09D20C90
-ram rom:0x133ee0 reloc:MIPS_32 symbol:D_em14_09D2AED8
-ram rom:0x133ee4 reloc:MIPS_32 symbol:D_em59_09D25308
-ram rom:0x133eec reloc:MIPS_32 symbol:D_em40_09D35790
-ram rom:0x133ef0 reloc:MIPS_32 symbol:D_em07_09D21DC8
-ram rom:0x133ef4 reloc:MIPS_32 symbol:D_em07_09D25848
-ram rom:0x133ef8 reloc:MIPS_32 symbol:D_em55_09D25F08
-ram rom:0x133efc reloc:MIPS_32 symbol:D_em75_09D56958
-ram rom:0x133f00 reloc:MIPS_32 symbol:D_em75_09D56D70
-ram rom:0x133f04 reloc:MIPS_32 symbol:D_em02_09D27700
-ram rom:0x133f08 reloc:MIPS_32 symbol:D_em02_09D28D90
-ram rom:0x133f0c reloc:MIPS_32 symbol:D_em02_09D2A1F0
-ram rom:0x133f10 reloc:MIPS_32 symbol:D_em75_09D57088
-ram rom:0x133f14 reloc:MIPS_32 symbol:D_em58_09D23010
-ram rom:0x133f68 reloc:MIPS_32 symbol:D_lobby_task_09B06098
-ram rom:0x133f6c reloc:MIPS_32 symbol:D_lobby_task_09B06258
-ram rom:0x133f70 reloc:MIPS_32 symbol:D_lobby_task_09B06318
-ram rom:0x133f74 reloc:MIPS_32 symbol:D_lobby_task_09B06420
-ram rom:0x133f78 reloc:MIPS_32 symbol:D_lobby_task_09B06528
-ram rom:0x133f7c reloc:MIPS_32 symbol:D_lobby_task_09B06680
-ram rom:0x133f80 reloc:MIPS_32 symbol:D_lobby_task_09B06988
-ram rom:0x133f84 reloc:MIPS_32 symbol:D_lobby_task_09B069F0
-ram rom:0x133f88 reloc:MIPS_32 symbol:D_lobby_task_09B06CA8
-ram rom:0x133f8c reloc:MIPS_32 symbol:D_lobby_task_09B06E30
-ram rom:0x133f90 reloc:MIPS_32 symbol:D_lobby_task_09B07250
-ram rom:0x133f94 reloc:MIPS_32 symbol:D_lobby_task_09B072C0
-ram rom:0x133f98 reloc:MIPS_32 symbol:D_lobby_task_09B07388
-ram rom:0x133f9c reloc:MIPS_32 symbol:D_lobby_task_09B073F0
-ram rom:0x133fa0 reloc:MIPS_32 symbol:D_lobby_task_09B074D0
-ram rom:0x133fa8 reloc:MIPS_32 symbol:D_lobby_task_09B078C0
-ram rom:0x133fac reloc:MIPS_32 symbol:D_lobby_task_09B079D8
-ram rom:0x133fb0 reloc:MIPS_32 symbol:D_lobby_task_09B07C60
-ram rom:0x133fb4 reloc:MIPS_32 symbol:D_lobby_task_09B07D20
-ram rom:0x133fb8 reloc:MIPS_32 symbol:D_lobby_task_09B07DE0
-ram rom:0x133fbc reloc:MIPS_32 symbol:D_lobby_task_09B07EA0
-ram rom:0x133fc0 reloc:MIPS_32 symbol:D_lobby_task_09B07F60
-ram rom:0x133fc4 reloc:MIPS_32 symbol:D_lobby_task_09B08020
-ram rom:0x133fc8 reloc:MIPS_32 symbol:D_lobby_task_09B080E0
-ram rom:0x133fcc reloc:MIPS_32 symbol:D_lobby_task_09B081A0
+rom:0x12C620 reloc:MIPS_32 symbol:method_08818098__7CockpitFv addend:0x3F0
+rom:0x12C624 reloc:MIPS_32 symbol:method_08818098__7CockpitFv addend:0x3F0
+rom:0x12C628 reloc:MIPS_32 symbol:method_08818098__7CockpitFv addend:0x4A4
+rom:0x12C62C reloc:MIPS_32 symbol:method_08818098__7CockpitFv addend:0x524
+rom:0x12C630 reloc:MIPS_32 symbol:method_08818098__7CockpitFv addend:0x524
+rom:0x12C634 reloc:MIPS_32 symbol:method_08818098__7CockpitFv addend:0x8AC
+rom:0x12C638 reloc:MIPS_32 symbol:method_08818098__7CockpitFv addend:0x8AC
+
+rom:0x12C714 reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x2AC
+rom:0x12C718 reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x2C0
+rom:0x12C71C reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x320
+rom:0x12C720 reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x3C4
+rom:0x12C724 reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x424
+rom:0x12C728 reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x458
+rom:0x12C72C reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x458
+rom:0x12C730 reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x264
+rom:0x12C734 reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x178
+rom:0x12C738 reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x1AC
+rom:0x12C73C reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x178
+rom:0x12C740 reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x1E0
+rom:0x12C744 reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x280
+rom:0x12C748 reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x280
+
+rom:0x136A40 reloc:MIPS_32 symbol:D_lobby_task_09AFFF08
+rom:0x136A44 reloc:MIPS_32 symbol:D_lobby_task_09AFFE30
+
+rom:0x133e50 reloc:MIPS_32 symbol:D_em21_09D29450
+rom:0x133e54 reloc:MIPS_32 symbol:D_em07_09D24ED8
+rom:0x133e58 reloc:MIPS_32 symbol:D_em02_09D28270
+rom:0x133e5c reloc:MIPS_32 symbol:D_em02_09D28538
+rom:0x133e60 reloc:MIPS_32 symbol:D_em55_09D26948
+rom:0x133e64 reloc:MIPS_32 symbol:D_em54_09D3DAA8
+rom:0x133e68 reloc:MIPS_32 symbol:D_em59_09D25710
+rom:0x133e6c reloc:MIPS_32 symbol:D_em54_09D3DC40
+rom:0x133e70 reloc:MIPS_32 symbol:D_em75_09D57488
+rom:0x133e74 reloc:MIPS_32 symbol:D_em07_09D25378
+rom:0x133e78 reloc:MIPS_32 symbol:D_em02_09D28740
+rom:0x133e7c reloc:MIPS_32 symbol:D_em55_09D26C90
+rom:0x133e80 reloc:MIPS_32 symbol:D_em75_09D57490
+rom:0x133e9c reloc:MIPS_32 symbol:D_em20_09D34540
+rom:0x133ea4 reloc:MIPS_32 symbol:D_em20_09D34E20
+rom:0x133eb0 reloc:MIPS_32 symbol:D_em54_09D3C8E8
+rom:0x133eb4 reloc:MIPS_32 symbol:D_em15_09D2C3D0
+rom:0x133ebc reloc:MIPS_32 symbol:D_em21_09D295E0
+rom:0x133ec4 reloc:MIPS_32 symbol:D_em14_09D2AB68
+rom:0x133ec8 reloc:MIPS_32 symbol:D_em54_09D3CB40
+rom:0x133ecc reloc:MIPS_32 symbol:D_em54_09D3CF68
+rom:0x133ed0 reloc:MIPS_32 symbol:D_em54_09D3D358
+rom:0x133ed4 reloc:MIPS_32 symbol:D_em17_09D2CBD0
+rom:0x133ed8 reloc:MIPS_32 symbol:D_em54_09D3D7F0
+rom:0x133edc reloc:MIPS_32 symbol:D_em33_09D20C90
+rom:0x133ee0 reloc:MIPS_32 symbol:D_em14_09D2AED8
+rom:0x133ee4 reloc:MIPS_32 symbol:D_em59_09D25308
+rom:0x133eec reloc:MIPS_32 symbol:D_em40_09D35790
+rom:0x133ef0 reloc:MIPS_32 symbol:D_em07_09D21DC8
+rom:0x133ef4 reloc:MIPS_32 symbol:D_em07_09D25848
+rom:0x133ef8 reloc:MIPS_32 symbol:D_em55_09D25F08
+rom:0x133efc reloc:MIPS_32 symbol:D_em75_09D56958
+rom:0x133f00 reloc:MIPS_32 symbol:D_em75_09D56D70
+rom:0x133f04 reloc:MIPS_32 symbol:D_em02_09D27700
+rom:0x133f08 reloc:MIPS_32 symbol:D_em02_09D28D90
+rom:0x133f0c reloc:MIPS_32 symbol:D_em02_09D2A1F0
+rom:0x133f10 reloc:MIPS_32 symbol:D_em75_09D57088
+rom:0x133f14 reloc:MIPS_32 symbol:D_em58_09D23010
+rom:0x133f68 reloc:MIPS_32 symbol:D_lobby_task_09B06098
+rom:0x133f6c reloc:MIPS_32 symbol:D_lobby_task_09B06258
+rom:0x133f70 reloc:MIPS_32 symbol:D_lobby_task_09B06318
+rom:0x133f74 reloc:MIPS_32 symbol:D_lobby_task_09B06420
+rom:0x133f78 reloc:MIPS_32 symbol:D_lobby_task_09B06528
+rom:0x133f7c reloc:MIPS_32 symbol:D_lobby_task_09B06680
+rom:0x133f80 reloc:MIPS_32 symbol:D_lobby_task_09B06988
+rom:0x133f84 reloc:MIPS_32 symbol:D_lobby_task_09B069F0
+rom:0x133f88 reloc:MIPS_32 symbol:D_lobby_task_09B06CA8
+rom:0x133f8c reloc:MIPS_32 symbol:D_lobby_task_09B06E30
+rom:0x133f90 reloc:MIPS_32 symbol:D_lobby_task_09B07250
+rom:0x133f94 reloc:MIPS_32 symbol:D_lobby_task_09B072C0
+rom:0x133f98 reloc:MIPS_32 symbol:D_lobby_task_09B07388
+rom:0x133f9c reloc:MIPS_32 symbol:D_lobby_task_09B073F0
+rom:0x133fa0 reloc:MIPS_32 symbol:D_lobby_task_09B074D0
+rom:0x133fa8 reloc:MIPS_32 symbol:D_lobby_task_09B078C0
+rom:0x133fac reloc:MIPS_32 symbol:D_lobby_task_09B079D8
+rom:0x133fb0 reloc:MIPS_32 symbol:D_lobby_task_09B07C60
+rom:0x133fb4 reloc:MIPS_32 symbol:D_lobby_task_09B07D20
+rom:0x133fb8 reloc:MIPS_32 symbol:D_lobby_task_09B07DE0
+rom:0x133fbc reloc:MIPS_32 symbol:D_lobby_task_09B07EA0
+rom:0x133fc0 reloc:MIPS_32 symbol:D_lobby_task_09B07F60
+rom:0x133fc4 reloc:MIPS_32 symbol:D_lobby_task_09B08020
+rom:0x133fc8 reloc:MIPS_32 symbol:D_lobby_task_09B080E0
+rom:0x133fcc reloc:MIPS_32 symbol:D_lobby_task_09B081A0

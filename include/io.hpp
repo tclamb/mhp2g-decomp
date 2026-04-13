@@ -23,7 +23,6 @@ extern "C" {
 
     int memcmp(const void*, const void*, long unsigned int);
     void *memset(void*, int,  long unsigned int);
-    int sprintf(char*, const char*, ...);
 }
 
 #endif

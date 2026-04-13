@@ -1,3 +1,4 @@
+#include "item_manager.hpp"
 #include "system.hpp"
 
 #include <pspthreadman.h>
@@ -35,7 +36,7 @@ System::~System() {}
 GlobalMemoryStick::GlobalMemoryStick() {}
 GlobalEvdemo::GlobalEvdemo() {}
 GlobalEquipManager::GlobalEquipManager() {}
-GlobalItemManager::GlobalItemManager() {}
+ItemManager::ItemManager() {}
 GlobalResultCheck::GlobalResultCheck() {}
 GlobalQuest::GlobalQuest() {}
 GlobalQuestNet::GlobalQuestNet() {}
@@ -43,7 +44,7 @@ GlobalLobbyNet::GlobalLobbyNet() {}
 GlobalNet::GlobalNet() {}
 GlobalOsk::GlobalOsk() {}
 GlobalCCC::GlobalCCC() {}
-GlobalSystemFont::GlobalSystemFont() {}
+SystemFont::SystemFont() {}
 GlobalVramManager::GlobalVramManager() {}
 GlobalFileSys::GlobalFileSys() {}
 GlobalPad::GlobalPad() {}

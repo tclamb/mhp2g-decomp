@@ -29,7 +29,6 @@ extern "C" {
     int sceIoGetstat(const char *file, SceIoStat *stat);
 
     void *memset(void*, int,  long unsigned int);
-    int sprintf(char*, const char*, ...);
 }
 
 void FileSys::initialize() {

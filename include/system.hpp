@@ -38,7 +38,6 @@
 DECLARE_GLOBAL(Ge);
 DECLARE_GLOBAL(Pad);
 DECLARE_GLOBAL(VramManager);
-DECLARE_GLOBAL(SystemFont);
 DECLARE_GLOBAL(CCC);
 DECLARE_GLOBAL(Osk);
 DECLARE_GLOBAL(Net);
@@ -47,7 +46,6 @@ DECLARE_GLOBAL(QuestNet);
 DECLARE_GLOBAL(FileSys);
 DECLARE_GLOBAL(Quest);
 DECLARE_GLOBAL(ResultCheck);
-DECLARE_GLOBAL(ItemManager);
 DECLARE_GLOBAL(EquipManager);
 DECLARE_GLOBAL(Evdemo);
 DECLARE_GLOBAL(MemoryStick);
@@ -64,7 +62,7 @@ struct System : NoInlineConstructorSingleton<System> {
     ObjManager objManager;
     DrawManager drawManager;
     ResourceManager resourceManager;
-    GlobalSystemFont systemFont;
+    SystemFont systemFont;
     GlobalCCC ccc;
     GlobalOsk osk;
     GlobalNet net;
@@ -76,7 +74,7 @@ struct System : NoInlineConstructorSingleton<System> {
     Cockpit cockpit;
     GlobalQuest quest;
     GlobalResultCheck resultCheck;
-    GlobalItemManager itemManager;
+    ItemManager itemManager;
     GlobalEquipManager equipManager;
     GlobalEvdemo evdemo;
     DataManager dataManager;

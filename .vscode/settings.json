@@ -9,6 +9,7 @@
         "-Wno-tautological-undefined-compare",
         "-Wno-tautological-constant-out-of-range-compare",
         "-Wno-c++11-narrowing",
+        "-Wno-writable-strings",
         "--target=mipsel-linux-gnu",
     ]
 }
