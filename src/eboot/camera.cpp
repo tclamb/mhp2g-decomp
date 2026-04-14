@@ -42,7 +42,7 @@ void Camera::method_088137C8() {
     inline_memset(&q, 0, sizeof(q));
     r = D_eboot_089310C0;
 
-    Singleton<Ge>::objectPtr->norm = 1;
+    Ge::objectPtr->norm = 1;
     near_z = 30;
     far_z = 65000;
     unknown_0xC = DEGREES_TO_VFPU(78.5);
@@ -68,7 +68,7 @@ void Camera::method_088138DC() {
     unknown_0xB3C = 1;
     method_0881395C();
     unknown_0xB10 = 0;
-    player = func_eboot_088DF804(Singleton<PlayerManager>::objectPtr, Singleton<GameSys>::objectPtr->player_id);
+    player = PlayerManager::objectPtr->method_088DF804(GameSys::objectPtr->player_id);
     unknown_0xB00 = 0;
     unknown_0xAE0 = 0;
     unknown_0xAC0 = 0;
@@ -194,7 +194,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08814C30);
 
 extern "C"
 bool func_eboot_08814C50(Camera *this_) {
-    if (Singleton<GameSys>::objectPtr->allow_hidden_flag == true) {
+    if (GameSys::objectPtr->allow_hidden_flag == true) {
         return true;
     }
     SubCameraData &unknown = this_->subCameras[5].unknown_0xA0;

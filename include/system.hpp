@@ -29,54 +29,38 @@
 #include "evdemo.hpp"
 #include "memory_stick.hpp"
 
-#define DECLARE_GLOBAL(T) \
-    struct Global ## T  : Singleton< T >, T { \
-        Global ## T (); \
-        inline ~Global ## T () {}; \
-    }
-
-DECLARE_GLOBAL(Ge);
-DECLARE_GLOBAL(Pad);
-DECLARE_GLOBAL(VramManager);
-DECLARE_GLOBAL(CCC);
-DECLARE_GLOBAL(Osk);
-DECLARE_GLOBAL(Net);
-DECLARE_GLOBAL(LobbyNet);
-DECLARE_GLOBAL(QuestNet);
-DECLARE_GLOBAL(FileSys);
-DECLARE_GLOBAL(Quest);
-DECLARE_GLOBAL(ResultCheck);
-DECLARE_GLOBAL(EquipManager);
-DECLARE_GLOBAL(Evdemo);
-DECLARE_GLOBAL(MemoryStick);
-
-#undef DECLARE_GLOBAL
+struct GlobalFileSys : InlineConstructorSingleton<FileSys>, FileSys {
+    GlobalFileSys();
+    virtual ~GlobalFileSys() {}
+};
 
 struct System : NoInlineConstructorSingleton<System> {
-    GlobalGe ge;
+    static System *objectPtr;
+
+    Ge ge;
     TaskManager taskManager;
-    GlobalPad pad;
+    Pad pad;
     GlobalFileSys fileSys;
-    GlobalVramManager vramManager;
+    VramManager vramManager;
     Sound sound;
     ObjManager objManager;
     DrawManager drawManager;
     ResourceManager resourceManager;
     SystemFont systemFont;
-    GlobalCCC ccc;
-    GlobalOsk osk;
-    GlobalNet net;
-    GlobalLobbyNet lobbyNet;
-    GlobalQuestNet questNet;
+    CCC ccc;
+    Osk osk;
+    Net net;
+    LobbyNet lobbyNet;
+    QuestNet questNet;
     Camera camera;
     LightManager lightManager;
     GameSys gameSys;
     Cockpit cockpit;
-    GlobalQuest quest;
-    GlobalResultCheck resultCheck;
+    Quest quest;
+    ResultCheck resultCheck;
     ItemManager itemManager;
-    GlobalEquipManager equipManager;
-    GlobalEvdemo evdemo;
+    EquipManager equipManager;
+    Evdemo evdemo;
     DataManager dataManager;
 
     u32 loopCount;
@@ -96,7 +80,7 @@ struct System : NoInlineConstructorSingleton<System> {
         u16 debug;
     } activeOverlays;
 
-    GlobalMemoryStick memoryStick;
+    MemoryStick memoryStick;
 
     SceUID priorityChangerThreadId;
     SceUID userMainThreadId;

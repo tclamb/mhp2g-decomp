@@ -1,9 +1,12 @@
 #pragma once
 
 #include "common.h"
+#include "singleton.hpp"
 
-struct LbEvent {
+struct LbEvent : Singleton<LbEvent> {
     // TODO
+
+    LbEvent();
 };
 
 extern "C" {

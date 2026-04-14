@@ -590,8 +590,8 @@ namespace immediate_ge {
         inline void fog(float color, float begin, float end) {
             ScePspUnion32 c, fog1, fog2;
             c.f = color;
-            float slope = begin * Singleton<Ge>::objectPtr->norm;
-            fog1.f = end * Singleton<Ge>::objectPtr->norm;
+            float slope = begin * Ge::objectPtr->norm;
+            fog1.f = end * Ge::objectPtr->norm;
             slope = ((fog1.f - slope) ? (fog1.f - slope) : 1.0f);
             slope = 1.0f / slope;
             fog2.f = slope;

@@ -71,7 +71,7 @@ void ObjBase::draw() {
 }
 
 void pmo::drawWeight(Hierarchy *hierarchy, tmh *textures, ScePspFMatrix4 *transform) {
-    Singleton<DrawManager>::objectPtr->world_model(transform);
+    DrawManager::objectPtr->world_model(transform);
     for (int i = 0; i < header->mesh_count; ++i) {
         drawWeightMesh(hierarchy, textures, i);
     }
@@ -174,7 +174,7 @@ void ObjBase::method_08865AD4(u16 flags, int a, int b) {
 }
 
 int ObjBase::inLoadedStage() {
-    return stageId == Singleton<GameSys>::objectPtr->stage_id;
+    return stageId == GameSys::objectPtr->stage_id;
 }
 
 extern struct StageCoordinateInfo {

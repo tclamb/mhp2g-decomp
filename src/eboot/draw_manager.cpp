@@ -55,9 +55,9 @@ DrawManager::~DrawManager() {
 void DrawManager::reset() {
     clear();
     if (start_fragment(render_group::RESET)) {
-        Camera *global = Singleton<Camera>::objectPtr;
-        ge::viewportscale(global->viewport_scale);
-        ge::viewportcenter(global->viewport_center);
+        Camera *camera = Camera::objectPtr;
+        ge::viewportscale(camera->viewport_scale);
+        ge::viewportcenter(camera->viewport_center);
 
         ge::minz(0x0000);
         ge::maxz(0xFFFF);
@@ -153,7 +153,7 @@ void DrawManager::draw() {
                 ScePspFMatrix4 m;
                 vmidt_q(&m);
                 ge::view(&m);
-                ge::projection(&Singleton<Camera>::objectPtr->projection);
+                ge::projection(&Camera::objectPtr->projection);
             }
 
             for (int j = 0; j < z_index_bucket_length[i]; ++j) {
@@ -185,7 +185,7 @@ bool DrawManager::vram_transfer() {
     VramAllocation allocation;
     u32 display_list[16];
 
-    Singleton<VramManager>::objectPtr->method_08813364(Singleton<Ge>::objectPtr->active_buffer ^ 1, &allocation);
+    VramManager::objectPtr->method_08813364(Ge::objectPtr->active_buffer ^ 1, &allocation);
 
     // TODO: immediate_ge with destination parameter
     u16 transfer_height = 272;
@@ -204,7 +204,7 @@ bool DrawManager::vram_transfer() {
     *write_head++ = GE_CMD_BASE << 24;
     *write_head++ = GE_CMD_JUMP << 24;
 
-    return func_eboot_088593A0(Singleton<Ge>::objectPtr, display_list, 12, vram_transfer_fragment_index);
+    return Ge::objectPtr->method_088593A0(display_list, 12, vram_transfer_fragment_index);
 }
 
 void DrawManager::initialize() {
@@ -321,7 +321,7 @@ bool DrawManager::start_fragment(u8 group) {
     if ((bool)writing != false) {
         end_fragment();
     }
-    DRAWABLE_WRITE_HEAD = Singleton<Ge>::objectPtr->write_head();
+    DRAWABLE_WRITE_HEAD = Ge::objectPtr->write_head();
     if (DRAWABLE_WRITE_HEAD != NULL) {
         writing = true;
         fragment_start = DRAWABLE_WRITE_HEAD;
@@ -338,8 +338,8 @@ void DrawManager::end_fragment() {
         int length = DRAWABLE_WRITE_HEAD - fragment_start;
         if (length != 0) {
             DRAWABLE_WRITE_HEAD += 2;
-            func_eboot_088595E8(Singleton<Ge>::objectPtr, fragment_start, length + 2, fragment_group);
-            Singleton<Ge>::objectPtr->set_write_head(DRAWABLE_WRITE_HEAD);
+            func_eboot_088595E8(Ge::objectPtr, fragment_start, length + 2, fragment_group);
+            Ge::objectPtr->set_write_head(DRAWABLE_WRITE_HEAD);
         }
         DRAWABLE_WRITE_HEAD = NULL;
         fragment_start = NULL;
@@ -372,7 +372,7 @@ int DrawManager::addObj(u8 group, ObjBase *character, bool no_culling) {
             ScePspFVector4 position;
             sv_q(&position, x, y, z, 0);
 
-            result = func_eboot_08816EA8(Singleton<Camera>::objectPtr, &position, s * character->model_pmo.header->clipping_distance);
+            result = func_eboot_08816EA8(Camera::objectPtr, &position, s * character->model_pmo.header->clipping_distance);
             if ((u8)result == false) {
                 break;
             }
@@ -392,7 +392,7 @@ int DrawManager::add(u8 group, ModelBase *model, bool no_culling) {
     int result;
     model->flags &= ~Draw::VISIBLE;
     if (no_culling != false ||
-        (result = func_eboot_08816EA8(Singleton<Camera>::objectPtr, &model->transform.w, model->model_pmo.header->clipping_distance), (u8)result != false)) {
+        (result = func_eboot_08816EA8(Camera::objectPtr, &model->transform.w, model->model_pmo.header->clipping_distance), (u8)result != false)) {
         result = add(group, model, &model->transform.w, no_culling);
         if ((u8)result == true) {
             model->flags |= Draw::VISIBLE;
@@ -412,10 +412,10 @@ int DrawManager::add(u8 group, Draw *object, ScePspFVector4 *position, bool no_c
     object->next = NULL;
 
     float zindex =
-        position->x * Singleton<Camera>::objectPtr->perspective.x.z +
-        position->y * Singleton<Camera>::objectPtr->perspective.y.z +
-        position->z * Singleton<Camera>::objectPtr->perspective.z.z +
-                      Singleton<Camera>::objectPtr->perspective.w.z ;
+        position->x * Camera::objectPtr->perspective.x.z +
+        position->y * Camera::objectPtr->perspective.y.z +
+        position->z * Camera::objectPtr->perspective.z.z +
+                      Camera::objectPtr->perspective.w.z ;
     zindex *= -1;
     if (zindex < 0.0f) {
         if (no_culling == true) {
@@ -430,7 +430,7 @@ int DrawManager::add(u8 group, Draw *object, ScePspFVector4 *position, bool no_c
     }
     object->zindex = zindex;
 
-    int index = z_index_bucket_length[group] * ((zindex - Singleton<Camera>::objectPtr->near_z) / (Singleton<Camera>::objectPtr->far_z - Singleton<Camera>::objectPtr->near_z));
+    int index = z_index_bucket_length[group] * ((zindex - Camera::objectPtr->near_z) / (Camera::objectPtr->far_z - Camera::objectPtr->near_z));
     if (index >= z_index_bucket_length[group]) {
         return false;
     }
@@ -480,10 +480,10 @@ bool DrawManager::queue_vram_transfer(void *dst, u8 fragment_index) {
 
 void DrawManager::world_model(ScePspFMatrix4 *transform) {
     ScePspFMatrix4 m;
-    float norm = Singleton<Ge>::objectPtr->norm;
+    float norm = Ge::objectPtr->norm;
     scaleMatrix(&m, norm, norm, norm);
     vmmul_q(&m, transform, &m);
-    vmmul_q(&m, &m, &Singleton<Camera>::objectPtr->world);
+    vmmul_q(&m, &m, &Camera::objectPtr->world);
 
     ge::world(&m);
 

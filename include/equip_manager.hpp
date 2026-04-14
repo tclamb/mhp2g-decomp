@@ -1,5 +1,9 @@
 #pragma once
 
-struct EquipManager {
+#include "singleton.hpp"
+
+struct EquipManager : Singleton<EquipManager> {
     // empty
+
+    EquipManager();
 };

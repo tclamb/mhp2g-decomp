@@ -1,9 +1,12 @@
 #pragma once
 
+#include "singleton.hpp"
 #include "task_base.hpp"
 
-struct FadeTask : TaskBase {
+struct FadeTask : Singleton<FadeTask>, TaskBase {
     // TODO
+
+    FadeTask();
 };
 
 extern "C" {

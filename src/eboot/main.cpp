@@ -13,7 +13,7 @@ static System system;
 int main() {
     sceKernelChangeThreadPriority(0, 0x30);
     mwInit();
-    Singleton<System>::objectPtr->run();
+    System::objectPtr->run();
     mwExit();
 }
 
@@ -33,21 +33,27 @@ void forceEmitGlobalFileSysDestructor() {
 }
 
 System::~System() {}
-GlobalMemoryStick::GlobalMemoryStick() {}
-GlobalEvdemo::GlobalEvdemo() {}
-GlobalEquipManager::GlobalEquipManager() {}
+MemoryStick::MemoryStick() {}
+Evdemo::Evdemo() {}
+EquipManager::EquipManager() {}
 ItemManager::ItemManager() {}
-GlobalResultCheck::GlobalResultCheck() {}
-GlobalQuest::GlobalQuest() {}
-GlobalQuestNet::GlobalQuestNet() {}
-GlobalLobbyNet::GlobalLobbyNet() {}
-GlobalNet::GlobalNet() {}
-GlobalOsk::GlobalOsk() {}
-GlobalCCC::GlobalCCC() {}
+ResultCheck::ResultCheck() {}
+Quest::Quest() {}
+QuestNet::QuestNet() {
+    unknown_0x0 = 0;
+}
+LobbyNet::LobbyNet() {
+    unknown_0x4 = 0;
+}
+Net::Net() {}
+Osk::Osk() {
+    unknown_0x74 = 0;
+}
+CCC::CCC() {}
 SystemFont::SystemFont() {}
-GlobalVramManager::GlobalVramManager() {}
+VramManager::VramManager() {}
 GlobalFileSys::GlobalFileSys() {}
-GlobalPad::GlobalPad() {}
+Pad::Pad() {}
 TaskManager::TaskManager() {
     active[0] = NULL;
     active[1] = NULL;
@@ -55,4 +61,4 @@ TaskManager::TaskManager() {
     active[3] = NULL;
     cache.reset(slab, sizeof(slab));
 }
-GlobalGe::GlobalGe() {}
+Ge::Ge() {}

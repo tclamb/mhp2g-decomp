@@ -10,13 +10,13 @@ ContTask::~ContTask() {}
 void ContTask::load() {
     switch (status) {
     case 0:
-        func_eboot_0884D658(Singleton<FadeTask>::objectPtr, 1, 0, 1);
-        func_eboot_0888FE4C(Singleton<System>::objectPtr, 0x2D, 1);
+        func_eboot_0884D658(FadeTask::objectPtr, 1, 0, 1);
+        func_eboot_0888FE4C(System::objectPtr, 0x2D, 1);
         status = (s32) (status + 1);
         return;
     case 1:
-        if (func_eboot_0888FEE8(Singleton<System>::objectPtr) == 0) {
-            func_eboot_0888FF00(Singleton<System>::objectPtr, 0x2D, 1);
+        if (func_eboot_0888FEE8(System::objectPtr) == 0) {
+            func_eboot_0888FF00(System::objectPtr, 0x2D, 1);
             status = 0;
             TaskBase::mem_fn next = (TaskBase::mem_fn)&ContTask::on_load;
             if (next != 0) {

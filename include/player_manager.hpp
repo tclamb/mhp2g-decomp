@@ -1,11 +1,12 @@
 #pragma once
 
-struct Player;
+#include "player.hpp"
+#include "singleton.hpp"
 
-struct PlayerManager {
+struct PlayerManager : Singleton<PlayerManager> {
     // TODO
-};
 
-extern "C" {
-    Player *func_eboot_088DF804(PlayerManager *, int);
-}
+    Player *method_088DF804(int playerId);
+
+    PlayerManager();
+};

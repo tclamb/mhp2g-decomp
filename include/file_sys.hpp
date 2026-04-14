@@ -3,6 +3,8 @@
 #include "file_sys_base.hpp"
 
 struct FileSys : FileSysBase {
+    static FileSys *objectPtr;
+
     virtual ~FileSys() {}
     virtual void initialize();
     virtual void stop();

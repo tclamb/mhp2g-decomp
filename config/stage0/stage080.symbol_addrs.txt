@@ -21,5 +21,5 @@ __register_global_object = 0x08909D80; // type:func
 D_eboot_089BE194 = 0x089BE194;
 DRAWABLE_WRITE_HEAD = 0x089C70D0;
 objectPtr__19Singleton<7GameSys> = 0x089C7508; // filename:D_eboot_089C7508
-objectPtr__18Singleton<6System> = 0x08A5E270; // filename:D_eboot_08A5E270
+objectPtr__6System = 0x08A5E270; // filename:D_eboot_08A5E270
 objectPtr__25Singleton<12StageManager> = 0x09A4ADA0; // filename:D_eboot_09A4ADA0

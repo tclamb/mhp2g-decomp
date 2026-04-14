@@ -36,8 +36,8 @@ StageManager::~StageManager() {
 void StageManager::reset() {
     cache.reset(slab, sizeof(slab));
     unknown_0xA2B8 = 0;
-    Singleton<VramManager>::objectPtr->method_08812F04(6, 0x4e200, VramManager::INVALID_ADRS);
-    vram_start = Singleton<VramManager>::objectPtr->method_088133D0(6);
+    VramManager::objectPtr->method_08812F04(6, 0x4e200, VramManager::INVALID_ADRS);
+    vram_start = VramManager::objectPtr->method_088133D0(6);
     vram_transfer_size = 0;
     unknown_0x28A = -1;
     unknown_0xA2C8 = 0;
@@ -47,9 +47,9 @@ void StageManager::reset() {
 }
 
 void StageManager::unload() {
-    Singleton<ResourceManager>::objectPtr->free_all(1);
+    ResourceManager::objectPtr->free_all(1);
     unknown_0xA2B8 = 0;
-    Singleton<VramManager>::objectPtr->method_08813024(6);
+    VramManager::objectPtr->method_08813024(6);
     vram_transfer_size = 0;
 }
 
@@ -675,7 +675,7 @@ bool StageManager::stage_vtable_0xA8() {
 
 // inferred from 0x1787 corresponding to the first farm variant stage pac
 u16 StageManager::farm_stage_file_id() {
-    FarmState &farm = Singleton<GameSys>::objectPtr->farm;
+    FarmState &farm = GameSys::objectPtr->farm;
     u16 offset = farm.vars[1];
     if ((farm.vars[6] & 1) != 0) {
         offset = 3;
@@ -683,7 +683,7 @@ u16 StageManager::farm_stage_file_id() {
     if (farm.vars[2] < 2) {
         offset += 4;
     }
-    if (func_game_sub_09C14800(Singleton<LbEvent>::objectPtr, 0x5F) == 0) {
+    if (func_game_sub_09C14800(LbEvent::objectPtr, 0x5F) == 0) {
         offset += 8;
     }
     return offset + 0x1787;
@@ -697,19 +697,19 @@ void StageManager::unknown_0xA2E8_clear() {
 
 u32 StageManager::register_sound(u32 arg2, u32 arg3, u32 arg4, u32 arg5, u32 arg6, ScePspFVector4 *arg7, u32 arg8) {
     u32 result = 0;
-    if (func_eboot_08883CF4(Singleton<Sound>::objectPtr, arg7, arg8) == 0) {
+    if (func_eboot_08883CF4(Sound::objectPtr, arg7, arg8) == 0) {
         if (unknown_0xA2E8[arg6] != 0) {
             unknown_0xA2E8[arg6] = 0;
-            func_eboot_08885198(Singleton<Sound>::objectPtr, arg2, arg5, arg6, false);
+            func_eboot_08885198(Sound::objectPtr, arg2, arg5, arg6, false);
         } else {
             result = result;
         }
     } else {
         if (unknown_0xA2E8[arg6] == 0) {
-            result = func_eboot_08883858(Singleton<Sound>::objectPtr, arg2, arg3, arg4, arg5, arg6, arg7, arg8, 0, 0, false);
+            result = func_eboot_08883858(Sound::objectPtr, arg2, arg3, arg4, arg5, arg6, arg7, arg8, 0, 0, false);
             unknown_0xA2E8[arg6] = 1;
         } else {
-            func_eboot_0888444C(Singleton<Sound>::objectPtr, arg2, arg4, arg5, arg6, arg7, arg8, 0, 0);
+            func_eboot_0888444C(Sound::objectPtr, arg2, arg4, arg5, arg6, arg7, arg8, 0, 0);
         }
     }
     return result;
@@ -786,11 +786,11 @@ void StageManager::compile_pac(pac_header *pac, bool load_all) {
 
     if (load_all == true) {
         void *unknown_data_4 = pac->data(4);
-        func_eboot_088157D4(Singleton<Camera>::objectPtr, unknown_data_4);
+        func_eboot_088157D4(Camera::objectPtr, unknown_data_4);
 
         void *unknown_data_5 = pac->data(5);
         if (unknown_data_5 != 0) {
-            func_game_sub_09C336D8(Singleton<HitManager>::objectPtr, unknown_data_5);
+            func_game_sub_09C336D8(HitManager::objectPtr, unknown_data_5);
         }
     }
 
@@ -990,7 +990,7 @@ u8 StageManager::get_flag_0xA3E8() {
 }
 
 u8 StageManager::find_map_stage_index(u16 stage_id) {
-    int mapId = Singleton<GameSys>::objectPtr->mapId;
+    int mapId = GameSys::objectPtr->mapId;
     MapStageIds &m = D_game_sub_09CDF678[mapId];
     for (int i = 0; i < m.count; ++i) {
         if (stage_id == m.stage_ids[i]) {
@@ -1001,7 +1001,7 @@ u8 StageManager::find_map_stage_index(u16 stage_id) {
 }
 
 u16 StageManager::map_stage_id(u8 map_stage_index) {
-    int mapId = Singleton<GameSys>::objectPtr->mapId;
+    int mapId = GameSys::objectPtr->mapId;
     MapStageIds &m = D_game_sub_09CDF678[mapId];
     return m.stage_ids[map_stage_index];
 }

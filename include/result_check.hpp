@@ -1,9 +1,12 @@
 #pragma once
 
 #include "common.h"
+#include "singleton.hpp"
 
-struct ResultCheck {
+struct ResultCheck : Singleton<ResultCheck> {
     u8 pad_0x0[0x130];
+
+    ResultCheck();
 };
 
 extern "C" {

@@ -51,7 +51,7 @@ struct GameSys : Singleton<GameSys> {
     int method_088567D4(u16);
 
     inline bool unknownTest() {
-        return Singleton<GameSys>::objectPtr->flag_0x6ADDD && !Singleton<GameSys>::objectPtr->flag_0x480;
+        return GameSys::objectPtr->flag_0x6ADDD && !GameSys::objectPtr->flag_0x480;
     }
 };
 

@@ -7454,8 +7454,8 @@ rom:0x94d88 reloc:MIPS_26 symbol:func_game_task_09A5E4D0
 rom:0xac88c reloc:MIPS_26 symbol:func_game_task_09AAE810
 rom:0xad084 reloc:MIPS_26 symbol:func_game_task_09A6B120
 rom:0xad248 reloc:MIPS_26 symbol:func_game_task_09A6B368
-rom:0xcc240 reloc:MIPS_26 symbol:func_game_task_09AAEE58
-rom:0xcc2b8 reloc:MIPS_26 symbol:func_game_task_09AAEE58
+rom:0xcc240 reloc:MIPS_26 symbol:method_09AAEE58__12EnemyManagerFUcbb
+rom:0xcc2b8 reloc:MIPS_26 symbol:method_09AAEE58__12EnemyManagerFUcbb
 rom:0xce6c8 reloc:MIPS_26 symbol:func_game_task_09A5FBF0
 rom:0xce7a8 reloc:MIPS_26 symbol:func_game_task_09A60190
 rom:0xce7c0 reloc:MIPS_26 symbol:func_game_task_09A60148

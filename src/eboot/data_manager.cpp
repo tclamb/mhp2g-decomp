@@ -81,7 +81,7 @@ inline void DataManager::clear_pacs_inner() {
         entries[i].flags &= ~(1 << 1);
     }
 
-    Singleton<FileSys>::objectPtr->update_ringbuf(1);
+    FileSys::objectPtr->update_ringbuf(1);
 }
 
 void DataManager::clear_pacs() {
@@ -96,7 +96,7 @@ void DataManager::clear_pacs() {
 
 void DataManager::update() {
     if (f0x216_flag) {
-        if (!Singleton<GameSys>::objectPtr->flag_0x480) {
+        if (!GameSys::objectPtr->flag_0x480) {
             if (ready_flag && !loading_flag && allocate_volatile_memory()) {
                 loading_flag = true;
                 clear_pacs_inner();
@@ -107,7 +107,7 @@ void DataManager::update() {
         u16 flags = entries[i].flags;
         if (((flags & 1) != 0)
           && ((flags & 2) == 0)
-          && !Singleton<FileSys>::objectPtr->is_loading(entries[i].file_id)) {
+          && !FileSys::objectPtr->is_loading(entries[i].file_id)) {
             if (entries[i].was_cancelled != 1) {
                 entries[i].flags &= ~1;
                 entries[i].flags |= 2;
@@ -119,7 +119,7 @@ void DataManager::update() {
 }
 
 void DataManager::load(s32 index, s32 file_id, u32 size) {
-    u32 load_size = Singleton<FileSys>::objectPtr->file_size(file_id);
+    u32 load_size = FileSys::objectPtr->file_size(file_id);
     if (size != 0) {
         load_size = size;
     }
@@ -140,11 +140,11 @@ void DataManager::load(s32 index, s32 file_id, u32 size) {
         }
         notify_on_cancel = true;
     } else {
-        e.buffer = Singleton<ResourceManager>::objectPtr->alloc(0x14, load_size);
+        e.buffer = ResourceManager::objectPtr->alloc(0x14, load_size);
         notify_on_cancel = false;
     }
     e.was_cancelled = false;
-    Singleton<FileSys>::objectPtr->load_file_async(file_id, e.buffer, -1, notify_on_cancel, &e.was_cancelled, true);
+    FileSys::objectPtr->load_file_async(file_id, e.buffer, -1, notify_on_cancel, &e.was_cancelled, true);
     e.flags |= 1;
     e.file_id = file_id;
 }
@@ -153,8 +153,8 @@ void DataManager::duplicate(s32 destination_index, s32 source_index) {
     entry &destination = entries[destination_index];
     entry &source = entries[source_index];
 
-    u32 size = Singleton<FileSys>::objectPtr->file_size(source.file_id);
-    destination.buffer = Singleton<ResourceManager>::objectPtr->alloc(0x14, size);
+    u32 size = FileSys::objectPtr->file_size(source.file_id);
+    destination.buffer = ResourceManager::objectPtr->alloc(0x14, size);
 
     sceKernelDcacheWritebackInvalidateAll();
     sceDmacMemcpy(destination.buffer, source.buffer, size);
@@ -166,7 +166,7 @@ void DataManager::duplicate(s32 destination_index, s32 source_index) {
 u32 DataManager::copy(void *dst, s32 source_index, u32 size) {
     entry &source = entries[source_index];
     if (size == -1) {
-        size = Singleton<FileSys>::objectPtr->file_size(source.file_id);
+        size = FileSys::objectPtr->file_size(source.file_id);
     }
     sceKernelDcacheWritebackInvalidateAll();
     sceDmacMemcpy(dst, source.buffer, size);
@@ -224,7 +224,7 @@ bool DataManager::is_loaded(s32 index) {
 
 void DataManager::free(s32 index) {
     entry &e = entries[index];
-    Singleton<ResourceManager>::objectPtr->free(e.buffer);
+    ResourceManager::objectPtr->free(e.buffer);
     e.reset();
 }
 
@@ -386,10 +386,10 @@ int on_power_down(int error, int event, DataManager *cache) {
     if (event != PowerEventType::STANDBY && event != PowerEventType::SUSPENDING) {
         return 0;
     }
-    Singleton<GameSys>::objectPtr->flag_0x2A |= 1;
+    GameSys::objectPtr->flag_0x2A |= 1;
     cache->ready_flag = false;
     if (cache->loading_flag != 0) {
-        func_eboot_0884EA44(Singleton<FileSys>::objectPtr);
+        func_eboot_0884EA44(FileSys::objectPtr);
         u32 handle = sceKernelSuspendDispatchThread();
         cache->loading_flag = false;
         cache->clear_pacs_inner();
@@ -403,8 +403,8 @@ int on_power_up(int error, int event, DataManager *cache) {
     if (event != PowerEventType::RESUME_COMPLETE) {
         return 0;
     }
-    Singleton<GameSys>::objectPtr->flag_0x2A &= 0xF0;
-    Singleton<GameSys>::objectPtr->flag_0x6AF0C = true;
+    GameSys::objectPtr->flag_0x2A &= 0xF0;
+    GameSys::objectPtr->flag_0x6AF0C = true;
     cache->ready_flag = true;
     return 0;
 }
@@ -422,12 +422,12 @@ extern "C" {
 void DataManager::cache_stage(u16 st_id) {
     load(0x15, (u16)(st_id + 0x167C), 0); // st pac
     load(0x29, (u16)(st_id + 0x1572), 0); // st ovl
-    func_eboot_088711B8(Singleton<Quest>::objectPtr, st_id);
+    func_eboot_088711B8(Quest::objectPtr, st_id);
     load(0x26, D_game_sub_09CDF7B8[st_id].left, 0);
     load(0x27, D_eboot_089A6470[st_id].left, 0);
     load(0x28, D_eboot_089A6470[st_id].right, 0);
 }
 
 bool DataManager::some_test() {
-    return Singleton<GameSys>::objectPtr->unknownTest();
+    return GameSys::objectPtr->unknownTest();
 }

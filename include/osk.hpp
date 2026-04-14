@@ -1,8 +1,9 @@
 #pragma once
 
 #include "common.h"
+#include "singleton.hpp"
 
-struct Osk {
+struct Osk : Singleton<Osk> {
     u32 unknown_0x0;
     u32 unknown_0x4;
     u32 unknown_0x8;
@@ -14,7 +15,5 @@ struct Osk {
     u8 unknown_0x74;
     u8 pad_0x75[0x7C - 0x75];
 
-    inline Osk() {
-        unknown_0x74 = 0;
-    }
+    Osk();
 };

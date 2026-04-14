@@ -1,8 +1,9 @@
 #pragma once
 
 #include "common.h"
+#include "singleton.hpp"
 
-struct CCC {
+struct CCC : Singleton<CCC> {
     u16 decodeSJIS(u8 **str);
     u16 decodeUtf8(u8 **str);
     void encodeUtf8(u8 **dst, u32 codepoint);
@@ -17,4 +18,6 @@ struct CCC {
     int islowerUcs2(u16 codepoint);
     int codepointLengthUtf8(u8 prefixByte);
     int encodedSizeUtf8(u8 *str);
+
+    CCC();
 };

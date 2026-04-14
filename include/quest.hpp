@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.h"
+#include "singleton.hpp"
 
 struct ResourceType {
     enum {
@@ -30,7 +31,7 @@ struct QuestTarget {
     u8 unknown_0x1f[11];
 };
 
-struct Quest {
+struct Quest : Singleton<Quest> {
     u8 pad_0x0[0x768];
     QuestTarget targets[2];
     u8 pad_0x7C0[0x8A8 - 0x7C0];
@@ -46,6 +47,8 @@ struct Quest {
         }
         return result;
     }
+
+    Quest();
 };
 
 extern "C" {

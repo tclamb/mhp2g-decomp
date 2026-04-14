@@ -342,7 +342,7 @@ void Ge::clear_display_list() {
 }
 #pragma opt_unroll_loops reset
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_088593A0);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge", method_088593A0__2GeFPUiii);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_088595E8);
 
@@ -395,6 +395,6 @@ void Ge::set_write_head(ge_command *value) {
     active_write_head = value;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_0885973C);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge", method_0885973C__2GeFUi);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_08859768);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge", method_08859768__2GeFP10tmh_headeriUiUiP9GeTexture);

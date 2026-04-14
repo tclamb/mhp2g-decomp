@@ -195,8 +195,8 @@ u16 *CCC::strstrUcs2(u16 *haystack, u16 *needle) {
     u16 *p = haystack;
     u16 *q = NULL;
 
-    int big = Singleton<CCC>::objectPtr->strlenUcs2(haystack);
-    int small = Singleton<CCC>::objectPtr->strlenUcs2(needle);
+    int big = CCC::objectPtr->strlenUcs2(haystack);
+    int small = CCC::objectPtr->strlenUcs2(needle);
 
     if (big >= small) {
         while (*p != 0) {

@@ -18,6 +18,6 @@ __register_global_object = 0x08909D80; // type:func
 D_eboot_089BB350 = 0x089BB350;
 objectPtr__19Singleton<7GameSys> = 0x089C7508; // filename:D_eboot_089C7508
 objectPtr__17Singleton<5Sound> = 0x08A5DE5C; // filename:D_eboot_08A5DE5C
-objectPtr__18Singleton<6System> = 0x08A5E270; // filename:D_eboot_08A5E270
+objectPtr__6System = 0x08A5E270; // filename:D_eboot_08A5E270
 func_game_sub_09C14800 = 0x09C14800; // type:func
 objectPtr__19Singleton<7LbEvent> = 0x09CF6718; // filename:D_game_sub_09CF6718

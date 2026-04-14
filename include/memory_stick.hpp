@@ -1,12 +1,15 @@
 #pragma once
 
 #include "common.h"
+#include "singleton.hpp"
 
-struct MemoryStick {
+struct MemoryStick : Singleton<MemoryStick> {
     u8 padding_0x0[0x970];
     bool flag_0x970;
     bool flag_0x971;
     u8 padding_0x972[0x4A90 - 0x972];
+
+    MemoryStick();
 } __attribute__((aligned(0x10)));
 
 extern "C" {

@@ -260,7 +260,7 @@ void *VramManager::method_088133D0(u8 vramId) {
 
 u8 VramManager::method_088133FC(u8 vramId, tmh_header *tmh, u32 textureIndex, u32 imageIndex, u32 paletteIndex) {
     GeTexture texture;
-    if ((u8)func_eboot_08859768(Singleton<Ge>::objectPtr, tmh, textureIndex, imageIndex, paletteIndex, &texture) == 0) {
+    if ((u8)Ge::objectPtr->method_08859768(tmh, textureIndex, imageIndex, paletteIndex, &texture) == 0) {
         return INVALID_ID;
     }
 
@@ -338,7 +338,7 @@ u8 VramManager::method_088133FC(u8 vramId, tmh_header *tmh, u32 textureIndex, u3
     *write_head++ = GE_CMD_BASE << 24;
     *write_head++ = GE_CMD_JUMP << 24;
 
-    func_eboot_088593A0(Singleton<Ge>::objectPtr, display_list, write_head - &display_list[0], 1);
+    Ge::objectPtr->method_088593A0(display_list, write_head - &display_list[0], 1);
 
     return copyId;
 }

@@ -1,7 +1,10 @@
 #pragma once
 
-struct HitManager {
+#include "singleton.hpp"
+struct HitManager : Singleton<HitManager> {
     // TODO
+
+    HitManager();
 };
 
 extern "C" {

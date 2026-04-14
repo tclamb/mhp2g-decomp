@@ -56,7 +56,7 @@ struct FontColor {
     inline FontColor(s8 value) : value(value) {}
 
     inline void apply() const {
-        Singleton<SystemFont>::objectPtr->method_088908F8(value);
+        SystemFont::objectPtr->method_088908F8(value);
     }
 
     inline operator s8() const {

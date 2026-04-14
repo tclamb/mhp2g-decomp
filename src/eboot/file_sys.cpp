@@ -96,7 +96,7 @@ loop_18:
     sha1_thread_id = sceKernelCreateThread("sha1Thread", sha1_thread, 0x31, 0x1000, 0, 0);
     sp.local_4 = this;
     sceKernelStartThread(sha1_thread_id, 4, &sp.local_4);
-    puVar1 = Singleton<System>::objectPtr;
+    puVar1 = System::objectPtr;
     puVar1->sha1ThreadId = sha1_thread_id;
     puVar1->sha1ThreadStarted = true;
     transfer_event_flag_id = sceKernelCreateEventFlag("transferEventFlag", 0x200, 0, 0);
@@ -128,8 +128,8 @@ void FileSys::draw_loading_screen() {
 
     switch (unknown_0x2fa0c) {
     case 0:
-        if ((Singleton<MemoryStick>::objectPtr->flag_0x970 == 0) && (Singleton<MemoryStick>::objectPtr->flag_0x971 == 0) && (unknown_0x2fa08 != 0)) {
-            Singleton<GameSys>::objectPtr->flag_0x6ADDE = 0;
+        if ((MemoryStick::objectPtr->flag_0x970 == 0) && (MemoryStick::objectPtr->flag_0x971 == 0) && (unknown_0x2fa08 != 0)) {
+            GameSys::objectPtr->flag_0x6ADDE = 0;
             if (unknown_0x2fa04 != 0) {
                 switch (unknown_0x2fa08) {
                 case 1:
@@ -181,25 +181,25 @@ void FileSys::draw_loading_screen() {
                     format_string_id = 0x48;
                     break;
                 }
-                if ((Singleton<GameSys>::objectPtr->flag_0x480 != 0) && (format_string_id == 0x44)) {
+                if ((GameSys::objectPtr->flag_0x480 != 0) && (format_string_id == 0x44)) {
                     format_string_id = 0x65;
                 }
                 if (format_string_argument_id != 0) {
-                    sprintf(buffer, func_eboot_088515A0(Singleton<GameSys>::objectPtr, format_string_id & 0xFFFF), func_eboot_088515A0(Singleton<GameSys>::objectPtr, format_string_argument_id & 0xFFFF));
+                    sprintf(buffer, func_eboot_088515A0(GameSys::objectPtr, format_string_id & 0xFFFF), func_eboot_088515A0(GameSys::objectPtr, format_string_argument_id & 0xFFFF));
                 } else {
-                    sprintf(buffer, func_eboot_088515A0(Singleton<GameSys>::objectPtr, format_string_id & 0xFFFF), "");
+                    sprintf(buffer, func_eboot_088515A0(GameSys::objectPtr, format_string_id & 0xFFFF), "");
                 }
-                func_eboot_088C28C0(Singleton<MemoryStick>::objectPtr, buffer);
-                Singleton<Pad>::objectPtr->flag_0x17 = true;
+                func_eboot_088C28C0(MemoryStick::objectPtr, buffer);
+                Pad::objectPtr->flag_0x17 = true;
                 unknown_0x2fa0c += 1;
             }
         }
         break;
     case 1:
-        if (Singleton<MemoryStick>::objectPtr->flag_0x971 == 0) {
+        if (MemoryStick::objectPtr->flag_0x971 == 0) {
             unknown_0x2fa0c = 0;
             unknown_0x2fa08 = 0;
-            Singleton<Pad>::objectPtr->flag_0x17 = false;
+            Pad::objectPtr->flag_0x17 = false;
         }
         break;
     }
@@ -383,7 +383,7 @@ int FileSys::load_file_async(s32 file_id, u8* buf, SceSize len, u8 unknown_flag,
     var_s2 = 0;
     var_s1 = 1;
     var_s0 = 0;
-    if ((is_data_file_encrypted != 0) && (((s32) (Singleton<System>::objectPtr->next_index(1) & 0xFFFF) % 100) < 5)) {
+    if ((is_data_file_encrypted != 0) && (((s32) (System::objectPtr->next_index(1) & 0xFFFF) % 100) < 5)) {
         var_s0 = 1;
     }
 loop_1:
@@ -610,4 +610,4 @@ const char* FileSys::data_bin_path() {
     return "disc0:/PSP_GAME/USRDIR/DATA.BIN";
 }
 
-template<> FileSys *Singleton<FileSys>::objectPtr;
+FileSys *FileSys::objectPtr;

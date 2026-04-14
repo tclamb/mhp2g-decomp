@@ -87,7 +87,7 @@ void ObjManager::registerObjDraw(int index) {
     while (objPtr) {
         if ((bool)(objPtr->flags & Draw::ALIVE) == true) {
             if ((bool)(objPtr->flags & Draw::REGISTERED) == false) {
-                Singleton<DrawManager>::objectPtr->addObj(render_group::GROUP_5, objPtr, false);
+                DrawManager::objectPtr->addObj(render_group::GROUP_5, objPtr, false);
             }
         }
         objPtr = objPtr->nextObj;
@@ -172,12 +172,12 @@ void ObjManager::clearFloatMemoryMap() {
 
 void ObjManager::reserveFixMemory(u32 resourceSize, u32 vramSize) {
     fixResourceSize = resourceSize;
-    fixResourcePtr = Singleton<ResourceManager>::objectPtr->alloc(2, resourceSize);
+    fixResourcePtr = ResourceManager::objectPtr->alloc(2, resourceSize);
     fixResourceUsed = 0;
 
     fixVramSize = vramSize;
-    Singleton<VramManager>::objectPtr->method_08812F04(7, vramSize, VramManager::INVALID_ADRS);
-    fixVramPtr = Singleton<VramManager>::objectPtr->method_088133D0(7);
+    VramManager::objectPtr->method_08812F04(7, vramSize, VramManager::INVALID_ADRS);
+    fixVramPtr = VramManager::objectPtr->method_088133D0(7);
     fixVramUsed = 0;
 }
 
@@ -211,35 +211,35 @@ void *ObjManager::allocateFloatMemory(u32 size) {
 void ObjManager::reserveFloatMemory(u32 resourceSize, u32 vramSize) {
     if ((int)resourceSize > 0) {
         floatResourceSize = resourceSize;
-        floatResourcePtr = Singleton<ResourceManager>::objectPtr->alloc(3, resourceSize);
+        floatResourcePtr = ResourceManager::objectPtr->alloc(3, resourceSize);
         floatResourceUsed = 0;
     }
 
     floatVramSize = vramSize;
-    Singleton<VramManager>::objectPtr->method_08812F04(8, vramSize, VramManager::INVALID_ADRS);
-    floatVramPtr = Singleton<VramManager>::objectPtr->method_088133D0(8);
+    VramManager::objectPtr->method_08812F04(8, vramSize, VramManager::INVALID_ADRS);
+    floatVramPtr = VramManager::objectPtr->method_088133D0(8);
     floatVramUsed = 0;
 }
 
 void ObjManager::releaseFixMemory() {
-    Singleton<ResourceManager>::objectPtr->free_all(2);
+    ResourceManager::objectPtr->free_all(2);
     fixResourcePtr = NULL;
     fixResourceSize = 0;
     fixResourceUsed = 0;
 
-    Singleton<VramManager>::objectPtr->method_08813024(7);
+    VramManager::objectPtr->method_08813024(7);
     fixVramPtr = NULL;
     fixVramSize = 0;
     fixVramUsed = 0;
 }
 
 void ObjManager::releaseFloatMemory() {
-    Singleton<ResourceManager>::objectPtr->free_all(3);
+    ResourceManager::objectPtr->free_all(3);
     floatResourcePtr = NULL;
     floatResourceSize = 0;
     floatResourceUsed = 0;
 
-    Singleton<VramManager>::objectPtr->method_08813024(8);
+    VramManager::objectPtr->method_08813024(8);
     floatVramPtr = NULL;
     floatVramSize = 0;
     floatVramUsed = 0;
@@ -283,7 +283,7 @@ int ObjManager::loadFile(int fileId, u16 mapId) {
     u8 state = resourceState[mapId];
     switch (state) {
     case 0:
-        size = Singleton<FileSys>::objectPtr->file_size(fileId);
+        size = FileSys::objectPtr->file_size(fileId);
         if (entry.size == -1) {
             switch (entry.load) {
             case MEM_GET_FIX:
@@ -298,12 +298,12 @@ int ObjManager::loadFile(int fileId, u16 mapId) {
         ++resourceState[mapId];
         break;
     case 1:
-        if (Singleton<FileSys>::objectPtr->load_file_async(fileId, (u8 *)resourceAddresses[mapId], -1, false, NULL, true) == 0) {
+        if (FileSys::objectPtr->load_file_async(fileId, (u8 *)resourceAddresses[mapId], -1, false, NULL, true) == 0) {
             break;
         }
         resourceState[mapId] = 2;
     case 2:
-        if (Singleton<FileSys>::objectPtr->is_loading() == false) {
+        if (FileSys::objectPtr->is_loading() == false) {
             resourceState[mapId] = 3;
             resourceFileIds[mapId] = fileId;
             return true;
