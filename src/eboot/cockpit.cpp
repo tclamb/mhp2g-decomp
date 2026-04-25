@@ -390,7 +390,7 @@ extern FontColor D_eboot_08938474[7];
 #define xyprintfx(x, y, ...) SystemFont::objectPtr->method_08891B68(x, y, __VA_ARGS__)
 #define ITEM_NAME(itemId) GameSys::objectPtr->method_08851448(itemId)
 #define UI_STRING(id) GameSys::objectPtr->method_0885143C(id)
-#define INVENTORY_QTY(itemId) GameSys::objectPtr->method_088567D4(itemId)
+#define INVENTORY_QTY(itemId) GameSys::objectPtr->bagQuantity(itemId)
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", __ct__7CockpitFv);
 
@@ -411,13 +411,13 @@ void Cockpit::method_08818098() {
     if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 0x200) == true) {
         inventory = GameSys::objectPtr->method_088567AC(0);
     } else {
-        inventory = GameSys::objectPtr->inventory;
+        inventory = GameSys::objectPtr->userData.inventory;
     }
     u32 inventoryCursorColor = 0;
     u32 inventoryFlags = 5;
-    if (((s32)combinationState < 3) && !(flags_0x528 & SORT_DIALOG_OPEN)) {
+    if (((s32)mixState < 3) && !(flags_0x528 & SORT_DIALOG_OPEN)) {
         method_0882FE94(&D_eboot_08935ABC, UI_STRING(D_eboot_089A9834[0]), -1);
-        if (combinationState == 0) {
+        if (mixState == 0) {
             xycprintf(D_eboot_08935ABC.textLeft + (D_eboot_08935ABC.textLineSpacing * 3) + 8, D_eboot_08935ABC.textTop, 3U, D_eboot_08935AB8, UI_STRING(D_eboot_089A9834[9]));
             if ((method_08828D80(inventoryCursorIndex, inventory[inventoryCursorIndex].itemId)) == 1) {
                 method_08818B7C(D_eboot_08935ABC.textLeft, D_eboot_08935ABC.textTop + D_eboot_08935ABC.textLineSpacing, inventoryCursorIndex, inventory[inventoryCursorIndex].itemId, false);
@@ -425,28 +425,28 @@ void Cockpit::method_08818098() {
                 method_08818B7C(D_eboot_08935ABC.textLeft, D_eboot_08935ABC.textTop + D_eboot_08935ABC.textLineSpacing, -1, inventory[inventoryCursorIndex].itemId, false);
             }
         } else {
-            method_08818B7C(D_eboot_08935ABC.textLeft, D_eboot_08935ABC.textTop + D_eboot_08935ABC.textLineSpacing, combinationMaterialAIndex, combinationMaterialA, true);
+            method_08818B7C(D_eboot_08935ABC.textLeft, D_eboot_08935ABC.textTop + D_eboot_08935ABC.textLineSpacing, mixFirstMaterialIndex, mixFirstMaterialItemId, true);
         }
-        if ((s32)combinationState > 0) {
+        if ((s32)mixState > 0) {
             method_0882FE94(&D_eboot_08935AD0, UI_STRING(D_eboot_089A9834[1]), 0xFF);
-            if (combinationState == 1) {
+            if (mixState == 1) {
                 xycprintf(D_eboot_08935AD0.textLeft + (D_eboot_08935AD0.textLineSpacing * 3) + 8, D_eboot_08935AD0.textTop, 3U, D_eboot_08935AB8, UI_STRING(D_eboot_089A9834[9]));
-                if (ItemManager::objectPtr->method_0885B5B0(combinationMaterialA, inventory[inventoryCursorIndex].itemId, 0U, false, 0) != NULL) {
+                if (ItemManager::objectPtr->findMix(mixFirstMaterialItemId, inventory[inventoryCursorIndex].itemId, 0U, false, 0) != NULL) {
                     method_08818B7C(D_eboot_08935AD0.textLeft, D_eboot_08935AD0.textTop + D_eboot_08935AD0.textLineSpacing, inventoryCursorIndex, inventory[inventoryCursorIndex].itemId, false);
                 } else {
                     method_08818B7C(D_eboot_08935AD0.textLeft, D_eboot_08935AD0.textTop + D_eboot_08935AD0.textLineSpacing, -1, inventory[inventoryCursorIndex].itemId, false);
                 }
             } else {
-                method_08818B7C(D_eboot_08935AD0.textLeft, D_eboot_08935AD0.textTop + D_eboot_08935AD0.textLineSpacing, combinationMaterialBIndex, combinationMaterialB, true);
+                method_08818B7C(D_eboot_08935AD0.textLeft, D_eboot_08935AD0.textTop + D_eboot_08935AD0.textLineSpacing, mixSecondMaterialIndex, mixSecondMaterialItemId, true);
             }
         }
-        if ((s32) combinationState < 2) {
+        if ((s32) mixState < 2) {
             inventoryCursorColor = 0x8000C040;
         }
-        inventoryFlags = (combinationState > 0 ? 8 : 4) | SORT_DIALOG_OPEN | 1;
+        inventoryFlags = (mixState > 0 ? 8 : 4) | SORT_DIALOG_OPEN | 1;
     }
     s16 resultIndent = (u16) D_eboot_08935AE4.textLeft + (D_eboot_08935AE4.fontWidth * 5);
-    switch (combinationState) {
+    switch (mixState) {
     case 0:
     case 1: {
         if ((flags_0x528 & SORT_DIALOG_OPEN)) {
@@ -467,9 +467,9 @@ void Cockpit::method_08818098() {
     case 2: {
         CockpitMenubox menubox;
         menubox.method_0882FC68(&D_eboot_08935AF8, 0, 0, 0);
-        method_0882F7C4(&menubox, 0, combinationConfirmMenuIndex, 0xFF, 0);
+        method_0882F7C4(&menubox, 0, mixConfirmMenuIndex, 0xFF, 0);
         u32 fontColor;
-        if (combinationAllowed == false) {
+        if (mixIsValid == false) {
             fontColor = FontColor::WHITE;
         } else {
             fontColor = FontColor::DARK_GRAY;
@@ -481,17 +481,17 @@ void Cockpit::method_08818098() {
     case 3:
     case 4: {
         method_0882FE94(&D_eboot_08935AE4, UI_STRING(D_eboot_089A9834[2]), 0xFF);
-        if (combinationTarget > 0) {
+        if (mixSuccessItemId > 0) {
             FontColor::white();
-            char *resultName = ITEM_NAME(combination->result);
+            char *resultName = ITEM_NAME(mix->successItemId);
             xyprintf(D_eboot_08935AE4.textLeft, D_eboot_08935AE4.textTop + D_eboot_08935AE4.textLineSpacing, D_eboot_08935AB8, resultName);
-            s8 mixRate = ItemManager::objectPtr->method_0885BE00(combination, 0);
-            D_eboot_08938474[func_eboot_0885C710(mixRate)].apply();
+            s8 mixRate = ItemManager::objectPtr->mixRate(mix, false);
+            D_eboot_08938474[mixRateColorId(mixRate)].apply();
             xyprintf(resultIndent, D_eboot_08935AE4.textTop + (D_eboot_08935AE4.textLineSpacing * 2), UI_STRING(D_eboot_089A9834[4]), mixRate);
             FontColor::white();
-            xyprintf(resultIndent, D_eboot_08935AE4.textTop + (D_eboot_08935AE4.textLineSpacing * 3), D_eboot_08935AB8, method_0882595C(combination));
+            xyprintf(resultIndent, D_eboot_08935AE4.textTop + (D_eboot_08935AE4.textLineSpacing * 3), D_eboot_08935AB8, method_0882595C(mix));
             for (int i = 0; i < 24; ++i) {
-                if (combinationTarget == inventory[i].itemId) {
+                if (mixSuccessItemId == inventory[i].itemId) {
                     s16 overflowStatus = method_088295D8(&inventory[i]);
                     if (overflowStatus >= 0) {
                         switch (overflowStatus) {
@@ -506,8 +506,8 @@ void Cockpit::method_08818098() {
                     break;
                 }
             }
-            u16 inventoryQty = INVENTORY_QTY(combinationTarget);
-            xyprintf(resultIndent, D_eboot_08935AE4.textTop + (D_eboot_08935AE4.textLineSpacing * 4), D_eboot_08935B0C, inventoryQty, ITEM_DEFINITIONS[combinationTarget].stackSize);
+            u16 inventoryQty = INVENTORY_QTY(mixSuccessItemId);
+            xyprintf(resultIndent, D_eboot_08935AE4.textTop + (D_eboot_08935AE4.textLineSpacing * 4), D_eboot_08935B0C, inventoryQty, ITEM_DEFINITIONS[mixSuccessItemId].stackSize);
             FontColor::white();
         } else {
             FontColor::darkGray();
@@ -523,21 +523,21 @@ void Cockpit::method_08818098() {
     case 6: {
             u16 qty;
             u16 successFailureStringId;
-            if (combinationOutcome != ITEM_ID_GARBAGE) {
-                qty = combinationOutcomeQuantity;
+            if (mixOutcomeItemId != ITEM_ID_GARBAGE) {
+                qty = mixOutcomeQuantity;
                 successFailureStringId = 7;
             } else {
                 successFailureStringId = 8;
                 qty = 1;
             }
             method_0882FE94(&D_eboot_08935AE4, UI_STRING(D_eboot_089A9834[successFailureStringId]), 0xFF);
-            u16 inventoryQty = INVENTORY_QTY(combinationOutcome);
-            u16 stackSize = ITEM_DEFINITIONS[combinationOutcome].stackSize;
+            u16 inventoryQty = INVENTORY_QTY(mixOutcomeItemId);
+            u16 stackSize = ITEM_DEFINITIONS[mixOutcomeItemId].stackSize;
             FontColor::white();
-            xyprintf(D_eboot_08935AE4.textLeft, D_eboot_08935AE4.textTop + D_eboot_08935AE4.textLineSpacing, D_eboot_08935AB8, ITEM_NAME(combinationOutcome));
+            xyprintf(D_eboot_08935AE4.textLeft, D_eboot_08935AE4.textTop + D_eboot_08935AE4.textLineSpacing, D_eboot_08935AB8, ITEM_NAME(mixOutcomeItemId));
             xyprintf(resultIndent, D_eboot_08935AE4.textTop + D_eboot_08935AE4.textLineSpacing * 3, D_eboot_08935B14, qty);
             for (int i = 0; i < 24; ++i) {
-                if (combinationTarget == inventory[i].itemId) {
+                if (mixSuccessItemId == inventory[i].itemId) {
                     s16 overflowStatus = method_088295D8(&inventory[i]);
                     if (overflowStatus >= 0) {
                         switch (overflowStatus) {
@@ -905,11 +905,11 @@ void Cockpit::method_0882536C(SceBool isLobby) {
 
 extern u16 D_eboot_089AA01C[7];
 
-char *Cockpit::method_0882595C(ItemCombination *combo) {
-    if (combo == NULL) {
+char *Cockpit::method_0882595C(MixDefinition *mix) {
+    if (mix == NULL) {
         return NULL;
     }
-    u16 stringId = D_eboot_089AA01C[combo->quantityOddsId];
+    u16 stringId = D_eboot_089AA01C[mix->quantityId];
     return GameSys::objectPtr->method_0885143C(stringId);
 }
 

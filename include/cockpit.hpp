@@ -118,19 +118,19 @@ struct Cockpit : Singleton<Cockpit> {
     u8 pad_0x57E[0x586 - 0x57E];
     u8 inventoryCursorIndex;
     u8 pad_0x587[0x5A8 - 0x587];
-    ItemCombination *combination;
-    u16 combinationMaterialA;
-    u16 combinationMaterialB;
-    u8 combinationMaterialAIndex;
-    u8 combinationMaterialBIndex;
+    MixDefinition *mix;
+    u16 mixFirstMaterialItemId;
+    u16 mixSecondMaterialItemId;
+    u8 mixFirstMaterialIndex;
+    u8 mixSecondMaterialIndex;
     u16 unknown_0x5B0;
-    s16 combinationTarget;
-    s16 combinationOutcome;
-    u8 combinationState;
-    s8 combinationConfirmMenuIndex;
-    s8 combinationAllowed;
+    s16 mixSuccessItemId;
+    s16 mixOutcomeItemId;
+    u8 mixState;
+    s8 mixConfirmMenuIndex;
+    s8 mixIsValid;
     u8 pad_0x5B9[0x5E5 - 0x5BB];
-    u8 combinationOutcomeQuantity;
+    u8 mixOutcomeQuantity;
     u8 pad_0x5E6[0x5E8 - 0x5E6];
     u32 unknown_0x5E8;
     u8 pad_0x5EC[0x5FC - 0x5EC];
@@ -159,7 +159,7 @@ struct Cockpit : Singleton<Cockpit> {
 
     void method_08824514(bool, int);
     void method_0882536C(SceBool unlimitedTime);
-    char *method_0882595C(ItemCombination *);
+    char *method_0882595C(MixDefinition *);
 
     void method_088259A0();
     void method_08825CB4(u32, bool, int);

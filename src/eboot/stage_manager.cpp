@@ -675,12 +675,12 @@ bool StageManager::stage_vtable_0xA8() {
 
 // inferred from 0x1787 corresponding to the first farm variant stage pac
 u16 StageManager::farm_stage_file_id() {
-    FarmState &farm = GameSys::objectPtr->farm;
-    u16 offset = farm.vars[1];
-    if ((farm.vars[6] & 1) != 0) {
+    u8 (&upgrades)[22] = GameSys::objectPtr->userData.farmUpgrades;
+    u16 offset = upgrades[1];
+    if ((upgrades[6] & 1) != 0) {
         offset = 3;
     }
-    if (farm.vars[2] < 2) {
+    if (upgrades[2] < 2) {
         offset += 4;
     }
     if (func_game_sub_09C14800(LbEvent::objectPtr, 0x5F) == 0) {
