@@ -53,4 +53,4 @@ struct FileSys : FileSysBase {
     volatile SceUID transfer_event_flag_id;
     volatile SceUID transfer_thread_id;
     u8 padding_0x2FA18[0x28];
-};
+}  __attribute__((aligned(16)));

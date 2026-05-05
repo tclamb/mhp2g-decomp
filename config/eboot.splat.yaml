@@ -116,7 +116,7 @@ segments:
       - [0x629ec, cpp, obj_base] # base class for em & player; embedded linked list next:0x1C4 prev:0x1C8
       - [0x64864, cpp, obj_manager] # manager for the em/player objects; 15(?) linked list heads at 0x80028, 2:player, 3:ems, 7:npcs
       - [0x66fa0, asmtu, osk]
-      - [0x674b8, asmtu, pad] # input
+      - [0x674b8, cpp, pad]
       - [0x679d0, asmtu, quest]
       - [0x726d0, asmtu, result_check]
       - [0x7d71c, asmtu, demo_task]

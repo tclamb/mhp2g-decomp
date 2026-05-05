@@ -190,7 +190,7 @@ void FileSys::draw_loading_screen() {
                     sprintf(buffer, func_eboot_088515A0(GameSys::objectPtr, format_string_id & 0xFFFF), "");
                 }
                 func_eboot_088C28C0(MemoryStick::objectPtr, buffer);
-                Pad::objectPtr->flag_0x17 = true;
+                Pad::objectPtr->inputDisabled = true;
                 unknown_0x2fa0c += 1;
             }
         }
@@ -199,7 +199,7 @@ void FileSys::draw_loading_screen() {
         if (MemoryStick::objectPtr->flag_0x971 == 0) {
             unknown_0x2fa0c = 0;
             unknown_0x2fa08 = 0;
-            Pad::objectPtr->flag_0x17 = false;
+            Pad::objectPtr->inputDisabled = false;
         }
         break;
     }
