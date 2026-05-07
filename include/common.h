@@ -20,6 +20,12 @@ typedef unsigned long uint64_t;
 #include <psptypes.h> // IWYU pragma: export
 #include <pspkerneltypes.h> // IWYU pragma: export
 
+#ifdef __MWERKS__
+#include "mw_stdarg.h" // IWYU pragma: export
+#else
+#include <stdarg.h> // IWYU pragma: export
+#endif
+
 extern "C" {
     int memcmp(const void*, const void*, long unsigned int);
     void *memset(void*, int,  long unsigned int);

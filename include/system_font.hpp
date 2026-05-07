@@ -2,7 +2,15 @@
 
 #include "common.h"
 #include "singleton.hpp"
-#include "cache.hpp"
+
+struct Encoding {
+    enum {
+        SJIS,
+        UTF8,
+    };
+private:
+    Encoding();
+};
 
 struct GlyphRun {
     s16 left;
@@ -53,6 +61,15 @@ struct PGFFontInfo {
     u8 bpp;
 };
 
+struct ParseResult {
+    enum {
+        COMMAND,
+        HALF_WIDTHS,
+    };
+private:
+    ParseResult();
+};
+
 struct SystemFont : Singleton<SystemFont> {
     void *fontLib;
     s32 fontId;
@@ -81,7 +98,7 @@ struct SystemFont : Singleton<SystemFont> {
     bool unknown_0x130;
     s8 usedColorIds;
     u8 padding_0x132[2];
-    s8 layerGlyphRunCounts[6];
+    u8 layerGlyphRunCounts[6];
     s8 layerIconCounts[6];
     GlyphRun *layerGlyphRuns[6];
     s16 glyphCacheCount;
@@ -90,7 +107,7 @@ struct SystemFont : Singleton<SystemFont> {
     s8 currentLayer;
     u8 unknown_0x15E;
     u8 lineSpacing;
-    u16 decodeBufferUsed;
+    u16 codepointBufferUsed;
     u16 unknown_0x162;
     u32 glowingFontColor;
     u32 fontColors[48];
@@ -99,7 +116,7 @@ struct SystemFont : Singleton<SystemFont> {
     u16 cachedCodepoints[432];
     u8 cacheStatus[432];
     Icon layerIcons[6][10];
-    u8 decodeBuffer[12288];
+    u8 codepointBuffer[12288];
 
     void initialize();
     void initializeVram();
@@ -116,25 +133,33 @@ struct SystemFont : Singleton<SystemFont> {
     int halfWidths(u8 *utf8);
     int lineHalfWidths(u8 *utf8);
     u32 strlen(char *str);
-
-    void drawBtnIcon(Icon *icons, u8 count, u32 renderGroup);
+    int halfWidthsX(char *utf8x);
+    int lineHalfWidthsX(char *utf8x);
+    void print(u16 *codepoints);
+    void print(s16 left, s16 top, u16 *codepoints);
+    void print(s16 left, s16 top, s8 fontColor, u16 *codepoints);
+    void printfUtf8(char *format, ...);
+    void printfUtf8(s16 left, s16 top, char *format, ...);
+    void printfUtf8(s16 left, s16 top, s8 fontColor, char *format, ...);
+    void printfSJIS(s16 left, s16 top, char *format, ...);
+    void printfSJIS(s16 left, s16 top, s8 fontColor, char *format, ...);
+    void printShadowUtf8(s16 left, s16 top, s8 shadowColor, s8 fontColor, u8 *utf8, s16 offsetLeft, s16 offsetTop);
 
     void asciiToFullWidthUtf8(char *in, char *out);
     void asciiToFullWidthSJIS(char *in, char *out);
 
-    u32 currentRenderGroup();
+    void method_08891B68(s16 left, s16 top, char *fmt, ...);
 
-    int isHalfWidth(u16 codepoint);
-
+    void drawBtnIcon(Icon *icons, u8 count, u32 renderGroup);
     void initializeFont();
 
-    void cacheCommonGlyphs();
+    void vsnprintf(char *buffer, u32 size, char *format, va_list args, int encoding);
+    void decode(char *str, int encoding);
+    int isHalfWidth(u16 codepoint);
+    u32 currentRenderGroup();
     void updateGlowingFontColor();
-
-    // printf-type functions
-    void method_08891070(s16 left, s16 top, s8 color, char *fmt, ...);
-    void method_08891B68(s16 left, s16 top, char *fmt, ...);
-    void method_08890F34(s16 left, s16 top, char *fmt, ...);
+    void cacheCommonGlyphs();
+    char *parseCommand(char *xstr, s16 *out, int resultType, int encoding);
 
     SystemFont();
 };

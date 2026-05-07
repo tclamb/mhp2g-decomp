@@ -384,8 +384,8 @@ extern s8 D_eboot_08938474[7];
 #define ITEM_ID_GARBAGE 0x9B
 
 // xy + color
-#define xycprintf(x, y, c,...) SystemFont::objectPtr->method_08891070(x, y, c, __VA_ARGS__)
-#define xyprintf(x, y, ...) SystemFont::objectPtr->method_08890F34(x, y, __VA_ARGS__)
+#define xycprintf(x, y, c,...) SystemFont::objectPtr->printfUtf8(x, y, c, __VA_ARGS__)
+#define xyprintf(x, y, ...) SystemFont::objectPtr->printfUtf8(x, y, __VA_ARGS__)
 // xy + control sequences?
 #define xyprintfx(x, y, ...) SystemFont::objectPtr->method_08891B68(x, y, __VA_ARGS__)
 #define ITEM_NAME(itemId) GameSys::objectPtr->method_08851448(itemId)
@@ -588,7 +588,7 @@ void Cockpit::method_08818B7C(s16 left, s16 top, u8 index, u16 itemId, bool lock
             color = unlockedColor;
         }
         char *itemName = GameSys::objectPtr->method_08851448(itemId);
-        SystemFont::objectPtr->method_08891070(left, top, color, D_eboot_08935AB8, itemName);
+        SystemFont::objectPtr->printfUtf8(left, top, color, D_eboot_08935AB8, itemName);
     }
 }
 
