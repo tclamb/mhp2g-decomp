@@ -35,6 +35,17 @@ extern "C" {
     int sprintf(char*, const char*, ...);
 }
 
+inline void *zero(void *dst, u32 size) {
+    u8 *p = (u8 *)dst;
+    u32 n = size;
+    if (p && n != 0) {
+        do {
+            *p++ = 0;
+        } while(--n != 0);
+    }
+    return dst;
+}
+
 #include "enums.hpp" // IWYU pragma: export
 
 struct render_group {

@@ -493,18 +493,16 @@ void SystemFont::printfSJIS(s16 left, s16 top, s8 fontColor, char *format, ...) 
     }
 }
 
-char D_eboot_089AA274[4] = "%s";
-
 void SystemFont::printShadowUtf8(s16 left, s16 top, s8 shadowColor, s8 fontColor, u8 *utf8, s16 offsetLeft, s16 offsetTop) {
-    printfUtf8(left + offsetLeft, top + offsetTop, shadowColor, D_eboot_089AA274, utf8);
-    printfUtf8(left, top, fontColor, D_eboot_089AA274, utf8);
+    printfUtf8(left + offsetLeft, top + offsetTop, shadowColor, "%s", utf8);
+    printfUtf8(left, top, fontColor, "%s", utf8);
 }
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_088914E8);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_088915D4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_0889161C);
+INCLUDE_ASM("asm/eboot/nonmatchings/system_font", widthUtf8__10SystemFontFPc);
 
 struct IconAtlasCoordinate {
     u8 left;
@@ -862,7 +860,150 @@ INCLUDE_ASM("asm/eboot/nonmatchings/system_font", method_08891B68__10SystemFontF
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08891C08);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08891CBC);
+extern "C"
+char *strncpy(char *dst, const char *src, u32 n);
+extern "C"
+char *strncat(char *dst, const char *src, u32 n);
+
+void SystemFont::nprintUtf8x(s16 n, u8 *utf8x) {
+    char bufferOne[0x300];
+    char bufferTwo[0x300];
+    char *(buffers[2]);
+    s16 command;
+
+    zero(buffers, sizeof(buffers));
+
+    char *p = bufferOne;
+    int raw = false;
+    int i, b = 0;
+
+    buffers[0] = bufferOne;
+    buffers[1] = bufferTwo;
+
+    strncpy(buffers[0], (char *)utf8x, sizeof(bufferOne));
+    bufferOne[0x2FF] = 0;
+
+    memset(bufferTwo, 0, sizeof(bufferTwo));
+
+    s16 indent = this->left;
+    s16 left = indent;
+    s16 top = this->top;
+
+    i = 0;
+    while (true) {
+        char c = *p;
+        if (c == 0) {
+            break;
+        }
+        if (c == '~') {
+            if (raw) {
+                char *tmp = p;
+                p = parseCommand(p, &command, ParseResult::COMMAND, Encoding::UTF8);
+                if ((command & 0xFF00) != 0x800) {
+                    p = tmp;
+                } else {
+                    raw = false;
+                    continue;
+                }
+            } else {
+                // flush
+                buffers[b ^ 1][i] = 0;
+                printfUtf8("%s", buffers[b ^ 1]);
+                i = 0;
+                setCursor(left, top);
+
+                p = parseCommand(p, &command, ParseResult::COMMAND, Encoding::UTF8);
+                switch (command & 0xFF00) {
+                case 0:
+                default:
+                    break;
+                case 0x100:
+                    setFontColor(command & 0xFF);
+                    continue;
+                    break;
+                case 0x200:
+                    b ^= 1;
+                    copySubstitution(buffers[b], command & 0xFF, Encoding::UTF8);
+                    strncat(buffers[b], p, 0x300 - CCC::objectPtr->encodedSizeUtf8((u8 *)buffers[b]));
+                    p = buffers[b];
+                    p[0x2FF] = 0;
+                    continue;
+                    break;
+                case 0x400:
+                    addIcon(left, top, fontHeight, fontColor, command & 0xFF);
+                    left += fontWidth;
+                    setCursor(left, top);
+                    if (n > 0) {
+                        --n;
+                    }
+                    if (!n) {
+                        *p = 0;
+                    }
+                    continue;
+                    break;
+                case 0x800:
+                    raw = true;
+                    continue;
+                    break;
+                }
+                if (*p == 0) {
+                    break;
+                }
+            }
+        }
+
+        int type;
+        if (widthUtf8(p) == 2) {
+            type = 0; // fullwidth
+            if (n > 0) {
+                --n;
+            }
+        } else if (*p == '\n') {
+            type = 2; // newline
+        } else {
+            type = 1; // halfwidth
+            if (n > 0) {
+                --n;
+            }
+        }
+
+        int len = CCC::objectPtr->codepointLengthUtf8(*p);
+        if (i + len < 0x2FF) {
+            for (int j = 0; j < len; ++j) {
+                char c = *p++;
+                buffers[b ^ 1][i] = c;
+                ++i;
+            }
+        } else {
+            break;
+        }
+
+        if (i >= 0x2FF) {
+            i = 0x2FF;
+            break;
+        }
+
+        if (type == 0) {
+            left += fontWidth;
+        } else if (type == 1) {
+            left += fontWidth / 2;
+        } else {
+            left = indent;
+            top += lineSpacing;
+            buffers[b ^ 1][i - 1] = 0;
+            printfUtf8("%s", buffers[b ^ 1]);
+            i = 0;
+            setCursor(indent, top);
+        }
+
+        if (n) {
+            continue;
+        }
+        *p = 0;
+    }
+    buffers[b ^ 1][i] = 0;
+    printfUtf8("%s", buffers[b ^ 1]);
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_088921C8);
 
@@ -1103,11 +1244,11 @@ INCLUDE_ASM("asm/eboot/nonmatchings/system_font", parseCommand__10SystemFontFPcP
 
 char D_eboot_089AA4BC[] = "%d";
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08894988);
+INCLUDE_ASM("asm/eboot/nonmatchings/system_font", copySubstitution__10SystemFontFPcsi);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08894A78);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08894D1C);
+INCLUDE_ASM("asm/eboot/nonmatchings/system_font", addIcon__10SystemFontFssUsScs);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08894D88);
 

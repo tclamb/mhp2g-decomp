@@ -24,6 +24,7 @@ ScePspFVector4 D_eboot_089310C0 = {0, 1, 0, 0};
 
 #include "ge.hpp"
 
+// TODO: try zero() in common.h
 inline void *inline_memset(void *dst, int val, u32 size) {
     u8 *p = (u8 *)dst;
     if (p) {

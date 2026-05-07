@@ -150,6 +150,12 @@ struct SystemFont : Singleton<SystemFont> {
 
     void method_08891B68(s16 left, s16 top, char *fmt, ...);
 
+    void nprintUtf8x(s16 n, u8 *utf8x);
+
+    void addIcon(s16 left, s16 top, u16 size, s8 fontColor, s16 iconId);
+    void copySubstitution(char *dst, s16 substitutionId, int encoding);
+    int widthUtf8(char *utf8);
+
     void drawBtnIcon(Icon *icons, u8 count, u32 renderGroup);
     void initializeFont();
 
