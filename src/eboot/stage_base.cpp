@@ -907,7 +907,7 @@ void StageBase::vtable_0x50() {
     }
     if (node) {
         while (node->position.x != -1.0f) {
-            if (node->remaining > 0 && node->type == ResourceType::BUG_NET) {
+            if (node->remaining > 0 && node->type == ResourceNodeType::BUG_NET) {
                 stage_definitions *assets = StageManager::objectPtr->stage->definitions();
                 if (assets->bug_mesh_index != -1 && (unknown_0x1C0 & 0x7F) == 0) {
                     ScePspFVector4 spawn_center, spawn_box;
@@ -1019,14 +1019,14 @@ void StageBase::draw_sky_gradient() {
         GE_VTYPE_TC_NONE,
         GE_VTYPE_COL_8888,
         GE_VTYPE_NRM_NONE,
-        GE_VTYPE_POS_S16,
+        GE_VTYPE_POS_16BIT,
         GE_VTYPE_WEIGHT_NONE,
         GE_VTYPE_IDX_NONE,
         0,
         0,
         true);
-    ge::vaddr(sky_gradient_vdata);
-    ge::prim(GE_PRIM_TRIANGLE_STRIP, 4);
+    ge::vaddr(&DRAWABLE_WRITE_HEAD, sky_gradient_vdata);
+    ge::prim(&DRAWABLE_WRITE_HEAD, GE_PRIM_TRIANGLE_STRIP, 4);
 }
 
 template<typename T, typename U>
@@ -1049,7 +1049,7 @@ void StageBase::draw_flash() {
             GE_VTYPE_TC_NONE,
             GE_VTYPE_COL_8888,
             GE_VTYPE_NRM_NONE,
-            GE_VTYPE_POS_S16,
+            GE_VTYPE_POS_16BIT,
             GE_VTYPE_WEIGHT_NONE,
             GE_VTYPE_IDX_NONE,
             0,
@@ -1065,8 +1065,8 @@ void StageBase::draw_flash() {
             blend_mask = 0xFF - (u8)(flash_frames * 127.5f);
             flash_blank_vdata[1].color.rgba8888 = (blend_mask << 24) | 0x000000;
             flash_blank_vdata[0].color.rgba8888 = (blend_mask << 24) | 0x000000;
-            ge::vaddr(flash_blank_vdata);
-            ge::prim(GE_PRIM_RECTANGLES, 2);
+            ge::vaddr(&DRAWABLE_WRITE_HEAD, flash_blank_vdata);
+            ge::prim(&DRAWABLE_WRITE_HEAD, GE_PRIM_RECTANGLES, 2);
             ge::blendfixeda(0xFF, 0xFF, 0xFF);
             ge::blendfixedb(0xFF, 0xFF, 0xFF);
             ge::blendmode(GE_BLENDMODE_MUL_AND_SUBTRACT, GE_SRCBLEND_FIXA, GE_DSTBLEND_FIXB);
@@ -1084,8 +1084,8 @@ void StageBase::draw_flash() {
             flash_blend_vdata[1].color.rgba8888 = color;
             flash_blend_vdata[0].color.rgba8888 = color;
         }
-        ge::vaddr(flash_blend_vdata);
-        ge::prim(GE_PRIM_RECTANGLES, 2);
+        ge::vaddr(&DRAWABLE_WRITE_HEAD, flash_blend_vdata);
+        ge::prim(&DRAWABLE_WRITE_HEAD, GE_PRIM_RECTANGLES, 2);
         ge::blendmode(GE_BLENDMODE_MUL_AND_ADD, GE_SRCBLEND_SRCALPHA, GE_DSTBLEND_INVSRCALPHA);
     }
 }

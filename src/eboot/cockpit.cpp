@@ -375,7 +375,7 @@ RotateTooltip D_eboot_08935D48[2] = {
 char D_eboot_08935D58[8] = "%2d/%2d";
 
 extern CockpitTextbox D_eboot_089386A0;
-extern FontColor D_eboot_08938474[7];
+extern s8 D_eboot_08938474[7];
 
 #define SORT_DIALOG_OPEN 0x10
 #define SORT_TOOLTIP_HIDDEN 0x20
@@ -392,13 +392,24 @@ extern FontColor D_eboot_08938474[7];
 #define UI_STRING(id) GameSys::objectPtr->method_0885143C(id)
 #define INVENTORY_QTY(itemId) GameSys::objectPtr->bagQuantity(itemId)
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", __ct__7CockpitFv);
+Cockpit::Cockpit() {
+    memset(this, 0, 0x1220);
+    mix = NULL;
+    memset(toasts, 0, 0x2D0);
+    unknown_0x1198 = 0;
+    unknown_0x119C = 0;
+    unknown_0x119E = 0;
+    flags_0x528 = 0;
+    unknown_0x608 = 0;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_088178A4);
+Toast::~Toast() {
+    // empty
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_088178E4);
-
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08817924);
+Toast::Toast() {
+    // empty
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", __dt__7CockpitFv);
 
@@ -452,7 +463,7 @@ void Cockpit::method_08818098() {
         if ((flags_0x528 & SORT_DIALOG_OPEN)) {
             inventoryFlags |= SORT_TOOLTIP_HIDDEN | 1;
             inventoryCursorColor = 0;
-            SystemFont::objectPtr->method_088908A8(14, 14);
+            SystemFont::objectPtr->setFontSize(14, 14);
             xyprintfx(((u16) D_eboot_089386A0.textLeft + 0x62), ((u16) D_eboot_089386A0.textTop + (D_eboot_089386A0.textLineSpacing * 2)), D_eboot_08935AB8, UI_STRING(D_eboot_089A9588[yesNoIndex]));
         } else {
             if ((flags_0x528 & SORT_TOOLTIP_HIDDEN)) {
@@ -482,13 +493,13 @@ void Cockpit::method_08818098() {
     case 4: {
         method_0882FE94(&D_eboot_08935AE4, UI_STRING(D_eboot_089A9834[2]), 0xFF);
         if (mixSuccessItemId > 0) {
-            FontColor::white();
+            SystemFont::objectPtr->setFontColor(FontColor::WHITE);
             char *resultName = ITEM_NAME(mix->successItemId);
             xyprintf(D_eboot_08935AE4.textLeft, D_eboot_08935AE4.textTop + D_eboot_08935AE4.textLineSpacing, D_eboot_08935AB8, resultName);
             s8 mixRate = ItemManager::objectPtr->mixRate(mix, false);
-            D_eboot_08938474[mixRateColorId(mixRate)].apply();
+            SystemFont::objectPtr->setFontColor(D_eboot_08938474[mixRateColorId(mixRate)]);
             xyprintf(resultIndent, D_eboot_08935AE4.textTop + (D_eboot_08935AE4.textLineSpacing * 2), UI_STRING(D_eboot_089A9834[4]), mixRate);
-            FontColor::white();
+            SystemFont::objectPtr->setFontColor(FontColor::WHITE);
             xyprintf(resultIndent, D_eboot_08935AE4.textTop + (D_eboot_08935AE4.textLineSpacing * 3), D_eboot_08935AB8, method_0882595C(mix));
             for (int i = 0; i < 24; ++i) {
                 if (mixSuccessItemId == inventory[i].itemId) {
@@ -496,10 +507,10 @@ void Cockpit::method_08818098() {
                     if (overflowStatus >= 0) {
                         switch (overflowStatus) {
                         case 0:
-                            FontColor::flamingo();
+                            SystemFont::objectPtr->setFontColor(FontColor::FLAMINGO);
                             break;
                         case 1:
-                            FontColor::lightOrange();
+                            SystemFont::objectPtr->setFontColor(FontColor::LIGHT_ORANGE);
                             break;
                         }
                     }
@@ -508,9 +519,9 @@ void Cockpit::method_08818098() {
             }
             u16 inventoryQty = INVENTORY_QTY(mixSuccessItemId);
             xyprintf(resultIndent, D_eboot_08935AE4.textTop + (D_eboot_08935AE4.textLineSpacing * 4), D_eboot_08935B0C, inventoryQty, ITEM_DEFINITIONS[mixSuccessItemId].stackSize);
-            FontColor::white();
+            SystemFont::objectPtr->setFontColor(FontColor::WHITE);
         } else {
-            FontColor::darkGray();
+            SystemFont::objectPtr->setFontColor(FontColor::DARK_GRAY);
             char *unknown = UI_STRING(D_eboot_089A9834[3]);
             xyprintf(D_eboot_08935AE4.textLeft, D_eboot_08935AE4.textTop + D_eboot_08935AE4.textLineSpacing, D_eboot_08935AB8, unknown);
             xyprintf(resultIndent, D_eboot_08935AE4.textTop + (D_eboot_08935AE4.textLineSpacing * 2), D_eboot_08935AB8, unknown);
@@ -533,7 +544,7 @@ void Cockpit::method_08818098() {
             method_0882FE94(&D_eboot_08935AE4, UI_STRING(D_eboot_089A9834[successFailureStringId]), 0xFF);
             u16 inventoryQty = INVENTORY_QTY(mixOutcomeItemId);
             u16 stackSize = ITEM_DEFINITIONS[mixOutcomeItemId].stackSize;
-            FontColor::white();
+            SystemFont::objectPtr->setFontColor(FontColor::WHITE);
             xyprintf(D_eboot_08935AE4.textLeft, D_eboot_08935AE4.textTop + D_eboot_08935AE4.textLineSpacing, D_eboot_08935AB8, ITEM_NAME(mixOutcomeItemId));
             xyprintf(resultIndent, D_eboot_08935AE4.textTop + D_eboot_08935AE4.textLineSpacing * 3, D_eboot_08935B14, qty);
             for (int i = 0; i < 24; ++i) {
@@ -542,10 +553,10 @@ void Cockpit::method_08818098() {
                     if (overflowStatus >= 0) {
                         switch (overflowStatus) {
                         case 0:
-                            FontColor::flamingo();
+                            SystemFont::objectPtr->setFontColor(FontColor::FLAMINGO);
                             break;
                         case 1:
-                            FontColor::lightOrange();
+                            SystemFont::objectPtr->setFontColor(FontColor::LIGHT_ORANGE);
                             break;
                         default:
                             break;
@@ -555,7 +566,7 @@ void Cockpit::method_08818098() {
                 }
             }
             xyprintf(resultIndent, D_eboot_08935AE4.textTop + (D_eboot_08935AE4.textLineSpacing * 4), D_eboot_08935B0C, inventoryQty, stackSize);
-            FontColor::white();
+            SystemFont::objectPtr->setFontColor(FontColor::WHITE);
             break;
         }
     }
@@ -776,18 +787,18 @@ extern u16 D_eboot_089B070C[4];
 // draw send item to box
 void Cockpit::method_0882536C(SceBool isLobby) {
     renderGroup = render_group::GROUP_10;
-    SystemFont::objectPtr->method_088908C8(1);
+    SystemFont::objectPtr->setLayer(1);
     method_08826600();
 
     if (isLobby == false) {
         renderGroup = render_group::GROUP_9;
-        SystemFont::objectPtr->method_088908C8(0);
+        SystemFont::objectPtr->setLayer(0);
         method_08826600();
         // draw quest freeze frame
         method_088259A0();
     }
     renderGroup = render_group::GROUP_10;
-    SystemFont::objectPtr->method_088908C8(1);
+    SystemFont::objectPtr->setLayer(1);
     method_08826600();
 
     ScePspUnion32 iconPos;
@@ -815,7 +826,7 @@ void Cockpit::method_0882536C(SceBool isLobby) {
                 break;
             case 4:
                 method_0882DEE4(D_eboot_08935C10.boxLeft, D_eboot_08935C10.boxTop, D_eboot_08935C10.boxWidth, D_eboot_08935C10.boxHeight, 0xFF);
-                SystemFont::objectPtr->method_088908A8(14, 14);
+                SystemFont::objectPtr->setFontSize(14, 14);
                 xyprintfx(224, 213, UI_STRING(D_eboot_089A9590[resultConfirmCursor]));
                 break;
             case 0:
@@ -847,7 +858,7 @@ void Cockpit::method_0882536C(SceBool isLobby) {
             method_08824514(false, isOtomoAiruResults);
             method_08825CB4(resultItemCursor, false, -1);
             if (resultItemWouldOverflow >= 0) {
-                SystemFont::objectPtr->method_088908F8(FontColor::FLAMINGO);
+                SystemFont::objectPtr->setFontColor(FontColor::FLAMINGO);
                 func_eboot_0887CDC8(456, 180, UI_STRING(D_eboot_089A9590[7]), 14);
             }
             if (!(resultDescriptionFlags & 1)) {
@@ -897,7 +908,7 @@ void Cockpit::method_0882536C(SceBool isLobby) {
 
     if (resultMenuState == 3) {
         renderGroup = render_group::GROUP_11;
-        SystemFont::objectPtr->method_088908C8(2);
+        SystemFont::objectPtr->setLayer(2);
         method_08826600();
         method_0881A280(inventoryCursorIndex, 0x8000C040, 0x10, 2);
     }
@@ -1153,10 +1164,10 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_088311F0);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08831290);
 
-void Cockpit::method_0883139C(s16 a, s16 b, u16 *c, s16 d, FontColor *e) {
+void Cockpit::method_0883139C(s16 a, s16 b, u16 *c, s16 d, s8 *e) {
     while (*c != 0xFFFF) {
         if (e != NULL) {
-            e->apply();
+            SystemFont::objectPtr->setFontColor(*e);
             ++e;
         }
         xyprintfx(a, b, D_eboot_08935AB8, UI_STRING(*c));

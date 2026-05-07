@@ -229,7 +229,7 @@ int tmh::compile(void *buffer, tmh_header *header, u8 index) {
             out->commands[2] = (GE_CMD_TEXBUFWIDTH0 << 24) | (((u32)t.data & 0xFF000000) >> 8) | t.width;
 
             u32 halign = Ge::objectPtr->method_0885973C(t.height);
-            u32 texsize = (GE_CMD_TEXSIZE << 24) | halign << 8;
+            u32 texsize = (GE_CMD_TEXSIZE0 << 24) | halign << 8;
             u32 walign = Ge::objectPtr->method_0885973C(t.width);
             texsize |= walign;
             out->commands[3] = texsize;

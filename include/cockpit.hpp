@@ -97,6 +97,12 @@ private:
     StringTableId();
 };
 
+struct Toast {
+    u8 padding[0x24];
+    Toast();
+    ~Toast();
+};
+
 struct Cockpit : Singleton<Cockpit> {
     u8 slab[0x500];
     cache cache;
@@ -138,7 +144,15 @@ struct Cockpit : Singleton<Cockpit> {
     u8 itemBoxMenuId;
     u8 pad_0x5FF[0x604 - 0x5FF];
     u8 unknown_0x604;
-    u8 pad_0x605[0x120A - 0x605];
+    u8 pad_0x605[0x608 - 0x605];
+    u8 unknown_0x608;
+    u8 pad_0x609[0xE28 - 0x609];
+    Toast toasts[20];
+    u8 pad_0x10F8[0x1198 - 0x10F8];
+    u32 unknown_0x1198;
+    u16 unknown_0x119E;
+    u16 unknown_0x119C;
+    u8 pad_0x11A0[0x120A - 0x11A0];
     u8 resultMenuState;
     u8 resultMenuCursor;
     u8 resultItemCursor;
@@ -176,7 +190,7 @@ struct Cockpit : Singleton<Cockpit> {
 
     const MonsterListDefinition *method_0882FFAC(u8 enemyType);
 
-    void method_0883139C(s16 a, s16 b, u16 *, s16, FontColor *);
+    void method_0883139C(s16 a, s16 b, u16 *, s16, s8 *);
 
     void method_0883FAF0();
 

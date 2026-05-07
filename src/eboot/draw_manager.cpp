@@ -101,7 +101,7 @@ void DrawManager::reset() {
         ge::texmapmode(GE_TEXMAP_TEXTURE_COORDS, GE_PROJMAP_POSITION);
         ge::texfilter(GE_TFILT_LINEAR, GE_TFILT_LINEAR);
         ge::texfunc(GE_TEXFUNC_MODULATE, GE_TEXFUNC_COMPONENTS_RGBA);
-        ge::texwrap();
+        ge::texwrap(GE_TWRAP_WRAP, GE_TWRAP_WRAP);
         ge::texoffset();
 
         ScePspUnion32 scale; scale.f = 1.0f;
@@ -217,7 +217,7 @@ void DrawManager::initialize() {
         ge::texmapmode(GE_TEXMAP_TEXTURE_COORDS, GE_PROJMAP_POSITION);
         ge::texfilter(GE_TFILT_LINEAR_MIPMAP_LINEAR, GE_TFILT_LINEAR);
         ge::texfunc(GE_TEXFUNC_MODULATE, GE_TEXFUNC_COMPONENTS_RGBA);
-        ge::texwrap();
+        ge::texwrap(GE_TWRAP_WRAP, GE_TWRAP_WRAP);
         ge::texoffset();
 
         ge::depthclampenable(true);
@@ -272,7 +272,7 @@ void DrawManager::initialize() {
         ge::texmapmode(GE_TEXMAP_TEXTURE_COORDS, GE_PROJMAP_POSITION);
         ge::texfilter(GE_TFILT_LINEAR, GE_TFILT_LINEAR);
         ge::texfunc(GE_TEXFUNC_MODULATE, GE_TEXFUNC_COMPONENTS_RGBA);
-        ge::texwrap();
+        ge::texwrap(GE_TWRAP_WRAP, GE_TWRAP_WRAP);
         ge::texoffset();
 
         ge::depthclampenable(true);
@@ -330,15 +330,12 @@ bool DrawManager::start_fragment(u8 group) {
     return writing != 0;
 }
 
-extern "C"
-void func_eboot_088595E8(Ge *, ge_command *, int, u32);
-
 void DrawManager::end_fragment() {
     if ((bool)writing != 0) {
         int length = DRAWABLE_WRITE_HEAD - fragment_start;
         if (length != 0) {
             DRAWABLE_WRITE_HEAD += 2;
-            func_eboot_088595E8(Ge::objectPtr, fragment_start, length + 2, fragment_group);
+            Ge::objectPtr->method_088595E8(fragment_start, length + 2, fragment_group);
             Ge::objectPtr->set_write_head(DRAWABLE_WRITE_HEAD);
         }
         DRAWABLE_WRITE_HEAD = NULL;

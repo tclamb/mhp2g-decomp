@@ -9610,6 +9610,13 @@ rom:0x12C740 reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x1E0
 rom:0x12C744 reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x280
 rom:0x12C748 reloc:MIPS_32 symbol:method_0882536C__7CockpitFi addend:0x280
 
+rom:0x12DA2C reloc:MIPS_32 symbol:currentRenderGroup__10SystemFontFv addend:0x2C
+rom:0x12DA30 reloc:MIPS_32 symbol:currentRenderGroup__10SystemFontFv addend:0x38
+rom:0x12DA34 reloc:MIPS_32 symbol:currentRenderGroup__10SystemFontFv addend:0x40
+rom:0x12DA38 reloc:MIPS_32 symbol:currentRenderGroup__10SystemFontFv addend:0x48
+rom:0x12DA3C reloc:MIPS_32 symbol:currentRenderGroup__10SystemFontFv addend:0x50
+rom:0x12DA40 reloc:MIPS_32 symbol:currentRenderGroup__10SystemFontFv addend:0x58
+
 rom:0x136A40 reloc:MIPS_32 symbol:D_lobby_task_09AFFF08
 rom:0x136A44 reloc:MIPS_32 symbol:D_lobby_task_09AFFE30
 

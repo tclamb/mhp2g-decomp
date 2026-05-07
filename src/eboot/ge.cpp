@@ -344,7 +344,7 @@ void Ge::clear_display_list() {
 
 INCLUDE_ASM("asm/eboot/nonmatchings/ge", method_088593A0__2GeFPUiii);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_088595E8);
+INCLUDE_ASM("asm/eboot/nonmatchings/ge", method_088595E8__2GeFPUiUii);
 
 void Ge::render() {
     GE_END_REACHED = 0;

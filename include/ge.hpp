@@ -40,6 +40,8 @@ struct Ge : Singleton<Ge> {
     int method_08859768(tmh_header *, s32, u32, u32, GeTexture *);
     u32 method_0885973C(u32);
 
+    int method_088595E8(u32 *commands, u32 count, s32 fragmentId);
+
     Ge();
 };
 

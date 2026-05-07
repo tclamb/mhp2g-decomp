@@ -126,7 +126,7 @@ segments:
       - [0x84634, asmtu, stream]
       - [0x84b64, asmtu, camera_b0] # initializes every stage load
       - [0x8dff0, asmtu, system] # main game loop
-      - [0x8e84c, asmtu, system_font]
+      - [0x8e84c, cpp, system_font]
       - [0x935d0, asmtu, task_manager] # owns state objects, calls update logic of active state once per frame, unloads & loads new states
       - [0x93f38, asmtu, cockpit_10fc]
       - [0x95238, cpp, task_base]

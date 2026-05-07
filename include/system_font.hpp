@@ -2,21 +2,139 @@
 
 #include "common.h"
 #include "singleton.hpp"
+#include "cache.hpp"
+
+struct GlyphRun {
+    s16 left;
+    s16 top;
+    u8 fontWidth;
+    u8 fontHeight;
+    s8 fontColor;
+    u8 lineSpacing;
+    u16 *codepoints;
+};
+
+struct Icon {
+    s16 left;
+    s16 top;
+    s16 size;
+    u8 iconId;
+    s8 fontColor;
+};
+
+// adapted from PPSSPP implementation of libfont
+struct PGFFontStyle {
+    float fontH;
+    float fontV;
+    float fontHRes;
+    float fontVRes;
+    float fontWeight;
+    u16 fontFamily;
+    u16 fontStyle;
+    u16 fontStyleSub;
+    u16 fontLanguage;
+    u16 fontRegion;
+    u16 fontCountry;
+    char fontName[64];
+    char fontFileName[64];
+    u32 fontAttributes;
+    u32 fontExpire;
+};
+
+// adapted from PPSSPP implementation of libfont
+struct PGFFontInfo {
+    s32 glyphMetricsFixed[10];
+    float glyphMetricsFloat[10];
+    u16 maxGlyphWidth;
+    u16 maxGlyphHeight;
+    u32 numGlyphs;
+    u32 shadowMapLength;
+    PGFFontStyle fontStyle;
+    u8 bpp;
+};
 
 struct SystemFont : Singleton<SystemFont> {
-    u8 pad_0x0[0x25CF8];
+    void *fontLib;
+    s32 fontId;
+    void *font;
+    PGFFontInfo fontInfo;
+    u8 glyphWidth;
+    u8 glyphHeight;
+    u8 glyphSpacingX;
+    u8 glyphSpacingY;
+    u8 glyphTextureWidth;
+    u8 glyphTextureHeight;
+    u8 glyphsPerRow;
+    u8 rowsPerAtlas;
+    u16 glyphsPerAtlas;
+    u16 maxCachedGlyphs;
+    s16 left;
+    s16 top;
+    s16 unknown_0x124;
+    u16 cursorLeft;
+    u16 cursorTop;
+    u16 cursorZ;
+    u8 fontWidth;
+    u8 fontHeight;
+    s8 fontColor;
+    s8 layer;
+    bool unknown_0x130;
+    s8 usedColorIds;
+    u8 padding_0x132[2];
+    s8 layerGlyphRunCounts[6];
+    s8 layerIconCounts[6];
+    GlyphRun *layerGlyphRuns[6];
+    s16 glyphCacheCount;
+    s16 unknown_0x15A;
+    u8 unknown_0x15C;
+    s8 currentLayer;
+    u8 unknown_0x15E;
+    u8 lineSpacing;
+    u16 decodeBufferUsed;
+    u16 unknown_0x162;
+    u32 glowingFontColor;
+    u32 fontColors[48];
+    GlyphRun glyphRuns[6][128];
+    u16 glyphIndices[65520];
+    u16 cachedCodepoints[432];
+    u8 cacheStatus[432];
+    Icon layerIcons[6][10];
+    u8 decodeBuffer[12288];
+
+    void initialize();
+    void initializeVram();
+    void initializeGlyphIndex();
+    void clear();
+    void setColor(s32 fontColorId, u32 alpha, u32 bgrColor);
+    void initializeColors();
+    s8 addColor(u32 bgrColor); // setUserFontColor?
+    void setFontSize(u8 fontWidth, u8 fontHeight);
+    void setFontColor(s8 fontColor);
+    void setCursor(s16 left, s16 top);
+    void setLayer(s8 layer);
+    void setLineSpacing(u8 spacing);
+    int halfWidths(u8 *utf8);
+    int lineHalfWidths(u8 *utf8);
+    u32 strlen(char *str);
+
+    void drawBtnIcon(Icon *icons, u8 count, u32 renderGroup);
+
+    void asciiToFullWidthUtf8(char *in, char *out);
+    void asciiToFullWidthSJIS(char *in, char *out);
+
+    u32 currentRenderGroup();
+
+    int isHalfWidth(u16 codepoint);
+
+    void initializeFont();
+
+    void cacheCommonGlyphs();
+    void updateGlowingFontColor();
 
     // printf-type functions
     void method_08891070(s16 left, s16 top, s8 color, char *fmt, ...);
     void method_08891B68(s16 left, s16 top, char *fmt, ...);
     void method_08890F34(s16 left, s16 top, char *fmt, ...);
-
-    // setFontSize
-    void method_088908A8(u8 fontWidth, u8 fontHeight);
-    // setFontColor
-    void method_088908F8(s8 fontColor);
-    // setLayer?
-    void method_088908C8(u8);
 
     SystemFont();
 };
@@ -50,44 +168,6 @@ struct FontColor {
         GOLD,
     };
 
-    s8 value;
-
-    inline FontColor() : value(WHITE) {}
-    inline FontColor(s8 value) : value(value) {}
-
-    inline void apply() const {
-        SystemFont::objectPtr->method_088908F8(value);
-    }
-
-    inline operator s8() const {
-        return value;
-    }
-
-
-    static inline void white() { FontColor(WHITE).apply(); }
-    static inline void black() { FontColor(BLACK).apply(); }
-    static inline void flamingo() { FontColor(FLAMINGO).apply(); }
-    static inline void lime() { FontColor(LIME).apply(); }
-    static inline void aqua() { FontColor(AQUA).apply(); }
-    static inline void lightYellow() { FontColor(LIGHT_YELLOW).apply(); }
-    static inline void lightOrange() { FontColor(LIGHT_ORANGE).apply(); }
-    static inline void fuschia() { FontColor(FUSCHIA).apply(); }
-    static inline void fadedRose() { FontColor(FADED_ROSE).apply(); }
-    static inline void lightGray() { FontColor(LIGHT_GRAY).apply(); }
-    static inline void darkGray() { FontColor(DARK_GRAY).apply(); }
-    static inline void orange() { FontColor(ORANGE).apply(); }
-    static inline void brown() { FontColor(BROWN).apply(); }
-    static inline void maroon() { FontColor(MAROON).apply(); }
-    static inline void slateBlue() { FontColor(SLATE_BLUE).apply(); }
-    static inline void pink() { FontColor(PINK).apply(); }
-    static inline void magenta() { FontColor(MAGENTA).apply(); }
-    static inline void blue() { FontColor(BLUE).apply(); }
-    static inline void yellow() { FontColor(YELLOW).apply(); }
-    static inline void red() { FontColor(RED).apply(); }
-    static inline void green() { FontColor(GREEN).apply(); }
-    static inline void olive() { FontColor(OLIVE).apply(); }
-    static inline void skyBlue() { FontColor(SKY_BLUE).apply(); }
-    static inline void lilac() { FontColor(LILAC).apply(); }
-    static inline void gold() { FontColor(GOLD).apply(); }
-
+private:
+    FontColor();
 };

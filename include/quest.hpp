@@ -3,12 +3,12 @@
 #include "common.h"
 #include "singleton.hpp"
 
-struct ResourceType {
+struct ResourceNodeType {
     enum {
         PICKAXE = 3,
         BUG_NET = 4,
     };
-private: ResourceType();
+private: ResourceNodeType();
 };
 
 struct ResourceNode {

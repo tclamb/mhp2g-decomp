@@ -119,11 +119,12 @@
 
 #define GE_CMD_CLUTADDR       0xB0
 #define GE_CMD_CLUTADDRUPPER  0xB1
-#define GE_CMD_TEXSIZE        0xB8
 #define GE_CMD_TRANSFERSRC    0xB2
 #define GE_CMD_TRANSFERSRCW   0xB3
 #define GE_CMD_TRANSFERDST    0xB4
 #define GE_CMD_TRANSFERDSTW   0xB5
+
+#define GE_CMD_TEXSIZE0       0xB8
 
 #define GE_CMD_TEXMAPMODE   0xC0
 #define GE_CMD_TEXSHADELS   0xC1
@@ -193,6 +194,9 @@
 #define GE_TFILT_LINEAR 1
 #define GE_TFILT_LINEAR_MIPMAP_LINEAR 7
 
+#define GE_TWRAP_WRAP 0
+#define GE_TWRAP_CLAMP 1
+
 #define GE_SHADE_GOURAUD 1
 
 #define GE_LIGHTMODE_SINGLECOLOR 0
@@ -213,12 +217,13 @@
 #define GE_PRIM_RECTANGLES 6
 
 #define GE_VTYPE_TC_NONE 0
+#define GE_VTYPE_TC_16BIT 2
 
 #define GE_VTYPE_COL_8888 7
 
 #define GE_VTYPE_NRM_NONE 0
 
-#define GE_VTYPE_POS_S16 2
+#define GE_VTYPE_POS_16BIT 2
 
 #define GE_VTYPE_WEIGHT_NONE 0
 
@@ -234,25 +239,43 @@ namespace immediate_ge {
     namespace ge {
         namespace impl {
 
+            inline void emit(u32 **out, u32 cmd) {
+                *(*out)++ = cmd;
+            }
+
             inline void emit(u32 cmd) {
-                *DRAWABLE_WRITE_HEAD++ = cmd;
+                emit(&DRAWABLE_WRITE_HEAD, cmd);
             }
 
         }
 
         // 0x0X
 
-        inline void vaddr(void *address) {
-            impl::emit((GE_CMD_BASE << 24) | (((u32)address & 0xFF000000) >> 8));
-            impl::emit((GE_CMD_VADDR << 24) | (((u32)address << 8) >> 8));
+        inline void vaddr(u32 **out, void *address) {
+            impl::emit(out, (GE_CMD_BASE << 24) | (((u32)address & 0xFF000000) >> 8));
+            impl::emit(out, (GE_CMD_VADDR << 24) | (((u32)address << 8) >> 8));
         }
 
-        inline void prim(int type, u16 count) {
-            impl::emit(
+        inline void vaddr(void *address) {
+            vaddr(&DRAWABLE_WRITE_HEAD, address);
+            vaddr(&DRAWABLE_WRITE_HEAD, address);
+        }
+
+        inline void prim(u32 **out, int type, u16 count) {
+            impl::emit(out,
                 (GE_CMD_PRIM << 24) |
                 ((type & 0x7) << 16) |
                 count
             );
+        }
+
+        inline void prim(int type, u16 count) {
+            prim(&DRAWABLE_WRITE_HEAD, type, count);
+        }
+
+        inline void jump(u32 **out, void *address) {
+            impl::emit(out, (GE_CMD_BASE << 24) | (((u32)address & 0xFF000000) >> 8));
+            impl::emit(out, (GE_CMD_JUMP << 24) |  ((u32)address & 0x00FFFFFF));
         }
 
         inline void call(void *address, u32 offset) {
@@ -263,8 +286,8 @@ namespace immediate_ge {
 
         // 0x1X
 
-        inline void vertextype(int uv_type, int color_type, int norm_type, int position_type, int weight_type, int index_type, int weight_count, int morph_count, bool through) {
-            impl::emit(
+        inline void vertextype(u32 **out, int uv_type, int color_type, int norm_type, int position_type, int weight_type, int index_type, int weight_count, int morph_count, bool through) {
+            impl::emit(out,
                 (GE_CMD_VERTEXTYPE << 24) |
                 (through << 23) |
                 ((morph_count & 0x7) << 18) |
@@ -276,6 +299,10 @@ namespace immediate_ge {
                 ((color_type & 0x7) << 2) |
                 (uv_type & 0x3)
             );
+        }
+
+        inline void vertextype(int uv_type, int color_type, int norm_type, int position_type, int weight_type, int index_type, int weight_count, int morph_count, bool through) {
+            vertextype(&DRAWABLE_WRITE_HEAD, uv_type, color_type, norm_type, position_type, weight_type, index_type, weight_count, morph_count, through);
         }
 
         inline void lightingenable(bool enable) {
@@ -293,8 +320,12 @@ namespace immediate_ge {
             impl::emit((GE_CMD_CULLFACEENABLE << 24) | enable);
         }
 
+        inline void texturemapenable(u32 **out, bool enable) {
+            impl::emit(out, (GE_CMD_TEXTUREMAPENABLE << 24) | enable);
+        }
+
         inline void texturemapenable(bool enable) {
-            impl::emit((GE_CMD_TEXTUREMAPENABLE << 24) | enable);
+            texturemapenable(&DRAWABLE_WRITE_HEAD, enable);
         }
 
         inline void fogenable(bool enable) {
@@ -307,16 +338,28 @@ namespace immediate_ge {
             impl::emit((GE_CMD_DITHERENABLE << 24) | enable);
         }
 
+        inline void alphablendenable(u32 **out, bool enable) {
+            impl::emit(out, (GE_CMD_ALPHABLENDENABLE << 24) | enable);
+        }
+
         inline void alphablendenable(bool enable) {
-            impl::emit((GE_CMD_ALPHABLENDENABLE << 24) | enable);
+            alphablendenable(&DRAWABLE_WRITE_HEAD, enable);
+        }
+
+        inline void alphatestenable(u32 **out, bool enable) {
+            impl::emit(out, (GE_CMD_ALPHATESTENABLE << 24) | enable);
         }
 
         inline void alphatestenable(bool enable) {
-            impl::emit((GE_CMD_ALPHATESTENABLE << 24) | enable);
+            alphatestenable(&DRAWABLE_WRITE_HEAD, enable);
+        }
+
+        inline void ztestenable(u32 **out, bool enable) {
+            impl::emit(out, (GE_CMD_ZTESTENABLE << 24) | enable);
         }
 
         inline void ztestenable(bool enable) {
-            impl::emit((GE_CMD_ZTESTENABLE << 24) | enable);
+            ztestenable(&DRAWABLE_WRITE_HEAD, enable);
         }
 
         inline void stenciltestenable(bool enable) {
@@ -474,8 +517,12 @@ namespace immediate_ge {
 
         // 0x5X
 
+        inline void shademode(u32 **out, u32 mode) {
+            impl::emit(out, (GE_CMD_SHADEMODE << 24) | mode);
+        }
+
         inline void shademode(u32 mode) {
-            impl::emit((GE_CMD_SHADEMODE << 24) | mode);
+            shademode(&DRAWABLE_WRITE_HEAD, mode);
         }
 
         inline void materialupdate(u8 flags) {
@@ -562,30 +609,69 @@ namespace immediate_ge {
 
         // 0xCX
 
+        inline void texmapmode(u32 **out, u32 mode, u32 projmode) {
+            impl::emit(out, (GE_CMD_TEXMAPMODE << 24) | (projmode << 8) | mode);
+        }
+
         inline void texmapmode(u32 mode, u32 projmode) {
-            impl::emit((GE_CMD_TEXMAPMODE << 24) | (projmode << 8) | mode);
+            texmapmode(&DRAWABLE_WRITE_HEAD, mode, projmode);
+        }
+
+        inline void texmode(u32 **out, u32 flags) {
+            impl::emit(out, (GE_CMD_TEXMODE << 24) | flags);
         }
 
         inline void texmode(u32 flags) {
-            impl::emit((GE_CMD_TEXMODE << 24) | flags);
+            texmode(&DRAWABLE_WRITE_HEAD, flags);
+        }
+
+        inline void loadclut(u32 **out, GeTexture &texture) {
+            impl::emit(out, GE_CMD_TEXFORMAT << 24 | texture.format);
+
+            impl::emit(out, GE_CMD_TEXADDR0 << 24 | ((u32)texture.data & 0x00FFFFFF));
+            impl::emit(out, GE_CMD_TEXBUFWIDTH0 << 24 | ((u32)texture.data & 0xFF000000) >> 8 | texture.width);
+
+            impl::emit(out, GE_CMD_TEXSIZE0 << 24 | Ge::objectPtr->method_0885973C(texture.height) << 8 | Ge::objectPtr->method_0885973C(texture.width));
+
+            impl::emit(out, GE_CMD_CLUTFORMAT << 24 | 0xFF << 8 | texture.palette_width);
+
+            impl::emit(out, GE_CMD_CLUTADDR << 24  | ((u32)texture.palette_data & 0x00FFFFFF));
+            impl::emit(out, GE_CMD_CLUTADDRUPPER << 24  | ((u32)texture.palette_data & 0xFF000000) >> 8);
+
+            impl::emit(out, GE_CMD_LOADCLUT << 24 | texture.palette_height / 8);
+        }
+
+        inline void texfilter(u32 **out, u8 min, u8 mag) {
+            impl::emit(out, (GE_CMD_TEXFILTER << 24) | (mag << 8) | min);
         }
 
         inline void texfilter(u8 min, u8 mag) {
-            impl::emit((GE_CMD_TEXFILTER << 24) | (mag << 8) | min);
+            texfilter(&DRAWABLE_WRITE_HEAD, min, mag);
         }
 
-        inline void texwrap() {
-            impl::emit(GE_CMD_TEXWRAP << 24);
+        inline void texwrap(u32 **out, u8 s, u8 t) {
+            impl::emit(out, GE_CMD_TEXWRAP << 24 | (s & 1) | ((t & 1) << 8));
+        }
+
+        inline void texwrap(u8 s, u8 t) {
+            texwrap(&DRAWABLE_WRITE_HEAD, s, t);
+        }
+
+        inline void texfunc(u32 **out, u32 func, u32 components) {
+            impl::emit(out, (GE_CMD_TEXFUNC << 24) | (components << 8) | func);
         }
 
         inline void texfunc(u32 func, u32 components) {
-            impl::emit((GE_CMD_TEXFUNC << 24) | (components << 8) | func);
+            texfunc(&DRAWABLE_WRITE_HEAD, func, components);
+        }
+
+        inline void texflush(u32 **out) {
+            impl::emit(out, GE_CMD_TEXFLUSH << 24);
         }
 
         inline void texflush() {
-            impl::emit(GE_CMD_TEXFLUSH << 24);
+            texflush(&DRAWABLE_WRITE_HEAD);
         }
-
 
         inline void fog(float color, float begin, float end) {
             ScePspUnion32 c, fog1, fog2;
@@ -627,16 +713,28 @@ namespace immediate_ge {
             impl::emit((GE_CMD_COLORTESTMASK << 24) | (bmask << 16) | (gmask << 8) | rmask);
         }
 
+        inline void atest(u32 **out, u8 mask, u8 threshold, u8 op) {
+            impl::emit(out, ((GE_CMD_ATEST << 24) | (mask << 16) | op) | (threshold << 8));
+        }
+
         inline void atest(u8 mask, u8 threshold, u8 op) {
-            impl::emit(((GE_CMD_ATEST << 24) | (mask << 16) | op) | (threshold << 8));
+            atest(&DRAWABLE_WRITE_HEAD, mask, threshold, op);
+        }
+
+        inline void ztest(u32 **out, u8 op) {
+            impl::emit(out, (GE_CMD_ZTEST << 24) | op);
         }
 
         inline void ztest(u8 op) {
-            impl::emit((GE_CMD_ZTEST << 24) | op);
+            ztest(&DRAWABLE_WRITE_HEAD, op);
+        }
+
+        inline void blendmode(u32 **out, u8 func, u8 srcfactor, u8 dstfactor) {
+            impl::emit(out, (GE_CMD_BLENDMODE << 24) | (func << 8) | (dstfactor << 4) | srcfactor);
         }
 
         inline void blendmode(u8 func, u8 srcfactor, u8 dstfactor) {
-            impl::emit((GE_CMD_BLENDMODE << 24) | (func << 8) | (dstfactor << 4) | srcfactor);
+            blendmode(&DRAWABLE_WRITE_HEAD, func, srcfactor, dstfactor);
         }
 
         // 0xEX

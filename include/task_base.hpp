@@ -5,8 +5,8 @@
 struct TaskBase {
     typedef void (TaskBase::*mem_fn)();
 
-    inline TaskBase() { set_action(&TaskBase::load); }
-    inline TaskBase(mem_fn action) { set_action(action); };
+    TaskBase() { set_action(&TaskBase::load); }
+    TaskBase(mem_fn action) { set_action(action); };
 
     virtual ~TaskBase() {};
     virtual void update();

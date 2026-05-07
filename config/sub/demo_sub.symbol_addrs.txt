@@ -1,4 +1,4 @@
-func_eboot_088595E8 = 0x088595E8; // type:func
+method_088595E8__2GeFPUiUii = 0x088595E8; // type:func
 write_head__2GeFv = 0x0885971C; // type:func
 set_write_head__2GeFPUi = 0x0885972C; // type:func
 method_0885973C__2GeFUi = 0x0885973C; // type:func

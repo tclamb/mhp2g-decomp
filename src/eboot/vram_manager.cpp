@@ -21,13 +21,13 @@ void VramManager::method_08812A44() {
         unknown_0x458[i] = 0;
     }
     unknown_0xC58[0] = 0;
-    method_08812BD8(   0, 0x200, 0x110, 1, 0, INVALID_ADRS);
-    method_08812BD8(   1, 0x200, 0x110, 1, 0, INVALID_ADRS);
-    method_08812BD8(   2, 0x200, 0x110, 0, 0, INVALID_ADRS);
-    method_08812BD8(0x2D, 0x100,  0x20, 3, 0, 0x1F8000);
+    alloc(   0, 0x200, 0x110, 1, 0, INVALID_ADRS);
+    alloc(   1, 0x200, 0x110, 1, 0, INVALID_ADRS);
+    alloc(   2, 0x200, 0x110, 0, 0, INVALID_ADRS);
+    alloc(0x2D, 0x100,  0x20, 3, 0, 0x1F8000);
 }
 
-u8 VramManager::method_08812BD8(u8 vramId, u16 width, u16 height, u16 imageFormat, u16 paletteWidth, u32 vramOffset) {
+u8 VramManager::alloc(u8 vramId, u16 width, u16 height, u16 imageFormat, u16 paletteWidth, u32 vramOffset) {
     if (vramId == INVALID_ID) {
         vramId = method_088130C8();
         if (vramId == INVALID_ID) {
@@ -264,7 +264,7 @@ u8 VramManager::method_088133FC(u8 vramId, tmh_header *tmh, u32 textureIndex, u3
         return INVALID_ID;
     }
 
-    u8 copyId = method_08812BD8(vramId, texture.width, texture.height, texture.format, texture.palette_width, INVALID_ADRS);
+    u8 copyId = alloc(vramId, texture.width, texture.height, texture.format, texture.palette_width, INVALID_ADRS);
     if (copyId == INVALID_ID) {
         return INVALID_ID;
     }

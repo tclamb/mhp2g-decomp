@@ -25,4 +25,6 @@ struct cache {
     void clear();
     u8 *alloc(u32 size, u32 align);
     void free(void* buf);
+
+    ~cache() {}
 };

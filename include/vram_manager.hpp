@@ -40,7 +40,7 @@ struct VramManager : Singleton<VramManager> {
     VramManager();
 
     void method_08812A44();
-    u8 method_08812BD8(u8 vramId, u16 width, u16 height, u16 image_format, u16 palette_width, u32 vramOffset);
+    u8 alloc(u8 vramId, u16 width, u16 height, u16 image_format, u16 palette_width, u32 vramOffset);
     u8 method_08812F04(u8 vramId, s32 size, u32 vramOffset);
     void method_08813024(u8 vramId);
     u8 method_088130C8();

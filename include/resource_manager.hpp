@@ -3,8 +3,23 @@
 #include "cache.hpp"
 #include "singleton.hpp"
 
-struct ResourceManager : Singleton<ResourceManager> {
+struct ResourceType {
+    enum {
+        RESIDES_TMH = 0,
+        TASK_STR_PAC = 4,
+        DEMO_TMH = 6,
+        COCK_TMH = 11,
+        GUILD_TMH = 13,
+        STG_ICON_TMH = 14,
+        ARCADE_TMH = 15,
+        GALLERY_TMH = 18,
+    };
 
+private:
+    ResourceType();
+};
+
+struct ResourceManager : Singleton<ResourceManager> {
     cache cache;
     u32 padding[5];
     u8 slab[0x83C000];
