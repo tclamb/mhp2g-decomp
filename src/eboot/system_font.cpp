@@ -865,7 +865,7 @@ char *strncpy(char *dst, const char *src, u32 n);
 extern "C"
 char *strncat(char *dst, const char *src, u32 n);
 
-void SystemFont::nprintUtf8x(s16 n, u8 *utf8x) {
+void SystemFont::printTextUtf8x(s16 n, u8 *utf8x) {
     char bufferOne[0x300];
     char bufferTwo[0x300];
     char *(buffers[2]);
