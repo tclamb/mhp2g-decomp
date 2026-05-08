@@ -159,7 +159,7 @@ struct SystemFont : Singleton<SystemFont> {
     void drawBtnIcon(Icon *icons, u8 count, u32 renderGroup);
     void initializeFont();
 
-    void vsnprintf(char *buffer, u32 size, char *format, va_list args, int encoding);
+    int vsnprintf(char *buffer, int size, char *format, va_list args, u8 encoding);
     void decode(char *str, int encoding);
     int isHalfWidth(u16 codepoint);
     u32 currentRenderGroup();

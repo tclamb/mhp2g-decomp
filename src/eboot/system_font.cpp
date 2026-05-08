@@ -16,6 +16,15 @@ u8 GLYPH_CACHE_SLAB[0x28000]  __attribute__((aligned(16)));
 s32 GLYPH_CACHE_USED;
 s32 GLYPH_CACHE_MAX_USED;
 
+
+extern "C" {
+    void *memcpy( void *dst, const void *src, u32 count);
+    char *strcat(char *dst, const char *src);
+    char *strcpy(char *dst, const char *src);
+    u32 strlen(const char *str);
+    int sprintf(char *buffer, const char *format, ...);
+}
+
 inline void set(u8 &field, u16 value) {
     field = value;
     field = (field + 1) & -2;
@@ -234,8 +243,6 @@ int SystemFont::lineHalfWidths(u8 *utf8) {
     }
     return result;
 }
-
-extern "C" u32 strlen(char *str);
 
 u32 SystemFont::strlen(char *str) {
     return ::strlen(str);
@@ -1189,7 +1196,255 @@ INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08893230);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08893348);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", vsnprintf__10SystemFontFPcUiPcPci);
+int SystemFont::vsnprintf(char *buffer, int n, char *format, va_list args, u8 encoding) {
+    char conv[0x300];
+    char spec[0x300];
+    int i = 0;
+    int j;
+    int isParsing = true;
+    int inSpecification = false;
+    int convLen;
+    int specLen;
+    while (isParsing) {
+        u8 c = *format;
+        switch (c) {
+        case 0:
+            buffer[i] = c;
+            isParsing = false;
+            break;
+        case '%':
+            inSpecification = true;
+            conv[0] = 0;
+            specLen = 1;
+            while (inSpecification) {
+                u8 c = format[specLen];
+                switch (c) {
+                case 'd':
+                    ++specLen;
+                    memcpy(spec, format, specLen);
+                    spec[specLen] = 0;
+                    sprintf(conv, spec, va_arg(args, int));
+                    inSpecification = false;
+                    break;
+                case 'u':
+                    ++specLen;
+                    memcpy(spec, format, specLen);
+                    spec[specLen] = 0;
+                    sprintf(conv, spec, va_arg(args, unsigned int));
+                    inSpecification = false;
+                    break;
+                case 'x':
+                case 'X':
+                    ++specLen;
+                    memcpy(spec, format, specLen);
+                    spec[specLen] = 0;
+                    sprintf(conv, spec, va_arg(args, int));
+                    inSpecification = false;
+                    break;
+                case 'o':
+                    ++specLen;
+                    memcpy(spec, format, specLen);
+                    spec[specLen] = 0;
+                    sprintf(conv, spec, va_arg(args, int));
+                    inSpecification = false;
+                    break;
+                case 'b': {
+                    ++specLen;
+                    memcpy(spec, format, specLen);
+                    spec[specLen] = 0;
+                    u32 x = va_arg(args, u32);
+                    int count = 32;
+                    int mult = 1;
+                    if (specLen > 2) {
+                        count = 0;
+                        for (j = specLen - 2; j > 0; --j) {
+                            count += (spec[j] - '0') * mult;
+                            mult *= 10;
+                        }
+                        if (count > 0x20) {
+                            count = 0x20;
+                        }
+                    }
+                    for (j = 0; j < count; ++j) {
+                        if (x & (1 << ((count - 1) - j))) {
+                            conv[j] = '1';
+                        } else {
+                            conv[j] = '0';
+                        }
+                    }
+                    conv[j] = 0;
+                    inSpecification = false;
+                    break;
+                }
+                case 'f': {
+                    ++specLen;
+                    memcpy(spec, format, specLen);
+                    spec[specLen] = 0;
+                    if ((int)args & 7) {
+                        *(char **)&args += 8 - ((int)args & 7);
+                    }
+                    int shift;
+                    if ((int) args & 7) {
+                        shift = 4;
+                    } else {
+                        shift = 0;
+                    }
+                    *(char **)&args += shift + 8;
+                    sprintf(conv, spec, *((u32 *)args - 2), *((u32 *)args - 1));
+                    inSpecification = false;
+                    break;
+                }
+                case 'c':
+                    ++specLen;
+                    memcpy(spec, format, specLen);
+                    spec[specLen] = 0;
+                    sprintf(conv, spec, (char)va_arg(args, int));
+                    inSpecification = false;
+                    break;
+                case 's':
+                    ++specLen;
+                    memcpy(spec, format, specLen);
+                    spec[specLen] = 0;
+                    sprintf(conv, spec, va_arg(args, char *));
+                    inSpecification = false;
+                    break;
+                case '%': {
+                    ++specLen;
+                    memcpy(spec, format, specLen);
+                    spec[specLen] = 0;
+                    int count = 1;
+                    int mult = 1;
+                    if (specLen > 2) {
+                        count = 0;
+                        for (j = specLen - 2; j > 0; --j) {
+                            count += (spec[j] - '0') * mult;
+                            mult *= 10;
+                        }
+                    }
+                    for (j = 0; j < count; ++j) {
+                        conv[j] = '%';
+                    }
+                    conv[j] = 0;
+                    inSpecification = false;
+                    break;
+                }
+                case 0:
+                    ++specLen;
+                    memcpy(spec, format, specLen);
+                    spec[specLen] = 0;
+                    strcpy(conv, spec);
+                    inSpecification = false;
+                    isParsing = false;
+                    break;
+                default:
+                    if ((c < '0' || c > '9') && c != '.' && c != '-' && c != '+' && c != '#' && c != ' ') {
+                        ++specLen;
+                        memcpy(spec, format, specLen);
+                        spec[specLen] = 0;
+                        strcpy(conv, spec);
+                        inSpecification = false;
+                    } else {
+                        ++specLen;
+                    }
+                    break;
+                }
+            }
+            if (encoding == Encoding::UTF8) {
+                convLen = CCC::objectPtr->encodedSizeUtf8((u8 *)conv);
+            } else {
+                convLen = ::strlen(conv);
+            }
+            if (i + convLen >= n - 1) {
+                buffer[i] = 0;
+                isParsing = false;
+            } else {
+                strcat(buffer, conv);
+                i += convLen;
+                format += specLen;
+            }
+            break;
+        default:
+            if (encoding == Encoding::UTF8) {
+                int len = CCC::objectPtr->codepointLengthUtf8(c);
+                switch (len) {
+                default:
+                    buffer[i] = 0;
+                    isParsing = false;
+                    break;
+                case 1:
+                    buffer[i++] = c;
+                    break;
+                case 2:
+                    if (i + 2 >= n - 1) {
+                        buffer[i] = 0;
+                        isParsing = false;
+                    } else {
+                        buffer[i] = c;
+                        buffer[i + 1] = *++format;
+                        i += 2;
+                    }
+                    break;
+                case 3:
+                    if (i + 3 >= n - 1) {
+                        buffer[i] = 0;
+                        isParsing = false;
+                    } else {
+                        buffer[i] = c;
+                        buffer[i + 1] = format[1];
+                        format += 2;
+                        buffer[i + 2] = *format;
+                        i += 3;
+                    }
+                    break;
+                case 4:
+                    if (i + 4 >= n - 1) {
+                        buffer[i] = 0;
+                        isParsing = false;
+                    } else {
+                        buffer[i] = c;
+                        buffer[i + 1] = format[1];
+                        buffer[i + 2] = format[2];
+                        format += 3;
+                        buffer[i + 3] = *format;
+                        i += 4;
+                    }
+                    break;
+                }
+                ++format;
+            } else {
+                if ((c >= 0x20 && c <= 0x7E) || c == '\n') {
+                    buffer[i] = c;
+                    ++i;
+                } else if ((c >= 0x81 && c <= 0x9F) || (c >= 0xE0 && c < 0x100)) {
+                    if (i + 2 >= n - 1) {
+                        buffer[i] = 0;
+                        isParsing = false;
+                    } else {
+                        buffer[i] = c;
+                        ++format;
+                        c = *format;
+                        buffer[i + 1] = c;
+                        i += 2;
+                        if (c == 0) {
+                            isParsing = false;
+                        }
+                    }
+                } else {
+                    buffer[i] = c;
+                    ++i;
+                }
+                ++format;
+            }
+            if (i >= n - 1) {
+                i = n - 1;
+                buffer[i] = 0;
+                isParsing = false;
+            }
+            break;
+        }
+    }
+    return i;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", decode__10SystemFontFPci);
 
