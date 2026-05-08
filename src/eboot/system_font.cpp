@@ -1,6 +1,7 @@
 #include "system_font.hpp"
 
 #include "cache.hpp"
+#include "vfpu.h"
 #include "vram_manager.hpp"
 #include "ccc.hpp"
 #include "resource_manager.hpp"
@@ -117,7 +118,7 @@ void SystemFont::clear() {
     unknown_0x15C = 1;
     usedColorIds = 32;
     updateGlowingFontColor();
-    ++unknown_0x15E;
+    ++frameCount;
 }
 
 void SystemFont::setColor(s32 fontColorId, u32 alpha, u32 rgb) {
@@ -382,7 +383,7 @@ void SystemFont::printfUtf8(char *format, ...) {
         vsnprintf(buffer, sizeof(buffer), format, va_args, Encoding::UTF8);
         va_end(va_args);
 
-        decode(buffer, Encoding::UTF8);
+        decode((u8 *)buffer, Encoding::UTF8);
     }
 }
 
@@ -410,7 +411,7 @@ void SystemFont::printfUtf8(s16 left, s16 top, char *format, ...) {
         vsnprintf(buffer, sizeof(buffer), format, va_args, Encoding::UTF8);
         va_end(va_args);
 
-        decode(buffer, Encoding::UTF8);
+        decode((u8 *)buffer, Encoding::UTF8);
     }
 }
 
@@ -439,7 +440,7 @@ void SystemFont::printfUtf8(s16 left, s16 top, s8 fontColor, char *format, ...) 
         vsnprintf(buffer, sizeof(buffer), format, va_args, Encoding::UTF8);
         va_end(va_args);
 
-        decode(buffer, Encoding::UTF8);
+        decode((u8 *)buffer, Encoding::UTF8);
     }
 }
 
@@ -467,7 +468,7 @@ void SystemFont::printfSJIS(s16 left, s16 top, char *format, ...) {
         vsnprintf(buffer, sizeof(buffer), format, va_args, Encoding::SJIS);
         va_end(va_args);
 
-        decode(buffer, Encoding::SJIS);
+        decode((u8 *)buffer, Encoding::SJIS);
     }
 }
 
@@ -496,7 +497,7 @@ void SystemFont::printfSJIS(s16 left, s16 top, s8 fontColor, char *format, ...) 
         vsnprintf(buffer, sizeof(buffer), format, va_args, Encoding::SJIS);
         va_end(va_args);
 
-        decode(buffer, Encoding::SJIS);
+        decode((u8 *)buffer, Encoding::SJIS);
     }
 }
 
@@ -509,7 +510,23 @@ INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_088914E8);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_088915D4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", widthUtf8__10SystemFontFPc);
+int SystemFont::widthUtf8(u8 *utf8) {
+    if (utf8 == NULL) {
+        return 0;
+    }
+
+    if (*utf8 == 0) {
+        return 0;
+    }
+
+    u8 *p = utf8;
+    u16 codepoint = CCC::objectPtr->decodeUtf8(&p);
+    if (isHalfWidth(codepoint)) {
+        return 1;
+    } else {
+        return 2;
+    }
+}
 
 struct IconAtlasCoordinate {
     u8 left;
@@ -855,17 +872,54 @@ void SystemFont::asciiToFullWidthSJIS(char *in, char *out) {
     *q = 0;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_088918CC);
+INCLUDE_ASM("asm/eboot/nonmatchings/system_font", cacheGlyphsSJIS__10SystemFontFPc);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_088919DC);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08891A48);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08891AC4);
+void SystemFont::printfUtf8x(char *format, ...) {
+    char buffer[0x300];
+    memset(buffer, 0, sizeof(buffer));
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", method_08891B68__10SystemFontFssPce);
+    va_list va_args;
+    va_start(va_args, format);
+    vsnprintf(buffer, sizeof(buffer), format, va_args, Encoding::UTF8);
+    va_end(va_args);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08891C08);
+    printTextUtf8x(-1, (u8 *)buffer);
+}
+
+void SystemFont::printfUtf8x(s16 left, s16 top, char *format, ...) {
+    char buffer[0x300];
+
+    setCursor(left, top);
+
+    memset(buffer, 0, sizeof(buffer));
+
+    va_list va_args;
+    va_start(va_args, format);
+    vsnprintf(buffer, sizeof(buffer), format, va_args, Encoding::UTF8);
+    va_end(va_args);
+
+    printTextUtf8x(-1, (u8 *)buffer);
+}
+
+void SystemFont::printfUtf8x(s16 left, s16 top, s8 fontColor, char *format, ...) {
+    char buffer[0x300];
+    va_list va_args;
+
+    setCursor(left, top);
+    setFontColor(fontColor);
+
+    memset(buffer, 0, sizeof(buffer));
+
+    va_start(va_args, format);
+    vsnprintf(buffer, sizeof(buffer), format, va_args, Encoding::UTF8);
+    va_end(va_args);
+
+    printTextUtf8x(-1, (u8 *)buffer);
+}
 
 extern "C"
 char *strncpy(char *dst, const char *src, u32 n);
@@ -960,7 +1014,7 @@ void SystemFont::printTextUtf8x(s16 n, u8 *utf8x) {
         }
 
         int type;
-        if (widthUtf8(p) == 2) {
+        if (widthUtf8((u8 *)p) == 2) {
             type = 0; // fullwidth
             if (n > 0) {
                 --n;
@@ -1446,9 +1500,58 @@ int SystemFont::vsnprintf(char *buffer, int n, char *format, va_list args, u8 en
     return i;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", decode__10SystemFontFPci);
+void SystemFont::decode(u8 *str, u8 encoding) {
+    u16 *p = (u16 *)(codepointBuffer + codepointBufferUsed);
+    int overflow = 0;
+    while (*str) {
+        u16 codepoint;
+        if (encoding == Encoding::UTF8) {
+            codepoint = CCC::objectPtr->decodeUtf8(&str);
+        } else {
+            codepoint = CCC::objectPtr->decodeSJIS(&str);
+            codepoint = CCC::objectPtr->jisToUcs2(codepoint);
+        }
+        *p++ = codepoint;
+        codepointBufferUsed += 2;
+        if (codepointBufferUsed >= 0x3000) {
+            codepointBufferUsed = 0x2FFE;
+            ++overflow;
+            p = (u16 *)(codepointBuffer + codepointBufferUsed);
+        }
+    }
+    *p = 0;
+    if (overflow == 0) {
+        codepointBufferUsed += 2;
+        if (codepointBufferUsed >= 0x3000) {
+            codepointBufferUsed = 0x2FFE;
+        }
+    }
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", isHalfWidth__10SystemFontFUs);
+int SystemFont::isHalfWidth(u16 codepoint) {
+    if (codepoint >=  0x250U && codepoint < 0x2000U) {
+        return 0;
+    }
+    if (codepoint >= 0x2000U && codepoint < 0x2070U) {
+        return 0;
+    }
+    if (codepoint >= 0x2070U && codepoint < 0x20A0U) {
+        return 0;
+    }
+    if (codepoint >= 0x20A0U && codepoint < 0x20D0U) {
+        return 1;
+    }
+    if (codepoint >= 0x20D0U && codepoint < 0xFF60U) {
+        return 0;
+    }
+    if (codepoint >= 0xFF60U && codepoint < 0xFFE0U) {
+        return 2;
+    }
+    if (codepoint >= 0xFFE0U && codepoint < 0xFFF0U) {
+        return 0;
+    }
+    return 1;
+}
 
 u32 SystemFont::currentRenderGroup() {
     switch (currentLayer) {
@@ -1468,7 +1571,15 @@ u32 SystemFont::currentRenderGroup() {
     }
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", updateGlowingFontColor__10SystemFontFv);
+void SystemFont::updateGlowingFontColor( ) {
+    u16 angle = (u16)((frameCount & 0x1F) << 11);
+    float x, y = (3.1415927f * angle) / 32768.0f;
+    x = vsin_s_slow(y);
+    u8 r = (s8)(s32)(x * 64.0f) + 0x50,
+       g = (s8)(s32)(x * 20.0f) + 0xE4,
+       b = (s8)(s32)(x * 7.0f) + 0xF7;
+    setColor(-1, 0, 0xFF000000 | r << 16 | g << 8 | b);
+}
 
 char *D_eboot_089AA4B8 =
   "0 1 2 3 4 5 6 7 8 9 \x82\xcc\x81\x42"
@@ -1493,17 +1604,58 @@ char *D_eboot_089AA4B8 =
   "\x90\xb6\x8d\x87\x82\xe2\x83\x83\x95\x90\x83\x57"
   "\x95\x69\x90\x46\x8d\x62\x94\x5c\x88\xea\x83\x4d";
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", cacheCommonGlyphs__10SystemFontFv);
+void SystemFont::cacheCommonGlyphs() {
+    // TODO: replace with string literal once source file can be encoded in Shift-JIS
+    cacheGlyphsSJIS(D_eboot_089AA4B8);
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", parseCommand__10SystemFontFPcPsii);
 
-char D_eboot_089AA4BC[] = "%d";
-
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", copySubstitution__10SystemFontFPcsi);
+void SystemFont::copySubstitution(char *dst, s16 substitutionId, u8 encoding) {
+    char buffer[0x300];
+    int value;
+    switch (substitutionId) {
+    case 0:
+    case 1:
+        if (substitutionId == 0) {
+            // TODO: sizeof( savedata type? )
+            value = 1824;
+        } else {
+            // TODO: sizeof( userdata type? )
+            value = 580;
+        }
+        sprintf(buffer, "%d", value);
+        if (encoding == Encoding::UTF8) {
+            asciiToFullWidthUtf8(buffer, dst);
+        } else {
+            asciiToFullWidthSJIS(buffer, dst);
+        }
+        break;
+    case 2:
+        buffer[0] = '0';
+        buffer[1] = 0;
+        if (encoding == Encoding::UTF8) {
+            asciiToFullWidthUtf8(buffer, dst);
+        } else {
+            asciiToFullWidthSJIS(buffer, dst);
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08894A78);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", addIcon__10SystemFontFssUsScs);
+void SystemFont::addIcon(s16 left, s16 top, u16 size, s8 fontColor, s16 iconId) {
+    if (layerIconCounts[layer] < 10) {
+        Icon &icon = layerIcons[layer][layerIconCounts[layer]];
+        icon.left = left;
+        icon.top = top;
+        icon.size = size;
+        icon.iconId = iconId;
+        icon.fontColor = fontColor;
+        ++layerIconCounts[layer];
+    }
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08894D88);
 

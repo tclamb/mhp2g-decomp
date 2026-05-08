@@ -99,13 +99,13 @@ struct SystemFont : Singleton<SystemFont> {
     s8 usedColorIds;
     u8 padding_0x132[2];
     u8 layerGlyphRunCounts[6];
-    s8 layerIconCounts[6];
+    u8 layerIconCounts[6];
     GlyphRun *layerGlyphRuns[6];
     s16 glyphCacheCount;
     s16 unknown_0x15A;
     u8 unknown_0x15C;
     s8 currentLayer;
-    u8 unknown_0x15E;
+    u8 frameCount;
     u8 lineSpacing;
     u16 codepointBufferUsed;
     u16 unknown_0x162;
@@ -147,20 +147,22 @@ struct SystemFont : Singleton<SystemFont> {
 
     void asciiToFullWidthUtf8(char *in, char *out);
     void asciiToFullWidthSJIS(char *in, char *out);
+    void cacheGlyphsSJIS(char *sjis);
 
-    void method_08891B68(s16 left, s16 top, char *fmt, ...);
-
+    void printfUtf8x(char *format, ...);
+    void printfUtf8x(s16 left, s16 top, char *format, ...);
+    void printfUtf8x(s16 left, s16 top, s8 fontColor, char *format, ...);
     void printTextUtf8x(s16 n, u8 *utf8x);
 
     void addIcon(s16 left, s16 top, u16 size, s8 fontColor, s16 iconId);
-    void copySubstitution(char *dst, s16 substitutionId, int encoding);
-    int widthUtf8(char *utf8);
+    void copySubstitution(char *dst, s16 substitutionId, u8 encoding);
+    int widthUtf8(u8 *utf8);
 
     void drawBtnIcon(Icon *icons, u8 count, u32 renderGroup);
     void initializeFont();
 
     int vsnprintf(char *buffer, int size, char *format, va_list args, u8 encoding);
-    void decode(char *str, int encoding);
+    void decode(u8 *str, u8 encoding);
     int isHalfWidth(u16 codepoint);
     u32 currentRenderGroup();
     void updateGlowingFontColor();

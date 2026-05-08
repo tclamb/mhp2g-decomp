@@ -463,6 +463,25 @@ inline float vsin_s(float radians) {
     return result;
 }
 
+inline float vsin_s_slow(float radians) {
+    float out, in = radians;
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.s S000, %1"
+        "vcst.s S001, VFPU_2_PI"
+        "vmul.s S000, S000, S001"
+        // nop inserted by compiler
+        "vsin.s S000, S000"
+        "sv.s S000, %0"
+        : "=m"(out)
+        : "m"(in)
+    );
+#else
+    out = sinf(radians);
+#endif
+    return out;
+}
+
 
 inline float atan2f_s(float y, float x) {
     float result;

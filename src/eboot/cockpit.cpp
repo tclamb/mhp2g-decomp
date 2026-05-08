@@ -387,7 +387,7 @@ extern s8 D_eboot_08938474[7];
 #define xycprintf(x, y, c,...) SystemFont::objectPtr->printfUtf8(x, y, c, __VA_ARGS__)
 #define xyprintf(x, y, ...) SystemFont::objectPtr->printfUtf8(x, y, __VA_ARGS__)
 // xy + control sequences?
-#define xyprintfx(x, y, ...) SystemFont::objectPtr->method_08891B68(x, y, __VA_ARGS__)
+#define xyprintfx(x, y, ...) SystemFont::objectPtr->printfUtf8x(x, y, __VA_ARGS__)
 #define ITEM_NAME(itemId) GameSys::objectPtr->method_08851448(itemId)
 #define UI_STRING(id) GameSys::objectPtr->method_0885143C(id)
 #define INVENTORY_QTY(itemId) GameSys::objectPtr->bagQuantity(itemId)
