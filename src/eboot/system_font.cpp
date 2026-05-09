@@ -8,6 +8,16 @@
 #include "ge.hpp"
 #include "immediate_ge.hpp"
 
+#define IS_SPACE(codepoint)                       \
+    (codepoint == '\n' || IS_BLANK(codepoint))
+
+#define IS_BLANK(codepoint)                       \
+    (codepoint == ' '                             \
+  || codepoint == 0xA0    /* no-break space    */ \
+  || codepoint == 0x2002  /* en space          */ \
+  || codepoint == 0x2003  /* em space          */ \
+  || codepoint == 0x3000) /* ideographic space */
+
 #pragma opt_unroll_loops on
 
 template<> SystemFont *Singleton<SystemFont>::objectPtr;
@@ -16,7 +26,6 @@ cache GLYPH_CACHE;
 u8 GLYPH_CACHE_SLAB[0x28000]  __attribute__((aligned(16)));
 s32 GLYPH_CACHE_USED;
 s32 GLYPH_CACHE_MAX_USED;
-
 
 extern "C" {
     void *memcpy( void *dst, const void *src, u32 count);
@@ -78,7 +87,7 @@ void SystemFont::initializeVram() {
     for (int i = 0; i < 6; ++i) {
         layerGlyphRuns[i] = &glyphRuns[i][0];
     }
-    unknown_0x130 = false;
+    leftAlignHalfwidthGlyphs = false;
     initializeGlyphIndex();
     clear();
     initializeColors();
@@ -90,10 +99,10 @@ void SystemFont::initializeGlyphIndex() {
     for (int i = 0; i < 0xFFF0; ++i) {
         entry[i] = 0xFFFF;
     }
-    glyphCacheCount = 0;
-    memset(cacheStatus, 0, sizeof(cacheStatus));
-    unknown_0x15A = 0;
-    unknown_0x162 = 0;
+    nextCacheIndex = 0;
+    memset(cacheStates, 0, sizeof(cacheStates));
+    numCachedGlyphs = 0;
+    residentGlyphCount = 0;
 }
 
 void SystemFont::clear() {
@@ -103,8 +112,8 @@ void SystemFont::clear() {
     }
     codepointBufferUsed = 0;
     for (int i = 0; i < 0x1B0; ++i) {
-        if (cacheStatus[i] != 0) {
-            --cacheStatus[i];
+        if (cacheStates[i] != 0) {
+            --cacheStates[i];
         }
     }
     left = 0;
@@ -506,9 +515,31 @@ void SystemFont::printShadowUtf8(s16 left, s16 top, s8 shadowColor, s8 fontColor
     printfUtf8(left, top, fontColor, "%s", utf8);
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_088914E8);
+void SystemFont::drawLayer(s8 layer) {
+    if (layer >= 0 && layer < 6) {
+        u8 glyphRunCount = layerGlyphRunCounts[layer];
+        if (glyphRunCount) {
+            currentLayer = layer;
+            beforeDrawGlyphs();
+            GlyphRun *run = layerGlyphRuns[layer];
+            for (int i = 0; i < glyphRunCount; ++i, ++run) {
+                drawGlyphRun(run);
+            }
+        }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_088915D4);
+        u8 iconCount = layerIconCounts[layer];
+        if (iconCount) {
+            drawBtnIcon(layerIcons[layer], iconCount, currentRenderGroup());
+            afterDrawIcons();
+        }
+    }
+}
+
+void SystemFont::draw() {
+    for (int layer = 0; layer < 6; ++layer) {
+        drawLayer(layer);
+    }
+}
 
 int SystemFont::widthUtf8(u8 *utf8) {
     if (utf8 == NULL) {
@@ -872,11 +903,53 @@ void SystemFont::asciiToFullWidthSJIS(char *in, char *out) {
     *q = 0;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", cacheGlyphsSJIS__10SystemFontFPc);
+void SystemFont::loadResidentGlyphsSJIS(char *sjis) {
+    u8 *p = (u8 *)sjis;
+    memset(cacheCodepoints, 0, sizeof(cacheCodepoints));
+    while (*p) {
+        u16 codepoint = CCC::objectPtr->decodeSJIS(&p);
+        codepoint = CCC::objectPtr->jisToUcs2(codepoint);
+        if (codepoint == 0) {
+            break;
+        } if (IS_SPACE(codepoint)) {
+            continue;
+        } else if (residentGlyphCount < maxCachedGlyphs - 1 && markUsedGlyph(codepoint)) {
+            ++residentGlyphCount;
+        }
+    }
+    loadGlyphs();
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_088919DC);
+int SystemFont::characterCountUtf8(char *utf8) {
+    int result = 0;
+    while (*utf8 != 0) {
+        if (*utf8 == '\n') {
+            ++utf8;
+        } else {
+            CCC::objectPtr->decodeUtf8((u8 **)&utf8);
+            ++result;
+        }
+    }
+    return result;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08891A48);
+int SystemFont::characterCountSJIS(char *sjis) {
+    int result = 0;
+    int c;
+    char *p = sjis;
+    while ((c = *p) != 0) {
+        u8 uc = c;
+        if ((uc >= 0x81 && uc <= 0x9F) || (uc >= 0xE0 && uc < 0x100)) {
+            ++p;
+        } else if (c == '\n') {
+            ++p;
+            continue;
+        }
+        ++p;
+        ++result;
+    }
+    return result;
+}
 
 void SystemFont::printfUtf8x(char *format, ...) {
     char buffer[0x300];
@@ -1066,7 +1139,84 @@ void SystemFont::printTextUtf8x(s16 n, u8 *utf8x) {
     printfUtf8("%s", buffers[b ^ 1]);
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_088921C8);
+s16 SystemFont::nthCharacterUtf8x(s16 n, char *out, char *str, char **nextOut) {
+    char buffer[0x300];
+    char *p = str;
+    char *q;
+    int raw = false;
+    s16 i = 0;
+    s16 type;
+    while (true) {
+        if (*p == 0) {
+            *out = 0;
+            type = CharacterType::END_OF_STRING;
+            break;
+        } else if (*p == '~') {
+            s16 result;
+            q = p;
+            p = parseCommand(q, &result, ParseResult::COMMAND, Encoding::UTF8);
+            if ((result & 0xFF00) == 0x800) {
+                raw ^= 1;
+                continue;
+            } else {
+                p = q;
+            }
+            if (!raw) {
+                p = parseCommand(p, &result, ParseResult::CHARACTERS, Encoding::UTF8);
+                if (i + result > n) {
+                    parseCommand(q, &result, ParseResult::COMMAND, Encoding::UTF8);
+                    switch (result & 0xFF00) {
+                    case 0:
+                        parseCommand(q, &result, ParseResult::CHARACTERS, Encoding::UTF8);
+                        if (result != 0) {
+                            *out = '~';
+                            out[1] = 0;
+                            *nextOut = p;
+                            return CharacterType::HALFWIDTH;
+                        }
+                    case 0x100:
+                        continue;
+                    case 0x200: {
+                        char *next = buffer;
+                        copySubstitution(next, result & 0xFF, Encoding::UTF8);
+                        s16 type = nthCharacter(n - i, out, &next, Encoding::UTF8);
+                        *nextOut = next; // oops, but probably okay if dereferenced immediately
+                        return type;
+                    }
+                    case 0x400:
+                        *out = result;
+                        out[1] = 0;
+                        *nextOut = p;
+                        return CharacterType::ICON;
+                    default:
+                        break;
+                    }
+                }
+                i += result;
+                continue;
+            }
+        }
+
+        int size = CCC::objectPtr->codepointLengthUtf8(*p);
+        if (i == n) {
+            s16 width = widthUtf8((u8 *)p);
+            for (int j = 0; j < size; ++j) {
+                *out++ = *p++;
+            }
+            *out = 0;
+            type = width == 2 ? CharacterType::FULLWIDTH : CharacterType::HALFWIDTH;
+            break;
+        } else {
+            // why not q += size?
+            for (int j = 0; j < size; ++j) {
+                ++p;
+            }
+            ++i;
+        }
+    }
+    *nextOut = p;
+    return type;
+}
 
 void SystemFont::drawBtnIcon(Icon *icons, u8 count, u32 renderGroup) {
     using namespace immediate_ge;
@@ -1229,24 +1379,119 @@ void fontFree(void *unused, void *p) {
     GLYPH_CACHE.free(p);
 }
 
-
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08892A70);
-
-extern "C"
-void func_eboot_08892B60(void) {
+void SystemFont::beforeDrawGlyphs() {
+    int renderGroup = currentRenderGroup();
+    u32 *start = Ge::objectPtr->write_head();
+    u32 *out = start;
+    using namespace immediate_ge;
+    ge::ztestenable(&out, false);
+    ge::ztest(&out, GE_OP_NEVER);
+    ge::alphablendenable(&out, true);
+    ge::blendmode(&out, GE_BLENDMODE_MUL_AND_ADD, GE_SRCBLEND_SRCALPHA, GE_DSTBLEND_INVSRCALPHA);
+    ge::alphatestenable(&out, true);
+    ge::atest(&out, 0xFF, 0x00, GE_OP_NOT_EQUALS);
+    ge::texfunc(&out, GE_TEXFUNC_MODULATE, GE_TEXFUNC_COMPONENTS_RGBA);
+    ge::texmapmode(&out, GE_TEXMAP_TEXTURE_COORDS, GE_PROJMAP_POSITION);
+    ge::texwrap(&out, GE_TWRAP_WRAP, GE_TWRAP_WRAP);
+    ge::texfilter(&out, GE_TFILT_LINEAR, GE_TFILT_LINEAR);
+    ge::jump(&out, NULL);
+    Ge::objectPtr->method_088595E8(start, 12, renderGroup);
+    Ge::objectPtr->set_write_head(start + 12);
+    markUsedGlyphs();
+    loadGlyphs();
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08892B68);
+void SystemFont::afterDrawIcons() {
+    // empty
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08892C58);
+void SystemFont::markUsedGlyphs() {
+    memset(cacheCodepoints, 0, sizeof(cacheCodepoints));
+    GlyphRun *run = layerGlyphRuns[currentLayer];
+    int count = layerGlyphRunCounts[currentLayer];
+    for (int i = 0; i < count; ++i, ++run) {
+        u16 *p = run->codepoints;
+        while (true) {
+            u16 codepoint = *p++;
+            if (codepoint == 0) {
+                break;
+            } else if (!IS_SPACE(codepoint)) {
+                markUsedGlyph(codepoint);
+            }
+        }
+    }
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08892D68);
+bool SystemFont::markUsedGlyph(u16 codepoint) {
+    if (codepoint >= 0xFFF0) {
+        return false;
+    }
+    if (glyphIndices[codepoint] != 0xFFFF) {
+        cacheStates[glyphIndices[codepoint]] = CacheState::FRESH;
+        return false;
+    }
+    u16 i = allocateCacheIndex();
+    nextCacheIndex = i;
+    glyphIndices[codepoint] = nextCacheIndex;
+    cacheCodepoints[nextCacheIndex] = codepoint;
+    cacheStates[nextCacheIndex] = CacheState::FRESH;
+    ++numCachedGlyphs;
+    if (numCachedGlyphs > maxCachedGlyphs) {
+        numCachedGlyphs = maxCachedGlyphs;
+    }
+    if (numCachedGlyphs < maxCachedGlyphs) {
+        ++nextCacheIndex;
+    }
+    return true;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08892E50);
+u16 SystemFont::allocateCacheIndex() {
+    if (numCachedGlyphs < maxCachedGlyphs) {
+        return nextCacheIndex;
+    }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08892F04);
+    int i;
+    for (i = residentGlyphCount; i < maxCachedGlyphs; ++i) {
+        if (cacheStates[i] == CacheState::EMPTY) {
+            for (int j = 0; j < 0xFFF0; ++j) {
+                if (glyphIndices[j] == i) {
+                    glyphIndices[j] = 0xFFFF;
+                    break;
+                }
+            }
+            return i;
+        }
+    }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08893230);
+    if (residentGlyphCount != 0) {
+        --residentGlyphCount;
+    }
+
+    for (i = 0; i < 0xFFF0; ++i) {
+        if (glyphIndices[i] == residentGlyphCount) {
+            glyphIndices[i] = 0xFFFF;
+            break;
+        }
+    }
+    return residentGlyphCount;
+}
+
+void SystemFont::loadGlyphs() {
+    for (int i = 0; i < maxCachedGlyphs; ++i) {
+        if (cacheCodepoints[i]) {
+            loadGlyph(
+                cacheCodepoints[i],
+                i / glyphsPerAtlas,
+                glyphTextureWidth * (i % glyphsPerRow),
+                glyphTextureHeight * ((i / glyphsPerRow) % rowsPerAtlas)
+            );
+        }
+    }
+}
+
+INCLUDE_ASM("asm/eboot/nonmatchings/system_font", loadGlyph__10SystemFontFUsiii);
+
+INCLUDE_ASM("asm/eboot/nonmatchings/system_font", drawGlyphRun__10SystemFontFP8GlyphRun);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08893348);
 
@@ -1606,10 +1851,10 @@ char *D_eboot_089AA4B8 =
 
 void SystemFont::cacheCommonGlyphs() {
     // TODO: replace with string literal once source file can be encoded in Shift-JIS
-    cacheGlyphsSJIS(D_eboot_089AA4B8);
+    loadResidentGlyphsSJIS(D_eboot_089AA4B8);
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", parseCommand__10SystemFontFPcPsii);
+INCLUDE_ASM("asm/eboot/nonmatchings/system_font", parseCommand__10SystemFontFPcPssUc);
 
 void SystemFont::copySubstitution(char *dst, s16 substitutionId, u8 encoding) {
     char buffer[0x300];
@@ -1643,7 +1888,7 @@ void SystemFont::copySubstitution(char *dst, s16 substitutionId, u8 encoding) {
     }
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08894A78);
+INCLUDE_ASM("asm/eboot/nonmatchings/system_font", nthCharacter__10SystemFontFsPcPPcUc);
 
 void SystemFont::addIcon(s16 left, s16 top, u16 size, s8 fontColor, s16 iconId) {
     if (layerIconCounts[layer] < 10) {

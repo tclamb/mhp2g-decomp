@@ -51,8 +51,26 @@ struct PGFFontStyle {
 
 // adapted from PPSSPP implementation of libfont
 struct PGFFontInfo {
-    s32 glyphMetricsFixed[10];
-    float glyphMetricsFloat[10];
+    s32 maxGlyphWidthI;
+    s32 maxGlyphHeightI;
+    s32 maxGlyphAscenderI;
+    s32 maxGlyphDescenderI;
+    s32 maxGlyphLeftXI;
+    s32 maxGlyphBaseYI;
+    s32 minGlyphCenterXI;
+    s32 maxGlyphTopYI;
+    s32 maxGlyphAdvanceXI;
+    s32 maxGlyphAdvanceYI;
+    float maxGlyphWidthF;
+    float maxGlyphHeightF;
+    float maxGlyphAscenderF;
+    float maxGlyphDescenderF;
+    float maxGlyphLeftXF;
+    float maxGlyphBaseYF;
+    float minGlyphCenterXF;
+    float maxGlyphTopYF;
+    float maxGlyphAdvanceXF;
+    float maxGlyphAdvanceYF;
     u16 maxGlyphWidth;
     u16 maxGlyphHeight;
     u32 numGlyphs;
@@ -61,13 +79,67 @@ struct PGFFontInfo {
     u8 bpp;
 };
 
+// adapted from PPSSPP implementation of libfont
+struct PGFCharInfo {
+    u32 bitmapWidth;
+    u32 bitmapHeight;
+    u32 bitmapLeft;
+    u32 bitmapTop;
+    u32 sfp26Width;
+    u32 sfp26Height;
+    s32 sfp26Ascender;
+    s32 sfp26Descender;
+    s32 sfp26BearingHX;
+    s32 sfp26BearingHY;
+    s32 sfp26BearingVX;
+    s32 sfp26BearingVY;
+    s32 sfp26AdvanceH;
+    s32 sfp26AdvanceV;
+    s16 shadowFlags;
+    s16 shadowId;
+};
+
+// adapted from PPSSPP implementation of libfont
+struct GlyphImage {
+    u32 pixelFormat;
+    s32 xPos;
+    s32 yPos;
+    u16 bufWidth;
+    u16 bufHeight;
+    u16 bytesPerLine;
+    u16 pad;
+    void *bufferPtr;
+};
+
 struct ParseResult {
     enum {
         COMMAND,
         HALF_WIDTHS,
+        CHARACTERS,
     };
 private:
     ParseResult();
+};
+
+struct CharacterType {
+    enum {
+        HALFWIDTH,
+        FULLWIDTH,
+        ICON,
+        END_OF_STRING = 0x4,
+    };
+private:
+    CharacterType();
+};
+
+struct CacheState {
+    enum {
+        EMPTY,
+        STALE,
+        FRESH,
+    };
+private:
+    CacheState();
 };
 
 struct SystemFont : Singleton<SystemFont> {
@@ -95,26 +167,26 @@ struct SystemFont : Singleton<SystemFont> {
     u8 fontHeight;
     s8 fontColor;
     s8 layer;
-    bool unknown_0x130;
+    bool leftAlignHalfwidthGlyphs;
     s8 usedColorIds;
     u8 padding_0x132[2];
     u8 layerGlyphRunCounts[6];
     u8 layerIconCounts[6];
     GlyphRun *layerGlyphRuns[6];
-    s16 glyphCacheCount;
-    s16 unknown_0x15A;
+    u16 nextCacheIndex;
+    u16 numCachedGlyphs;
     u8 unknown_0x15C;
     s8 currentLayer;
     u8 frameCount;
     u8 lineSpacing;
     u16 codepointBufferUsed;
-    u16 unknown_0x162;
+    u16 residentGlyphCount;
     u32 glowingFontColor;
     u32 fontColors[48];
     GlyphRun glyphRuns[6][128];
     u16 glyphIndices[65520];
-    u16 cachedCodepoints[432];
-    u8 cacheStatus[432];
+    u16 cacheCodepoints[432];
+    u8 cacheStates[432];
     Icon layerIcons[6][10];
     u8 codepointBuffer[12288];
 
@@ -144,30 +216,42 @@ struct SystemFont : Singleton<SystemFont> {
     void printfSJIS(s16 left, s16 top, char *format, ...);
     void printfSJIS(s16 left, s16 top, s8 fontColor, char *format, ...);
     void printShadowUtf8(s16 left, s16 top, s8 shadowColor, s8 fontColor, u8 *utf8, s16 offsetLeft, s16 offsetTop);
-
+    void drawLayer(s8 layer);
+    void draw();
+    int widthUtf8(u8 *utf8);
     void asciiToFullWidthUtf8(char *in, char *out);
     void asciiToFullWidthSJIS(char *in, char *out);
-    void cacheGlyphsSJIS(char *sjis);
-
+    void loadResidentGlyphsSJIS(char *sjis);
+    int characterCountUtf8(char *utf8);
+    int characterCountSJIS(char *sjis);
     void printfUtf8x(char *format, ...);
     void printfUtf8x(s16 left, s16 top, char *format, ...);
     void printfUtf8x(s16 left, s16 top, s8 fontColor, char *format, ...);
     void printTextUtf8x(s16 n, u8 *utf8x);
-
-    void addIcon(s16 left, s16 top, u16 size, s8 fontColor, s16 iconId);
-    void copySubstitution(char *dst, s16 substitutionId, u8 encoding);
-    int widthUtf8(u8 *utf8);
-
+    s16 nthCharacterUtf8x(s16 n, char *out, char *str, char **nextOut);
     void drawBtnIcon(Icon *icons, u8 count, u32 renderGroup);
     void initializeFont();
-
+    void beforeDrawGlyphs();
+    void afterDrawIcons();
+    void markUsedGlyphs();
+    bool markUsedGlyph(u16 codepoint);
+    u16 allocateCacheIndex();
+    void loadGlyphs();
+    void loadGlyph(u16 codepoint, int atlas, s32 u, s32 v);
+    void drawGlyphRun(GlyphRun *run);
+    void drawGlyph(u16 codepoint, int width, GlyphRun *run);
     int vsnprintf(char *buffer, int size, char *format, va_list args, u8 encoding);
     void decode(u8 *str, u8 encoding);
     int isHalfWidth(u16 codepoint);
     u32 currentRenderGroup();
     void updateGlowingFontColor();
     void cacheCommonGlyphs();
-    char *parseCommand(char *xstr, s16 *out, int resultType, int encoding);
+    char *parseCommand(char *str, s16 *out, s16 type, u8 encoding);
+    void copySubstitution(char *dst, s16 substitutionId, u8 encoding);
+    s16 nthCharacter(s16 n, char *out, char **str, u8 encoding);
+    void addIcon(s16 left, s16 top, u16 size, s8 fontColor, s16 iconId);
+    // glyphWidth?
+    // hasDiacritic?
 
     SystemFont();
 };
