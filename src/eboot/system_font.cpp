@@ -13,13 +13,12 @@
 
 #define IS_BLANK(codepoint)                       \
     (codepoint == ' '                             \
-  || codepoint == 0xA0    /* no-break space    */ \
-  || codepoint == 0x2002  /* en space          */ \
-  || codepoint == 0x2003  /* em space          */ \
-  || codepoint == 0x3000) /* ideographic space */
+  || codepoint == L'\u00A0'  /* no-break space    */ \
+  || codepoint == L'\u2002'  /* en space          */ \
+  || codepoint == L'\u2003'  /* em space          */ \
+  || codepoint == L'\u3000') /* ideographic space */
 
 #pragma opt_unroll_loops on
-
 template<> SystemFont *Singleton<SystemFont>::objectPtr;
 
 cache GLYPH_CACHE;
@@ -118,7 +117,7 @@ void SystemFont::clear() {
     }
     left = 0;
     top = 0;
-    unknown_0x124 = 0;
+    z = 0;
     fontWidth = 20;
     fontHeight = 20;
     lineSpacing = fontHeight;
@@ -1207,7 +1206,6 @@ s16 SystemFont::nthCharacterUtf8x(s16 n, char *out, char *str, char **nextOut) {
             type = width == 2 ? CharacterType::FULLWIDTH : CharacterType::HALFWIDTH;
             break;
         } else {
-            // why not q += size?
             for (int j = 0; j < size; ++j) {
                 ++p;
             }
@@ -1489,11 +1487,191 @@ void SystemFont::loadGlyphs() {
     }
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", loadGlyph__10SystemFontFUsiii);
+extern "C" {
+    int sceFontGetCharInfo(void *font, u16 codepoint, PGFCharInfo *info);
+    int sceFontGetCharGlyphImage(void *font, u16 codepoint, GlyphImage *buffer);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", drawGlyphRun__10SystemFontFP8GlyphRun);
+void SystemFont::loadGlyph(u16 codepoint, int atlasId, s32 left, s32 top) {
+    GlyphImage glyph;
+    PGFCharInfo info;
+    VramAllocation vram;
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08893348);
+    VramManager::objectPtr->method_08813364(3 + atlasId, &vram);
+
+    glyph.bufWidth = 0x100;
+    glyph.bufHeight = 0x100;
+    glyph.pixelFormat = 0;
+    glyph.pad = 0;
+    glyph.bytesPerLine = 0x80;
+    glyph.bufferPtr = vram.texture.vramAddress;
+
+    u8 *p = (u8 *)vram.texture.vramAddress;
+    p += (left / 2) + top * 0x80;
+    for (int j, i = 0; i < glyphTextureHeight; ++i) {
+        for (j = 0; j < glyphTextureWidth / 2; ++j) {
+            *p++ = 0;
+        }
+        p += (0x100 - glyphTextureWidth) / 2;
+    }
+
+    if (IS_BLANK(codepoint)) {
+        return;
+    }
+
+    if (sceFontGetCharInfo(font, codepoint, &info) != 0) {
+        return;
+    }
+
+    s32 maxAscenderSize = fontInfo.maxGlyphAscenderI;
+    s32 yMiddleOffset = (u32)glyphSpacingY >> 1;
+    s32 yTopCenterDistance = (yMiddleOffset << 6) + maxAscenderSize;
+    s32 xCenter = (left + (((u32) glyphSpacingX) >> 1)) << 6;
+    s32 xLeftOffset = info.bitmapLeft << 6;
+    s32 yCenter = maxAscenderSize + ((top + yMiddleOffset) << 6);
+    s32 yTopOffset = -(info.bitmapTop << 6);
+
+    if (isHalfWidth(codepoint) == 1 && leftAlignHalfwidthGlyphs == 0) {
+        xLeftOffset = ((glyphWidth - info.bitmapWidth) >> 1) << 6;
+    }
+
+    if (fontId == 0 && yTopCenterDistance + yTopOffset < 0) {
+        yCenter = ((top + (((u32) glyphSpacingY) >> 1)) << 6);
+        yTopOffset = (glyphHeight - info.bitmapHeight) << 6;
+    }
+
+    if (codepoint == '*' || codepoint == L'\u00D7' /* × */) {
+        yCenter = ((top + (((u32) glyphSpacingY) >> 1)) << 6);
+        yTopOffset = ((glyphHeight - info.bitmapHeight) >> 1) << 6;
+    }
+
+    if (codepoint == L'\u00C6' /* Æ */ || codepoint == L'\u00D0' /* Ð */ || codepoint == L'\u00D8' /* Ø */) {
+        yCenter = ((top + (((u32) glyphSpacingY) >> 1)) << 6);
+        yTopOffset = (glyphHeight - info.bitmapHeight) << 6;
+    }
+
+    glyph.xPos = xCenter + xLeftOffset;
+    glyph.yPos = yCenter + yTopOffset;
+    if ((sceFontGetCharGlyphImage(font, codepoint, &glyph) == 0) && (fontId == 0) && (isHalfWidth(codepoint) == 1)) {
+        glyph.xPos -= 0x1F;
+        sceFontGetCharGlyphImage(font, codepoint, &glyph);
+    }
+}
+
+void SystemFont::drawGlyphRun(GlyphRun *run) {
+    int characterWidth;
+    u16 *p = run->codepoints;
+
+    cursorLeft = run->left;
+    cursorTop = run->top;
+    cursorZ = z;
+
+    while (true) {
+        u16 c = *p++;
+        if (c == 0) {
+            return;
+        } else if (c == '\n') {
+            cursorLeft = run->left;
+            cursorTop += run->lineSpacing;
+        } else {
+            characterWidth = isHalfWidth(c);
+            if (!IS_BLANK(c)) {
+                drawGlyph(c, characterWidth, run);
+            }
+            cursorLeft += (u8)glyphAdvance(c, characterWidth, run->fontWidth);
+        }
+    }
+}
+
+inline u32 position(u32 x, u32 y) {
+    return (u16)x | (y << 16);
+}
+
+void SystemFont::drawGlyph(u16 codepoint, int width, GlyphRun *run) {
+    VramAllocation vram;
+
+    if (glyphIndices[codepoint] == 0xFFFF) {
+        return;
+    }
+
+    if (run->fontColor >= 48) {
+        run->fontColor = 0;
+    }
+
+    u32 color;
+    if (run->fontColor < 0) {
+        color = glowingFontColor;
+    } else {
+        color = fontColors[run->fontColor];
+    }
+    int visible = (color & 0xFF000000) != 0;
+    color = 0xFF000000 | (color & 0x00FFFFFF);
+
+    u16 i = glyphIndices[codepoint];
+    u32 u = glyphTextureWidth * (i % glyphsPerRow);
+    u32 v = glyphTextureHeight * ((i / glyphsPerRow) % rowsPerAtlas);
+
+    VramManager::objectPtr->method_08813364(3 + i / glyphsPerAtlas, &vram);
+
+    u8 step;
+    if (width == 0 || width == 2) {
+        step = run->fontWidth;
+    } else {
+        step = run->fontWidth / 2;
+    }
+
+    int renderGroup = currentRenderGroup();
+
+    s16 topOffset;
+    if (isAccentedUpper(codepoint) == true) {
+        if (run->fontHeight < 16) {
+            topOffset = -2;
+        } else if (run->fontHeight < 20) {
+            topOffset = -3;
+        } else if (run->fontHeight < 26) {
+            topOffset = -4;
+        } else if (run->fontHeight < 30) {
+            topOffset = -5;
+        } else {
+            topOffset = -6;
+        }
+    } else {
+        topOffset = 0;
+    }
+
+    using namespace immediate_ge;
+    u32 *start = Ge::objectPtr->write_head();
+    u32 *out = start;
+    *out++ = (v << 16) | u;
+    *out++ = color;
+    *out++ = position(cursorLeft, cursorTop + topOffset);
+    *out++ = (u16)cursorZ;
+    *out++ = ((v + glyphTextureHeight) << 16) | (u + glyphTextureWidth);
+    *out++ = color;
+    *out++ = ((cursorTop + topOffset + run->fontHeight) << 16) | (u16)(cursorLeft + step);
+    *out++ = (u16)cursorZ;
+    ge::vaddr(&out, start);
+    ge::texmode(&out, GE_TEXMODE_NO_SWIZZLE);
+    ge::loadclut(&out, visible, vram.texture);
+    ge::texflush(&out);
+    ge::texturemapenable(&out, true);
+    ge::shademode(&out, GE_SHADE_GOURAUD);
+    ge::vertextype(&out,
+        GE_VTYPE_TC_16BIT,
+        GE_VTYPE_COL_8888,
+        GE_VTYPE_NRM_NONE,
+        GE_VTYPE_POS_16BIT,
+        GE_VTYPE_WEIGHT_NONE,
+        GE_VTYPE_IDX_NONE,
+        0,
+        0,
+        true);
+    ge::prim(&out, GE_PRIM_RECTANGLES, 2);
+    ge::jump(&out, 0);
+
+    Ge::objectPtr->method_088595E8(start + 8, 18, renderGroup);
+    Ge::objectPtr->set_write_head(start + 26);
+}
 
 int SystemFont::vsnprintf(char *buffer, int n, char *format, va_list args, u8 encoding) {
     char conv[0x300];
@@ -1854,7 +2032,152 @@ void SystemFont::cacheCommonGlyphs() {
     loadResidentGlyphsSJIS(D_eboot_089AA4B8);
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", parseCommand__10SystemFontFPcPssUc);
+#define ASSERT(x) if (!(x)) { /* DEBUG code */ }
+
+char *SystemFont::parseCommand(char *p, s16 *out, s16 type, u8 encoding) {
+    char buffer[0x300];
+    *out = 0;
+    ASSERT(*p++ == '~');
+    switch (*p) {
+    case '~':
+        switch (type) {
+        case ParseResult::COMMAND:
+            *out = 0;
+            break;
+        case ParseResult::HALF_WIDTHS:
+            ++p;
+            *out = -1;
+            break;
+        case ParseResult::CHARACTERS:
+            ++p;
+            *out = 1;
+            break;
+        }
+        break;
+    case 'C':
+        ++p;
+        switch (type) {
+        case ParseResult::COMMAND:
+            char c = *p;
+            s16 i = 0;
+            if (c >= '0' && c <= '9') {
+                i = c - '0';
+                ++p;
+                c = *p;
+                if (c >= '0' && c <= '9') {
+                    s16 d = c - '0';
+                    ++p;
+                    i = 10 * i + d;
+                }
+            }
+            *out = 0x100 | i;
+            break;
+        case ParseResult::HALF_WIDTHS:
+            p += 2;
+            *out = -4;
+            break;
+        case ParseResult::CHARACTERS:
+            *out = 0;
+            p += 2;
+            break;
+        }
+        break;
+    case 'A': {
+        ++p;
+        char c = *p;
+        s16 i = 0;
+        if (c >= '0' && c <= '9') {
+            i = c - '0';
+            ++p;
+            c = *p;
+            if (c >= '0' && c <= '9') {
+                s16 d = c - '0';
+                ++p;
+                i = 10 * i + d;
+            }
+        }
+        switch (type) {
+        case ParseResult::COMMAND:
+            *out = 0x200 | i;
+            break;
+        case ParseResult::HALF_WIDTHS:
+            copySubstitution(buffer, i, encoding);
+            if (encoding == Encoding::UTF8) {
+                *out = halfWidths((u8 *)buffer) - 4;
+            } else /* if (encoding == Encoding::SHIFT_JIS) */ {
+                *out = strlen(buffer) - 4;
+            }
+            break;
+        case ParseResult::CHARACTERS:
+            copySubstitution(buffer, i, encoding);
+            if (encoding == Encoding::UTF8) {
+                *out = characterCountUtf8(buffer);
+            } else /* if (encoding == Encoding::SHIFT_JIS) */ {
+                *out = characterCountSJIS(buffer);
+            }
+            break;
+        }
+        break;
+    }
+    case 'B':
+        ++p;
+        switch (type) {
+        case ParseResult::COMMAND: {
+            char c = *p;
+            s16 i = 0;
+            if (c >= '0' && c <= '9') {
+                i = c - '0';
+                ++p;
+                c = *p;
+                if (c >= '0' && c <= '9') {
+                    s16 d = c - '0';
+                    ++p;
+                    i = 10 * i + d;
+                }
+            }
+            *out = 0x400 | i;
+            break;
+        }
+        case ParseResult::HALF_WIDTHS:
+            p += 2;
+            *out = -2;
+            break;
+        case ParseResult::CHARACTERS:
+            p += 2;
+            *out = 1;
+            break;
+        }
+        break;
+    case '%':
+        ++p;
+        switch (type) {
+        case ParseResult::COMMAND:
+            *out = 0x800;
+            break;
+        case ParseResult::HALF_WIDTHS:
+            *out = -2;
+            break;
+        case ParseResult::CHARACTERS:
+            *out = 0;
+            break;
+        }
+        break;
+    default:
+        switch (type) {
+        case ParseResult::COMMAND:
+            *out = 0;
+            break;
+        case ParseResult::HALF_WIDTHS:
+            *out = -1;
+            break;
+        case ParseResult::CHARACTERS:
+            *out = 0;
+            break;
+        }
+        break;
+    }
+    return p;
+}
 
 void SystemFont::copySubstitution(char *dst, s16 substitutionId, u8 encoding) {
     char buffer[0x300];
@@ -1888,7 +2211,50 @@ void SystemFont::copySubstitution(char *dst, s16 substitutionId, u8 encoding) {
     }
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", nthCharacter__10SystemFontFsPcPPcUc);
+s16 SystemFont::nthCharacter(s16 n, char *out, char **strPtr, u8 encoding) {
+    s16 i = 0;
+    char *p = *strPtr;
+    while (*p) {
+        if (encoding == (u8)Encoding::UTF8) {
+            int size = CCC::objectPtr->codepointLengthUtf8((u8)*p);
+            if (i == n) {
+                u32 width = widthUtf8((u8 *)p);
+                for (int j = 0; j < size; ++j) {
+                    *out++ = *p++;
+                }
+                *out = 0;
+                *strPtr = p;
+                return width == 2 ? CharacterType::FULLWIDTH : CharacterType::HALFWIDTH;
+            }
+            for (int j = 0; j < size; ++j) {
+                p++;
+            }
+            ++i;
+        } else /* if (encoding == Encoding::SHIFT_JIS) */ {
+            u8 c = *p;
+            if ((c >= 0x81 && c <= 0x9F) || (c >= 0xE0 && c < 0x100)) {
+                if (i == n) {
+                    out[0] = *p;
+                    out[1] = p[1];
+                    out[2] = 0;
+                    *strPtr = p + 2;
+                    return CharacterType::FULLWIDTH;
+                }
+                p++;
+            } else if (i == n) {
+                out[0] = *p;
+                out[1] = 0;
+                *strPtr = p + 1;
+                return CharacterType::HALFWIDTH;
+            }
+            p++;
+            ++i;
+        }
+    }
+    *out = 0;
+    *strPtr = p;
+    return CharacterType::END_OF_STRING;
+}
 
 void SystemFont::addIcon(s16 left, s16 top, u16 size, s8 fontColor, s16 iconId) {
     if (layerIconCounts[layer] < 10) {
@@ -1902,6 +2268,78 @@ void SystemFont::addIcon(s16 left, s16 top, u16 size, s8 fontColor, s16 iconId) 
     }
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08894D88);
+s32 SystemFont::glyphAdvance(u16 codepoint, int width, u8 fontWidth) {
+    u8 result;
 
-INCLUDE_ASM("asm/eboot/nonmatchings/system_font", func_eboot_08894DC8);
+    // oops?
+    if (!leftAlignHalfwidthGlyphs) {
+        if (width == 0) {
+            return fontWidth;
+        } else {
+            result = fontWidth / 2;
+            return result;
+        }
+    }
+
+    if (width == 0) {
+        return fontWidth;
+    } else {
+        result = fontWidth / 2;
+        return result;
+    }
+}
+
+bool SystemFont::isAccentedUpper(u16 codepoint) {
+    if (codepoint >= 0xA0 && codepoint < 0x200) {
+        switch (codepoint) {
+        case L'\u00C0': // À
+        case L'\u00C1': // Á
+        case L'\u00C2': // Â
+        case L'\u00C3': // Ã
+        case L'\u00C4': // Ä
+        case L'\u00C5': // Å
+        case L'\u00C6': // Æ
+        case L'\u00C8': // È
+        case L'\u00C9': // É
+        case L'\u00CA': // Ê
+        case L'\u00CB': // Ë
+        case L'\u00CC': // Ì
+        case L'\u00CD': // Í
+        case L'\u00CE': // Î
+        case L'\u00CF': // Ï
+        case L'\u00D0': // Ð
+        case L'\u00D1': // Ñ
+        case L'\u00D2': // Ò
+        case L'\u00D3': // Ó
+        case L'\u00D4': // Ô
+        case L'\u00D5': // Õ
+        case L'\u00D6': // Ö
+        case L'\u00D8': // Ø
+        case L'\u00D9': // Ù
+        case L'\u00DA': // Ú
+        case L'\u00DB': // Û
+        case L'\u00DC': // Ü
+        case L'\u00DD': // Ý
+        case L'\u0100': // Ā
+        case L'\u0112': // Ē
+        case L'\u011A': // Ě
+        case L'\u0128': // Ĩ
+        case L'\u012A': // Ī
+        case L'\u014C': // Ō
+        case L'\u0160': // Š
+        case L'\u0168': // Ũ
+        case L'\u016A': // Ū
+        case L'\u016E': // Ů
+        case L'\u0178': // Ÿ
+        case L'\u017D': // Ž
+        case L'\u01CD': // Ǎ
+        case L'\u01CF': // Ǐ
+        case L'\u01D1': // Ǒ
+        case L'\u01D3': // Ǔ
+            return true;
+        default:
+            return false;
+        }
+    }
+    return false;
+}

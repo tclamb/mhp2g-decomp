@@ -159,10 +159,10 @@ struct SystemFont : Singleton<SystemFont> {
     u16 maxCachedGlyphs;
     s16 left;
     s16 top;
-    s16 unknown_0x124;
-    u16 cursorLeft;
-    u16 cursorTop;
-    u16 cursorZ;
+    s16 z;
+    s16 cursorLeft;
+    s16 cursorTop;
+    s16 cursorZ;
     u8 fontWidth;
     u8 fontHeight;
     s8 fontColor;
@@ -248,10 +248,10 @@ struct SystemFont : Singleton<SystemFont> {
     void cacheCommonGlyphs();
     char *parseCommand(char *str, s16 *out, s16 type, u8 encoding);
     void copySubstitution(char *dst, s16 substitutionId, u8 encoding);
-    s16 nthCharacter(s16 n, char *out, char **str, u8 encoding);
+    s16 nthCharacter(s16 n, char *out, char **strPtr, u8 encoding);
     void addIcon(s16 left, s16 top, u16 size, s8 fontColor, s16 iconId);
-    // glyphWidth?
-    // hasDiacritic?
+    s32 glyphAdvance(u16 codepoint, int width, u8 fontWidth);
+    bool isAccentedUpper(u16 codepoint);
 
     SystemFont();
 };

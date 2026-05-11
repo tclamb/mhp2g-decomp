@@ -3,6 +3,7 @@
 #include "common.h"
 #include "singleton.hpp"
 #include "ge.hpp"
+#include "vram_manager.hpp"
 
 #define GE_CMD_NOP              0x00
 #define GE_CMD_VADDR            0x01
@@ -185,6 +186,7 @@
 #define GE_TEXMAP_TEXTURE_COORDS 0
 #define GE_PROJMAP_POSITION 0
 
+#define GE_TEXMODE_NO_SWIZZLE 0
 #define GE_TEXMODE_SWIZZLE 1
 
 #define GE_TEXFUNC_MODULATE 0
@@ -639,6 +641,22 @@ namespace immediate_ge {
             impl::emit(out, GE_CMD_CLUTADDRUPPER << 24  | ((u32)texture.palette_data & 0xFF000000) >> 8);
 
             impl::emit(out, GE_CMD_LOADCLUT << 24 | texture.palette_height / 8);
+        }
+
+        inline void loadclut(u32 **out, SceBool colored, VramTexture &texture) {
+            impl::emit(out, GE_CMD_TEXFORMAT << 24 | texture.imageFormat);
+
+            impl::emit(out, GE_CMD_TEXADDR0 << 24 | ((u32)texture.vramAddress & 0x00FFFFFF));
+            impl::emit(out, GE_CMD_TEXBUFWIDTH0 << 24 | ((u32)texture.vramAddress & 0xFF000000) >> 8 | texture.alignedWidth);
+
+            impl::emit(out, GE_CMD_TEXSIZE0 << 24 | Ge::objectPtr->method_0885973C(texture.alignedHeight) << 8 | Ge::objectPtr->method_0885973C(texture.alignedWidth));
+
+            impl::emit(out, GE_CMD_CLUTFORMAT << 24 | colored << 16 | 0xFF << 8 | texture.paletteWidth);
+
+            impl::emit(out, GE_CMD_CLUTADDR << 24  | ((u32)texture.vramBlockAddress & 0x00FFFFFF));
+            impl::emit(out, GE_CMD_CLUTADDRUPPER << 24  | ((u32)texture.vramBlockAddress & 0xFF000000) >> 8);
+
+            impl::emit(out, GE_CMD_LOADCLUT << 24 | /* paletteHeight / 8 */ 4);
         }
 
         inline void texfilter(u32 **out, u8 min, u8 mag) {
