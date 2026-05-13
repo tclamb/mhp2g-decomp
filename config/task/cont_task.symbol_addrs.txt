@@ -1,6 +1,6 @@
 method_08826600__7CockpitFv = 0x08826600; // type:func
 reset__11DrawManagerFv = 0x0884B188; // type:func
-func_eboot_0884D694 = 0x0884D694; // type:func
+fadeBlack__8FadeTaskFsb = 0x0884D694; // type:func
 func_eboot_0884FA08 = 0x0884FA08; // type:func
 func_eboot_0884FA7C = 0x0884FA7C; // type:func
 func_eboot_0884FB50 = 0x0884FB50; // type:func

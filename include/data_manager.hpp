@@ -5,12 +5,13 @@
 
 struct LanguageId {
     enum {
-        DEFAULT,
+        JAPANESE,
         ENGLISH,
         GERMAN,
         FRENCH,
         SPANISH,
         ITALIAN,
+        KOREAN,
     };
 private: LanguageId() {}
 };

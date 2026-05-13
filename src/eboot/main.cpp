@@ -47,7 +47,7 @@ LobbyNet::LobbyNet() {
 }
 Net::Net() {}
 Osk::Osk() {
-    unknown_0x74 = 0;
+    visible = 0;
 }
 CCC::CCC() {}
 SystemFont::SystemFont() {}

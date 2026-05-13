@@ -10,7 +10,7 @@ ContTask::~ContTask() {}
 void ContTask::load() {
     switch (status) {
     case 0:
-        func_eboot_0884D658(FadeTask::objectPtr, 1, 0, 1);
+        FadeTask::objectPtr->fade(1, 0, true);
         func_eboot_0888FE4C(System::objectPtr, 0x2D, 1);
         status = (s32) (status + 1);
         return;

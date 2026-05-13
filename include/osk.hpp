@@ -3,17 +3,36 @@
 #include "common.h"
 #include "singleton.hpp"
 
+#include <psputility.h>
+
+struct InputTypeId {
+    enum {
+        JAPANESE = 1,
+        LATIN,
+        DIGIT,
+        LATIN_DIGIT,
+    };
+private:
+    InputTypeId();
+};
+
 struct Osk : Singleton<Osk> {
-    u32 unknown_0x0;
-    u32 unknown_0x4;
-    u32 unknown_0x8;
-    u32 unknown_0xC;
-    u32 unknown_0x10;
-    u32 unknown_0x14;
-    u32 unknown_0x18;
-    u8 pad_0x1C[0x74 - 0x1C];
-    u8 unknown_0x74;
-    u8 pad_0x75[0x7C - 0x75];
+    SceUtilityOskParams params;
+    SceUtilityOskData data;
+    bool visible;
+    u8 systemLanguageId;
+    bool buttonSwap;
+    u8 inputLanguageId;
+    u32 padding;
+
+    void initialize();
+    void update();
+    void input(u8 inputTypeId, u16 *description, u16 *in, u16 *out, u32 outSize, s32 lineCount);
 
     Osk();
+
+private:
+    void initializeLanguage();
+    void initializeParams(u8 inputTypeId, u16 *description, u16 *in, u16 *out, u32 outSize, s32 lineCount);
+    void finish();
 };
