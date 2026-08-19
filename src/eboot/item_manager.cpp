@@ -210,16 +210,16 @@ s32 ItemManager::transportItemId(u16 itemId) {
     return -1;
 }
 
+bool ItemManager::isMixIngredient(s16 _itemId, bool isItemBox, int filter) {
+    int itemId = _itemId;
 
-#ifdef BUILD_NONMATCHING
-// instead of `seh s2, a1` at the start
-// it's doing `move s2, a1` and `seh ..., s2` twice later on
-// but the value in s2 isn't ever accessed except through `seh`...
-bool ItemManager::isMixIngredient(s16 itemId, bool isItemBox, int filter) {
-    MixIndexEntry &entry = MIX_INDEX[itemId];
-    if (entry.count != 0) {
-        MixDefinition *mix = &MIX_DEFINITIONS[entry.firstId];
-        for (int i = entry.count; i > 0; --i, ++mix) {
+    MixDefinition *mix;
+    int n;
+
+    MixIndexEntry *idx = &MIX_INDEX[itemId];
+    if (idx->count != 0) {
+        mix = &MIX_DEFINITIONS[idx->firstId];
+        for (n = idx->count; n > 0; --n, ++mix) {
             switch (filter) {
             case 1:
                 return true;
@@ -238,11 +238,11 @@ bool ItemManager::isMixIngredient(s16 itemId, bool isItemBox, int filter) {
     }
 
     for (int otherId = 0; otherId < itemId; ++otherId) {
-        MixIndexEntry &entry = MIX_INDEX[otherId];
-        if (entry.count != 0) {
-            MixDefinition *mix = &MIX_DEFINITIONS[entry.firstId];
-            for (int i = entry.count; i > 0; --i, ++mix) {
-                if (mix->materialB == itemId) {
+        MixIndexEntry *idx = &MIX_INDEX[otherId];
+        if (idx->count != 0) {
+            mix = &MIX_DEFINITIONS[idx->firstId];
+            for (n = idx->count; n > 0; --n, ++mix) {
+                if (mix->secondMaterialItemId == _itemId) {
                     switch (filter) {
                     case 1:
                         return true;
@@ -263,9 +263,6 @@ bool ItemManager::isMixIngredient(s16 itemId, bool isItemBox, int filter) {
     }
     return false;
 }
-#else
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", isMixIngredient__11ItemManagerFsbi);
-#endif
 
 MixDefinition *ItemManager::findMix(s16 firstMaterialItemId, s16 secondMaterialItemId, int flags, bool isItemBox, int filter) {
     if (firstMaterialItemId > secondMaterialItemId) {
