@@ -1,6 +1,6 @@
 spimdisasm>=1.28.1
 rabbitizer>=1.8.0
-splat64[mips]>=0.27.0
+splat64[mips]>=0.27.0,<0.40.1
 ninja_syntax
 tqdm
 pycdlib>=1.14.0
