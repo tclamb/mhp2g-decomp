@@ -356,46 +356,38 @@ s16 ItemManager::combine(u8 *quantityOut, Player *player, s16 firstMaterialItemI
     return resultItemId;
 }
 
-#ifdef BUILD_NONMATCHING
 s16 ItemManager::boxRemove(u16 itemId, s16 quantity) {
-    GameSys &gameSys = *GameSys::objectPtr;
-    UserData &userData = gameSys.userData;
+    UserData *userData = &GameSys::objectPtr->userData;
+
     if (quantity < 0) {
         return 0;
     }
-    if (itemId != 0) {
-        if (ITEM_DEFINITIONS[itemId].stackSize == 0xFF) {
-            return 0;
-        }
-        for (s16 i = 0, boxSize = gameSys.itemBoxSize(); i < boxSize; ++i) {
-            if (userData.itemBox[i].itemId != itemId) {
-                continue;
-            }
-            s16 remaining = quantity;
-            s16 boxQuantity = userData.itemBox[i].quantity;
-            if (remaining <= boxQuantity) {
-                quantity = 0;
-                userData.itemBox[i].quantity -= remaining;
+
+    if (itemId == 0 || ITEM_DEFINITIONS[itemId].stackSize == 0xFF) {
+        return 0;
+    }
+
+    s16 boxSize = GameSys::objectPtr->itemBoxSize();
+    s16 remaining = quantity;
+    for (s16 i = 0; i < boxSize; ++i) {
+        if (userData->itemBox[i].itemId == itemId) {
+            if (userData->itemBox[i].quantity >= remaining) {
+                userData->itemBox[i].quantity -= remaining;
+                remaining = 0;
             } else {
-                userData.itemBox[i].quantity = 0;
-                quantity -= boxQuantity;
+                remaining -= userData->itemBox[i].quantity;
+                userData->itemBox[i].quantity = 0;
             }
-            if (userData.itemBox[i].quantity < 1) {
-                userData.itemBox[i].itemId = 0;
+            if (userData->itemBox[i].quantity < 1) {
+                userData->itemBox[i].itemId = 0;
             }
-            if (quantity < 1) {
+            if (remaining < 1) {
                 return 0;
             }
         }
-        return quantity;
-    } else {
-        return 0;
     }
-    return quantity;
+    return remaining;
 }
-#else
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", boxRemove__11ItemManagerFUss);
-#endif
 
 INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", boxRemove__11ItemManagerFUssUs);
 

@@ -169,6 +169,7 @@ data_bin_path__7FileSysFv = 0x0884F7B0;
 __dt__7FileSysFv = 0x0884F7BC; // type:func
 __ct__7GameSysFv = 0x0884F818; // type:func
 __dt__7GameSysFv = 0x0884F950; // type:func
+itemBoxSize__7GameSysFv = 0x08850E08; // type:func
 method_0885143C__7GameSysFUs = 0x0885143C; // type:func
 method_08851448__7GameSysFUs = 0x08851448; // type:func
 method_088567AC__7GameSysFUi = 0x088567AC; // type:func
