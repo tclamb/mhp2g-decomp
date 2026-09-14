@@ -124,7 +124,7 @@ segments:
       - [0x7e6b4, asmtu, sound]
       - [0x84038, asmtu, bgm_server]
       - [0x84634, asmtu, stream]
-      - [0x84b64, asmtu, camera_b0] # initializes every stage load
+      - [0x84b64, cpp, sub_camera]
       - [0x8dff0, asmtu, system] # main game loop
       - [0x8e84c, cpp, system_font]
       - [0x935d0, asmtu, task_manager] # owns state objects, calls update logic of active state once per frame, unloads & loads new states
@@ -199,7 +199,7 @@ segments:
       - [0x12d2e4, .rodata, quest]
       - [0x12d3ec, .rodata, result_check]
       - [0x12d60c, .rodata, sound]
-      - [0x12d624, .rodata, camera_b0]
+      - [0x12d624, .rodata, sub_camera]
       - [0x12d73c, .rodata, system_font]
       - [0x12da44, .rodata, task_manager]
       - [0x12dacc, .rodata, lib/libwave]
@@ -247,7 +247,7 @@ segments:
       - [0x1a3bb8, .data, result_check]
       - [0x1a3fc4, .int4, demo_task]
       - [0x1a3fe8, .data, sound] # very hit or miss on encapsulation here; might be additional splits, maybe not
-      - [0x1a8744, .data, camera_b0]
+      - [0x1a8744, .data, sub_camera]
       - [0x1a87e4, .data, system]
       - [0x1a8820, .data, system_font]
       - [0x1a8a74, .data, task_manager]
@@ -871,6 +871,7 @@ segments:
       - {start: 0x1c5114, type: .bss, vram: 0x08a5de5c, name: sound}
       - {start: 0x1c5114, type: .bss, vram: 0x08a5de60, name: bgm_server}
       - {start: 0x1c5114, type: .bss, vram: 0x08a5de64, name: stream}
+      - {start: 0x1c5114, type: .bss, vram: 0x08a5de70, name: sub_camera}
       - {start: 0x1c5114, type: .bss, vram: 0x08a5e270, name: system}
       - {start: 0x1c5114, type: .bss, vram: 0x08a5e278, name: system_font}
       - {start: 0x1c5114, type: .bss, vram: 0x08a862b8, name: task_manager}

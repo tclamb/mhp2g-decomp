@@ -63,6 +63,81 @@ rom:0x12d020 reloc:MIPS_32 symbol:draw_loading_screen__7FileSysFv addend:0x138
 rom:0x12d024 reloc:MIPS_32 symbol:draw_loading_screen__7FileSysFv addend:0x144
 rom:0x12d028 reloc:MIPS_32 symbol:draw_loading_screen__7FileSysFv addend:0x150
 
+rom:0x12d624 reloc:MIPS_32 symbol:cam_init__9SubCameraFUc addend:0x64
+rom:0x12d628 reloc:MIPS_32 symbol:cam_init__9SubCameraFUc addend:0xBC
+rom:0x12d62c reloc:MIPS_32 symbol:cam_init__9SubCameraFUc addend:0x114
+rom:0x12d630 reloc:MIPS_32 symbol:cam_init__9SubCameraFUc addend:0x16C
+rom:0x12d634 reloc:MIPS_32 symbol:cam_init__9SubCameraFUc addend:0x1C4
+rom:0x12d638 reloc:MIPS_32 symbol:cam_init__9SubCameraFUc addend:0x21C
+
+rom:0x12d63c reloc:MIPS_32 symbol:cam_plEX_zoom__9SubCameraFR14ZoomCameraData addend:0x24C
+rom:0x12d640 reloc:MIPS_32 symbol:cam_plEX_zoom__9SubCameraFR14ZoomCameraData addend:0x32C
+rom:0x12d644 reloc:MIPS_32 symbol:cam_plEX_zoom__9SubCameraFR14ZoomCameraData addend:0x5A8
+rom:0x12d648 reloc:MIPS_32 symbol:cam_plEX_zoom__9SubCameraFR14ZoomCameraData addend:0x4C4
+rom:0x12d64c reloc:MIPS_32 symbol:cam_plEX_zoom__9SubCameraFR14ZoomCameraData addend:0x32C
+rom:0x12d650 reloc:MIPS_32 symbol:cam_plEX_zoom__9SubCameraFR14ZoomCameraData addend:0x32C
+
+rom:0x12d654 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x90
+rom:0x12d658 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x9C
+rom:0x12d65c reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0xB0
+rom:0x12d660 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0xC4
+rom:0x12d664 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0xD8
+rom:0x12d668 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0xEC
+rom:0x12d66c reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x100
+rom:0x12d670 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x114
+rom:0x12d674 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x120
+rom:0x12d678 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x12C
+rom:0x12d67c reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x138
+rom:0x12d680 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x144
+rom:0x12d684 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x150
+rom:0x12d688 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x164
+rom:0x12d68c reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x178
+rom:0x12d690 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x184
+rom:0x12d694 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x190
+rom:0x12d698 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x19C
+rom:0x12d69c reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x1A8
+rom:0x12d6a0 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x1B8
+rom:0x12d6a4 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x1C4
+rom:0x12d6a8 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x1D0
+rom:0x12d6ac reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x1DC
+rom:0x12d6b0 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x1E8
+rom:0x12d6b4 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x1F4
+rom:0x12d6b8 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x200
+rom:0x12d6bc reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x20C
+rom:0x12d6c0 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x218
+rom:0x12d6c4 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x224
+rom:0x12d6c8 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x230
+rom:0x12d6cc reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x23C
+rom:0x12d6d0 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x248
+rom:0x12d6d4 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x254
+rom:0x12d6d8 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x260
+rom:0x12d6dc reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x26C
+rom:0x12d6e0 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x278
+rom:0x12d6e4 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x28C
+rom:0x12d6e8 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x2A0
+rom:0x12d6ec reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x2C8
+rom:0x12d6f0 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x2DC
+rom:0x12d6f4 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x3A8
+rom:0x12d6f8 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x3E4
+rom:0x12d6fc reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x3EC
+rom:0x12d700 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x3BC
+rom:0x12d704 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x3D0
+rom:0x12d708 reloc:MIPS_32 symbol:point_cam_sub__9SubCameraFv addend:0x3C8
+
+rom:0x12d70c reloc:MIPS_32 symbol:cmd_set_pos__9SubCameraFP14ScePspFVector4P13CameraCommand addend:0xCC
+rom:0x12d710 reloc:MIPS_32 symbol:cmd_set_pos__9SubCameraFP14ScePspFVector4P13CameraCommand addend:0xF8
+rom:0x12d714 reloc:MIPS_32 symbol:cmd_set_pos__9SubCameraFP14ScePspFVector4P13CameraCommand addend:0x80
+rom:0x12d718 reloc:MIPS_32 symbol:cmd_set_pos__9SubCameraFP14ScePspFVector4P13CameraCommand addend:0x10C
+rom:0x12d71c reloc:MIPS_32 symbol:cmd_set_pos__9SubCameraFP14ScePspFVector4P13CameraCommand addend:0x144
+rom:0x12d720 reloc:MIPS_32 symbol:cmd_set_pos__9SubCameraFP14ScePspFVector4P13CameraCommand addend:0x150
+
+rom:0x12d724 reloc:MIPS_32 symbol:cmd_cam_move__9SubCameraFP13CameraCommand addend:0x360
+rom:0x12d728 reloc:MIPS_32 symbol:cmd_cam_move__9SubCameraFP13CameraCommand addend:0x3B4
+rom:0x12d72C reloc:MIPS_32 symbol:cmd_cam_move__9SubCameraFP13CameraCommand addend:0x31C
+rom:0x12d730 reloc:MIPS_32 symbol:cmd_cam_move__9SubCameraFP13CameraCommand addend:0x384
+rom:0x12d734 reloc:MIPS_32 symbol:cmd_cam_move__9SubCameraFP13CameraCommand addend:0x3B4
+rom:0x12d738 reloc:MIPS_32 symbol:cmd_cam_move__9SubCameraFP13CameraCommand addend:0x3B4
+
 rom:0x109E70 reloc:MIPS_HI16 symbol:__static_init
 rom:0x109E74 reloc:MIPS_HI16 symbol:__static_init_end
 rom:0x109E78 reloc:MIPS_HI16 symbol:__exception_table_start__
@@ -7823,32 +7898,32 @@ rom:0x736fc reloc:MIPS_26 symbol:func_game_sub_09C21AD8
 rom:0x78388 reloc:MIPS_26 symbol:func_game_sub_09C217C8
 rom:0x82530 reloc:MIPS_26 symbol:func_game_sub_09C30780
 rom:0x826ac reloc:MIPS_26 symbol:func_game_sub_09C30780
-rom:0x8509c reloc:MIPS_26 symbol:func_game_sub_09C389F0
-rom:0x85d24 reloc:MIPS_26 symbol:func_game_sub_09C35A98
-rom:0x85d7c reloc:MIPS_26 symbol:func_game_sub_09C389F0
-rom:0x85ee8 reloc:MIPS_26 symbol:func_game_sub_09C35A98
-rom:0x85f40 reloc:MIPS_26 symbol:func_game_sub_09C35A98
-rom:0x85f68 reloc:MIPS_26 symbol:func_game_sub_09C35A98
-rom:0x86048 reloc:MIPS_26 symbol:func_game_sub_09C35A98
-rom:0x8611c reloc:MIPS_26 symbol:func_game_sub_09C35A98
+rom:0x8509c reloc:MIPS_26 symbol:GetGroundHit__10HitManagerFP14ScePspFVector4
+rom:0x85d24 reloc:MIPS_26 symbol:GetWallHitLineCam__10HitManagerFP14ScePspFVector4P14ScePspFVector4P14ScePspFVector4Usf
+rom:0x85d7c reloc:MIPS_26 symbol:GetGroundHit__10HitManagerFP14ScePspFVector4
+rom:0x85ee8 reloc:MIPS_26 symbol:GetWallHitLineCam__10HitManagerFP14ScePspFVector4P14ScePspFVector4P14ScePspFVector4Usf
+rom:0x85f40 reloc:MIPS_26 symbol:GetWallHitLineCam__10HitManagerFP14ScePspFVector4P14ScePspFVector4P14ScePspFVector4Usf
+rom:0x85f68 reloc:MIPS_26 symbol:GetWallHitLineCam__10HitManagerFP14ScePspFVector4P14ScePspFVector4P14ScePspFVector4Usf
+rom:0x86048 reloc:MIPS_26 symbol:GetWallHitLineCam__10HitManagerFP14ScePspFVector4P14ScePspFVector4P14ScePspFVector4Usf
+rom:0x8611c reloc:MIPS_26 symbol:GetWallHitLineCam__10HitManagerFP14ScePspFVector4P14ScePspFVector4P14ScePspFVector4Usf
 rom:0x861e8 reloc:MIPS_26 symbol:func_game_sub_09C31C20
 rom:0x86200 reloc:MIPS_26 symbol:func_game_sub_09C31A98
-rom:0x86234 reloc:MIPS_26 symbol:func_game_sub_09C35A98
+rom:0x86234 reloc:MIPS_26 symbol:GetWallHitLineCam__10HitManagerFP14ScePspFVector4P14ScePspFVector4P14ScePspFVector4Usf
 rom:0x862bc reloc:MIPS_26 symbol:func_game_sub_09C31C20
 rom:0x862d4 reloc:MIPS_26 symbol:func_game_sub_09C31A98
-rom:0x86b70 reloc:MIPS_26 symbol:func_game_sub_09C35A98
-rom:0x8b210 reloc:MIPS_26 symbol:func_game_sub_09C35A98
-rom:0x8b244 reloc:MIPS_26 symbol:func_game_sub_09C35A98
-rom:0x8b268 reloc:MIPS_26 symbol:func_game_sub_09C389F0
+rom:0x86b70 reloc:MIPS_26 symbol:GetWallHitLineCam__10HitManagerFP14ScePspFVector4P14ScePspFVector4P14ScePspFVector4Usf
+rom:0x8b210 reloc:MIPS_26 symbol:GetWallHitLineCam__10HitManagerFP14ScePspFVector4P14ScePspFVector4P14ScePspFVector4Usf
+rom:0x8b244 reloc:MIPS_26 symbol:GetWallHitLineCam__10HitManagerFP14ScePspFVector4P14ScePspFVector4P14ScePspFVector4Usf
+rom:0x8b268 reloc:MIPS_26 symbol:GetGroundHit__10HitManagerFP14ScePspFVector4
 rom:0x8b4a8 reloc:MIPS_26 symbol:func_game_sub_09C38E00
-rom:0x8b4c0 reloc:MIPS_26 symbol:func_game_sub_09C389F0
-rom:0x8b4d4 reloc:MIPS_26 symbol:func_game_sub_09C389F0
+rom:0x8b4c0 reloc:MIPS_26 symbol:GetGroundHit__10HitManagerFP14ScePspFVector4
+rom:0x8b4d4 reloc:MIPS_26 symbol:GetGroundHit__10HitManagerFP14ScePspFVector4
 rom:0x8b590 reloc:MIPS_26 symbol:func_game_sub_09C392C0
-rom:0x8ba64 reloc:MIPS_26 symbol:func_game_sub_09C389F0
-rom:0x8c88c reloc:MIPS_26 symbol:func_game_sub_09C389F0
-rom:0x8c8d0 reloc:MIPS_26 symbol:func_game_sub_09C389F0
-rom:0x8d370 reloc:MIPS_26 symbol:func_game_sub_09C35A98
-rom:0x8d394 reloc:MIPS_26 symbol:func_game_sub_09C389F0
+rom:0x8ba64 reloc:MIPS_26 symbol:GetGroundHit__10HitManagerFP14ScePspFVector4
+rom:0x8c88c reloc:MIPS_26 symbol:GetGroundHit__10HitManagerFP14ScePspFVector4
+rom:0x8c8d0 reloc:MIPS_26 symbol:GetGroundHit__10HitManagerFP14ScePspFVector4
+rom:0x8d370 reloc:MIPS_26 symbol:GetWallHitLineCam__10HitManagerFP14ScePspFVector4P14ScePspFVector4P14ScePspFVector4Usf
+rom:0x8d394 reloc:MIPS_26 symbol:GetGroundHit__10HitManagerFP14ScePspFVector4
 rom:0x9d004 reloc:MIPS_26 symbol:func_game_sub_09C217C8
 rom:0x9d00c reloc:MIPS_26 symbol:func_game_sub_09C21670
 rom:0x9d0b4 reloc:MIPS_26 symbol:func_game_sub_09C22B28

@@ -1,31 +1,258 @@
 #pragma once
 
 #include "common.h"
+#include "enemy.hpp"
+#include "npc.hpp"
+#include "psptypes.h"
 #include "singleton.hpp"
 #include "player.hpp"
 
-struct SubCameraData {
-    u8 pad_0x0[0x4E];
-    u8 unknown_0x4E;
-    u8 pad_0x4F;
+union SubCameraState {
+    u32 word;
+    u8 byte;
+};
+
+struct PchngrCameraData {
+    u8 pad_0x0[0x5C];
+    float unknown_0x5C;
+    float unknown_0x60;
+};
+
+struct FishingCameraData {
+    SubCameraState state;
+    u32 checkResult;
+    void *stageUnique;
+};
+
+struct ZoomCameraData {
+    SubCameraState state;
+    Npc *npcs[3];
+    ScePspFVector4 position;
+    ScePspFVector4 direction;
+    u8 animationState;
+    u8 targetTypes[3];
+    s16 animationTotalFrames;
+    s16 operationFrame;
+    float yCenters[3];
+    float zSpacings[3];
+    float fieldOfView;
+    int stackSize;
+    float fieldsOfView[3];
+    ScePspFVector4 positions[3];
+    ScePspFVector4 targets[3];
+};
+
+struct PlayerEXCameraData {
+    u8 pad_0x0[4];
+    FishingCameraData fishing_cam;
+    ZoomCameraData zoom_cam;
+};
+
+struct CameraAngle {
+    s16 pitch;
+    s16 yaw;
+};
+
+union CameraCommand {
+    struct {
+        s8 op;
+        s8 words;
+    } type0;
+
+    struct {
+        s8 op;
+        s8 words;
+        s8 arg0;
+    } type1;
+
+    struct {
+        s8 op;
+        s8 words;
+        s8 arg0;
+        s8 arg1;
+    } type11;
+
+    struct {
+        s8 op;
+        s8 words;
+        s16 arg0;
+    } type2;
+
+    struct {
+        s8 op;
+        s8 words;
+        s32 arg0;
+    } type4;
+
+    struct {
+        s8 op;
+        s8 words;
+        s32 arg0;
+        s32 arg1;
+        s32 arg2;
+    } type444;
+};
+
+struct DemoCameraData {
+    ScePspFVector4 pos_start;
+    ScePspFVector4 pos_end;
+    ScePspFVector4 tar_start;
+    ScePspFVector4 tar_end;
+    ScePspUnion32 *pc;
+    ScePspUnion32 *loop_pc;
+    u8 move_type;
+    u8 pos_offset_type;
+    u8 tar_offset_type;
+    u8 pos_offset_bone_id;
+    u8 tar_offset_bone_id;
+    u8 follow_target;
+    u8 demo_id;
+    s8 demo_state;
+    Enemy *enemy;
+    float offset_start;
+    float offset_end;
+    CameraAngle pitch_yaw_start;
+    CameraAngle pitch_yaw_end;
+    s16 roll_start;
+    s16 roll_end;
+    s16 fov_start;
+    s16 fov_end;
+    s16 truck_shake_phase;
+    s16 truck_shake_rate;
+    s16 truck_shake_magnitude_start;
+    s16 truck_shake_magnitude_end;
+    s16 jib_shake_phase;
+    s16 jib_shake_rate;
+    s16 jib_shake_magnitude_start;
+    s16 jib_shake_magnitude_end;
+    s16 roll_shake_phase;
+    s16 roll_shake_rate;
+    s16 roll_shake_magnitude_start;
+    s16 roll_shake_magnitude_end;
+    s16 fov_shake_phase;
+    s16 fov_shake_rate;
+    s16 fov_shake_magnitude_start;
+    s16 fov_shake_magnitude_end;
+    union {
+        struct {
+            u8 truck; // unimplemented
+            u8 jib; // unimplemented
+            u8 roll;
+            u8 fov;
+        } shake_rng;
+        u8 shake_rngs[4];
+    };
+    ScePspUnion32 *jump_pc;
+    float interpolation_exponent;
+    u8 interpolation_type;
+    u8 error;
+    u8 is_quest_clear;
+    u8 enable_stage_collision;
+};
+
+union SubCameraData {
+    PchngrCameraData pchngr;
+    PlayerEXCameraData playerEX;
+    DemoCameraData demo;
+};
+
+struct SubCameraType {
+    enum {
+        STD,
+        GUNNER,
+        STG,
+        PCHNGR,
+        PLAYER_EX,
+        DEMO,
+    };
+private:
+    SubCameraType();
+};
+
+struct RailCameraData {
+    float scale;
+    float t;
+    u8 spline;
 };
 
 struct SubCamera {
+    typedef void (SubCamera::*mem_fn)();
+
     SubCamera() {
         unknown_0x90 = 0;
         unknown_0x92 = 0;
     }
     ~SubCamera() {}
 
-    u8 pad_0x0[0x90];
+    ScePspFVector4 current_position;
+    ScePspFVector4 current_target;
+    ScePspFVector4 last_camera_position;
+    u8 pad_0x30[0x80 - 0x30];
+    float current_roll;
+    u32 pad_0x84;
+    float current_fov;
+    u32 pad_0x8C;
     u8 unknown_0x90;
-    bool unknown_0x91;
+    bool isActive;
     u8 unknown_0x92;
-    u8 pad_0x93[0xA0 - 0x93];
-    SubCameraData unknown_0xA0;
-    u8 unknown_0xF0[0x13A - 0xF0];
-    bool unknown_0x13A;
-    u8 pad_0x13B[0x1A0 - 0x13B];
+    u8 pad_0x93[0x94 - 0x93];
+    s16 timer;
+    s16 timer_total;
+    SubCameraState cam_sub_mode;
+    SubCameraState cam_sub_state;
+    SubCameraData data;
+    mem_fn cam_sub_impl;
+    u8 cam_type;
+    u8 pad_0x18D[0x1A0 - 0x18D];
+
+    void cam_init(u8 type);
+    void cam_sub();
+    void cam_init_sub_std();
+    void cam_sub_std();
+    void cam_init_sub_gunner();
+    void cam_sub_gunner();
+    void cam_init_sub_stg();
+    void cam_sub_stg();
+    void cam_init_sub_pchngr();
+    void cam_sub_pchngr();
+    void cam_init_sub_playerEX();
+    void cam_sub_playerEX();
+    void cam_init_sub_demo();
+    void cam_sub_demo();
+
+    void cam_plEX_fishing(FishingCameraData&);
+    void cam_plEX_zoom(ZoomCameraData&);
+    float zoom_cam_rate(s16 timer, s16 total_timer, u8 state);
+    int point_cam_sub();
+
+    u32 CamRailMove(ScePspFVector4 *, bool);
+
+    void cam_rail_move(RailCameraData *,void *, void*);
+    void cam_rail_move0(RailCameraData *,void *, void*);
+
+    int ex_ev_camera();
+    int point_camera();
+    int point_camera_sub();
+
+    void Spline(ScePspFVector4 *points, int num_points);
+    void tri_diag(float *out, float *subdiag, float *diag, float *superdiag, float *in, int equations);
+
+    ScePspFMatrix4 *get_em_local();
+    void get_angle(CameraAngle *out);
+
+    void cmd_set_pos(ScePspFVector4 *out, CameraCommand *pc);
+    void cmd_set_tar(ScePspFVector4 *out, CameraCommand *pc);
+    void cmd_copy(int flags);
+    void cmd_cam_move(CameraCommand *pc);
+
+private:
+    inline void set_cam_sub(mem_fn fn) {
+        if (fn) {
+            cam_sub_impl = fn;
+        }
+    }
+
+    inline float interpolant();
 };
 
 struct Camera : Singleton<Camera> {
@@ -38,15 +265,19 @@ struct Camera : Singleton<Camera> {
     u8 padding_0x15[0xB0 - 0x15];
     SubCamera subCameras[6];
     u8 padding_0xA70[0xA7C - 0xA70];
-    float unknown_0xA7C;
-    u8 cameraScriptIndex;
+    Enemy *demo_enemy;
+    u8 next_demo_id;
     s8 unknown_0xA81;
     Player *player;
     s8 unknown_0xA88;
     u8 unknown_0xA89;
     s8 unknown_0xA8A;
-    u8 padding_0xA8B[0xAA9 - 0xA8B];
-    u8 unknown_0xAA9;
+    u8 padding_0xA8B[0xA8D - 0xA8B];
+    u8 base_sub_type;
+    u8 padding_0xA8E[0xA98 - 0xA8E];
+    RailCameraData rail;
+    u8 padding_0xAA4[0xAA9 - 0xAA4];
+    bool enableCameraControls;
     bool zClipping;
     u8 padding_0xAAB[0xAC0 - 0xAAB];
     s8 unknown_0xAC0;

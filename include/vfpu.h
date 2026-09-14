@@ -15,18 +15,22 @@ extern "C" {
 extern "C" {
 #endif
 
-inline void vtfm3_q(ScePspFVector4 *v, ScePspFMatrix4 *m, ScePspFVector4 *p) {
+float sceVfpuScalarPow(float, float);
+void sceVfpuQuaternionFromRotate(ScePspFVector4 *out, ScePspFVector4 *axis, float angle);
+void sceVfpuQuaternionToMatrix(ScePspFMatrix4 *out, ScePspFVector4 *quaternion);
+
+inline void flvecApplyMat33(ScePspFVector4 *v, ScePspFVector4 *p, ScePspFMatrix4 *m) {
 #if defined(__MWERKS__)
     __asm__ (
-        "lv.q C100, %2"
-        "lv.q C200, 0x0(%1)"
-        "lv.q C210, 0x10(%1)"
-        "lv.q C220, 0x20(%1)"
+        "lv.q C100, %1"
+        "lv.q C200, 0x0(%2)"
+        "lv.q C210, 0x10(%2)"
+        "lv.q C220, 0x20(%2)"
         "vmov.s S003, S103"
         "vtfm3.t C000, E200, C100"
         "sv.q C000, %0"
         : "=m" (*v)
-        : "m" (*m), "m" (*p)
+        : "m" (*p), "m" (*m)
     );
 #else
     v->x = m->x.x * p->x + m->x.y * p->y + m->x.z * p->z;
@@ -68,6 +72,24 @@ inline void sv_q(ScePspFVector4 *v, float x, float y, float z, float w) {
     v->y = y;
     v->z = z;
     v->w = w;
+#endif
+}
+
+inline void vsub_t(ScePspFVector4 *v, ScePspFVector4 *a, ScePspFVector4 *b) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C000, %1"
+        "lv.q C010, %2"
+        "vsub.t C000, C000, C010"
+        "sv.q C000, %0"
+        : "=m"(*v)
+        : "m"(*a), "m"(*b)
+    );
+#else
+    v->x = a->x - b->x;
+    v->y = a->y - b->y;
+    v->z = a->z - b->z;
+    v->w = a->w;
 #endif
 }
 
@@ -649,6 +671,201 @@ inline void rotateZXY(ScePspFMatrix4 *out, ScePspFVector3 * angle) {
     rotateZ(out, z);
     rotateX(out, x);
     rotateY(out, y);
+}
+
+
+inline void flmatInit(ScePspFMatrix4 *out) {
+    vmidt_q(out);
+}
+
+// in-place copy of eulerRotation with in == out == m
+// calling eulerRotation introduces an extra 4 bytes of phantom stack usage
+inline void flmatRotXYZ33(ScePspFMatrix4 *m, float alpha, float beta, float gamma) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q    C000, 0x0 (%1)"
+        "lv.q    C010, 0x10(%1)"
+        "lv.q    C020, 0x20(%1)"
+        "lv.q    C030, 0x30(%1)"
+        "lv.s    S100, %2"
+        "lv.s    S101, %3"
+        "lv.s    S102, %4"
+        "vcst.s  S103, VFPU_2_PI"
+        "vscl.t  C130, C100, S103"
+        "vsin.t  C110, C130"
+        "vcos.t  C120, C130"
+        "vmul.s  S000, S122, S121"
+        "vmul.s  S130, S112, S120"
+        "vmul.s  S010, S111, S122"
+        "vmul.s  S010, S010, S110"
+        "vsub.s  S010, S010, S130"
+        "vmul.s  S020, S110, S112"
+        "vmul.s  S131, S111, S122"
+        "vmul.s  S131, S131, S120"
+        "vadd.s  S020, S020, S131"
+        "vmul.s  S001, S112, S121"
+        "vmul.s  S011, S122, S120"
+        "vmul.s  S131, S111, S112"
+        "vmul.s  S131, S131, S110"
+        "vadd.s  S011, S011, S131"
+        "vmul.s  S130, S110, S122"
+        "vmul.s  S021, S111, S112"
+        "vmul.s  S021, S021, S120"
+        "vsub.s  S021, S021, S130"
+        "vneg.s  S002, S111"
+        "vmul.s  S012, S110, S121"
+        "vmul.s  S022, S121, S120"
+        "sv.q    C000, 0x0 (%0)"
+        "sv.q    C010, 0x10(%0)"
+        "sv.q    C020, 0x20(%0)"
+        "sv.q    C030, 0x30(%0)"
+        : "=m" (*m)
+        : "m" (*m), "m" (alpha), "m" (beta), "m" (gamma)
+    );
+#else
+    float sa = sinf(alpha), sb = sinf(beta), sc = sinf(gamma),
+          ca = cosf(alpha), cb = cosf(beta), cc = cosf(gamma);
+    m->x.x = cb*cc;   m->x.y = sa*sb*cc - ca*sc; m->x.z = ca*sb*cc + sa*sc; m->x.w = m->x.w;
+    m->y.x = cb*sc;   m->y.y = sa*sb*sc + ca*cc; m->y.z = ca*sb*sc - sa*cc; m->x.w = m->y.w;
+    m->z.x = -sb;     m->z.y = sa*cb;            m->z.z = ca*cb;            m->x.w = m->y.w;
+    m->w.x = m->w.x;  m->w.y = m->w.y;           m->w.z = m->w.z;           m->w.w = m->w.w;
+#endif
+}
+
+
+inline void flvecApplyMat33_2(ScePspFVector4 *v, ScePspFMatrix4 *m) {
+    flvecApplyMat33(v, v, m);
+}
+
+inline float Acos(float a) {
+#if defined(__MWERKS__)
+    float result;
+    __asm__ (
+        "lv.s   S000, 0x0(%1)"
+        "vcst.s S001, 5"
+        "vmul.s S000, S000, S001"
+        "vcos.s S010, S000"
+        "sv.s   S010, 0x0(%0)"
+        : "=m" (result)
+        : "m" (a)
+    );
+    return result;
+#else
+    return cosf(a);
+#endif
+}
+
+// misnomer
+inline void flvecOuterProduct(ScePspFVector4 *out, ScePspFVector4 *a, ScePspFVector4 *b) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q    C000, 0x0(%1)"
+        "lv.q    C010, 0x0(%2)"
+        "vzero.s S023"
+        "vcrsp.t C020, C000, C010"
+        "sv.q    C020, 0x0(%0)"
+        : "=m" (*out)
+        : "m" (*a), "m" (*b)
+    );
+#else
+    out->x = a->y * b->z - a->z * b->y;
+    out->y = a->z * b->x - a->x * b->z;
+    out->z = a->x * b->y - a->y * b->x;
+    out->w = 0;
+#endif
+}
+
+inline void ScaleVector(ScePspFVector4 *out, ScePspFVector4 *in, float scale) {
+    vscl_q(out, in, scale);
+}
+
+inline void AddVector(ScePspFVector4 *out, ScePspFVector4 *a, ScePspFVector4 *b) {
+    vadd_t(out, a, b);
+}
+
+inline void flQuatSetRot2(ScePspFVector4 *axis, float angle, ScePspFVector4 *out) {
+    sceVfpuQuaternionFromRotate(out, axis, angle);
+}
+
+inline void flQuatCnv(ScePspFVector4 *quaternion, ScePspFMatrix4 *out) {
+    sceVfpuQuaternionToMatrix(out, quaternion);
+}
+
+inline void cpInterVector(ScePspFVector4 *out, ScePspFVector4 *start, ScePspFVector4 *end, float t) {
+    float u = 1.0f - t;
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q    C000, 0x0 (%1)"
+        "lv.q    C010, 0x0 (%2)"
+        "lv.s    S020, 0x0 (%3)"
+        "lv.s    S021, 0x0 (%4)"
+        "vscl.t  C100, C000, S020"
+        "vscl.t  C110, C010, S021"
+        "vadd.t  C000, C100, C110"
+        "sv.q    C000, 0x0 (%0)"
+        : "=m" (*out)
+        : "m" (*start), "m" (*end), "m" (t), "m" (u)
+    );
+#else
+    out->x = start->x * t + end->x * u;
+    out->y = start->y * t + end->y * u;
+    out->z = start->z * t + end->z * u;
+    out->w = start->w;
+#endif
+}
+
+// would like to eliminate this, but some uses of cpInterVector write t & u to the stack in the wrong order
+inline void cpInterVector2(ScePspFVector4 *out, ScePspFVector4 *start, ScePspFVector4 *end, float t, float u) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q    C000, 0x0 (%1)"
+        "lv.q    C010, 0x0 (%2)"
+        "lv.s    S020, 0x0 (%3)"
+        "lv.s    S021, 0x0 (%4)"
+        "vscl.t  C100, C000, S020"
+        "vscl.t  C110, C010, S021"
+        "vadd.t  C000, C100, C110"
+        "sv.q    C000, 0x0 (%0)"
+        : "=m" (*out)
+        : "m" (*start), "m" (*end), "m" (t), "m" (u)
+    );
+#else
+    out->x = start->x * t + end->x * u;
+    out->y = start->y * t + end->y * u;
+    out->z = start->z * t + end->z * u;
+    out->w = start->w;
+#endif
+}
+
+inline void SubVector(ScePspFVector4 *out, ScePspFVector4 *minuend, ScePspFVector4 *subtrahend) {
+    vsub_t(out, minuend, subtrahend);
+}
+
+inline void flvecNormalize(ScePspFVector4 *v) {
+    normalize(v, v);
+}
+
+inline void nlCalcPoint(ScePspFVector4 *out, ScePspFVector4 *in, ScePspFMatrix4 *transform) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q    C100, 0x0 (%1)"
+        "lv.q    C200, 0x0 (%2)"
+        "lv.q    C210, 0x10(%2)"
+        "lv.q    C220, 0x20(%2)"
+        "lv.q    C230, 0x30(%2)"
+        "vcst.s  S003, 0"
+        "vtfm3.t C000, E200, C100"
+        "vadd.t  C000, C000, C230"
+        "sv.q    C000, 0x0 (%0)"
+        : "=m" (*out)
+        : "m" (*in), "m" (*transform)
+    );
+#else
+    out->x = transform->x.x * in->x + transform->x.y * in->y + transform->x.z * in->z;
+    out->y = transform->y.x * in->x + transform->y.y * in->y + transform->y.z * in->z;
+    out->z = transform->z.x * in->x + transform->z.y * in->y + transform->z.z * in->z;
+    out->w = 0; // constant 0 is "undefined", but per PPSSPP source, hardware returns 0
+#endif
 }
 
 #ifdef __cplusplus

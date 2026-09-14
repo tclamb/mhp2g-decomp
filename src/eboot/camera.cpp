@@ -76,8 +76,8 @@ void Camera::method_088138DC() {
     unknown_0xA81 = 0;
     unknown_0xA8A = 0;
     unknown_0xA88 = 0;
-    unknown_0xA7C = 0;
-    cameraScriptIndex = 0;
+    demo_enemy = 0;
+    next_demo_id = 0;
     method_08815744();
     method_08813990();
 }
@@ -155,8 +155,8 @@ INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08814BD8);
 
 extern "C"
 bool func_eboot_08814BE0(Camera *this_) {
-    if (this_->subCameras[5].unknown_0x91) {
-        switch (this_->subCameras[5].unknown_0xA0.unknown_0x4E) {
+    if (this_->subCameras[5].isActive) {
+        switch (this_->subCameras[5].data.demo.demo_id) {
         case 0x50:
         case 0x51:
         case 0x52:
@@ -198,11 +198,11 @@ bool func_eboot_08814C50(Camera *this_) {
     if (GameSys::objectPtr->allow_hidden_flag == true) {
         return true;
     }
-    SubCameraData &unknown = this_->subCameras[5].unknown_0xA0;
-    if (this_->subCameras[5].unknown_0x13A) {
+    DemoCameraData &data = this_->subCameras[5].data.demo;
+    if (data.is_quest_clear) {
         return true;
     }
-    switch (unknown.unknown_0x4E) {
+    switch (data.demo_id) {
     case 0x3:
     case 0x4:
     case 0x5:
@@ -516,7 +516,7 @@ extern CameraScript
     D_lobby_task_09B078C0, D_lobby_task_09B079D8, D_lobby_task_09B07C60, D_lobby_task_09B07D20, D_lobby_task_09B07DE0,
     D_lobby_task_09B07EA0, D_lobby_task_09B07F60, D_lobby_task_09B08020, D_lobby_task_09B080E0, D_lobby_task_09B081A0;
 
-u32 *D_eboot_08935874[107] = {
+u32 *demo_cam_tbl[107] = {
     0,
     &D_eboot_08931830[0],
     &D_eboot_08931F74[0],

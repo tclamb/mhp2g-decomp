@@ -193,7 +193,7 @@ void LightManager::method_08860EB8(ObjBase *c) {
         ge::lighttype(i, GE_LIGHTTYPE_DIRECTIONAL);
 
         ScePspVector4 position;
-        vtfm3_q(&position.fv, &Camera::objectPtr->world, &light.position);
+        flvecApplyMat33(&position.fv, &light.position, &Camera::objectPtr->world);
         ge::lightposition(i, &position);
 
         ge::lightdiffusecolor(i, color.ui);
@@ -212,7 +212,7 @@ void LightManager::method_0886117C(s8 flag) {
     for (int i = 0; i < 3; ++i) {
         light_data &light = lighting.lights[i];
         ScePspVector4 position;
-        vtfm3_q(&position.fv, &Camera::objectPtr->world, &light.position);
+        flvecApplyMat33(&position.fv, &light.position, &Camera::objectPtr->world);
 
         ge::lightposition(i, &position);
         ge::lighttype(i, GE_LIGHTTYPE_DIRECTIONAL);

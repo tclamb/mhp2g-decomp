@@ -7,6 +7,7 @@
 
 #define DEGREES_TO_VFPU(degrees) ((degrees) / 90.0f)
 #define PI 3.141592653589793238462643383279502884
+#define DEGREES_TO_RADIANS(degrees) ((degrees) * PI / 180.0f)
 
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
