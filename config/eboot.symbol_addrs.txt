@@ -297,7 +297,7 @@ inLoadedStage__7ObjBaseFv = 0x08865BA4; // type:func
 updateStagePosition__7ObjBaseFv = 0x08865BC8; // type:func
 toStagePosition__7ObjBaseFP14ScePspFVector4UsP14ScePspFVector4 = 0x08865C24; // type:func
 method_08865C80__7ObjBaseFUi = 0x08865C80; // type:func
-testAnimation__7ObjBaseFbUc = 0x08865CB0; // type:func
+pl_action_ck__7ObjBaseFUcUc = 0x08865CB0; // type:func
 method_08865D4C__7ObjBaseFv = 0x08865D4C; // type:func
 method_08865D7C__7ObjBaseFv = 0x08865D7C; // type:func
 vtable_0x30__7ObjBaseFv = 0x08865DB4; // type:func
@@ -355,12 +355,20 @@ zoom_cam_rate__9SubCameraFssUc = 0x0888AC6C; // type:func
 point_camera__9SubCameraFv = 0x0888ACF0; // type:func
 point_cam_sub__9SubCameraFv = 0x0888AEC4; // type:func
 
+ZoomRateCalc__9SubCameraFP21CameraDataEntryHeaderf = 0x0888BF98; // type:func
+
 Spline__9SubCameraFP14ScePspFVector4i = 0x0888C0B0; // type:func
 tri_diag__9SubCameraFPfPfPfPfPfi = 0x0888C498; // type:func
 ex_ev_camera__9SubCameraFv = 0x0888C6FC; // type:func
 
+pl_falldown_status__9SubCameraFv = 0x0888D438; // type:func
+
+vInnerProductXYZ__9SubCameraFP14ScePspFVector4P14ScePspFVector4 = 0x0888DECC; // type:func
+vInnerProductXZ__9SubCameraFP14ScePspFVector4P14ScePspFVector4 = 0x0888DEFC; // type:func
 get_em_local__9SubCameraFv = 0x0888DF1C; // type:func
 get_angle__9SubCameraFP11CameraAngle = 0x0888DF90; // type:func
+
+cmGetGroundHit__9SubCameraFP14ScePspFVector4P6Player = 0x0888E2BC; // type:func
 
 cmd_set_pos__9SubCameraFP14ScePspFVector4P13CameraCommand = 0x0888E48C; // type:func
 cmd_set_tar__9SubCameraFP14ScePspFVector4P13CameraCommand = 0x0888E5EC; // type:func

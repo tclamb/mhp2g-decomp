@@ -12,6 +12,33 @@ union SubCameraState {
     u8 byte;
 };
 
+struct CameraDataEntryHeader {
+    u8 pad_0x0;
+    u8 index;
+    u8 move_type;
+    u8 axes;
+    u8 target_type;
+    u8 zone_count;
+    u8 attributes;
+    u8 pad_0x7;
+    float near_distance;
+    float far_distance;
+    float near_fov;
+    float far_fov;
+    void *zones;
+    void *bytepairs;
+};
+
+struct StdCameraData {
+    ScePspFVector4 position;
+    ScePspFVector4 target;
+    ScePspFVector4 previous_position;
+    float ground_y;
+    s8 ground_hit;
+    u8 is_falldown;
+    s16 falldown_timer;
+};
+
 struct PchngrCameraData {
     u8 pad_0x0[0x5C];
     float unknown_0x5C;
@@ -103,8 +130,8 @@ struct DemoCameraData {
     u8 move_type;
     u8 pos_offset_type;
     u8 tar_offset_type;
-    u8 pos_offset_bone_id;
-    u8 tar_offset_bone_id;
+    u8 pos_offset_joint_id;
+    u8 tar_offset_joint_id;
     u8 follow_target;
     u8 demo_id;
     s8 demo_state;
@@ -151,6 +178,7 @@ struct DemoCameraData {
 };
 
 union SubCameraData {
+    StdCameraData std;
     PchngrCameraData pchngr;
     PlayerEXCameraData playerEX;
     DemoCameraData demo;
@@ -234,12 +262,20 @@ struct SubCamera {
     int point_camera();
     int point_camera_sub();
 
+    float ZoomRateCalc(CameraDataEntryHeader *d, float distance);
+
     void Spline(ScePspFVector4 *points, int num_points);
     void tri_diag(float *out, float *subdiag, float *diag, float *superdiag, float *in, int equations);
 
+    bool pl_falldown_status();
+
+    float vInnerProductXYZ(ScePspFVector4 *a, ScePspFVector4 *b);
+    float vInnerProductXZ(ScePspFVector4 *a, ScePspFVector4 *b);
     ScePspFMatrix4 *get_em_local();
     void get_angle(CameraAngle *out);
 
+    float cmGetGroundHit(ScePspFVector4 *camera_position, Player *player);
+    int SenkaiChousei(int angle, float, float, float);
     void cmd_set_pos(ScePspFVector4 *out, CameraCommand *pc);
     void cmd_set_tar(ScePspFVector4 *out, CameraCommand *pc);
     void cmd_copy(int flags);

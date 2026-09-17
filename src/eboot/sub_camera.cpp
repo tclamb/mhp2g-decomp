@@ -348,7 +348,7 @@ int SubCamera::point_cam_sub() {
             break;
         case 1:
             d.pos_offset_type = old_pc->c[2];
-            d.pos_offset_bone_id = old_pc->c[3];
+            d.pos_offset_joint_id = old_pc->c[3];
             break;
         case 2:
             cmd_set_pos(&d.pos_start, cmd);
@@ -358,7 +358,7 @@ int SubCamera::point_cam_sub() {
             break;
         case 4:
             d.tar_offset_type = old_pc->c[2];
-            d.tar_offset_bone_id = old_pc->c[3];
+            d.tar_offset_joint_id = old_pc->c[3];
             break;
         case 5:
             cmd_set_tar(&d.tar_start, cmd);
@@ -548,8 +548,22 @@ INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888B844);
 // GetOrthogonalPoint
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888B944);
 
-// ZoomRateCalc
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888BF98);
+float SubCamera::ZoomRateCalc(CameraDataEntryHeader *d, float distance) {
+    if (distance <= d->near_distance) {
+        return d->near_fov;
+    }
+
+    if (distance >= d->far_distance) {
+        return d->far_fov;
+    }
+
+    if (d->far_distance == d->near_distance) {
+        return (d->near_fov + d->far_fov) * 0.5f;
+    }
+
+    float delta = (d->far_fov - d->near_fov) * (distance - d->near_distance) / (d->far_distance - d->near_distance);
+    return delta + d->near_fov;
+}
 
 // ZoomBaseAngleRail
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888C01C);
@@ -681,8 +695,48 @@ INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888D304);
 // Fishing_cam_chk
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888D40C);
 
-// pl_falldown_status
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888D438);
+bool SubCamera::pl_falldown_status() {
+    StdCameraData *d = &data.std;
+    Player *pl = Camera::objectPtr->player;
+    if (pl->action_type == 2 /* DAMAGE */) {
+        d->is_falldown = false;
+        return false;
+    }
+    u8 state = 0;
+    if (pl->posture == 2 /* FLY */) {
+        state = 1;
+        if (pl->position.y < pl->last_position.y - 10.0f) {
+            state = 2;
+            float ground_y = HitManager::objectPtr->GetGroundHit(&pl->position);
+            if (pl->position.y > ground_y + 300.0f) {
+                state = 3;
+            }
+        }
+    }
+    switch (d->is_falldown) {
+    case 0:
+        if (state < 3) {
+            d->falldown_timer = 4;
+            break;
+        }
+        if (--d->falldown_timer > 0) {
+            break;
+        }
+        ++d->is_falldown;
+        // fallthrough
+    case 1:
+        if ((state & 1) != 0) {
+            d->falldown_timer = 15;
+            return true;
+        }
+        if (--d->falldown_timer > 0) {
+            return true;
+        }
+        d->is_falldown = 0;
+        break;
+    }
+    return false;
+}
 
 // PachiTypeCheck
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888D58C);
@@ -713,17 +767,21 @@ float D_eboot_089AA200[6] = {
     1.0f / 5,
 };
 
+u8 D_eboot_089AA218[8] = {}; // pad
+
 // DKAS
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888D764);
 
 // Cardano
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888DA18);
 
-// vInnerProductXYZ
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888DECC);
+float SubCamera::vInnerProductXYZ(ScePspFVector4 *a, ScePspFVector4 *b) {
+    return a->x * b->x + a->y * b->y + a->z * b->z;
+}
 
-// vInnerProductXZ
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888DEFC);
+float SubCamera::vInnerProductXZ(ScePspFVector4 *a, ScePspFVector4 *b) {
+    return a->x * b->x + a->z * b->z;
+}
 
 ScePspFMatrix4 *SubCamera::get_em_local() {
     DemoCameraData &d = data.demo;
@@ -763,8 +821,16 @@ INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888E0E0);
 // Cam_senkai_chk
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888E198);
 
-// cmGetGroundHit
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888E2BC);
+float SubCamera::cmGetGroundHit(ScePspFVector4 *camera_position, Player *player) {
+    float ground_y = HitManager::objectPtr->GetGroundHit(camera_position);
+    if (player->position.y <= ground_y) {
+        return ground_y;
+    }
+    ScePspFVector4 raised;
+    copy_q(&raised, camera_position);
+    raised.y += 150.0f;
+    return HitManager::objectPtr->GetGroundHit(&raised);
+}
 
 // SenkaiChousei
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888E338);
@@ -783,7 +849,7 @@ void SubCamera::cmd_set_pos(ScePspFVector4 *out, CameraCommand *pc) {
     switch (d.pos_offset_type) {
     case 2:
         j = pl->hierarchy.roots[0];
-        nlCalcPoint(out, out, &j[d.pos_offset_bone_id].globalPose);
+        nlCalcPoint(out, out, &j[d.pos_offset_joint_id].globalPose);
         break;
     case 0:
         nlCalcPoint(out, out, &pl->transform);
@@ -820,7 +886,7 @@ void SubCamera::cmd_set_tar(ScePspFVector4 *out, CameraCommand *pc) {
     switch (d.tar_offset_type) {
     case 2:
         j = pl->hierarchy.roots[0];
-        nlCalcPoint(out, out, &j[d.tar_offset_bone_id].globalPose);
+        nlCalcPoint(out, out, &j[d.tar_offset_joint_id].globalPose);
         break;
     case 0:
         nlCalcPoint(out, out, &pl->transform);
@@ -927,7 +993,7 @@ void SubCamera::cmd_cam_move(CameraCommand *pc) {
             switch (d.pos_offset_type) {
             case 2: {
                 Joint *j = pl->hierarchy.roots[0];
-                flvecApplyMat33_2(&offset, &j[d.tar_offset_bone_id].globalPose);
+                flvecApplyMat33_2(&offset, &j[d.tar_offset_joint_id].globalPose);
                 break;
             }
             case 0:
@@ -953,7 +1019,7 @@ void SubCamera::cmd_cam_move(CameraCommand *pc) {
             switch (d.tar_offset_type) {
             case 2: {
                 Joint *j = pl->hierarchy.roots[0];
-                m =  &j[d.pos_offset_bone_id].globalPose;
+                m =  &j[d.pos_offset_joint_id].globalPose;
                 flvecApplyMat33_2(&offset, m);
                 break;
             }

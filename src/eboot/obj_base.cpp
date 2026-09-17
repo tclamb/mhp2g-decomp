@@ -33,7 +33,7 @@ void ObjBase::vtable_0x10() {
     reset_transform();
     memset(&unknown_0x1F0, 0, sizeof(unknown_0x1F0));
     memset(&position, 0, sizeof(position));
-    memset(&unknown_0x210, 0, sizeof(unknown_0x210));
+    memset(&last_position, 0, sizeof(last_position));
     // inline method?
     scale.z = 1; scale.y = 1; scale.x = 1;
     // inline method?
@@ -144,13 +144,13 @@ void ObjBase::method_08865A94(u32 flag) {
 void ObjBase::method_08865AD4(u16 flags, int a, int b) {
     switch(flags & 0xFF) {
     case 1:
-        unknown_0x280 = 1;
+        posture = 1;
         break;
     case 2:
-        unknown_0x280 = 2;
+        posture = 2;
         break;
     default:
-        unknown_0x280 = 0;
+        posture = 0;
         break;
     }
 
@@ -210,8 +210,8 @@ u32 ObjBase::method_08865C80(u32 flag) {
     }
 }
 
-int ObjBase::testAnimation(bool isIdle, u8 animationId) {
-    if (this->isIdle == isIdle && this->animationId == animationId) {
+bool ObjBase::pl_action_ck(u8 type, u8 id) {
+    if (action_type == type && action_id == id) {
         return true;
     }
     return false;

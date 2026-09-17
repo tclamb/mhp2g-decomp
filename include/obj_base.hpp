@@ -33,7 +33,7 @@ struct ObjBase : ModelBase {
     void updateStagePosition();
     void toStagePosition(ScePspFVector4 *out, u16 stageId, ScePspFVector4 *in);
     u32 method_08865C80(u32 flag);
-    int testAnimation(bool isIdle, u8 animationId);
+    bool pl_action_ck(u8 type, u8 id);
     void method_08865D4C();
     void method_08865D7C();
     int method_08865DCC(s16);
@@ -55,7 +55,7 @@ struct ObjBase : ModelBase {
     u8 kind;
     ScePspFVector4 unknown_0x1F0;
     ScePspFVector4 position;
-    ScePspFVector4 unknown_0x210;
+    ScePspFVector4 last_position;
     ScePspFVector4 scale;
     u8 alpha;
     u8 padding_0x231[0x244 - 0x231];
@@ -69,15 +69,15 @@ struct ObjBase : ModelBase {
     u8 padding_0x276[6];
     u16 unknown_0x27C;
     u8 padding_0x27E[2];
-    u8 unknown_0x280;
+    u8 posture;
     u8 padding_0x281[4];
     u8 unknown_0x285;
     u32 unknown_0x288;
     u32 unknown_0x28C;
     u8 unknown_0x290;
     u8 padding_0x291[7];
-    bool isIdle;
-    u8 animationId;
+    u8 action_type;
+    u8 action_id;
     u16 stageId;
     u8 padding_0x29C[0x2AC - 0x29C];
     ScePspUnion32 diffuse_light_colors[3];
