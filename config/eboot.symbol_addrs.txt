@@ -348,25 +348,47 @@ cam_init_sub_playerEX__9SubCameraFv = 0x08889E68; // type:func
 cam_sub_playerEX__9SubCameraFv = 0x08889E94; // type:func
 cam_init_sub_demo__9SubCameraFv = 0x08889ED4; // type:func
 cam_sub_demo__9SubCameraFv = 0x08889F00; // type:func
-
+CamRailMove__9SubCameraFP14ScePspFVector4b = 0x0888A034; // type:func
+cam_rail_move_sub__9SubCameraFP15CameraRailPointP20CameraRailDefinitionif = 0x0888A08C; // type:func
+cam_rail_move_0__9SubCameraFP15CameraRailPointP20CameraRailDefinitionP14ScePspFVector4 = 0x0888A1A0; // type:func
+cam_rail_move__9SubCameraFP15CameraRailPointP20CameraRailDefinitionP14ScePspFVector4 = 0x0888A23C; // type:func
 cam_plEX_fishing__9SubCameraFR17FishingCameraData = 0x0888A36C; // type:func
+fish_cam_sub__9SubCameraFR17FishingCameraData = 0x0888A440; // type:func
 cam_plEX_zoom__9SubCameraFR14ZoomCameraData = 0x0888A5C4; // type:func
 zoom_cam_rate__9SubCameraFssUc = 0x0888AC6C; // type:func
 point_camera__9SubCameraFv = 0x0888ACF0; // type:func
 point_cam_sub__9SubCameraFv = 0x0888AEC4; // type:func
-
-ZoomRateCalc__9SubCameraFP21CameraDataEntryHeaderf = 0x0888BF98; // type:func
-
+CamRailPoint__9SubCameraFP14ScePspFVector4P14ScePspFMatrix4f = 0x0888B304; // type:func
+GetRailTarget__9SubCameraFP14ScePspFVector4P15CameraDataEntryP14ScePspFVector4 = 0x0888B3B0; // type:func
+GetRailCamPos__9SubCameraFP14ScePspFVector4P15CameraDataEntry = 0x0888B500; // type:func
+GetNearSection__9SubCameraFP20CameraRailDefinitionP14ScePspFVector4 = 0x0888B588; // type:func
+GetNearPoint__9SubCameraFP15CameraRailPointP20CameraRailDefinitionP14ScePspFVector4 = 0x0888B698; // type:func
+get_near_point_sub__9SubCameraFP15CameraRailPointP14ScePspFVector4Pfi = 0x0888B844; // type:func
+GetOrthogonalPoint__9SubCameraFPfP14ScePspFMatrix4P14ScePspFVector4i = 0x0888B944; // type:func
+ZoomRateCalc__9SubCameraFP15CameraDataEntryf = 0x0888BF98; // type:func
+ZoomBaseAngleRail__9SubCameraFP20CameraRailDefinitionif = 0x0888C01C; // type:func
+RollAngleRail__9SubCameraFP20CameraRailDefinitionif = 0x0888C048; // type:func
 Spline__9SubCameraFP14ScePspFVector4i = 0x0888C0B0; // type:func
 tri_diag__9SubCameraFPfPfPfPfPfi = 0x0888C498; // type:func
 ex_ev_camera__9SubCameraFv = 0x0888C6FC; // type:func
 
-pl_falldown_status__9SubCameraFv = 0x0888D438; // type:func
+std_cam_sw_set_sub__9SubCameraFv = 0x0888CD08; // type:func
+GetPanTarget__9SubCameraFP14ScePspFVector4P15CameraDataEntry = 0x0888CDAC; // type:func
 
+Manual_cam_chk__9SubCameraFv = 0x0888D304; // type:func
+Fishing_cam_chk__9SubCameraFv = 0x0888D40C; // type:func
+pl_falldown_status__9SubCameraFv = 0x0888D438; // type:func
+PachiTypeCheck__9SubCameraFv = 0x0888D58C; // type:func
+pachinger_mat__9SubCameraFP14ScePspFMatrix4ssP14ScePspFVector4 = 0x0888D65C; // type:func
+DKAS__9SubCameraFPfPf = 0x0888D764; // type:func
+Cardano__9SubCameraFPfPf = 0x0888DA18; // type:func
 vInnerProductXYZ__9SubCameraFP14ScePspFVector4P14ScePspFVector4 = 0x0888DECC; // type:func
 vInnerProductXZ__9SubCameraFP14ScePspFVector4P14ScePspFVector4 = 0x0888DEFC; // type:func
 get_em_local__9SubCameraFv = 0x0888DF1C; // type:func
 get_angle__9SubCameraFP11CameraAngle = 0x0888DF90; // type:func
+Camera_hokan_start__9SubCameraFi = 0x0888E028; // type:func
+Camera_hokan_chk__9SubCameraFP15CameraDataEntry = 0x0888E054; // type:func
+Camera_hokan_sub__9SubCameraFv = 0x0888E0E0; // type:func
 
 cmGetGroundHit__9SubCameraFP14ScePspFVector4P6Player = 0x0888E2BC; // type:func
 
@@ -683,6 +705,7 @@ vtable_0xB4__9StageBaseFv = 0x088CEE50; // type:func
 vtable_0xB8__9StageBaseFv = 0x088CEE78; // type:func
 activeSkill__6PlayerFUc = 0x088D9364; // type:func
 bagAdd__6PlayerFUssb = 0x088D9BEC; // type:func
+Pl_bari_ck__6PlayerFv = 0x088DD5EC; // type:func
 method_088DF804__13PlayerManagerFi = 0x088DF804; // type:func
 reset__Q211DataManager5entryFv = 0x088E0AAC; // type:func
 __ct__11DataManagerFv = 0x088E0AC0; // type:func

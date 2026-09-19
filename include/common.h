@@ -82,6 +82,7 @@ struct stages {
         GREAT_FOREST_N_2 = 259,
         GREAT_FOREST_N_7 = 264,
         TOWER_3 = 130,
+        SWAMP_N_4 = 75,
     };
 
 private:

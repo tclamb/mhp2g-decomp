@@ -12,7 +12,31 @@ union SubCameraState {
     u8 byte;
 };
 
-struct CameraDataEntryHeader {
+struct CameraRailDefinition {
+    ScePspFVector4 cam_points[16];
+    ScePspFVector4 target_points[16];
+    float fovs[16];
+    s16 rolls[16];
+    u8 count;
+    u8 enable_y;
+    u8 pad[14];
+    ScePspFVector3 model_offset;
+    ScePspFVector3 world_offset;
+};
+
+struct CameraPanDefinition {
+    ScePspFVector3 camera_position;
+    ScePspFVector3 target_position;
+    ScePspFVector3 model_offset;
+    ScePspFVector3 world_offset;
+};
+
+struct CameraHokanInfo {
+    u8 area_id;
+    u8 steps;
+};
+
+struct CameraDataEntry {
     u8 pad_0x0;
     u8 index;
     u8 move_type;
@@ -26,7 +50,11 @@ struct CameraDataEntryHeader {
     float near_fov;
     float far_fov;
     void *zones;
-    void *bytepairs;
+    CameraHokanInfo *hokan_info;
+    union {
+        CameraPanDefinition pan;
+        CameraRailDefinition rail;
+    };
 };
 
 struct StdCameraData {
@@ -37,6 +65,9 @@ struct StdCameraData {
     s8 ground_hit;
     u8 is_falldown;
     s16 falldown_timer;
+    u8 pad_0x38[0x84 - 0x38];
+    u16 buttons;
+    u16 rising_edge;
 };
 
 struct PchngrCameraData {
@@ -48,7 +79,7 @@ struct PchngrCameraData {
 struct FishingCameraData {
     SubCameraState state;
     u32 checkResult;
-    void *stageUnique;
+    void *stage_unique;
 };
 
 struct ZoomCameraData {
@@ -197,8 +228,8 @@ private:
     SubCameraType();
 };
 
-struct RailCameraData {
-    float scale;
+struct CameraRailPoint {
+    float coord;
     float t;
     u8 spline;
 };
@@ -231,7 +262,7 @@ struct SubCamera {
     SubCameraData data;
     mem_fn cam_sub_impl;
     u8 cam_type;
-    u8 pad_0x18D[0x1A0 - 0x18D];
+    float hokan_divisor;
 
     void cam_init(u8 type);
     void cam_sub();
@@ -247,33 +278,47 @@ struct SubCamera {
     void cam_sub_playerEX();
     void cam_init_sub_demo();
     void cam_sub_demo();
-
+    int CamRailMove(ScePspFVector4 *, bool);
+    void cam_rail_move_sub(CameraRailPoint *point, CameraRailDefinition *rail, int spline, float t);
+    int cam_rail_move_0(CameraRailPoint *point, CameraRailDefinition *rail, ScePspFVector4 *position);;
+    int cam_rail_move(CameraRailPoint *point, CameraRailDefinition *rail, ScePspFVector4 *position);;
     void cam_plEX_fishing(FishingCameraData&);
+    bool fish_cam_sub(FishingCameraData &);
     void cam_plEX_zoom(ZoomCameraData&);
-    float zoom_cam_rate(s16 timer, s16 total_timer, u8 state);
-    int point_cam_sub();
-
-    u32 CamRailMove(ScePspFVector4 *, bool);
-
-    void cam_rail_move(RailCameraData *,void *, void*);
-    void cam_rail_move0(RailCameraData *,void *, void*);
-
-    int ex_ev_camera();
+    float zoom_cam_rate(s16 timer, s16 total_timer, u8 state);\
     int point_camera();
-    int point_camera_sub();
-
-    float ZoomRateCalc(CameraDataEntryHeader *d, float distance);
-
+    int point_cam_sub();
+    void CamRailPoint(ScePspFVector4 *out, ScePspFMatrix4 *coeff, float t);
+    void GetRailTarget(ScePspFVector4 *out, CameraDataEntry *data, ScePspFVector4 *in);
+    void GetRailCamPos(ScePspFVector4 *out, CameraDataEntry *data);
+    int GetNearSection(CameraRailDefinition *definition, ScePspFVector4 *position);
+    int GetNearPoint(CameraRailPoint *point, CameraRailDefinition *rail, ScePspFVector4 *position);
+    int get_near_point_sub(CameraRailPoint *point, ScePspFVector4 *section, float *idk, int n);
+    int GetOrthogonalPoint(float *idk, ScePspFMatrix4 *spline_section, ScePspFVector4 *postion, int enable_y);
+    float ZoomRateCalc(CameraDataEntry *d, float distance);
+    float ZoomBaseAngleRail(CameraRailDefinition *definition, int spline, float t);
+    float RollAngleRail(CameraRailDefinition *definition, int spline, float t);
     void Spline(ScePspFVector4 *points, int num_points);
     void tri_diag(float *out, float *subdiag, float *diag, float *superdiag, float *in, int equations);
+    int ex_ev_camera();
 
+    void std_cam_sw_set_sub();
+    void GetPanTarget(ScePspFVector4 *out, CameraDataEntry *data);
+
+    bool Manual_cam_chk();
+    bool Fishing_cam_chk();
     bool pl_falldown_status();
-
+    u8 PachiTypeCheck();
+    void pachinger_mat(ScePspFMatrix4 *out, s16 alpha, s16 beta, ScePspFVector4 *position);
+    void DKAS(float *out, float *coeffs);
+    int Cardano(float *out, float *coeffs);
     float vInnerProductXYZ(ScePspFVector4 *a, ScePspFVector4 *b);
     float vInnerProductXZ(ScePspFVector4 *a, ScePspFVector4 *b);
     ScePspFMatrix4 *get_em_local();
     void get_angle(CameraAngle *out);
-
+    void Camera_hokan_start(int steps);
+    void Camera_hokan_chk(CameraDataEntry *area);
+    float Camera_hokan_sub();
     float cmGetGroundHit(ScePspFVector4 *camera_position, Player *player);
     int SenkaiChousei(int angle, float, float, float);
     void cmd_set_pos(ScePspFVector4 *out, CameraCommand *pc);
@@ -300,7 +345,9 @@ struct Camera : Singleton<Camera> {
     u8 unknown_0x14;
     u8 padding_0x15[0xB0 - 0x15];
     SubCamera subCameras[6];
-    u8 padding_0xA70[0xA7C - 0xA70];
+    u16 buttons;
+    u16 rising_edge;
+    u8 padding_0xA74[0xA7C - 0xA74];
     Enemy *demo_enemy;
     u8 next_demo_id;
     s8 unknown_0xA81;
@@ -308,10 +355,12 @@ struct Camera : Singleton<Camera> {
     s8 unknown_0xA88;
     u8 unknown_0xA89;
     s8 unknown_0xA8A;
-    u8 padding_0xA8B[0xA8D - 0xA8B];
+    bool changeStageCamera;
+    u8 padding_0xA8C[0xA8D - 0xA8C];
     u8 base_sub_type;
-    u8 padding_0xA8E[0xA98 - 0xA8E];
-    RailCameraData rail;
+    CameraDataEntry *areas;
+    u8 area_id;
+    CameraRailPoint rail_point;
     u8 padding_0xAA4[0xAA9 - 0xAA4];
     bool enableCameraControls;
     bool zClipping;

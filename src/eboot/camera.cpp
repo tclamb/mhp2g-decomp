@@ -350,12 +350,12 @@ ScePspFVector4 D_eboot_08931260[8] = {
     {100, -550, -1000}
 };
 
-struct CameraPairData {
-    ScePspFVector3 left;
-    ScePspFVector3 right;
+struct FishingCameraOffsets {
+    ScePspFVector3 position;
+    ScePspFVector3 target;
 };
 
-CameraPairData D_eboot_089312E0[39] = {
+FishingCameraOffsets D_eboot_089312E0[39] = {
     {{84, 380, -200}, {10, 21, 127}},
     {{46, 143, 690}, {-21, 154, 176}},
     {{46, 90, 640}, {-21, 104, 176}},

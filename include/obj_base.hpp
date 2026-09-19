@@ -84,7 +84,9 @@ struct ObjBase : ModelBase {
     u8 padding_0x2B8[2];
     u16 unknown_0x2BA;
     u16 unknown_0x2BC;
-    u8 padding_0x2BE[0x324 - 0x2BE];
+    u8 padding_0x2BE[0x320 - 0x2BE];
+    u16 next_rotation;
+    u8 padding_0x322[0x324 - 0x322];
     ScePspSVector4 unknown_0x324;
     u8 padding_0x32C[0x33C - 0x32C];
     u8 unknown_0x33C;

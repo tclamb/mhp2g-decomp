@@ -4,6 +4,7 @@
 
 #if !defined(__MWERKS__)
 extern "C" {
+    float absf(float);
     float sinf(float);
     float cosf(float);
     float sqrtf(float);
@@ -451,6 +452,22 @@ inline void normalize(ScePspFVector4 *out, ScePspFVector4 *v) {
 #endif
 }
 
+inline float vabs_s(float x) {
+    float result;
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.s S000, %1"
+        "vabs.s S010, S000"
+        "sv.s S010, %0"
+        : "=m"(result)
+        : "m"(x)
+    );
+#else
+    result = absf(x);
+#endif
+    return result;
+}
+
 inline float vsqrt_s(float x) {
     float result;
 #if defined(__MWERKS__)
@@ -865,6 +882,55 @@ inline void nlCalcPoint(ScePspFVector4 *out, ScePspFVector4 *in, ScePspFMatrix4 
     out->y = transform->y.x * in->x + transform->y.y * in->y + transform->y.z * in->z;
     out->z = transform->z.x * in->x + transform->z.y * in->y + transform->z.z * in->z;
     out->w = 0; // constant 0 is "undefined", but per PPSSPP source, hardware returns 0
+#endif
+}
+
+inline float flvecCalcDistance(ScePspFVector4 *p, ScePspFVector4 *q) {
+    float result;
+#if defined (__MWERKS__)
+    __asm__ (
+        "lv.q C000, %1"
+        "lv.q C010, %2"
+        "vsub.t C000, C000, C010"
+        "vdot.t S010, C000, C000"
+        "vsqrt.s S010, S010"
+        "sv.s S010, %0"
+        : "=m"(result)
+        : "m"(*p), "m"(*q)
+    );
+#else
+    result = (p->x - q->x) * (p->x - q->x) +
+             (p->y - q->y) * (p->y - q->y) +
+             (p->z - q->z) * (p->z - q->z);
+    result = sqrtf(result);
+#endif
+    return result;
+}
+
+inline void flvecRotY(ScePspFVector4 *v, float angle) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C000, 0x0(%0)"
+        "lv.q C100, 0x0(%0)"
+        "lv.s S110, 0x00(%1)"
+        "vcst.s S111, VFPU_2_PI"
+        "vmul.s S122, S110, S111"
+        "vsin.s S120, S122"
+        "vcos.s S121, S122"
+        "vmul.s S000, S121, S100"
+        "vmul.s S130, S120, S102"
+        "vadd.s S000, S000, S130"
+        "vmul.s S002, S120, S100"
+        "vmul.s S130, S121, S102"
+        "vsub.s S002, S130, S002"
+        "sv.q C000, 0x0(%0)"
+        : "=m" (*v)
+        : "m" (angle)
+    );
+#else
+    float x = v->x, z = v->z;
+    v->x = cosf(angle) * x + sinf(angle) * z;
+    v->z = cosf(angle) * z - sinf(angle) * x;
 #endif
 }
 

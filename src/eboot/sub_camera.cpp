@@ -161,23 +161,154 @@ void SubCamera::cam_sub_demo() {
     }
 }
 
-// CamRailMove
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888A034);
+int SubCamera::CamRailMove(ScePspFVector4 *position, bool compound) {
+    CameraDataEntry *areas = Camera::objectPtr->areas;
+    if (areas == NULL) {
+        return 0;
+    } else if (compound == false) {
+        return cam_rail_move_0(&Camera::objectPtr->rail_point, &areas->rail, position);
+    } else {
+        return cam_rail_move(&Camera::objectPtr->rail_point, &areas->rail, position);
+    }
+}
 
-// cam_rail_move_sub
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888A08C);
+void SubCamera::cam_rail_move_sub(CameraRailPoint *point, CameraRailDefinition *rail, int i, float t) {
+    float result;
+    float x = 0.5f;
+    if (point->spline < i) {
+        do {
+            float w = rail->target_points[point->spline].w;
+            w -= point->coord;
+            if (w <= x) {
+                x -= w;
+                ++point->spline;
+                point->coord = 0.0f;
+            } else {
+                result = point->coord + x;
+                point->coord = result;
+                return;
+            }
+        } while (point->spline < i);
 
-// cam_rail_move_0
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888A1A0);
+        if (t - point->coord <= x) {
+            point->coord = t;
+        } else {
+            point->coord = point->coord + x;
+        }
+    } else {
+        do {
+            if (point->coord <= x) {
+                x -= point->coord;
+                --point->spline;
+                point->coord = rail->target_points[i].w;
+            } else {
+                result = point->coord - x;
+                point->coord = result;
+                return;
+            }
+        } while (point->spline > i);
 
-// cam_rail_move
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888A23C);
+        if (point->coord - t <= x) {
+            point->coord = t;
+        } else {
+            point->coord = point->coord - x;
+        }
+    }
+}
 
-// cam_plEX_fishing
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", cam_plEX_fishing__9SubCameraFR17FishingCameraData);
+int SubCamera::cam_rail_move_0(CameraRailPoint *point, CameraRailDefinition *rail, ScePspFVector4 *position) {
+    point->spline = GetNearSection(rail, position);
+    if (GetNearPoint(point, rail, position)) {
+        point->t = point->coord / rail->target_points[point->spline].w;
+        return true;
+    } else {
+        point->t = 0.0f;
+        point->coord = 0.0f;
+        return false;
+    }
+}
 
-// fish_cam_sub
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888A440);
+int SubCamera::cam_rail_move(CameraRailPoint *point, CameraRailDefinition *rail, ScePspFVector4 *position) {
+    CameraRailPoint tmp __attribute__((aligned(16)));
+    tmp.spline = GetNearSection(rail, position);
+    if (GetNearPoint(&tmp, rail, position) != 0) {
+        if (point->spline == tmp.spline) {
+            if (point->coord < tmp.coord) {
+                if (tmp.coord - point->coord <= 0.5f) {
+                    point->coord = tmp.coord;
+                } else {
+                    point->coord += 0.5f;
+                }
+            } else if (point->coord > tmp.coord) {
+                if (point->coord - tmp.coord <= 0.5f) {
+                    point->coord = tmp.coord;
+                } else {
+                    point->coord -= 0.5f;
+                }
+            }
+        } else {
+            cam_rail_move_sub(point, rail, tmp.spline, tmp.coord);
+        }
+        point->t = point->coord / rail->target_points[point->spline].w;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void SubCamera::cam_plEX_fishing(FishingCameraData &d) {
+    Player *pl = Camera::objectPtr->player;
+    isActive = false;
+    if (!(d.checkResult = Fishing_cam_chk())) {
+        d.state.byte = 0;
+        return;
+    }
+    if (d.state.byte == 0) {
+        ++d.state.byte;
+        d.stage_unique = pl->stage_unique;
+        if (GameSys::objectPtr->stage_id != stages::SWAMP_N_4) {
+            current_fov = DEGREES_TO_RADIANS(55);
+        } else {
+            current_fov = DEGREES_TO_RADIANS(50);
+        }
+        current_roll = 0.0f;
+    }
+    if (fish_cam_sub(d) == true) {
+        isActive = true;
+    }
+}
+
+struct FishingCameraOffsets {
+    ScePspFVector3 position;
+    ScePspFVector3 target;
+};
+extern FishingCameraOffsets D_eboot_089312E0[39];
+extern float D_eboot_08931688[39];
+extern u8 D_eboot_08931724[267];
+
+bool SubCamera::fish_cam_sub(FishingCameraData &d) {
+    Player *pl = Camera::objectPtr->player;
+    int i = D_eboot_08931724[GameSys::objectPtr->stage_id];
+    FishingCameraOffsets *offsets = &D_eboot_089312E0[i];
+    float angle = (int)(u16)pl->next_rotation * (float)(PI / 32768);
+
+    current_fov = D_eboot_08931688[i];
+
+    ScePspFVector4 offset;
+    offset.x = offsets->position.x;
+    offset.y = offsets->position.y;
+    offset.z = offsets->position.z;
+    flvecRotY(&offset, angle);
+    vadd_q(&current_position, &pl->position, &offset);
+
+    offset.x = offsets->target.x;
+    offset.y = offsets->target.y;
+    offset.z = offsets->target.z;
+    flvecRotY(&offset, angle);
+    vadd_q(&current_target, &pl->position, &offset);
+
+    return true;
+}
 
 void SubCamera::cam_plEX_zoom(ZoomCameraData &d) {
     Camera *c = Camera::objectPtr;
@@ -527,28 +658,279 @@ int SubCamera::point_cam_sub() {
     return result;
 }
 
-// CamRailPoint
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888B304);
+void SubCamera::CamRailPoint(ScePspFVector4 *out, ScePspFMatrix4 *coeff, float t) {
+    // cubic polynomial evaluated in nested form:
+    // ((x t + y) t + z) t + w
+    // == x t^3 + y t^2 + z t + w
+    vscl_q(out, &coeff->x, t);
+    vadd_q(out, out, &coeff->y);
+    vscl_q(out, out, t);
+    vadd_q(out, out, &coeff->z);
+    vscl_q(out, out, t);
+    vadd_q(out, out, &coeff->w);
+}
 
-// GetRailTarget
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888B3B0);
+void SubCamera::GetRailTarget(ScePspFVector4 *out, CameraDataEntry *data, ScePspFVector4 *in) {
+    Camera *c = Camera::objectPtr;
+    Player *pl = c->player;
+    switch (data->target_type) {
+    case 0:
+        copy_q(out, in);
+        break;
+    case 1: {
+        ScePspFVector4 offset;
+        zero(&offset, sizeof(offset));
+        ScePspFMatrix4 *wmat = &pl->transform;
+        offset.x = data->rail.model_offset.x;
+        offset.y = data->rail.model_offset.y;
+        offset.z = data->rail.model_offset.z;
+        nlCalcPoint(out, &offset, wmat);
+        break;
+    }
+    case 2: {
+        ScePspFVector4 woffset;
+        zero(&woffset, sizeof(woffset));
+        woffset.x = data->rail.world_offset.x;
+        woffset.y = data->rail.world_offset.y;
+        woffset.z = data->rail.world_offset.z;
+        vadd_q(out, &pl->position, &woffset);
+        break;
+    }
+    }
+    switch (data->axes) {
+    case 0:
+        out->y = in->y;
+        break;
+    case 1:
+        out->x = in->x;
+        out->z = in->z;
+        break;
+    }
+}
 
-// GetRailCamPos
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888B500);
+ScePspFMatrix4 SplineRValue[16];
 
-// GetNearSection
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888B588);
+void SubCamera::GetRailCamPos(ScePspFVector4 *out, CameraDataEntry *data) {
+    Camera *c = Camera::objectPtr;
+    Spline(data->rail.cam_points, data->rail.count);
+    CamRailPoint(out, &SplineRValue[c->rail_point.spline], c->rail_point.t * data->rail.cam_points[c->rail_point.spline].w);
+}
 
-// GetNearPoint
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888B698);
+// FIXME: figure out this struct zeroing pattern...
+inline void zero_asm() {
+    __asm__ (
+        ".set noreorder"
+        "addiu a4, sp, 0x0"
+        "beqz a4, done"
+        "addiu v1, zero, 0x10"
+    "loop:"
+        "sb zero, 0x0(a4)"
+        "addiu v1, -0x1"
+        "bnez v1, loop"
+        "addiu a4, 0x1"
+    "done:"
+    : :
+    );
+}
 
-// get_near_point_sub
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888B844);
+int SubCamera::GetNearSection(CameraRailDefinition *rail, ScePspFVector4 *position) {
+    union {
+        ScePspFVector4 v4;
+        ScePspFVector3 v3;
+    } point;
+    float distances[16];
+    float min_distance = 1e+07;
+    // bug?
+    ScePspFVector3 *p = (ScePspFVector3 *)rail->target_points;
+    float *distance = distances;
+    int min_index = 0;
+    for (int i = 0; i < rail->count; ++i, ++p, ++distance) {
+        // FIXME: zero(&point, sizeof(point));
+        zero_asm();
+        point.v3 = *p;
+        *distance = flvecCalcDistance(position, &point.v4);
+        if (min_distance > *distance) {
+            min_index = i;
+            min_distance = *distance;
+        }
+    }
+    if (min_index != 0 && min_index < rail->count - 1) {
+        if (distances[min_index - 1] < distances[min_index + 1]) {
+            --min_index;
+        }
+    } else if (min_index >= rail->count - 1) {
+        min_index = rail->count - 2;
+    }
+    return min_index;
+}
 
-// GetOrthogonalPoint
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888B944);
+int SubCamera::GetNearPoint(CameraRailPoint *point, CameraRailDefinition *rail, ScePspFVector4 *position) {
+    float scratch[5];
+    Spline(rail->target_points, rail->count);
 
-float SubCamera::ZoomRateCalc(CameraDataEntryHeader *d, float distance) {
+    int result = GetOrthogonalPoint(scratch, &SplineRValue[point->spline], position, rail->enable_y);
+    if (result == 0) {
+        point->coord = 0;
+        return 0;
+    }
+
+    result = get_near_point_sub(point, rail->target_points + point->spline, scratch, result);
+    if (result >= 1) {
+        if (rail->count - 2 > point->spline) {
+            result = GetOrthogonalPoint(scratch, &SplineRValue[point->spline + 1],  position, rail->enable_y);
+            if (result != 0) {
+                ++point->spline;
+                get_near_point_sub(point, rail->target_points + point->spline, scratch, result);
+            }
+        }
+    } else {
+        if (result < 0 && point->spline > 0) {
+            result = GetOrthogonalPoint(scratch, &SplineRValue[point->spline - 1], position, rail->enable_y);
+            if (result != 0) {
+                --point->spline;
+                get_near_point_sub(point, rail->target_points + point->spline, scratch, result);
+            }
+        }
+    }
+    return 1;
+}
+
+int SubCamera::get_near_point_sub(CameraRailPoint *point, ScePspFVector4 *section, float *idk, int n) {
+    float x = *idk, y, z;
+    int result;
+    if (x < 0.0f) {
+        point->coord = 0;
+        x = -x;
+        result = -1;
+    } else {
+        y = section->w;
+        if (x > y) {
+            x -= y;
+            point->coord = y;
+            result = 1;
+        } else {
+            point->coord = x;
+            return 0;
+        }
+    }
+    if (n == 1) {
+        return result;
+    }
+    while (--n != 0) {
+        ++idk;
+        y = *idk;
+        if (y < 0.0f) {
+            if (x > -y) {
+                point->coord = 0;
+                result = -1;
+                x = -y;
+            }
+        } else {
+            z = section->w;
+            if (y > z) {
+                if (x > y - z) {
+                    point->coord = z;
+                    result = 1;
+                    x = y - z;
+                }
+            } else {
+                point->coord = y;
+                return 0;
+            }
+        }
+    }
+    return result;
+}
+
+inline bool too_small(ScePspFVector4 *v) {
+    return v->x * v->x + v->y * v->y + v->z * v->z > 1e-09f;
+}
+
+inline bool near_zero(float x) {
+    return vabs_s(x) < 0.001f;
+}
+
+int SubCamera::GetOrthogonalPoint(float *idk, ScePspFMatrix4 *section, ScePspFVector4 *position, int enable_y) {
+    float coeffs[6];
+    ScePspFVector4 pos;
+    copy_q(&pos, position);
+    if (enable_y == 0) {
+        pos.y = 0;
+        ScePspFVector4 delta;
+        vsub_q(&delta, &section->w, &pos);
+        if (!too_small(&section->x)) {
+            if (!too_small(&section->y)) {
+                if (!too_small(&section->z)) {
+                    return 0;
+                } else {
+                    *idk = -(vInnerProductXZ(&section->z, &delta) / vInnerProductXZ(&section->z, &section->z));
+                    return 1;
+                }
+            } else {
+                coeffs[0] = vInnerProductXZ(&section->y, &section->y) * 2.0f;
+                coeffs[1] = vInnerProductXZ(&section->y, &section->z) * 3.0f;
+                coeffs[2] = vInnerProductXZ(&section->y, &delta) * 2.0f + vInnerProductXZ(&section->z, &section->z);
+                coeffs[3] = vInnerProductXZ(&section->z, &delta);
+                return Cardano(idk, coeffs);
+            }
+        } else {
+            coeffs[0] = vInnerProductXZ(&section->x, &section->x) * 3.0f;
+            coeffs[1] = vInnerProductXZ(&section->x, &section->y) * 5.0f;
+            coeffs[2] = vInnerProductXZ(&section->x, &section->z) * 4.0f + vInnerProductXZ(&section->y, &section->y) * 2.0f;
+            coeffs[3] = (vInnerProductXZ(&section->x, &delta) + vInnerProductXZ(&section->y, &section->z)) * 3.0f;
+            coeffs[4] = vInnerProductXZ(&section->y, &delta) * 2.0f + vInnerProductXZ(&section->z, &section->z);
+            coeffs[5] = vInnerProductXZ(&section->z, &delta);
+            float dkas_out[10];
+            DKAS(dkas_out, coeffs);
+            int n = 0;
+            for (int i = 0; i < 5; ++i) {
+                float x = vabs_s(dkas_out[2 * i + 1]);
+                if (x < 0.001f) {
+                    idk[n++] = dkas_out[2 * i];
+                }
+            }
+            return n;
+        }
+    } else {
+        ScePspFVector4 delta;
+        vsub_q(&delta, &section->w, &pos);
+        if (!too_small(&section->x)) {
+            if (!too_small(&section->y)) {
+                if (!too_small(&section->z)) {
+                    return 0;
+                } else {
+                    *idk = -(vInnerProductXYZ(&section->z, &delta) / vInnerProductXYZ(&section->z, &section->z));
+                    return 1;
+                }
+            } else {
+                coeffs[0] = vInnerProductXYZ(&section->y, &section->y) * 2.0f;
+                coeffs[1] = vInnerProductXYZ(&section->y, &section->z) * 3.0f;
+                coeffs[2] = vInnerProductXYZ(&section->y, &delta) * 2.0f + vInnerProductXYZ(&section->z, &section->z);
+                coeffs[3] = vInnerProductXYZ(&section->z, &delta);
+                return Cardano(idk, coeffs);
+            }
+        } else {
+            coeffs[0] = vInnerProductXYZ(&section->x, &section->x) * 3.0f;
+            coeffs[1] = vInnerProductXYZ(&section->x, &section->y) * 5.0f;
+            coeffs[2] = vInnerProductXYZ(&section->x, &section->z) * 4.0f + vInnerProductXYZ(&section->y, &section->y) * 2.0f;
+            coeffs[3] = (vInnerProductXYZ(&section->x, &delta) + vInnerProductXYZ(&section->y, &section->z)) * 3.0f;
+            coeffs[4] = vInnerProductXYZ(&section->y, &delta) * 2.0f + vInnerProductXYZ(&section->z, &section->z);
+            coeffs[5] = vInnerProductXYZ(&section->z, &delta);
+            float dkas_out[10];
+            DKAS(dkas_out, coeffs);
+            int n = 0;
+            for (int i = 0; i < 5; ++i) {
+                float x = vabs_s(dkas_out[2 * i + 1]);
+                if (x < 0.001f) {
+                    idk[n++] = dkas_out[2 * i];
+                }
+            }
+            return n;
+        }
+    }
+}
+
+float SubCamera::ZoomRateCalc(CameraDataEntry *d, float distance) {
     if (distance <= d->near_distance) {
         return d->near_fov;
     }
@@ -565,55 +947,65 @@ float SubCamera::ZoomRateCalc(CameraDataEntryHeader *d, float distance) {
     return delta + d->near_fov;
 }
 
-// ZoomBaseAngleRail
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888C01C);
+float SubCamera::ZoomBaseAngleRail(CameraRailDefinition *definition, int spline, float t) {
+    return definition->fovs[spline]* (1.0f - t) + definition->fovs[spline + 1] * t;
+}
 
-// RollAngleRail
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888C048);
+float SubCamera::RollAngleRail(CameraRailDefinition *definition, int spline, float t) {
+    union {
+        s16 s[2];
+        s32 i;
+    } delta;
+    int range = definition->rolls[spline + 1];
+    s16 start = definition->rolls[spline];
 
-ScePspFMatrix4 SplineRValue[16];
+    range -= start;
+    delta.i = (int)(t * 65536) * range;
+    delta.s[1] += start;
 
-#define subdiag scratch
-#define diag (scratch + 16)
-#define superdiag (scratch + 32)
-#define b1 (scratch + 48)
-#define b2 (scratch + 64)
-#define b3 (scratch + 80)
-#define x1 (scratch + 96)
-#define x2 (scratch + 112)
-#define x3 (scratch + 128)
+    float result = (float)(PI / 32768);
+    result *= delta.s[1];
+    return result;
+}
+
 void SubCamera::Spline(ScePspFVector4 *p, int n) {
-    float scratch[144];
+    struct {
+        float subdiag[16];
+        float diag[16];
+        float superdiag[16];
+        float b1[16], b2[16], b3[16];
+        float x1[16], x2[16], x3[16];
+    } f;
 
-    subdiag[0] = 0;
-    superdiag[0] = p[0].w;
-    diag[0] = superdiag[0] + superdiag[0];
+    f.subdiag[0] = 0;
+    f.superdiag[0] = p[0].w;
+    f.diag[0] = f.superdiag[0] + f.superdiag[0];
 
-    b1[0] = (p[1].x - p[0].x) * 3;
-    b2[0] = (p[1].y - p[0].y) * 3;
-    b3[0] = (p[1].z - p[0].z) * 3;
+    f.b1[0] = (p[1].x - p[0].x) * 3;
+    f.b2[0] = (p[1].y - p[0].y) * 3;
+    f.b3[0] = (p[1].z - p[0].z) * 3;
 
     for (int i = 1; i < n - 1; i++) {
         float left = p[i].w / p[i - 1].w;
         float right = p[i - 1].w / p[i].w;
-        subdiag[i] = p[i].w;
-        diag[i] = (p[i - 1].w + p[i].w) * 2;
-        superdiag[i] = p[i - 1].w;
-        b1[i] = (left * (p[i].x - p[i - 1].x) + right * (p[i + 1].x - p[i].x)) * 3;
-        b2[i] = (left * (p[i].y - p[i - 1].y) + right * (p[i + 1].y - p[i].y)) * 3;
-        b3[i] = (left * (p[i].z - p[i - 1].z) + right * (p[i + 1].z - p[i].z)) * 3;
+        f.subdiag[i] = p[i].w;
+        f.diag[i] = (p[i - 1].w + p[i].w) * 2;
+        f.superdiag[i] = p[i - 1].w;
+        f.b1[i] = (left * (p[i].x - p[i - 1].x) + right * (p[i + 1].x - p[i].x)) * 3;
+        f.b2[i] = (left * (p[i].y - p[i - 1].y) + right * (p[i + 1].y - p[i].y)) * 3;
+        f.b3[i] = (left * (p[i].z - p[i - 1].z) + right * (p[i + 1].z - p[i].z)) * 3;
     }
 
-    subdiag[n - 1] = p[n - 2].w;
-    diag[n - 1] = p[n - 2].w + p[n - 2].w;
-    superdiag[n - 1] = 0;
-    b1[n - 1] = (p[n - 1].x - p[n - 2].x) * 3;
-    b2[n - 1] = (p[n - 1].y - p[n - 2].y) * 3;
-    b3[n - 1] = (p[n - 1].z - p[n - 2].z) * 3;
+    f.subdiag[n - 1] = p[n - 2].w;
+    f.diag[n - 1] = p[n - 2].w + p[n - 2].w;
+    f.superdiag[n - 1] = 0;
+    f.b1[n - 1] = (p[n - 1].x - p[n - 2].x) * 3;
+    f.b2[n - 1] = (p[n - 1].y - p[n - 2].y) * 3;
+    f.b3[n - 1] = (p[n - 1].z - p[n - 2].z) * 3;
 
-    tri_diag(x1, subdiag, diag, superdiag, b1, n);
-    tri_diag(x2, subdiag, diag, superdiag, b2, n);
-    tri_diag(x3, subdiag, diag, superdiag, b3, n);
+    tri_diag(f.x1, f.subdiag, f.diag, f.superdiag, f.b1, n);
+    tri_diag(f.x2, f.subdiag, f.diag, f.superdiag, f.b2, n);
+    tri_diag(f.x3, f.subdiag, f.diag, f.superdiag, f.b3, n);
 
     ScePspFMatrix4 *m = SplineRValue;
     for (int i = 0; i < n - 1; ++i, ++m) {
@@ -621,31 +1013,22 @@ void SubCamera::Spline(ScePspFVector4 *p, int n) {
         float d2 = d * d;
         float d3 = 1 / sceVfpuScalarPow(p[i].w, 3);
 
-        m->x.x = (p[i].x - p[i + 1].x) * 2 * d3 + (x1[i] + x1[i + 1]) * d2;
-        m->y.x = (p[i + 1].x - p[i].x) * 3 * d2 - (x1[i] * 2 + x1[i + 1]) * d;
-        m->z.x = x1[i];
+        m->x.x = (p[i].x - p[i + 1].x) * 2 * d3 + (f.x1[i] + f.x1[i + 1]) * d2;
+        m->y.x = (p[i + 1].x - p[i].x) * 3 * d2 - (f.x1[i] * 2 + f.x1[i + 1]) * d;
+        m->z.x = f.x1[i];
         m->w.x = p[i].x;
 
-        m->x.y = (p[i].y - p[i + 1].y) * 2 * d3 + (x2[i] + x2[i + 1]) * d2;
-        m->y.y = (p[i + 1].y - p[i].y) * 3 * d2 - (x2[i] * 2 + x2[i + 1]) * d;
-        m->z.y = x2[i];
+        m->x.y = (p[i].y - p[i + 1].y) * 2 * d3 + (f.x2[i] + f.x2[i + 1]) * d2;
+        m->y.y = (p[i + 1].y - p[i].y) * 3 * d2 - (f.x2[i] * 2 + f.x2[i + 1]) * d;
+        m->z.y = f.x2[i];
         m->w.y = p[i].y;
 
-        m->x.z = (p[i].z - p[i + 1].z) * 2 * d3 + (x3[i] + x3[i + 1]) * d2;
-        m->y.z = (p[i + 1].z - p[i].z) * 3 * d2 - (x3[i] * 2 + x3[i + 1]) * d;
-        m->z.z = x3[i];
+        m->x.z = (p[i].z - p[i + 1].z) * 2 * d3 + (f.x3[i] + f.x3[i + 1]) * d2;
+        m->y.z = (p[i + 1].z - p[i].z) * 3 * d2 - (f.x3[i] * 2 + f.x3[i + 1]) * d;
+        m->z.z = f.x3[i];
         m->w.z = p[i].z;
     }
 }
-#undef subdiag
-#undef diag
-#undef superdiag
-#undef b1
-#undef b2
-#undef b3
-#undef x1
-#undef x2
-#undef x3
 
 void SubCamera::tri_diag(float *out, float *subdiag, float *diag, float *superdiag, float *in, int equations) {
     float scratch[64];
@@ -677,11 +1060,60 @@ INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", ex_ev_camera__9SubCameraFv);
 // ex_ev_cam_sub
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888C914);
 
-// std_cam_sw_set_sub
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888CD08);
+void SubCamera::std_cam_sw_set_sub() {
+    Camera *c = Camera::objectPtr;
+    StdCameraData &d = data.std;
+    if (Camera::objectPtr->base_sub_type == 0 && Camera::objectPtr->subCameras[5].isActive == false) {
+        if (Manual_cam_chk() == true) {
+            d.buttons = c->buttons;
+            d.rising_edge = c->rising_edge;
+            return;
+        }
+        if (Osk::objectPtr->visible == false) {
+            d.buttons = c->buttons & Ctrl::L_TRIGGER;
+            d.rising_edge = c->rising_edge & Ctrl::L_TRIGGER;
+            return;
+        }
+    }
+    d.rising_edge = 0;
+    d.buttons = 0;
+}
 
-// GetPanTarget
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888CDAC);
+void SubCamera::GetPanTarget(ScePspFVector4 *out, CameraDataEntry *data) {
+    Player *pl = Camera::objectPtr->player;
+    switch (data->target_type) {
+    case 0:
+        out->x = data->pan.target_position.x;
+        out->y = data->pan.target_position.y;
+        out->z = data->pan.target_position.z;
+        break;
+    case 1: {
+        ScePspFVector4 offset;
+        ScePspFMatrix4 *wmat = &pl->transform;
+        offset.x = data->pan.model_offset.x;
+        offset.y = data->pan.model_offset.y;
+        offset.z = data->pan.model_offset.z;
+        offset.w = 1.0f;
+        nlCalcPoint(out, &offset, wmat);
+        break;
+    }
+    case 2:
+        out->x = pl->position.x + data->pan.world_offset.x;
+        out->y = pl->position.y + data->pan.world_offset.y;
+        out->z = pl->position.z + data->pan.world_offset.z;
+        out->w = 1.0f;
+        break;
+    }
+    switch (data->axes) {
+    case 0:
+        out->y = data->pan.target_position.y;
+        break;
+    case 1:
+        out->x = data->pan.target_position.x;
+        out->z = data->pan.target_position.z;
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888CEC0);
 
@@ -689,11 +1121,9 @@ INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888CFB8);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888D070);
 
-// Manual_cam_chk
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888D304);
+INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", Manual_cam_chk__9SubCameraFv);
 
-// Fishing_cam_chk
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888D40C);
+INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", Fishing_cam_chk__9SubCameraFv);
 
 bool SubCamera::pl_falldown_status() {
     StdCameraData *d = &data.std;
@@ -738,11 +1168,27 @@ bool SubCamera::pl_falldown_status() {
     return false;
 }
 
-// PachiTypeCheck
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888D58C);
+u8 SubCamera::PachiTypeCheck() {
+    Player *pl = Camera::objectPtr->player;
+    if (pl->pl_action_ck(0 /* NORMAL */, 101 /* USE_BINOCULARS */) == true || pl->pl_action_ck(0 /* NORMAL */, 102 /* USE_BINOCULARS_CROUCHING */) == true) {
+        return 1 /* BINOCULARS */;
+    } else if (pl->Pl_bari_ck() == true) {
+        return 2 /* BALLISTA */;
+    } else if (pl->pl_action_ck(8 /* LOBBY? */, 15 /* NET_LAUNCHER */) == true) {
+        return 3 /* NET_LAUNCHER */;
+    } else if (pl->pl_type == 1 /* B_BOWGUN (heavy bowgun) */ || pl->pl_type == 5 /* B_BOWGUN (light bowgun) */) {
+        return 0 /* BOWGUN */;
+    } else {
+        return -1;
+    }
+}
 
-// pachingr_mat
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888D65C);
+void SubCamera::pachinger_mat(ScePspFMatrix4 *out, s16 alpha, s16 beta, ScePspFVector4 *position) {
+    flmatInit(out);
+    flmatRotXYZ33(out, alpha * (float)(PI / 32768), beta * (float)(PI / 32768), 0.0f);
+    copy_q(&out->w, position);
+    out->w.w = 1.0f;
+}
 
 // 10th roots of unity
 float D_eboot_089AA1D8[10] = {
@@ -769,11 +1215,9 @@ float D_eboot_089AA200[6] = {
 
 u8 D_eboot_089AA218[8] = {}; // pad
 
-// DKAS
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888D764);
+INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", DKAS__9SubCameraFPfPf);
 
-// Cardano
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888DA18);
+INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", Cardano__9SubCameraFPfPf);
 
 float SubCamera::vInnerProductXYZ(ScePspFVector4 *a, ScePspFVector4 *b) {
     return a->x * b->x + a->y * b->y + a->z * b->z;
@@ -809,14 +1253,52 @@ void SubCamera::get_angle(CameraAngle *out) {
     }
 }
 
-// Camera_hokan_start
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888E028);
+void SubCamera::Camera_hokan_start(int steps) {
+    cam_sub_state.byte = 1;
+    timer = steps - 1;
+    hokan_divisor = 1.0f / steps;
+}
 
-// Camera_hokan_chk
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888E054);
+void SubCamera::Camera_hokan_chk(CameraDataEntry *area) {
+    if (Camera::objectPtr->changeStageCamera == false) {
+        return;
+    }
+    int steps = 15;
+    if (area != NULL && area->hokan_info != NULL) {
+        int n = 16;
+        CameraHokanInfo *info = area->hokan_info;
+        for (int i = 16; i != 0; --i, ++info) {
+            if (info->area_id == Camera::objectPtr->area_id) {
+                steps = info->steps;
+                break;
+            }
+        }
+    }
+    switch (steps) {
+    case 0:
+        break;
+    case 1:
+        break;
+    default:
+        Camera_hokan_start(steps);
+        return;
+    }
+    cam_sub_state.byte = 0;
+}
 
-// Camera_hokan_sub
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888E0E0);
+float SubCamera::Camera_hokan_sub() {
+  float t = timer * hokan_divisor;
+  if (t < 0.5f) {
+    t = 0.5f * sceVfpuScalarPow(t * 2.0f, 2.0f);
+  }
+  else {
+    t = 1.0f - sceVfpuScalarPow((1.0f - t) * 2.0f, 2.0f) * 0.5f;
+  }
+  if (--timer == 0) {
+    cam_sub_state.byte = 0;
+  }
+  return t;
+}
 
 // Cam_senkai_chk
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888E198);
