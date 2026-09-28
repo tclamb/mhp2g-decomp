@@ -52,3 +52,17 @@ func_demo_sub_09C146A0 = 0x09C146A0; // type:func
 func_demo_sub_09C14A98 = 0x09C14A98; // type:func
 func_demo_sub_09C14D70 = 0x09C14D70; // type:func
 D_demo_sub_09C167A0 = 0x09C167A0;
+
+func_option_task_09A5A600 = 0x09A5A600; // type:func
+func_option_task_09A5AD78 = 0x09A5AD78; // type:func
+func_option_task_09A5AF28 = 0x09A5AF28; // type:func
+func_option_task_09A5AFA8 = 0x09A5AFA8; // type:func
+func_option_task_09A5B018 = 0x09A5B018; // type:func
+func_option_task_09A5B368 = 0x09A5B368; // type:func
+func_option_task_09A5B498 = 0x09A5B498; // type:func
+func_option_task_09A5B5D0 = 0x09A5B5D0; // type:func
+func_option_task_09A5B628 = 0x09A5B628; // type:func
+func_option_task_09A5B678 = 0x09A5B678; // type:func
+
+D_option_task_09A5BD9C = 0x09A5BD9C; // size:0x24
+D_option_task_09A5BDC0 = 0x09A5BDC0; // size:0x4

@@ -1,7 +1,7 @@
 name: option_task
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/task/option_task
@@ -62,7 +62,12 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, option_task_ovl]
+  - [0x80, asm, option_task_ovl_head]
+  - [0x9a8, cpp, option_task_af28]
+  - [0xa28, asm, option_task_ovl_afa8]
+  - [0xa98, cpp, option_task_b018]
+  - [0xde8, cpp, option_task_b368]
+  - [0xf18, asm, option_task_ovl_tail]
   - [0x17d8, pad]
   - [0x1800, data, option_task_ovl]
   - [0x1900, bss, option_task_ovl]
