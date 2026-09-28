@@ -6,6 +6,9 @@
 // (Cockpit::toasts at Cockpit+0xE28, 0x24 bytes each). The box is centered
 // horizontally on x = 240, slides down from y = 0 to y = 136 - height / 2
 // (vertical screen center) in about 3 frames, holds 60 frames and slides back up.
+// Layout reads a separate data center (240, 144): x controls horizontal placement,
+// while y computes the initial slide speed. Draw clamps to its own constant 136,
+// so changing the data y alone does not move the resting toast vertically.
 struct ToastNotification {
     u8 active;      // 0x00
     u8 type;        // 0x01: 0..8, selects the message format (4 and 6 = caller text, 6 = heap text freed on close)

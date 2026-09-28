@@ -106,9 +106,9 @@ segments:
       - [0x4ddcc, asmtu, game_sys] # string manager?
       - [0x574c8, cpp, ge] # tmh parsing emitted here (header?)
       - [0x57fb8, cpp, cache]
-      - [0x581e8, asmtu, toast_notification] # layout (func_eboot_08859C34): still asm, owns a jump table and the data
+      - [0x581e8, cpp, toast_notification] # toast layout and named shared data
       - [0x5869c, cpp, toast_notification_update]
-      - [0x58720, asmtu, toast_notification_draw] # draw/animate (func_eboot_0885A16C): still asm, owns the second jump table
+      - [0x58720, cpp, toast_notification_draw] # textbox, colored text, slide/hold animation
       - [0x58e8c, cpp, toast_notification_tail] # small toast helpers
       - [0x58f40, asmtu, start_task]
       - [0x5924c, cpp, item_manager]
