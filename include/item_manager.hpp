@@ -7,7 +7,7 @@
 struct MixDefinition {
     s16 secondMaterialItemId;
     s16 successItemId;
-    u8 rateId;
+    s8 rateId;
     u8 quantityId;
     u8 id;
     u8 flags;

@@ -395,11 +395,91 @@ INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", boxFind__11ItemManagerFUs);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", mixRate__11ItemManagerFssi);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", mixRate__11ItemManagerFP13MixDefinitionb);
+extern "C" u8 func_eboot_088D9410(Player *player, int skillType);
+extern "C" int func_eboot_088D939C(Player *player, int skillType);
+
+extern "C" s8 mixRate__11ItemManagerFP13MixDefinitionb(ItemManager *this_, MixDefinition *mix, int isItemBox) {
+    bool box = isItemBox == true ? true : false;
+    Player *player = PlayerManager::objectPtr->method_088DF804(GameSys::objectPtr->player_id);
+    if (this_->canMix(player, mix, box) != true) {
+        return -1;
+    }
+    if ((mix->flags & MixFlag::BOMB) != 0) {
+        if (player->activeSkill(SkillId::BOMBER) == true) {
+            return 100;
+        }
+    }
+    if ((mix->flags & MixFlag::TRAP) != 0) {
+        if (player->activeSkill(SkillId::TRAP_MASTER) == true) {
+            return 100;
+        }
+    }
+
+    u8 rate = MIX_RATES[mix->rateId];
+    switch (func_eboot_088D9410(player, 0x3B)) {
+    case SkillId::COMBINE_SUCCESS_PLUS_15_PERCENT:
+        rate += 15;
+        break;
+    case SkillId::COMBINE_SUCCESS_PLUS_25_PERCENT:
+        rate += 25;
+        break;
+    case SkillId::COMBINE_SUCCESS_PLUS_45_PERCENT:
+        rate += 45;
+        break;
+    case SkillId::COMBINE_SUCCESS_MINUS_5_PERCENT:
+        rate -= 5;
+        break;
+    case SkillId::COMBINE_SUCCESS_MINUS_10_PERCENT:
+        rate -= 10;
+        break;
+    case SkillId::COMBINE_SUCCESS_MINUS_15_PERCENT:
+        rate -= 15;
+        break;
+    }
+    if (func_eboot_088D939C(player, 0xF)) {
+        rate += 10;
+    }
+    if (func_eboot_088D939C(player, 0x10)) {
+        rate += 5;
+    }
+
+    u32 i;
+    if (!isItemBox) {
+        for (i = 0; i < 5; i++) {
+            if (GameSys::objectPtr->bagQuantity(COMBO_BOOK_IDS[i]) == 0) {
+                break;
+            }
+        }
+        rate += COMBO_BOOK_BONUSES[i];
+    }
+    if (isItemBox == true) {
+        for (i = 0; i < 5; i++) {
+            bool found = false;
+            if (GameSys::objectPtr->bagQuantity(COMBO_BOOK_IDS[i]) != 0) {
+                found = true;
+            }
+            if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) == true) {
+                if (this_->boxFind(COMBO_BOOK_IDS[i]) != 0xFFFF) {
+                    found = true;
+                }
+            }
+            if (found == false) {
+                break;
+            }
+        }
+        rate += COMBO_BOOK_BONUSES[i];
+    }
+    if (rate > 100) {
+        rate = 100;
+    }
+    return rate;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", setMixBit__11ItemManagerFP13MixDefinition);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", maxMixQuantity__11ItemManagerFP13MixDefinition);
+u8 ItemManager::maxMixQuantity(MixDefinition *mix) {
+    return MIX_MAX_QUANTITIES[mix->quantityId];
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", nextMix__11ItemManagerFPUccPUsPUsb);
 
@@ -411,7 +491,9 @@ INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", boxTotalSpace__11ItemManagerF
 
 INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", boxStackSpace__11ItemManagerFUs);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", bagDefinition__11ItemManagerFi);
+ItemDefinition *ItemManager::bagDefinition(int index) {
+    return &ITEM_DEFINITIONS[GameSys::objectPtr->method_088567AC(index)->itemId];
+}
 
 void ItemManager::setItemBit(u16 itemId) {
     GameSys::objectPtr->userData.setItemBit(itemId);
@@ -421,12 +503,45 @@ bool ItemManager::getItemBit(u16 itemId) {
     return GameSys::objectPtr->userData.getItemBit(itemId);
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", sort__FP14InventoryEntryUi);
+void sort(InventoryEntry *entries, u32 count) {
+    int h = 1;
+    while (h < count) {
+        h = h * 3 + 1;
+    }
+    for (h /= 3; h > 0; h /= 3) {
+        for (u32 i = h; i < count; i++) {
+            u16 itemId = entries[i].itemId;
+            s16 quantity = entries[i].quantity;
+            int j;
+            for (j = i - h; j >= 0; j -= h) {
+                if (entries[j].itemId > itemId || (entries[j].itemId == itemId && entries[j].quantity < quantity)) {
+                    entries[j + h] = entries[j];
+                } else {
+                    break;
+                }
+            }
+            entries[j + h].itemId = itemId;
+            entries[j + h].quantity = quantity;
+        }
+    }
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", isDecoration__11ItemManagerFUs);
+int ItemManager::isDecoration(u16 itemId) {
+    return ITEM_DEFINITIONS[itemId].decorationId != 0;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", mixRateColorId__FSc);
+u8 mixRateColorId(s8 mixRate) {
+    u8 i;
+    for (i = 0; i < 6; i++) {
+        if (mixRate >= MIX_RATES[i]) {
+            break;
+        }
+    }
+    return i;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", search__11ItemManagerFPUsiP16ItemSearchResult);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", convertMixId2nd__11ItemManagerFUs);
+s16 ItemManager::convertMixId2nd(u16 mixId) {
+    return MIX_DEFINITIONS[mixId].oldCombinationId;
+}
