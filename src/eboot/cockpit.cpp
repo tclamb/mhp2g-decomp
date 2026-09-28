@@ -17,6 +17,13 @@
 #include "vfpu.h"
 #include "toast_notification.hpp"
 #include "equip_manager.hpp"
+#include "quest.hpp"
+
+extern "C" int func_eboot_0881F830(Cockpit *);
+extern "C" void func_eboot_0881CFB0(Cockpit *, void *, int, u8);
+extern "C" void func_eboot_08848CE0();
+extern "C" void func_eboot_0883BAB4(Cockpit *, void *);
+extern "C" u32 D_lobby_task_09AFECD8;
 
 template<> Cockpit *Singleton<Cockpit>::objectPtr;
 
@@ -627,7 +634,12 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08818C20);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08818DB8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_088193FC);
+extern "C" void func_eboot_0881B5C0(Cockpit *, Player *, u8);
+
+// Forward the stored player and the menu selection byte at Cockpit+0x57F.
+extern "C" void func_eboot_088193FC(Cockpit *this_) {
+    func_eboot_0881B5C0(this_, this_->player, this_->pad_0x57E[1]);
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08819408);
 
@@ -667,7 +679,14 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0881BEA0);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0881BF24);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0881C0E0);
+extern "C" void func_eboot_0881C114(Cockpit *, Player *, s16, s16, s8 *);
+
+// Forward the player and coordinates with six default text-color selectors.
+extern "C" void func_eboot_0881C0E0(Cockpit *this_, Player *player, s16 x, s16 y) {
+    s8 colors[6];
+    colors[0] = colors[1] = colors[2] = colors[3] = colors[4] = colors[5] = 0;
+    func_eboot_0881C114(this_, player, x, y, colors);
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0881C114);
 
@@ -701,19 +720,54 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0881D498);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0881D588);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0881D61C);
+extern "C" void func_eboot_08827824(Cockpit *, Player *, Player *);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0881D660);
+// Rebuild the stored player's entries without a comparison player, then close
+// this selection. The menu dispatcher consumes the zero return value.
+extern "C" int func_eboot_0881D61C(Cockpit *this_) {
+    func_eboot_08827824(this_, this_->player, NULL);
+    this_->pad_0x57E[1] = 0;
+    this_->unknown_0x5E8 &= ~4;
+    return 0;
+}
+
+// Clear the menu selection bytes at +0x57F/+0x582 and bit 2 of +0x5E8.
+// The menu dispatcher consumes the zero return value as its next status.
+extern "C" int func_eboot_0881D660(Cockpit *this_) {
+    this_->pad_0x57E[1] = 0;
+    this_->pad_0x57E[4] = 0;
+    this_->unknown_0x5E8 &= ~4;
+    return 0;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0881D680);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0881E6B0);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0881F44C);
+// Initialize menu 2 and reset its selections. pad_0x5B9 actually starts at
+// +0x5BB in the current layout; its index 0x1E is the byte at +0x5D9.
+extern "C" int func_eboot_0881F44C(Cockpit *this_) {
+    this_->pad_0x57E[0] = 0;
+    this_->pad_0x57E[1] = 0;
+    this_->pad_0x5B9[0] = 0;
+    this_->mix = NULL;
+    this_->pad_0x5B9[0x1E] = 0;
+    this_->unknown_0x5E8 |= 4;
+    this_->itemBoxMenuId = 2;
+    this_->itemBoxMenuCursor = 0;
+    return 0;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0881F480);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0881F64C);
+extern "C" int func_eboot_0881F64C(Cockpit *self, int value) {
+    self->unknown_0x5E8 &= ~4U;
+    if ((u8)func_eboot_0881F830(self) == 1) {
+        func_eboot_0881CFB0(self, (u8 *)self + 0x57F, value,
+                            *((u8 *)self + 0x581));
+    }
+    return value;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0881F6B4);
 
@@ -790,7 +844,13 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08822E10);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08822F6C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08823214);
+// Equipment UI predicate: player byte +0x4E9 is 6, or byte +0x5F2 is positive.
+extern "C" bool func_eboot_08823214(Cockpit *this_, Player *player) {
+    if (player->padding_0x480[0x69] == 6) {
+        return true;
+    }
+    return player->padding_0x558[0x9A] >= 1;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882323C);
 
@@ -826,17 +886,60 @@ extern "C" void func_eboot_088242A8(Cockpit *this_) {
     }
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882433C);
+// Search the pending notification ring for the byte tag at slot+0x1B.
+// Both the queued count and its read cursor are signed bytes.
+extern "C" bool func_eboot_0882433C(Cockpit *this_, u8 tag) {
+    int count = (s8)this_->pad_0x10F8[0];
+    if (count == 0) {
+        return false;
+    }
+    s16 i = 0;
+    if (count > 0) {
+        int cursor = (s8)this_->pad_0x10F8[1];
+        do {
+            s16 slot = cursor % 20;
+            if (this_->toasts[slot].padding[0x1B] == tag) {
+                return true;
+            }
+            ++i;
+            ++cursor;
+        } while (i < count);
+    }
+    return false;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_088243B0);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_088244DC);
+// Active notifications plus the signed pending count at Cockpit+0x10F8.
+extern "C" int func_eboot_088244DC(Cockpit *this_) {
+    int count = 0;
+    for (int i = 0; i < 20; ++i) {
+        if (((ToastNotification *)&this_->toasts[i])->active) {
+            ++count;
+        }
+    }
+    return count + (s8)this_->pad_0x10F8[0];
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", method_08824514__7CockpitFbi);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08824608);
+// Initialize the result menu; preserve the item and confirmation cursors.
+extern "C" void func_eboot_08824608(Cockpit *this_) {
+    this_->resultMenuState = 0;
+    this_->resultMenuCursor = 0;
+    this_->resultDescriptionFlags = 0;
+    this_->unknown_0x120F = 0;
+    this_->resultFramesRemaining = 3600;
+    this_->isOtomoAiruResults = 0;
+    this_->itemBoxMenuId = 6;
+    this_->itemBoxMenuCursor = 4;
+    this_->unknown_0x5E8 |= 4;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08824644);
+extern "C" void func_eboot_08824644(Cockpit *this_) {
+    func_eboot_08824608(this_);
+    this_->isOtomoAiruResults = 1;
+}
 
 // SystemFont offsets
 const u8 D_eboot_0892E138[6][2] = {
@@ -1087,15 +1190,49 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08826B08);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08826D4C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08826EE0);
+// Reset the item-combination selection, its result and bit 2 of +0x528.
+extern "C" void func_eboot_08826EE0(Cockpit *this_) {
+    this_->mixState = 0;
+    this_->inventoryCursorIndex = 0;
+    this_->mixConfirmMenuIndex = 0;
+    this_->mixSecondMaterialIndex = 0xFF;
+    this_->mixFirstMaterialIndex = 0xFF;
+    this_->mixSecondMaterialItemId = 0xFFFF;
+    this_->mixFirstMaterialItemId = 0xFFFF;
+    this_->mixSuccessItemId = -1;
+    this_->mix = NULL;
+    this_->flags_0x528 &= ~4;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08826F24);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08826F8C);
+// The inventory lookup takes a byte index; this accessor returns the item id
+// as a signed halfword, preserving the original lh and caller's seh.
+extern "C" s16 func_eboot_08826F8C(Cockpit *this_, u8 index) {
+    return (s16)GameSys::objectPtr->method_088567AC(index)->itemId;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08826FB4);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08827138);
+extern "C" bool func_eboot_08827138(Cockpit *self, u16 *value) {
+    u8 *raw = (u8 *)self;
+    if (raw[0x52F] != 0) {
+        return false;
+    }
+    s16 state = *(s16 *)(raw + 0x119E);
+    if (state <= 0) {
+        u16 next = *(u16 *)(raw + 0x119C) + 1;
+        *(u16 *)(raw + 0x119C) = next;
+        *value = next;
+        *(s16 *)(raw + 0x119E) = 4;
+        return true;
+    }
+    if (*value == *(u16 *)(raw + 0x119C)) {
+        *(s16 *)(raw + 0x119E) = 4;
+        return true;
+    }
+    return false;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08827194);
 
@@ -1105,7 +1242,19 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", vtable_0xA0__9StageBaseFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882774C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_088277D8);
+extern "C" u8 func_eboot_088277D8(Cockpit *self, int divisor) {
+    u8 *entry = (u8 *)self + 0x684;
+    int count = 0;
+    for (; count < 54; ++count, entry += 0x12) {
+        if (entry[2] == 0) {
+            break;
+        }
+    }
+    if (count == 0) {
+        return 1;
+    }
+    return (u8)(((count - 1) / divisor) + 1);
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08827824);
 
@@ -1151,7 +1300,13 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08828FD4);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08829588);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_088295B0);
+// Whether an inventory index is one of the two selected mix ingredients.
+extern "C" bool func_eboot_088295B0(Cockpit *this_, u16 index) {
+    if (index == this_->mixFirstMaterialIndex || index == this_->mixSecondMaterialIndex) {
+        return true;
+    }
+    return false;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", method_088295D8__7CockpitFP14InventoryEntry);
 
@@ -1169,7 +1324,12 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08829D10);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08829EB8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08829F80);
+extern "C" void *func_eboot_08829F80() {
+    if (((GameSys::objectPtr->flags_0x6AF14 & 1) != 0) == true) {
+        return &D_lobby_task_09AFECD8;
+    }
+    return *(void **)((u8 *)Quest::objectPtr + 0x68);
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08829FC4);
 
@@ -1179,9 +1339,16 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882A1F4);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882A508);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882A588);
+extern "C" void func_eboot_0882A5A0(Cockpit *this_, int type, s16 x, s16 y);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882A594);
+// Start a HUD effect of the requested type at either fixed anchor.
+extern "C" void func_eboot_0882A588(Cockpit *this_, int type) {
+    func_eboot_0882A5A0(this_, type, 48, 48);
+}
+
+extern "C" void func_eboot_0882A594(Cockpit *this_, int type) {
+    func_eboot_0882A5A0(this_, type, 246, 104);
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882A5A0);
 
@@ -1215,7 +1382,16 @@ extern "C" void func_eboot_0882A804(Cockpit *this_) {
     func_eboot_08832BC4(this_, 0);
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882A8E4);
+// Find the first inactive HUD effect slot. The caller initializes and activates
+// the returned entry; a full array returns NULL without changing any slot.
+extern "C" CockpitHudFx *func_eboot_0882A8E4(Cockpit *this_) {
+    for (int i = 0; i < 6; ++i) {
+        if (this_->hudFx[i].active == 0) {
+            return &this_->hudFx[i];
+        }
+    }
+    return NULL;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882A928);
 
@@ -1223,13 +1399,47 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882AAD8);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882ACFC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882AF00);
+// Only the local player (or a null query) may pass. The UI state must be zero
+// and the signed halfword at +0x119E nonpositive. Its current field name is 119C.
+extern "C" bool func_eboot_0882AF00(Cockpit *this_, Player *player) {
+    if (player != NULL) {
+        if ((bool)(player->pl_id == GameSys::objectPtr->player_id) == false) {
+            return false;
+        }
+    }
+    if (this_->unknown_0x52F) {
+        return false;
+    }
+    return (s16)this_->unknown_0x119C <= 0;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882AF54);
+extern "C" u8 *func_eboot_0883B450(Cockpit *, int);
+
+// Classify the selected lobby entry: absent -> 3; byte +0xBF of 5 -> 1,
+// zero -> 2, any other value -> 0.
+extern "C" u8 func_eboot_0882AF54(Cockpit *this_, int index) {
+    u8 *entry = func_eboot_0883B450(this_, index);
+    if (entry == NULL) {
+        return 3;
+    }
+    switch (entry[0xBF]) {
+    case 0:
+        return 2;
+    case 5:
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882AF98);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882B024);
+extern "C" void func_eboot_0882B024(Cockpit *self, void *arg) {
+    u8 *player = (u8 *)self->player;
+    if ((player[0x1E0] != 0) == 1) {
+        func_eboot_08848CE0();
+    }
+    func_eboot_0883BAB4(self, arg);
+}
 
 // Draws cockpit texture `textureId` (D_eboot_089366F0 atlas entry) 1:1 at (left, top):
 // one through-mode sprite, UV = the atlas rectangle, colour 0xFFFF (opaque white).
@@ -1471,7 +1681,67 @@ extern "C" void func_eboot_0882C614(Cockpit *this_, u16 x, u16 y, u16 w, u16 h, 
     geDrawPacket(Ge::objectPtr, &sprite, this_->renderGroup);
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882C9F8);
+// Stretched RGBA atlas sprite. Modes 0/1 use normal geometry with normal/mirrored U;
+// modes 2/3 reverse the geometry's Y endpoints with the same U choices. Modes 4/5
+// retain normal geometry and reverse V / both UV axes. Callers supply mode 0..5.
+// Coordinates and texture come from the caller; packets use this_->renderGroup.
+extern "C" void func_eboot_0882C9F8(Cockpit *this_, u16 x, u16 y, s16 w, s16 h, u8 r, u8 g, u8 b, u8 a, int textureId, int flip) {
+    CockpitTexture *tex = &D_eboot_089366F0[textureId];
+    func_eboot_088315C8(this_, tex->texture, tex->resource);
+    GePacket<8, 9> sprite;
+    sprite.vertexWords = 8;
+    sprite.commandWords = 9;
+    sprite.commands[0] = 0x1E000001;
+    sprite.commands[2] = 0x50000001;
+    sprite.commands[3] = 0x1280011E;
+    sprite.commands[6] = 0x04060002;
+    sprite.commands[7] = 0x10000000;
+    sprite.commands[8] = 0x08000000;
+    sprite.commands[1] = 0xC9000100;
+    sprite.vertices[1] = r | (g << 8) | (b << 16) | (a << 24);
+    sprite.vertices[3] = 0;
+    sprite.vertices[5] = r | (g << 8) | (b << 16) | (a << 24);
+    sprite.vertices[7] = 0;
+    switch ((u8)flip) {
+    case 0:
+        sprite.vertices[2] = (y << 16) | x;
+        sprite.vertices[6] = ((y + h) << 16) | (u16)(x + w);
+        sprite.vertices[0] = (tex->v << 16) | tex->u;
+        sprite.vertices[4] = ((tex->v + tex->height) << 16) | (tex->u + tex->width);
+        break;
+    case 1:
+        sprite.vertices[2] = (y << 16) | x;
+        sprite.vertices[6] = ((y + h) << 16) | (u16)(x + w);
+        sprite.vertices[0] = (tex->v << 16) | (tex->u + tex->width);
+        sprite.vertices[4] = ((tex->v + tex->height) << 16) | tex->u;
+        break;
+    case 2:
+        sprite.vertices[2] = ((y + h) << 16) | x;
+        sprite.vertices[6] = (y << 16) | (u16)(x + w);
+        sprite.vertices[0] = (tex->v << 16) | tex->u;
+        sprite.vertices[4] = ((tex->v + tex->height) << 16) | (tex->u + tex->width);
+        break;
+    case 3:
+        sprite.vertices[2] = ((y + h) << 16) | x;
+        sprite.vertices[6] = (y << 16) | (u16)(x + w);
+        sprite.vertices[0] = (tex->v << 16) | (tex->u + tex->width);
+        sprite.vertices[4] = ((tex->v + tex->height) << 16) | tex->u;
+        break;
+    case 4:
+        sprite.vertices[2] = (y << 16) | x;
+        sprite.vertices[6] = ((y + h) << 16) | (u16)(x + w);
+        sprite.vertices[0] = ((tex->v + tex->height) << 16) | tex->u;
+        sprite.vertices[4] = (tex->v << 16) | (tex->u + tex->width);
+        break;
+    case 5:
+        sprite.vertices[2] = (y << 16) | x;
+        sprite.vertices[6] = ((y + h) << 16) | (u16)(x + w);
+        sprite.vertices[0] = ((tex->v + tex->height) << 16) | (tex->u + tex->width);
+        sprite.vertices[4] = (tex->v << 16) | tex->u;
+        break;
+    }
+    geDrawPacket(Ge::objectPtr, &sprite, this_->renderGroup);
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882CEE0);
 
@@ -1568,9 +1838,16 @@ extern "C" void func_eboot_0882DD04(Cockpit *this_, u16 x0, u16 y0, u16 x1, u16 
     geDrawPacket(Ge::objectPtr, &line, this_->renderGroup);
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", method_0882DEE4__7CockpitFUsUsUsUsUc);
+extern "C" void func_eboot_0882DEF4(Cockpit *, u16 left, u16 top, u16 width, u16 height, u8 alpha, int textureId);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882DEEC);
+// Box styles select consecutive atlas tiles beginning at 0x40 or 0x9E.
+void Cockpit::method_0882DEE4(u16 left, u16 top, u16 width, u16 height, u8 alpha) {
+    func_eboot_0882DEF4(this, left, top, width, height, alpha, 0x40);
+}
+
+extern "C" void func_eboot_0882DEEC(Cockpit *this_, u16 left, u16 top, u16 width, u16 height, u8 alpha) {
+    func_eboot_0882DEF4(this_, left, top, width, height, alpha, 0x9E);
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882DEF4);
 
@@ -1720,7 +1997,14 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0883062C);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08830794);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08830920);
+// Reset the pending notification ring, its 20 slots and the 0x500-byte cache.
+extern "C" void func_eboot_08830920(Cockpit *this_) {
+    this_->pad_0x10F8[0] = 0;
+    this_->pad_0x10F8[1] = 0;
+    this_->pad_0x10F8[2] = 0;
+    memset(this_->toasts, 0, sizeof(this_->toasts));
+    this_->cache.reset(this_->slab, sizeof(this_->slab));
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0883096C);
 
@@ -1803,7 +2087,17 @@ extern "C" void func_eboot_08830F80(Cockpit *this_) {
     }
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_088311B8);
+// UI-state predicate used by player and camera input checks. The first byte
+// is GameSys+0x10, followed by Cockpit+0x604 and the state at Cockpit+0x52F.
+extern "C" bool func_eboot_088311B8(Cockpit *this_) {
+    if (GameSys::objectPtr->pad_0xE[2]) {
+        return true;
+    }
+    if (this_->unknown_0x604) {
+        return true;
+    }
+    return this_->unknown_0x52F != 0;
+}
 
 // Horizontal bar of width w: body texture 0xB5 stretched over w - capWidth, then the end cap 0xB6
 // (1:1) at x + w - capWidth. The cap is drawn first.
@@ -2077,7 +2371,13 @@ extern "C" void func_eboot_08832064(Cockpit *this_, u16 x, u16 y, u16 w, u16 h, 
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08832120);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0883232C);
+// The player query reads this halfword as an item id; states 0 and 6 return 0.
+extern "C" u16 func_eboot_0883232C(Cockpit *this_) {
+    if (this_->unknown_0x52F == 0 || this_->unknown_0x52F == 6) {
+        return 0;
+    }
+    return *(u16 *)&this_->pad_0x587[9];
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08832350);
 
@@ -2085,7 +2385,13 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08832670);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_088327AC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08832960);
+// Release cockpit texture resources only while the loaded flag is set.
+extern "C" void func_eboot_08832960(Cockpit *this_) {
+    if (this_->flags_0x528 & 0x1000) {
+        ResourceManager::objectPtr->free_all(ResourceType::COCK_TMH);
+        this_->flags_0x528 &= ~0x1000;
+    }
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_088329AC);
 
