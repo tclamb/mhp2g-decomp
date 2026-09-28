@@ -24,23 +24,23 @@ struct CockpitTextbox {
 };
 
 struct CockpitMenu {
-    s16 boxLeft;
-    s16 boxTop;
+    u16 boxLeft;
+    u16 boxTop;
     u8 fontWidth;
     u8 fontHeight;
-    s8 fontColor;
+    u8 fontColor;
     u8 boxStyle;
-    s16 optionMaxLength;
-    s16 optionCount;
+    u16 optionMaxLength;
+    u16 optionCount;
     u16 *optionStringIds;
     u32 cursorColor;
 };
 
 struct CockpitMenubox {
-    s16 boxLeft;
-    s16 boxTop;
-    s16 boxWidth;
-    s16 boxHeight;
+    u16 boxLeft;
+    u16 boxTop;
+    u16 boxWidth;
+    u16 boxHeight;
     u8 fontWidth;
     u8 fontHeight;
     s8 fontColor;
@@ -97,6 +97,14 @@ private:
     StringTableId();
 };
 
+// One of 6 HUD effect slots at Cockpit+0x112A, drawn in render slot 12 by func_eboot_0882A804.
+struct CockpitHudFx {
+    s16 unk0;
+    s8 active; // 1 = draw
+    s8 type;   // 0: func_eboot_0882A928, 1: func_eboot_0882AAD8, 2: func_eboot_0882ACFC
+    u8 data[8];
+};
+
 struct Toast {
     u8 padding[0x24];
     Toast();
@@ -116,7 +124,8 @@ struct Cockpit : Singleton<Cockpit> {
     u8 renderGroup;
     u8 pad_0x535[0x537 - 0x535];
     u8 yesNoIndex;
-    u8 pad_0x538[0x554 - 0x538];
+    u16 *snapshot; // 0x538: 0x44000-byte copy of the last frame (512x272, 5551), set by game_task 09A5B508
+    u8 pad_0x53C[0x554 - 0x53C];
     u8 unknown_0x554;
     u8 pad_0x555[0x57C - 0x555];
     u8 unknown_0x57C;
@@ -139,7 +148,11 @@ struct Cockpit : Singleton<Cockpit> {
     u8 mixOutcomeQuantity;
     u8 pad_0x5E6[0x5E8 - 0x5E6];
     u32 unknown_0x5E8;
-    u8 pad_0x5EC[0x5FC - 0x5EC];
+    char *unknown_0x5EC;
+    s8 unknown_0x5F0;
+    u8 pad_0x5F1;
+    s16 unknown_0x5F2;
+    u8 pad_0x5F4[0x5FC - 0x5F4];
     u16 itemBoxMenuCursor;
     u8 itemBoxMenuId;
     u8 pad_0x5FF[0x604 - 0x5FF];
@@ -148,7 +161,9 @@ struct Cockpit : Singleton<Cockpit> {
     u8 unknown_0x608;
     u8 pad_0x609[0xE28 - 0x609];
     Toast toasts[20];
-    u8 pad_0x10F8[0x1198 - 0x10F8];
+    u8 pad_0x10F8[0x112A - 0x10F8];
+    CockpitHudFx hudFx[6]; // 0x112A, drawn by func_eboot_0882A804
+    u8 pad_0x1172[0x1198 - 0x1172];
     u32 unknown_0x1198;
     u16 unknown_0x119E;
     u16 unknown_0x119C;

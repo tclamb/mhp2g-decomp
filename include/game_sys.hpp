@@ -60,7 +60,9 @@ struct UserData {
     u8 padding_0x3FE2[42];
     u8 monsterListMask[16];
     u8 hunterRank;
-    u8 padding_0x401D[15];
+    u8 padding_0x401D;
+    u16 rngSeed; // persisted state of System rng stream 2
+    u8 padding_0x4020[12];
     u16 captureCounts[90];
     u16 largestSizes[90];
     u16 smallestSizes[90];
@@ -88,7 +90,10 @@ struct UserData {
 };
 
 struct GameSys : Singleton<GameSys> {
-    u8 pad_0x0[0x1C];
+    u8 pad_0x0[0xC];
+    u8 snapshot_state_0C; // 0x81 = quest clear: take a screen snapshot (see game_task 09A5B508), then 0x80
+    u8 snapshot_draw_0D;  // != 0: Cockpit::method_088259A0 draws the snapshot as a full-screen background
+    u8 pad_0xE[0x1C - 0xE];
     u16 short_0x1C;
     u8 pad_0x1E[0x28 - 0x1E];
     u8 player_id;
@@ -104,7 +109,9 @@ struct GameSys : Singleton<GameSys> {
     bool flag_0x480;
     u8 pad_0x481[0x4A0 - 0x481];
     UserData userData;
-    u8 pad_0x6ADD8[0x6ADDD - 0x6ADD8];
+    u8 pad_0x6ADD8;
+    s8 byte_0x6ADD9;
+    u8 pad_0x6ADDA[0x6ADDD - 0x6ADDA];
     s8 flag_0x6ADDD;
     bool flag_0x6ADDE;
     u8 pad_0x6ADDF[0x6AF0C - 0x6ADDF];
