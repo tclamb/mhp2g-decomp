@@ -434,7 +434,11 @@ def build_stuff(linker_entries_by_module_name: Dict[str, List[LinkerEntry]], git
     ninja.rule(
         "mwldpsp",
         description="mwldpsp -o $out build/ULJM-05500.lcf",
-        command="MWIncludes=./bin ./bin/wibo ./bin/mwldpsp.exe -m _start -map -nofail -noinhibit-exec -o $out $in $args",
+        # objects + overlay args go through a response file: with one C++ unit per
+        # function the command line exceeds Linux's 128 KiB single-argument limit
+        command="MWIncludes=./bin ./bin/wibo ./bin/mwldpsp.exe -m _start -map -nofail -noinhibit-exec -o $out @$out.rsp",
+        rspfile="$out.rsp",
+        rspfile_content="$in $args",
     )
 
     ninja.rule(
