@@ -85,7 +85,7 @@ struct System : NoInlineConstructorSingleton<System> {
     SceUID priorityChangerThreadId;
     SceUID userMainThreadId;
     SceUID changeThreadVtimerId;
-    u32  vtimerTickCount;
+    s32 vtimerTickCount;
     SceUID sha1ThreadId;
     bool sha1ThreadStarted;
 
@@ -101,6 +101,7 @@ struct System : NoInlineConstructorSingleton<System> {
     ~System();
 
     u16 next_index(u32 type);
+    SceBool isWirelessOn() { return (wirelessIsOn & 1) != 0; }
     void run();
 };
 

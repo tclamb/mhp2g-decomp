@@ -101,12 +101,15 @@ segments:
       - [0x4943c, cpp, cont_task]
       - [0x49654, cpp, draw_manager]
       - [0x4b524, asmtu, edit_task]
-      - [0x4b714, asmtu, fade_task]
+      - [0x4b714, cpp, fade_task] # screen fade overlay
       - [0x4bd30, cpp, file_sys]
       - [0x4ddcc, asmtu, game_sys] # string manager?
       - [0x574c8, cpp, ge] # tmh parsing emitted here (header?)
       - [0x57fb8, cpp, cache]
-      - [0x581e8, asmtu, toast_notification]
+      - [0x581e8, asmtu, toast_notification] # layout (func_eboot_08859C34): still asm, owns a jump table and the data
+      - [0x5869c, cpp, toast_notification_update]
+      - [0x58720, asmtu, toast_notification_draw] # draw/animate (func_eboot_0885A16C): still asm, owns the second jump table
+      - [0x58e8c, cpp, toast_notification_tail] # small toast helpers
       - [0x58f40, asmtu, start_task]
       - [0x5924c, cpp, item_manager]
       - [0x5ade8, asmtu, equip_manager]
@@ -125,9 +128,9 @@ segments:
       - [0x84038, asmtu, bgm_server]
       - [0x84634, asmtu, stream]
       - [0x84b64, cpp, sub_camera]
-      - [0x8dff0, asmtu, system] # main game loop
+      - [0x8dff0, cpp, system] # main game loop
       - [0x8e84c, cpp, system_font]
-      - [0x935d0, asmtu, task_manager] # owns state objects, calls update logic of active state once per frame, unloads & loads new states
+      - [0x935d0, cpp, task_manager] # owns state objects, calls update logic of active state once per frame, unloads & loads new states
       - [0x93f38, asmtu, cockpit_10fc]
       - [0x95238, cpp, task_base]
       - [0x95338, asmtu, lib/libsas]
@@ -192,6 +195,7 @@ segments:
       - [0x12cff8, .rodata, file_sys]
       - [0x12d02c, .rodata, game_sys]
       - [0x12d0e4, .rodata, toast_notification]
+      - [0x12d108, .rodata, toast_notification_draw]
       - [0x12d12c, .rodata, item_manager]
       - [0x12d144, .rodata, equip_manager]
       - [0x12d274, .rodata, model_base]
@@ -202,6 +206,7 @@ segments:
       - [0x12d624, .rodata, sub_camera]
       - [0x12d73c, .rodata, system_font]
       - [0x12da44, .rodata, task_manager]
+      - [0x12da80, .rodata, cockpit_10fc] # jtbl_eboot_0892F4CC, used by func_eboot_088961A4
       - [0x12dacc, .rodata, lib/libwave]
       - [0x12db0c, .rodata, lobby_net]
       - [0x12dba4, .rodata, csepsp]
@@ -230,7 +235,7 @@ segments:
       - [0x137254, .data, cont_task]
       - [0x13726c, .data, draw_manager]
       - [0x1372b0, .data, edit_task]
-      - [0x1372c8, .data, fade_task]
+      - [0x1752a8, .data, fade_task] # only the ptmf; the 0x3dfe0-byte table blob before it (equip data?) stays with the edit_task asmtu
       - [0x1752b4, .data, file_sys]
       - [0x195860, .data, game_sys]
       - [0x198378, .data, ge]
@@ -875,7 +880,7 @@ segments:
       - {start: 0x1c5114, type: .bss, vram: 0x08a5e270, name: system}
       - {start: 0x1c5114, type: .bss, vram: 0x08a5e278, name: system_font}
       - {start: 0x1c5114, type: .bss, vram: 0x08a862b8, name: task_manager}
-      - {start: 0x1c5114, type: .bss, vram: 0x08a862c0, name: lib/libsas}
+      - {start: 0x1c5114, type: .bss, vram: 0x08a862bc, name: lib/libsas} # starts 4 early: owns the 64-byte alignment pad (0x08a862bc) that task_manager.cpp cannot emit
       - {start: 0x1c5114, type: .bss, vram: 0x08a87140, name: lib/libwave}
       - {start: 0x1c5114, type: .bss, vram: 0x08a883ec, name: main}
       - {start: 0x1c5114, type: .bss, vram: 0x09a07280, name: resource_manager}
