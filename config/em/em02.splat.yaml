@@ -62,7 +62,13 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, em02]
+  - [0x80, asm, em02_before_lifecycle_e3e0]
+  - [0xe3e0, cpp, lifecycle_e3e0_ctor]
+  - [0xe414, asm, lifecycle_e3e0_gap1]
+  - [0xe418, cpp, lifecycle_e3e0_dtor]
+  - [0xe474, asm, lifecycle_e3e0_gap2]
+  - [0xe478, asm, em02_before_vtable_calls]
+  - [0xead8, cpp, vtable_calls_ead8]
   - [0xeb28, pad]
   - [0xeb80, data, em02]
   - [0x16980, bss, em02]

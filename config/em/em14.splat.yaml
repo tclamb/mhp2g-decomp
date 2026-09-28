@@ -62,7 +62,12 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, em14]
+  - [0x80, asm, em14_before_lifecycle_f468]
+  - [0xf468, cpp, lifecycle_f468_ctor]
+  - [0xf49c, asm, lifecycle_f468_gap1]
+  - [0xf4a0, cpp, lifecycle_f468_dtor]
+  - [0xf4fc, asm, lifecycle_f468_gap2]
+  - [0xf500, asm, em14_tail]
   - [0xf9a0, pad]
   - [0xfa00, data, em14]
   - [0x16700, bss, em14]

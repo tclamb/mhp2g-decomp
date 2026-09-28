@@ -62,7 +62,17 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, em40]
+  - [0x80, asm, em40_before_lifecycle_14da0]
+  - [0x14da0, cpp, lifecycle_14da0_ctor]
+  - [0x14dd4, asm, lifecycle_14da0_gap1]
+  - [0x14dd8, cpp, lifecycle_14da0_dtor]
+  - [0x14e34, asm, lifecycle_14da0_gap2]
+  - [0x14e38, asm, em40_between_lifecycle_14da0_15418]
+  - [0x15418, cpp, lifecycle_15418_ctor]
+  - [0x1544c, asm, lifecycle_15418_gap1]
+  - [0x15450, cpp, lifecycle_15418_dtor]
+  - [0x154ac, asm, lifecycle_15418_gap2]
+  - [0x154b0, asm, em40_tail]
   - [0x1667c, pad]
   - [0x16680, data, em40]
   - [0x21b80, bss, em40]

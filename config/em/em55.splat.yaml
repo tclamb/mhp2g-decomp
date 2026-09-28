@@ -62,7 +62,17 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, em55]
+  - [0x80, cpp, ctor]
+  - [0xb4, asm, ctor_gap]
+  - [0xb8, cpp, dtor]
+  - [0x114, asm, dtor_gap]
+  - [0x118, cpp, init]
+  - [0x1c0, cpp, noop]
+  - [0x1c8, asm, em55_before_action_timer]
+  - [0x3b10, cpp, action_timer]
+  - [0x3bd8, asm, em55_before_sync]
+  - [0x6a10, cpp, game_state]
+  - [0x6b20, asm, em55_tail]
   - [0xe5d4, pad]
   - [0xe600, data, em55]
   - [0x12180, bss, em55]
