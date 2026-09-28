@@ -859,3 +859,7 @@ rom:0x98F0 reloc:MIPS_HI16 symbol:D_lobby_task_09B1E780
 rom:0x98F8 reloc:MIPS_LO16 symbol:D_lobby_task_09B1E780
 rom:0x9928 reloc:MIPS_HI16 symbol:D_lobby_task_09B1E780
 rom:0x992C reloc:MIPS_LO16 symbol:D_lobby_task_09B1E780
+rom:0xa4584 reloc:MIPS_HI16 symbol:DRAWABLE_WRITE_HEAD
+rom:0xa4670 reloc:MIPS_LO16 symbol:DRAWABLE_WRITE_HEAD
+rom:0xa83d8 reloc:MIPS_HI16 symbol:DRAWABLE_WRITE_HEAD
+rom:0xa84d4 reloc:MIPS_LO16 symbol:DRAWABLE_WRITE_HEAD
