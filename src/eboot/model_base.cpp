@@ -461,7 +461,21 @@ float spline(float t, float x0, float t0, float dxdt0, float x1, float t1, float
     return result;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088630C8);
+extern "C" s16 func_eboot_08863660(void *, motion_track *, motion_key **k0, motion_key **k1, s16 cursor, float t);
+// The call passes the joint pointer through a0 as well, ahead of the floats.
+extern "C" float spline__Ffffffff(void *, float t, float x0, float t0, float dxdt0, float x1, float t1, float dxdt1);
+
+// Sample one track at frame t: find the key pair around t (cursor caches the last
+// key index), then Hermite-interpolate between them.
+extern "C" float func_eboot_088630C8(void *joint, float t, motion_track *track, s16 *cursor) {
+    motion_key *k0 = 0;
+    motion_key *k1 = 0;
+    *cursor = func_eboot_08863660(joint, track, &k0, &k1, *cursor, t);
+    if (k1 == 0) {
+        return k0->value;
+    }
+    return spline__Ffffffff(joint, t, k0->value, k0->frame, k0->tangent_out, k1->value, k1->frame, k1->tangent_in);
+}
 
 static int log2table[257] = {
     [0 ... 256] =  0xff,
@@ -476,7 +490,27 @@ static int log2table[257] = {
     [256] = 8,
 };
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863190);
+// Sample every track of a joint's motion group at `frame` into out[9]
+// (scale xyz, rotation xyz, position xyz). Rotations are s16 with 16384 = 2 pi,
+// scale and position are fixed point with 16 = 1.0.
+extern "C" int func_eboot_08863190(u8 *joint, float *out, u32 frame, s16 *cursors) {
+    motion_group *g = *(motion_group **)(joint + 0x64);
+    if (g != 0 && (g->flags & 0x1FF) != 0) {
+        motion_track *t = g->tracks;
+        for (u32 i = 0; i < (*(motion_group **)(joint + 0x64))->track_count; ++i) {
+            int idx = log2table[t->type];
+            float *o = &out[idx];
+            *o = func_eboot_088630C8(joint, frame, t, &cursors[idx]);
+            if (t->type & 0x38) {
+                *o *= 3.14159265f / 8192.0f;
+            } else {
+                *o *= 0.0625f;
+            }
+            t = (motion_track *)((u8 *)t + t->size);
+        }
+    }
+    return 1;
+}
 
 // only a rotation & translation, no scale
 extern "C"
@@ -486,32 +520,430 @@ void func_eboot_088632D0(ScePspFMatrix4 *, ScePspFMatrix4 *out, ScePspFMatrix3 *
     out->w.x = args->z.x; out->w.y = args->z.y; out->w.z = args->z.z;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088633C4);
+// m = scale * rotX * rotY * rotZ with the rotation matrix built on the left (vmmul.q, full 4x4).
+#define ROT4(NAME, R0, R1, R2, R3) \
+inline void NAME(ScePspFMatrix4 *m, float angle) { \
+    __asm__ ( \
+        "lv.s S100, 0x0(%1)" \
+        "vcst.s S101, VFPU_2_PI" \
+        "vmul.s S100, S100, S101" \
+        R0 R1 R2 R3 \
+        "lv.q C100, 0x0(%0)" \
+        "lv.q C110, 0x10(%0)" \
+        "lv.q C120, 0x20(%0)" \
+        "lv.q C130, 0x30(%0)" \
+        "vmmul.q M200, M000, M100" \
+        "sv.q C200, 0x0(%0)" \
+        "sv.q C210, 0x10(%0)" \
+        "sv.q C220, 0x20(%0)" \
+        "sv.q C230, 0x30(%0)" \
+        : "=m" (*m) \
+        : "m" (angle) \
+    ); \
+}
+ROT4(rotX4, "vidt.q C000", "vrot.q C010, S100, [0, C, S, 0]", "vrot.q C020, S100, [0, -S, C, 0]", "vidt.q C030")
+ROT4(rotY4, "vrot.q C000, S100, [C, 0, -S, 0]", "vidt.q C010", "vrot.q C020, S100, [S, 0, C, 0]", "vidt.q C030")
+ROT4(rotZ4, "vrot.q C000, S100, [C, S, 0, 0]", "vrot.q C010, S100, [-S, C, 0, 0]", "vidt.q C020", "vidt.q C030")
+#undef ROT4
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863644);
+// Joint local matrix at `frame`: start from the rest pose (9 floats: scale xyz, rotation xyz,
+// position xyz), overwrite the animated components from the joint's motion group (as in
+// func_eboot_08863190), then m = scale * rotX * rotY * rotZ with the position in m->w.
+// The float goes second in the declaration (EABI passes it in f12 either way); that order is what
+// makes the call arguments evaluate like the original.
+extern "C" void func_eboot_088633C4(u8 *joint, float frame, float *rest, float *out, ScePspFMatrix4 *m, s16 *cursors) {
+    for (int i = 0; i < 9; ++i) {
+        out[i] = rest[i];
+    }
+    motion_group *g = *(motion_group **)(joint + 0x64);
+    if (g != 0) {
+        u32 i;
+        motion_track *t = g->tracks;
+        if ((g->flags & 0x1FF) != 0) {
+        for (i = 0; i < (*(motion_group **)(joint + 0x64))->track_count; ++i) {
+            int idx = log2table[t->type];
+            float *o = &out[idx];
+            *o = func_eboot_088630C8(joint, frame, t, &cursors[idx]);
+            if (t->type & 0x38) {
+                *o *= 3.14159265f / 8192.0f;
+            } else {
+                *o *= 0.0625f;
+            }
+            t = (motion_track *)((u8 *)t + t->size);
+        }
+    }
+    }
+    scaleMatrix(m, out[0], out[1], out[2]);
+    rotX4(m, out[3]);
+    rotY4(m, out[4]);
+    rotZ4(m, out[5]);
+    m->w.x = out[6];
+    m->w.y = out[7];
+    m->w.z = out[8];
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863660);
+// Frame number of the last key of a motion track.
+extern "C" float func_eboot_08863644(void *joint_0x150, motion_track *track) {
+    return track->keys[track->key_count - 1].frame;
+}
+
+// Find the keys around frame t in a track, starting from the cached key index.
+// Returns the new cursor; *k1 == 0 means "hold *k0" (before the first key, after the
+// last one, or exactly on a key).
+extern "C" s16 func_eboot_08863660(void *joint, motion_track *track, motion_key **k0, motion_key **k1, s16 cursor, float t) {
+    *k0 = 0;
+    *k1 = 0;
+    motion_key *keys = track->keys;
+    if (t <= keys[0].frame || track->key_count == 1) {
+        *k0 = keys;
+        *k1 = 0;
+        return 0;
+    }
+    if (t >= keys[track->key_count - 1].frame) {
+        *k0 = &keys[track->key_count - 1];
+        *k1 = 0;
+        return track->key_count - 1;
+    }
+    if (cursor < 0) {
+        cursor = 0;
+    } else if (cursor >= track->key_count) {
+        cursor = track->key_count - 1;
+    }
+    motion_key *k = &keys[cursor];
+    while (1) {
+        if (k->frame == t) {
+            *k0 = k;
+            *k1 = 0;
+            return cursor;
+        }
+        if (k->frame < t && t < k[1].frame) {
+            *k0 = k;
+            *k1 = k + 1;
+            return cursor;
+        }
+        if (t < k->frame) {
+            --k;
+            --cursor;
+        } else {
+            ++k;
+            ++cursor;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088637BC);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863B68);
+inline void vzero_q(ScePspFVector4 *v) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "vzero.q C000"
+        "sv.q C000, 0x0(%0)"
+        : "=m" (*v)
+    );
+#else
+    v->x = 0; v->y = 0; v->z = 0; v->w = 0;
+#endif
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863D50);
+// Root displacement of a joint between two frames of a channel's motion (joint.cpp).
+extern "C" void func_eboot_0885F8E0(void *joint, ScePspFVector4 *out, int channel, float from, float to);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863DEC);
+inline void copy_m(ScePspFMatrix4 *d, ScePspFMatrix4 *s) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C000, 0x0(%1)"
+        "lv.q C010, 0x10(%1)"
+        "lv.q C020, 0x20(%1)"
+        "lv.q C030, 0x30(%1)"
+        "sv.q C000, 0x0(%0)"
+        "sv.q C010, 0x10(%0)"
+        "sv.q C020, 0x20(%0)"
+        "sv.q C030, 0x30(%0)"
+        : "=m" (*d)
+        : "m" (*s)
+    );
+#else
+    *d = *s;
+#endif
+}
 
+// v = a * wa + b * wb
+inline void vblend_q(ScePspFVector4 *v, ScePspFVector4 *a, ScePspFVector4 *b, float wa, float wb) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C000, %1"
+        "lv.q C010, %2"
+        "lv.s S020, %3"
+        "lv.s S021, %4"
+        "vscl.q C100, C000, S020"
+        "vscl.q C110, C010, S021"
+        "vadd.q C000, C100, C110"
+        "sv.q C000, %0"
+        : "=m" (*v)
+        : "m" (*a), "m" (*b), "m" (wa), "m" (wb)
+    );
+#else
+    v->x = a->x * wa + b->x * wb;
+    v->y = a->y * wa + b->y * wb;
+    v->z = a->z * wa + b->z * wb;
+    v->w = a->w * wa + b->w * wb;
+#endif
+}
+
+// v = p * m (row vector times matrix, 4x4)
+inline void vtfm4_q(ScePspFVector4 *v, ScePspFMatrix4 *m, ScePspFVector4 *p) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C100, %2"
+        "lv.q C200, 0x0(%1)"
+        "lv.q C210, 0x10(%1)"
+        "lv.q C220, 0x20(%1)"
+        "lv.q C230, 0x30(%1)"
+        "vtfm4.q C000, E200, C100"
+        "sv.q C000, %0"
+        : "=m" (*v)
+        : "m" (*m), "m" (*p)
+    );
+#else
+    v->x = p->x * m->x.x + p->y * m->y.x + p->z * m->z.x + p->w * m->w.x;
+    v->y = p->x * m->x.y + p->y * m->y.y + p->z * m->z.y + p->w * m->w.y;
+    v->z = p->x * m->x.z + p->y * m->y.z + p->z * m->z.z + p->w * m->w.z;
+    v->w = p->x * m->x.w + p->y * m->y.w + p->z * m->z.w + p->w * m->w.w;
+#endif
+}
+
+// Root-motion step of channel 0: the root joint's displacement over one motion step
+// (func_eboot_0885F8E0 between two frames), rotated by m with its translation row cleared.
+// While blending (direction != 0) the new motion's next step and the old motion's next step are
+// cross-faded with weight spline(blend_step, 0 -> 1); direction < 0 gives (0, 0, 0, 1).
+extern "C" void func_eboot_08863B68(Hierarchy *h, ScePspFVector4 *out, ScePspFMatrix4 *m) {
+    ScePspFVector4 c;
+    ScePspFVector4 a;
+    ScePspFVector4 b;
+    ScePspFMatrix4 mat;
+    vzero_q(out);
+    copy_m(&mat, m);
+    vzero_q(&mat.w);
+    u8 *j = *(u8 **)((u8 *)h->roots[0] + 0x14C);
+    u8 *p = j + 0x150;
+    if (h->motion[0].direction != 0) {
+        func_eboot_0885F8E0(j, &a, 0, h->motion[0].frame, h->motion[0].frame + h->motion[0].speed);
+        float w = spline__Ffffffff(p, h->motion[0].blend_step, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f);
+        float iw = 1.0f - w;
+        func_eboot_0885F8E0(*(u8 **)((u8 *)h->roots[0] + 0x14C), &b, 1, h->motion[0].blend_frame, h->motion[0].blend_frame + h->motion[0].speed);
+        vblend_q(&c, &a, &b, w, iw);
+        if (h->motion[0].direction > 0) {
+            vtfm4_q(out, &mat, &c);
+        } else {
+            sv_q(out, 0.0f, 0.0f, 0.0f, 1.0f);
+        }
+    } else {
+        func_eboot_0885F8E0(j, &c, 0, h->motion[0].frame - h->motion[0].speed, h->motion[0].frame);
+        vtfm4_q(out, &mat, &c);
+    }
+}
+
+extern "C" void func_eboot_0885F998(Joint *, void *motion, int channel, int);
+extern "C" float func_eboot_08860254(Joint *, void *motion);
+extern "C" void func_eboot_08864234(Hierarchy *, void *motion, int channel, float frame);
+extern "C" void func_eboot_08863E68(Hierarchy *, void *motion, int frame, int blend, int channel);
+
+
+// Set the motion of one channel without blending.
+extern "C" void func_eboot_08863D50(Hierarchy *h, void *motion, int channel, float frame) {
+    if (motion != 0) {
+        h->unknown_0x128[channel] = 0;
+        h->unknown_0x130[channel] = 0;
+        func_eboot_08864234(h, motion, channel, frame);
+        for (int i = 0; i < h->root_count; ++i) {
+            func_eboot_0885F998(h->roots[i], motion, channel, 0);
+        }
+    }
+}
+
+// Set the motion of one channel, blending from the current one over `blend` frames.
+extern "C" void func_eboot_08863DEC(Hierarchy *h, void *motion, int blend, int channel, float frame) {
+    if (blend != 0 && h->motion[channel].motion == 0) {
+        blend = 0;
+    }
+    if (blend == 0) {
+        func_eboot_08863D50(h, motion, channel, frame);
+    } else if (motion != 0) {
+        func_eboot_08863E68(h, motion, (int)frame, blend, channel);
+    } else {
+        h->unknown_0x128[channel] = 0;
+        h->unknown_0x130[channel] = 0;
+    }
+}
+
+#ifdef BUILD_NONMATCHING
+// 97.78%: the original keeps &motion[channel] in v0 for the second group of stores and computes
+// &blend_frame (for the 0885FB4C argument) before the direction branch; ours keeps it in a0 and
+// computes it in the branch delay slot, so the likely-branch preload of chain_count is lost.
+extern "C" void func_eboot_0885FB4C(Joint *, int channel, float frame);
+extern "C" void func_eboot_0885FBAC(Joint *, int chain);
+#define M h->motion[channel]
+#define MSTART(m) (*(float *)((u8 *)(m) + 0x10))
+#define MLOOP(m) (*(u32 *)((u8 *)(m) + 0xC))
+extern "C" void func_eboot_08863E68(Hierarchy *h, void *motion, int frame, int blend, int channel) {
+    if (blend != 0) {
+        if (M.blending == 0) {
+            func_eboot_0885F998(h->roots[0], M.motion, channel, 1);
+            M.blend_end = M.end;
+            if (M.flags & Hierarchy::Motion::LOOP) {
+                M.flags |= Hierarchy::Motion::BLEND_LOOP;
+            } else {
+                M.flags &= ~Hierarchy::Motion::BLEND_LOOP;
+            }
+            M.blend_start = M.start;
+            float *bf = &M.blend_frame;
+            *bf = M.frame;
+            M.blending = 1;
+            if (M.direction == 0) {
+                func_eboot_0885FB4C(h->roots[0], channel, *bf);
+            } else {
+                for (int i = 0; i < h->chain_count; ++i) {
+                    func_eboot_0885FBAC(h->roots[0], i);
+                }
+            }
+        }
+        if (blend < 0) {
+            blend = -blend;
+            M.direction = -1;
+        } else {
+            M.direction = 1;
+        }
+        int n = blend + 1;
+        func_eboot_0885F998(h->roots[0], motion, channel, 0);
+        M.end = func_eboot_08860254(h->roots[channel], motion);
+        if (MLOOP(motion) != 0) {
+            M.flags |= Hierarchy::Motion::LOOP;
+        } else {
+            M.flags &= ~Hierarchy::Motion::LOOP;
+        }
+        M.start = MSTART(motion);
+        M.frame = frame;
+        M.motion = motion;
+        M.blend_frames = n;
+        M.blend_step = M.blend_speed = 1.0f / n;
+    } else {
+        func_eboot_0885F998(h->roots[0], motion, channel, 0);
+        M.end = func_eboot_08860254(h->roots[channel], motion);
+        if (MLOOP(motion) != 0) {
+            M.flags |= Hierarchy::Motion::LOOP;
+        } else {
+            M.flags &= ~Hierarchy::Motion::LOOP;
+        }
+        M.start = MSTART(motion);
+        M.frame = frame;
+        M.motion = motion;
+        M.blend_frames = 0;
+        M.direction = 0;
+    }
+    M.flags |= Hierarchy::Motion::ACTIVE;
+    if (channel == 0) {
+        vzero_q(&h->motion[0].root_delta);
+    }
+}
+#undef M
+#undef MSTART
+#undef MLOOP
+#else
 INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863E68);
+#endif
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088640F0);
+// Update every joint chain: root->update(transform or identity, identity, x, y, z).
+extern "C" void func_eboot_088640F0(Hierarchy *h, ScePspFMatrix4 *transform, float x, float y, float z) {
+    ScePspFMatrix4 identity;
+    vmidt_q(&identity);
+    if (transform == 0) {
+        transform = &identity;
+    }
+    for (int i = 0; i < h->root_count; ++i) {
+        h->roots[i]->update(transform, &identity, x, y, z);
+    }
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088641B8);
+extern "C" void func_eboot_08860640(Joint *);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08864214);
+extern "C" void func_eboot_088641B8(Hierarchy *h) {
+    for (int i = 0; i < h->root_count; ++i) {
+        func_eboot_08860640(h->roots[i]);
+    }
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08864234);
+// Joint `index` of the joint array (all joints are allocated contiguously after roots[0]).
+extern "C" Joint *func_eboot_08864214(Hierarchy *h, int index) {
+    return &h->roots[0][index];
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088642F4);
+// Start `motion` on `channel` at `frame` (no blend): speed 2, start/end from the data.
+extern "C" void func_eboot_08864234(Hierarchy *h, void *motion, int channel, float frame) {
+    h->motion[channel].flags |= Hierarchy::Motion::ACTIVE;
+    h->motion[channel].frame = frame;
+    h->motion[channel].speed = 2.0f;
+    h->motion[channel].start = *(float *)((u8 *)motion + 0x10);
+    h->motion[channel].end = func_eboot_08860254(h->roots[0], motion);
+    if (*(u32 *)((u8 *)motion + 0xC) != 0) {
+        h->motion[channel].flags |= Hierarchy::Motion::LOOP;
+    } else {
+        h->motion[channel].flags &= ~Hierarchy::Motion::LOOP;
+    }
+    h->motion[channel].motion = motion;
+    if (channel == 0) {
+        vzero_q(&h->motion[channel].root_delta);
+    }
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08864340);
+extern "C" void func_eboot_088642F4(Hierarchy *h) {
+    for (int i = 0; i < 4; ++i) {
+        h->roots[i] = 0;
+    }
+    for (int i = 0; i < 4; ++i) {
+        h->unknown_0x128[i] = 0;
+        h->unknown_0x130[i] = 0;
+        h->unknown_0x138[i] = 0;
+    }
+    h->root_count = 0;
+    h->chain_count = 0;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08864400);
+// True when frame t is crossed by the next update of `channel` (event trigger test).
+extern "C" int func_eboot_08864340(Hierarchy *h, int channel, float t) {
+    int wrapped = 0;
+    if (h->motion[0].direction != 0) {
+        return 0;
+    }
+    float frame = h->motion[channel].frame;
+    float next = frame + h->motion[channel].speed;
+    float end = h->motion[channel].end;
+    if (next > end) {
+        if (h->motion[channel].flags & Hierarchy::Motion::LOOP) {
+            next = h->motion[channel].start + (next - end);
+            wrapped = 1;
+        } else {
+            next = end;
+        }
+    }
+    if (!wrapped) {
+        if (t >= frame && t < next) {
+            return 1;
+        }
+    } else {
+        if (t >= frame && next < end) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// True once `channel` has reached frame t.
+extern "C" bool func_eboot_08864400(Hierarchy *h, int channel, float t) {
+    if (h->motion[0].direction != 0) {
+        return false;
+    }
+    if (t <= h->motion[channel].frame) {
+        return true;
+    }
+    return false;
+}

@@ -5,6 +5,32 @@
 #include "joint.hpp"
 #include "draw.hpp"
 
+// Motion (animation) data, as read by the Hierarchy/Joint code.
+// A key is a Hermite spline point: value, frame, tangents (see spline()).
+struct motion_key {
+    s16 value;
+    s16 frame;
+    s16 tangent_in;   // slope used when this key ends a segment
+    s16 tangent_out;  // slope used when this key starts a segment
+};
+
+// One animated component of one joint.
+struct motion_track {
+    u16 type;         // one bit: 0x001-0x004 scale xyz, 0x008-0x020 rotation xyz, 0x040-0x100 position xyz
+    u16 unknown_0x2;
+    u32 key_count;
+    u32 size;         // bytes to the next track
+    motion_key keys[1];
+};
+
+// The tracks of one joint (motion + 0x14 onwards, walked by size).
+struct motion_group {
+    u32 flags;        // & 0x1FF: which components are animated
+    u32 track_count;
+    u32 size;         // bytes to the next group
+    motion_track tracks[1];
+};
+
 struct Hierarchy {
     inline Hierarchy() {
         for (int i = 0; i < 4; ++i) {
@@ -20,7 +46,32 @@ struct Hierarchy {
     }
     virtual ~Hierarchy() {}
 
-    u8 unknown_0x4[0x10C];
+    // One animation channel (4 of them, 0x40 bytes each, at Hierarchy+0x10).
+    struct Motion {
+        enum {
+            ACTIVE = 1 << 0,  // a motion is set
+            LOOP   = 1 << 1,  // motion header +0xC != 0: wrap to start at end
+            BLEND_LOOP = 1 << 2, // copy of LOOP for the blended-out motion
+        };
+        float frame;          // 0x00 current frame
+        float speed;          // 0x04 frames per update (set to 2.0 by func_eboot_08864234)
+        float start;          // 0x08 first frame (motion header +0x10)
+        float end;            // 0x0C last key frame over all tracks (func_eboot_08860254)
+        float blend_frame;    // 0x10 blended-out motion: its frame when the blend started
+        float blend_speed;    // 0x14 1 / (blend frames + 1)
+        float blend_start;    // 0x18 blended-out motion: start
+        float blend_end;      // 0x1C blended-out motion: end
+        s32 blend_frames;     // 0x20 blend frames + 1
+        float blend_step;     // 0x24 1 / (blend frames + 1)
+        void *motion;         // 0x28 motion data (header: +0x4 group count, +0xC loop, +0x10 start frame)
+        u16 flags;            // 0x2C
+        s8 direction;         // 0x2E 0 = plain set, 1 / -1 = blend (sign of the blend count)
+        u8 blending;          // 0x2F old motion captured for blending
+        ScePspFVector4 root_delta; // 0x30 (cleared for channel 0 only)
+    };
+
+    u8 unknown_0x4[0xC];
+    Motion motion[4];
     Joint *roots[4];
     u16 root_count;
     u16 chain_count; // ??
