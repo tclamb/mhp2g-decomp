@@ -65,7 +65,8 @@ struct StdCameraData {
     s8 ground_hit;
     u8 is_falldown;
     s16 falldown_timer;
-    u8 pad_0x38[0x84 - 0x38];
+    float unknown_0x38;
+    u8 pad_0x3C[0x84 - 0x3C];
     u16 buttons;
     u16 rising_edge;
 };

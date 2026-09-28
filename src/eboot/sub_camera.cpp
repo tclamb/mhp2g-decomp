@@ -1,6 +1,7 @@
 #pragma opt_unroll_loops on
 
 #include "camera.hpp"
+#include "cockpit.hpp"
 #include "common.h"
 #include "enemy_manager.hpp"
 #include "hit_manager.hpp"
@@ -1115,15 +1116,92 @@ void SubCamera::GetPanTarget(ScePspFVector4 *out, CameraDataEntry *data) {
     }
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888CEC0);
+extern "C" int func_game_sub_09C38E00(HitManager *, ScePspFVector4 *, void *, ScePspFVector4 *);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888CFB8);
+extern "C" float func_eboot_0888CEC0(SubCamera *self) {
+    StdCameraData *d = &self->data.std;
+    HitManager *hit = HitManager::objectPtr;
+    Player *player = Camera::objectPtr->player;
+    ScePspFVector4 collision;
+    void *model_part = (u8 *)*(void **)((u8 *)player + 0x190) + 0x2F40;
+    if (func_game_sub_09C38E00(hit, &d->position, model_part, &collision)) {
+        float first = HitManager::objectPtr->GetGroundHit(&d->position);
+        float second = HitManager::objectPtr->GetGroundHit(&d->target);
+        if (first - second > 150.0f) {
+            d->unknown_0x38 += 20.0f;
+            if (d->unknown_0x38 > 300.0f) {
+                d->unknown_0x38 = 300.0f;
+            }
+            return d->unknown_0x38;
+        }
+    }
+    d->unknown_0x38 -= 20.0f;
+    if (d->unknown_0x38 < 0.0f) {
+        d->unknown_0x38 = 0.0f;
+    }
+    return d->unknown_0x38;
+}
+
+extern "C" bool func_game_sub_09C392C0(HitManager *, ScePspFVector4 *, ScePspFVector4 *, ScePspFVector4 *, u32);
+
+extern "C" int func_eboot_0888CFB8(SubCamera *self) {
+    ScePspFVector4 *d = (ScePspFVector4 *)((u8 *)self + 0xA0);
+    ScePspFVector4 hit;
+    if (func_game_sub_09C392C0(HitManager::objectPtr, &d[5], &d[4], &hit, 0x8009) != false) {
+        ScePspFVector4 a;
+        ScePspFVector4 b;
+        copy_q(&a, &hit);
+        copy_q(&b, &d[4]);
+        a.y = 0.0f;
+        b.y = 0.0f;
+        if (flvecCalcDistance(&a, &b) > 50.0f) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888D070);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", Manual_cam_chk__9SubCameraFv);
+extern "C" bool func_eboot_088311B8(Cockpit *);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", Fishing_cam_chk__9SubCameraFv);
+bool SubCamera::Manual_cam_chk() {
+    Camera *camera = Camera::objectPtr;
+    Player *player = camera->player;
+    SubCamera *self = this;
+    Cockpit *cockpit = Cockpit::objectPtr;
+    if (cockpit->unknown_0x554 != 0) {
+        return false;
+    }
+    if (func_eboot_088311B8(cockpit) == true) {
+        return false;
+    }
+    int disabled = (player->lighting_flags & 2) != 0;
+    if (disabled == 1) {
+        return false;
+    }
+    int locked = *(u8 *)((u8 *)player + 0x564) != 0;
+    if (locked == 1) {
+        return false;
+    }
+    if (Fishing_cam_chk() != false) {
+        return false;
+    }
+    if (player->pl_type == 1 || player->pl_type == 5) {
+        int special = (player->unknown_0x410 & 8) != 0;
+        if (special != 0) {
+            int flagged = (player->lighting_flags & 0x8000) != 0;
+            if (flagged == 1) {
+                return false;
+            }
+        }
+    }
+    return *(s8 *)((u8 *)self + 0x131) < 0;
+}
+
+bool SubCamera::Fishing_cam_chk() {
+    return Camera::objectPtr->player->method_08865C80(0x80000) != 0;
+}
 
 bool SubCamera::pl_falldown_status() {
     StdCameraData *d = &data.std;
@@ -1217,7 +1295,60 @@ u8 D_eboot_089AA218[8] = {}; // pad
 
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", DKAS__9SubCameraFPfPf);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", Cardano__9SubCameraFPfPf);
+int SubCamera::Cardano(float *out, float *coeffs) {
+    float inv = 1.0f / coeffs[0];
+    float a = coeffs[1] * inv;
+    float b = coeffs[2] * inv;
+    float c = coeffs[3] * inv;
+    float shift = (1.0f / 3.0f) * a;
+    float shift2 = shift * shift;
+    float p = (1.0f / 3.0f) * b - shift2;
+    float p2;
+    float q = 0.5f * (c + shift * (shift2 + shift2 - b));
+
+    if (vabs_s(p) < 1e-6f && vabs_s(q) < 1e-6f) {
+        out[0] = -shift;
+        return 1;
+    }
+    p2 = p * p;
+    float D = p2 * p + q * q;
+    if (D > 0.0f) {
+        float u;
+        if (q >= 0.0f) {
+            u = sceVfpuScalarPow(q + vsqrt_s(D), 1.0f / 3.0f);
+        } else {
+            u = -sceVfpuScalarPow(-q + vsqrt_s(D), 1.0f / 3.0f);
+        }
+        float v = p / u;
+        if (p < 0.0f) {
+            out[0] = v - u;
+        } else {
+            float u2 = u * u;
+            out[0] = -2.0f * q * u2 / (p2 + u2 * (u2 + p));
+        }
+        out[0] -= shift;
+        return 1;
+    } else {
+        float r;
+        if (q < 0.0f) {
+            r = vsqrt_s(-p);
+        } else {
+            r = -vsqrt_s(-p);
+        }
+        if (vabs_s(D) < 1e-6f) {
+            out[0] = r + r - shift;
+            out[1] = -r - shift;
+            return 2;
+        }
+        float theta = (1.0f / 3.0f) * atan2f_s(vsqrt_s(-D), -q);
+        float rc = r * Acos(theta);
+        float rs = 1.7320508f * (r * vsin_s(theta));
+        out[0] = rc + rc - shift;
+        out[1] = -rc - rs - shift;
+        out[2] = -rc + rs - shift;
+        return 3;
+    }
+}
 
 float SubCamera::vInnerProductXYZ(ScePspFVector4 *a, ScePspFVector4 *b) {
     return a->x * b->x + a->y * b->y + a->z * b->z;
@@ -1641,9 +1772,53 @@ void SubCamera::cmd_cam_move(CameraCommand *pc) {
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888F3A4);
 
 // posa_sphere_make
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888F7D0);
+extern "C" void func_eboot_08865F1C(Player *, ScePspFVector4 *, int);
+
+static inline float subcam_dot_t(ScePspFVector4 *a, ScePspFVector4 *b) {
+    float result;
+    __asm__ (
+        "lv.q C000, %1\n"
+        "lv.q C010, %2\n"
+        "vdot.t S100, C000, C010\n"
+        "sv.s S100, %0"
+        : "=m"(result) : "m"(*a), "m"(*b));
+    return result;
+}
+
+extern "C" bool func_eboot_0888F7D0(SubCamera *self, ScePspFVector4 *position) {
+    Player *player = Camera::objectPtr->player;
+    func_eboot_08865F1C(player, position, 20);
+    if (position->y >= self->current_position.y) {
+        return 0;
+    }
+    ScePspFVector4 delta;
+    vsub_t(&delta, position, &self->current_position);
+    if (subcam_dot_t((ScePspFVector4 *)((u8 *)self + 0x30), &delta) > 0.0f) {
+        return 1;
+    }
+    func_eboot_08865F1C(player, position, 2);
+    vsub_t(&delta, position, &self->current_position);
+    if (subcam_dot_t((ScePspFVector4 *)((u8 *)self + 0x30), &delta) > 0.0f) {
+        return 1;
+    }
+    return 0;
+}
 
 // sdc_flag_set
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888F8D8);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888F9E8);
+extern "C" int func_eboot_0888F9E8(SubCamera *self) {
+    Camera *camera = Camera::objectPtr;
+    u8 *d = (u8 *)self + 0xA0;
+    Player *player = camera->player;
+    if (d[0x8D] != 0) {
+        return 1;
+    }
+    int delta = *(int *)((u8 *)player + 0x1F4) - *(s16 *)(d + 0x80);
+    u32 angle = (u16)delta;
+    if (angle < 0x4000) {
+        return 1;
+    }
+    u32 less = angle < 0xC001u;
+    return less ^ 1;
+}
