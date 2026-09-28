@@ -1,7 +1,7 @@
 name: stage197
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/stage1/stage197
@@ -62,7 +62,8 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, stage197]
+  - [0x80, cpp, stage197_head]
+  - [0x148, cpp, stage197_tail]
   - [0x200, data, stage197]
   - [0x480, init, stage197]
   - [0x4c0, ctor, stage197]

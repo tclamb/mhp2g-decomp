@@ -1,7 +1,7 @@
 name: stage178
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/stage1/stage178
@@ -62,7 +62,10 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, stage178]
+  - [0x80, cpp, stage178_head_ctor]
+  - [0x118, asm, stage178_setup]
+  - [0x190, cpp, stage178_head_access]
+  - [0x1B8, cpp, stage178_tail]
   - [0x270, pad]
   - [0x280, data, stage178]
   - [0x600, init, stage178]

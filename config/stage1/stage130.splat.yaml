@@ -1,7 +1,7 @@
 name: stage130
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/stage1/stage130
@@ -62,7 +62,9 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, stage130]
+  - [0x80, cpp, stage130_head_ctor]
+  - [0x118, asm, stage130_head_rest]
+  - [0x338, cpp, stage130_tail]
   - [0x3f0, pad]
   - [0x400, data, stage130]
   - [0x800, init, stage130]

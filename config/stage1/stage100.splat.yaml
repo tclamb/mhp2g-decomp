@@ -1,7 +1,7 @@
 name: stage100
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/stage1/stage100
@@ -62,7 +62,10 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, stage100]
+  - [0x80, cpp, stage100_head_ctor]
+  - [0x118, asm, stage100_setup]
+  - [0x180, cpp, stage100_head_access]
+  - [0x1A8, cpp, stage100_tail]
   - [0x268, pad]
   - [0x280, data, stage100]
   - [0x500, init, stage100]

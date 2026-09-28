@@ -1,7 +1,7 @@
 name: stage142
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/stage1/stage142
@@ -62,7 +62,9 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, stage142]
+  - [0x80, cpp, stage142_head_ctor]
+  - [0x118, asm, stage142_head_rest]
+  - [0x268, cpp, stage142_tail]
   - [0x320, pad]
   - [0x380, data, stage142]
   - [0xa00, init, stage142]
