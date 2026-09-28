@@ -1,7 +1,7 @@
 name: stage060
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/stage0/stage060
@@ -62,7 +62,8 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, stage060]
+  - [0x80, cpp, stage060_head]
+  - [0x180, cpp, stage060_tail]
   - [0x238, pad]
   - [0x280, data, stage060]
   - [0x480, init, stage060]

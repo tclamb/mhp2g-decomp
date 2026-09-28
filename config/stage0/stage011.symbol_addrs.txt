@@ -13,5 +13,33 @@ vtable_0x24__9StageBaseFv = 0x088CD614; // type:func
 draw_sky_gradient__9StageBaseFv = 0x088CDDBC; // type:func
 vtable_0x3C__9StageBaseFv = 0x088CEE38;
 __register_global_object = 0x08909D80; // type:func
-D_eboot_089BAEE8 = 0x089BAEE8;
+__vt__8Stage011 = 0x089BAEE8; // type:StageVtable size:0xBC
 objectPtr__25Singleton<12StageManager> = 0x09A4ADA0; // filename:D_eboot_09A4ADA0
+
+__ct__8Stage011Fv = 0x09D5E000; // type:func
+__dt__8Stage011Fv = 0x09D5E038; // type:func
+vtable_0x24__8Stage011Fv = 0x09D5E098; // type:func
+definitions__8Stage011Fv = 0x09D5E100; // type:func
+__dl__8Stage011FPv = 0x09D5E110; // type:func
+vtable_0x48__8Stage011Fv = 0x09D5E118; // type:func
+vtable_0xA0__8Stage011Fv = 0x09D5E128; // type:func
+vtable_0xA4__8Stage011Fv = 0x09D5E130; // type:func
+vtable_0xA8__8Stage011Fv = 0x09D5E138; // type:func
+vtable_0xAC__8Stage011Fv = 0x09D5E140; // type:func
+vtable_0xB0__8Stage011Fv = 0x09D5E168; // type:func
+vtable_0xB4__8Stage011Fv = 0x09D5E190; // type:func
+vtable_0xB8__8Stage011Fv = 0x09D5E1B8; // type:func
+
+D_stage011_09D5E200 = 0x09D5E200; // size:0x38
+D_stage011_09D5E238 = 0x09D5E238; // size:0x44
+D_stage011_09D5E280 = 0x09D5E280; // size:0x18
+D_stage011_09D5E2A0 = 0x09D5E2A0; // size:0x20
+D_stage011_09D5E2C0 = 0x09D5E2C0; // size:0x20
+D_stage011_09D5E2E0 = 0x09D5E2E0; // size:0x20
+D_stage011_09D5E300 = 0x09D5E300; // size:0x18
+D_stage011_09D5E318 = 0x09D5E318; // size:0xC
+D_stage011_09D5E328 = 0x09D5E328; // size:0x18
+D_stage011_09D5E340 = 0x09D5E340; // size:0x40
+
+__sinit_stage011.cpp = 0x09D5E380; // type:func
+.p__sinit_stage011.cpp = 0x09D5E3C0; // size:0x4

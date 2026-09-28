@@ -1,7 +1,7 @@
 name: stage013
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/stage0/stage013
@@ -62,9 +62,9 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, stage013]
+  - [0x80, cpp, stage013]
   - [0x668, pad]
-  - [0x680, data, stage013]
+  - [0x680, .data, stage013]
   - [0xb80, init, stage013]
   - [0xbc0, ctor, stage013]
   - [0xbc4, pad]

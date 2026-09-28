@@ -1,7 +1,7 @@
 name: stage029
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/stage0/stage029
@@ -62,7 +62,10 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, stage029]
+  - [0x80, cpp, stage029_head_ctor]
+  - [0x118, asm, stage029_setup]
+  - [0x1D8, cpp, stage029_head_access]
+  - [0x200, cpp, stage029_tail]
   - [0x2b8, pad]
   - [0x300, data, stage029]
   - [0x480, init, stage029]

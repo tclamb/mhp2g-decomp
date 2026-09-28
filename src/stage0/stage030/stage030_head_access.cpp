@@ -1,0 +1,26 @@
+#include "common.h"
+#include "stage_base.hpp"
+
+extern stage_definitions D_stage030_09D5E238;
+extern stage_draw_commands D_stage030_09D5E318;
+
+struct Stage030 : StageBase {
+    Stage030();
+    virtual ~Stage030();
+    virtual void vtable_0x24();
+    virtual stage_definitions *definitions();
+    virtual stage_draw_commands *vtable_0x48();
+    virtual bool vtable_0xA0();
+    virtual bool vtable_0xA4();
+    virtual bool vtable_0xA8();
+    virtual int vtable_0xAC();
+    virtual stage_sound *vtable_0xB0();
+    virtual u8 vtable_0xB4();
+    virtual stage_definitions_0x38_t *vtable_0xB8();
+
+    static void operator delete(void *);
+};
+
+stage_definitions *Stage030::definitions() { return &D_stage030_09D5E238; }
+void Stage030::operator delete(void *) {}
+stage_draw_commands *Stage030::vtable_0x48() { return &D_stage030_09D5E318; }
