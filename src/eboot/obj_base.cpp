@@ -3,6 +3,7 @@
 #include "game_sys.hpp"
 #include "model_base.hpp"
 #include "draw_manager.hpp"
+#include "immediate_ge.hpp"
 #include "vfpu.h"
 #include "sound.hpp"
 
@@ -79,7 +80,87 @@ void pmo::drawWeight(Hierarchy *hierarchy, tmh *textures, ScePspFMatrix4 *transf
     }
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", drawWeightMesh__3pmoFP9HierarchyP3tmhi);
+using namespace immediate_ge;
+
+// A group references (GE bone-matrix slot, contiguous Joint index) pairs.
+struct ObjBonePaletteEntry { u8 slot; u8 joint; };
+inline void obj_emit_bone(ScePspFMatrix4 *matrix, u32 slot) {
+    ScePspMatrix4 *m = reinterpret_cast<ScePspMatrix4 *>(matrix);
+    ge::impl::emit((GE_CMD_BONEMATRIXNUMBER << 24) | (slot * 12));
+    ge::impl::emit((GE_CMD_BONEMATRIXDATA << 24) | ((u32)m->im.x.x >> 8));
+    ge::impl::emit((GE_CMD_BONEMATRIXDATA << 24) | ((u32)m->im.x.y >> 8));
+    ge::impl::emit((GE_CMD_BONEMATRIXDATA << 24) | ((u32)m->im.x.z >> 8));
+    ge::impl::emit((GE_CMD_BONEMATRIXDATA << 24) | ((u32)m->im.y.x >> 8));
+    ge::impl::emit((GE_CMD_BONEMATRIXDATA << 24) | ((u32)m->im.y.y >> 8));
+    ge::impl::emit((GE_CMD_BONEMATRIXDATA << 24) | ((u32)m->im.y.z >> 8));
+    ge::impl::emit((GE_CMD_BONEMATRIXDATA << 24) | ((u32)m->im.z.x >> 8));
+    ge::impl::emit((GE_CMD_BONEMATRIXDATA << 24) | ((u32)m->im.z.y >> 8));
+    ge::impl::emit((GE_CMD_BONEMATRIXDATA << 24) | ((u32)m->im.z.z >> 8));
+    ge::impl::emit((GE_CMD_BONEMATRIXDATA << 24) | ((u32)m->im.w.x >> 8));
+    ge::impl::emit((GE_CMD_BONEMATRIXDATA << 24) | ((u32)m->im.w.y >> 8));
+    ge::impl::emit((GE_CMD_BONEMATRIXDATA << 24) | ((u32)m->im.w.z >> 8));
+}
+
+void pmo::drawWeightMesh(Hierarchy *hierarchy, tmh *textures, int mesh_index) {
+    u32 last_material;
+    u32 last_texture;
+    int i;
+    Joint *joints = hierarchy->roots[0];
+    pmo_header *header = this->header;
+    pmo_mesh_header *mesh = header->mesh_header(mesh_index);
+    pmo_mesh_lighting *lighting = mesh_lighting(mesh_index);
+    lighting->emit();
+    ge::texscale(mesh->uv_scale);
+    header->mesh_material_count(mesh_index);
+    u8 *remap = header->material_remap(mesh_index, 0);
+    last_material = -1;
+    last_texture = -1;
+    pmo_tristrip_header *tristrip = header->tristrip_header(mesh_index, 0);
+    for (i = 0; i < mesh->tristrip_count; ++i, ++tristrip) {
+        u32 material_index = remap[tristrip->material_offset];
+        if (material_index != last_material) {
+            pmo_material_data *material = &material_data[material_index];
+            if (material->color.uc[3] == 0) continue;
+            ge::materialupdate(GE_MATERIALCOLOR_AMBIENT | GE_MATERIALCOLOR_DIFFUSE);
+            ge::materialdiffuse(material->color);
+            ge::materialalpha(material->color.uc[3]);
+            ge::materialambient(material->shadow_color);
+            u32 texture_index = material->texture_index;
+            if (material->texture_index != 0xFF) {
+                if (texture_index != last_texture) {
+                    u32 (&fragment)[8] = textures->fragments[texture_index].commands;
+                    ge::texturemapenable(true);
+                    ge::texmode(GE_TEXMODE_SWIZZLE);
+                    ge::impl::emit(fragment[0]);
+                    ge::impl::emit(fragment[1]);
+                    ge::impl::emit(fragment[2]);
+                    ge::impl::emit(fragment[3]);
+                    ge::impl::emit(fragment[4]);
+                    ge::impl::emit(fragment[5]);
+                    ge::impl::emit(fragment[6]);
+                    ge::impl::emit(fragment[7]);
+                    ge::texflush();
+                    last_texture = material->texture_index;
+                }
+            } else {
+                ge::texturemapenable(false);
+                last_texture = material->texture_index;
+            }
+            last_material = material_index;
+        } else {
+            // Preserve the command emitted when the material is already active.
+            ge::impl::emit(0xFF000000);
+        }
+        ObjBonePaletteEntry *bone = (ObjBonePaletteEntry *)((u8 *)header + header->bone_data_offset) + tristrip->cumulative_tristrip_count;
+        for (int j = 0; j < (s8)tristrip->tristrip_count; ++j, ++bone) {
+            // Skinning matrix: twelve XYZ floats at Joint+0x50, skipping W lanes.
+            obj_emit_bone(&joints[bone->joint].f0x50, bone->slot);
+        }
+        pmo_mesh_data *data = mesh_data + tristrip->mesh_offset;
+        ge::call(data, 0);
+    }
+    ge::colortestenable(false);
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_0886503C);
 
@@ -246,11 +327,97 @@ void func_eboot_088655F0(ScePspFVector4 *out, u16 *in) {
     out->w = 0;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865640);
+// ABI view of the timestamp lookup at vtable +0x20. The inherited ObjBase
+// declaration does not yet describe its timestamp argument or pointer result.
+// This view is used only for dispatch through an existing object's vtable.
+struct ObjMotionLookup {
+    virtual ~ObjMotionLookup();
+    virtual void draw();
+    virtual void slot10();
+    virtual void slot14();
+    virtual void slot18();
+    virtual void slot1c();
+    virtual void *lookup(u32 stamp);
+};
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", vtable_0x24__7ObjBaseFv);
+extern "C" void func_eboot_08863B68(Hierarchy *, ScePspFVector4 *, ScePspFMatrix4 *);
+extern "C" void func_eboot_088637BC(Hierarchy *);
+extern "C" void func_eboot_0885F998(Joint *, void *, int, int);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", vtable_0x28__7ObjBaseFv);
+extern "C" void func_eboot_08865640(ObjBase *obj) {
+    ScePspFVector4 delta;
+    if (obj->method_08865C80(0x20000) == 0) {
+        func_eboot_088652D4(obj);
+        func_eboot_08863B68(&obj->hierarchy, &delta, &obj->transform);
+        vadd_t(&obj->position, &obj->position, &delta);
+    }
+    u32 i;
+    u8 *part;
+    i = 0;
+    if (obj->hierarchy.chain_count != 0) {
+        part = (u8 *)obj;
+        do {
+            if (obj->hierarchy.motion[(int)i].direction == 0) {
+                if (obj->hierarchy.unknown_0x128[i] != 0) {
+                    if (((ObjMotionLookup *)obj)->lookup(*(u16 *)(part + 0x1B8)) != 0) {
+                        void *motion = ((ObjMotionLookup *)obj)->lookup(*(u16 *)(part + 0x1B8));
+                        func_eboot_0885F998(obj->hierarchy.roots[0], motion, i, 1);
+                    }
+                }
+            }
+            ++i;
+            part += 2;
+        } while (i < obj->hierarchy.chain_count);
+    }
+    func_eboot_088637BC(&obj->hierarchy);
+}
+
+extern "C" void func_eboot_08863D50(Hierarchy *, void *, int, float);
+extern "C" void func_eboot_08863DEC(Hierarchy *, void *, int, int, float);
+
+extern "C" void vtable_0x24__7ObjBaseFv(ObjBase *obj, u32 stamp, void *data, int channel) {
+    if (channel == -1) {
+        u32 i;
+        u32 offset;
+        u8 *out;
+        i = 0;
+        if (obj->hierarchy.chain_count != 0) {
+            offset = 0;
+            out = (u8 *)obj;
+            do {
+                data = ((ObjMotionLookup *)obj)->lookup(stamp + offset);
+                func_eboot_08863D50(&obj->hierarchy, data, i, 0.0f);
+                *(u16 *)(out + 0x324) = stamp;
+                ++i;
+                offset += 200;
+                out += 2;
+            } while (i < obj->hierarchy.chain_count);
+        }
+    } else {
+        func_eboot_08863D50(&obj->hierarchy, data, channel, 0.0f);
+    }
+}
+
+extern "C" void vtable_0x28__7ObjBaseFv(ObjBase *obj, u32 stamp, void *data, int channel, float blend) {
+    if (channel == -1) {
+        u32 i;
+        u32 offset;
+        u32 frames;
+        i = 0;
+        if (obj->hierarchy.chain_count != 0) {
+            offset = 0;
+            frames = blend;
+            do {
+                data = ((ObjMotionLookup *)obj)->lookup(stamp + offset);
+                func_eboot_08863DEC(&obj->hierarchy, data, frames, i, 0.0f);
+                ++i;
+                offset += 200;
+            } while (i < obj->hierarchy.chain_count);
+        }
+    } else {
+        func_eboot_08863DEC(&obj->hierarchy, data, (u32)blend, channel, 0.0f);
+    }
+}
 
 extern "C" void func_eboot_0886592C(ObjBase *obj) {
     u8 *p = (u8 *)obj;

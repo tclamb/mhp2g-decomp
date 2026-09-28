@@ -225,7 +225,15 @@ INCLUDE_ASM("asm/eboot/nonmatchings/file_sys", func_eboot_0884E6CC);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/file_sys", func_eboot_0884E740);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/file_sys", func_eboot_0884E79C);
+// Keep the address comparisons and addition unsigned, including wraparound.
+extern "C" u32 func_eboot_0884E79C(FileSys *fs, void *buffer, u32 size) {
+    u32 below = (u32)buffer < 0x08400000;
+    u32 result = below ^ 1;
+    if (result) {
+        result = (u32)buffer + size < 0x08800001;
+    }
+    return result;
+}
 
 INCLUDE_ASM("asm/eboot/nonmatchings/file_sys", func_eboot_0884E7C8);
 
