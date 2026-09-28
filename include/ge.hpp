@@ -37,9 +37,12 @@ struct Ge : Singleton<Ge> {
 
     // copies a display list fragment to the write head and calls that copy at the specified index
     bool method_088593A0(u32 *display_list, s32 length, s32 fragment_index);
+    // looks up picture/image/palette in a .TMH texture file and fills a GeTexture; 0 on failure
     int method_08859768(tmh_header *, s32, u32, u32, GeTexture *);
+    // smallest n with (1 << n) >= size, capped at 11 (log2 for GE texture size commands)
     u32 method_0885973C(u32);
 
+    // links an in-memory display list fragment (last 2 words reserved for a BASE+JUMP) at the end of slot fragmentId
     int method_088595E8(u32 *commands, u32 count, s32 fragmentId);
 
     Ge();

@@ -1,5 +1,6 @@
 #include "ge.hpp"
 #include "singleton.hpp"
+#include "system.hpp"
 
 #include <pspgecmd.h>
 
@@ -14,11 +15,13 @@
 
 #include <pspge.h>
 #include <pspdisplay.h>
+#include <pspthreadman.h>
+extern "C" void sceKernelDcacheWritebackAll(void);
 
 template<> Ge *Singleton<Ge>::objectPtr;
 u8 D_eboot_08A5DD14;
 volatile bool GE_END_REACHED;
-u32 D_eboot_08A5DD18;
+s32 D_eboot_08A5DD18;
 u32 D_eboot_08A5DD1C;
 
 s16 BLANK_BUFFER_VERTEX_DATA[2][4] = {
@@ -282,6 +285,15 @@ static ge_command INITIALIZE_GE_DISPLAY_LIST[221] = {
 
 void ge_finish_callback(int, void*);
 
+extern "C" {
+    void func_eboot_088B0CBC(Net *);
+    void func_eboot_088AE050(QuestNet *);
+    void func_eboot_0889B804(LobbyNet *);
+    void func_eboot_088C29D8(MemoryStick *);
+    void func_eboot_0889016C(System *);
+    void func_eboot_08804678(int, void (*)(), int);
+}
+
 void Ge::initialize() {
   sceDisplaySetMode(0,0x1e0,0x110);
   sceGeEdramSetAddrTranslation(0x400);
@@ -303,13 +315,50 @@ void Ge::initialize() {
   waiting_for_ge = 0;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_08858FD0);
+extern "C" void func_eboot_088591C8(Ge *this_);
+extern "C" void func_eboot_08859138(Ge *this_);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_08859094);
+extern "C" void func_eboot_08858FD0(Ge *this_) {
+    this_->spinlock_until_ge_end();
+    Osk::objectPtr->update();
+    if (System::objectPtr->isWirelessOn()) {
+        func_eboot_088B0CBC(Net::objectPtr);
+        func_eboot_088AE050(QuestNet::objectPtr);
+        func_eboot_0889B804(LobbyNet::objectPtr);
+    }
+    func_eboot_088C29D8(MemoryStick::objectPtr);
+    if (!this_->waiting_for_ge) {
+        func_eboot_088591C8(this_);
+    }
+    func_eboot_08859138(this_);
+    sceKernelDcacheWritebackAll();
+    this_->swap_buffers();
+    this_->render();
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_088590A8);
+extern "C" void func_eboot_088590A8();
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_08859138);
+extern "C" void func_eboot_08859094() {
+    func_eboot_08804678(0, func_eboot_088590A8, 0);
+}
+
+extern "C" void func_eboot_088590A8() {
+    if (++D_eboot_08A5DD18 >= 2) {
+        if (!D_eboot_08A5DD14) {
+            D_eboot_08A5DD14 = 1;
+            D_eboot_08A5DD18 = 0;
+            func_eboot_0889016C(System::objectPtr);
+            sceKernelWakeupThread(System::objectPtr->userMainThreadId);
+            return;
+        }
+    }
+    D_eboot_08A5DD1C = 1;
+}
+
+extern "C" void func_eboot_08859138(Ge *this_) {
+    D_eboot_08A5DD14 = 0;
+    sceKernelSleepThreadCB();
+}
 
 void Ge::swap_buffers() {
   active_buffer ^= 1;
@@ -318,7 +367,9 @@ void Ge::swap_buffers() {
   clear_display_list();
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge", func_eboot_088591C8);
+extern "C" void func_eboot_088591C8(Ge *this_) {
+    sceDisplaySetFrameBuf(VramManager::objectPtr->method_088133D0(this_->active_buffer != 0), 0x200, 1, 1);
+}
 
 static ge_command FINISH_END_DISPLAY_LIST[2] = {
     0xf000000, // FINISH 000000
@@ -342,9 +393,36 @@ void Ge::clear_display_list() {
 }
 #pragma opt_unroll_loops reset
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge", method_088593A0__2GeFPUiii);
+#pragma opt_unroll_loops on
+bool Ge::method_088593A0(u32 *display_list, s32 length, s32 fragment_index) {
+    s32 i;
+    ge_command *start;
+    if (fragment_index < 0 || fragment_index >= 20) {
+        return false;
+    }
+    start = active_write_head;
+    if ((u32)(length + (start - slab[active_buffer])) >= 0x10000) {
+        return false;
+    }
+    for (i = 0; i < length; i++) {
+        *active_write_head = *display_list;
+        active_write_head++;
+        display_list++;
+    }
+    method_088595E8(start, length, fragment_index);
+    return true;
+}
+#pragma opt_unroll_loops reset
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge", method_088595E8__2GeFPUiUii);
+int Ge::method_088595E8(u32 *commands, u32 count, s32 fragmentId) {
+    display_list branch = active_branches[fragmentId];
+    display_list tail = &commands[count - 2];
+    tail[0] = branch[0];
+    tail[1] = branch[1];
+    jump(branch, commands);
+    active_branches[fragmentId] = tail;
+    return 1;
+}
 
 void Ge::render() {
     GE_END_REACHED = 0;
@@ -395,6 +473,84 @@ void Ge::set_write_head(ge_command *value) {
     active_write_head = value;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge", method_0885973C__2GeFUi);
+u32 Ge::method_0885973C(u32 size) {
+    s32 n;
+    u32 i = 1;
+    for (n = 0; n <= 10; n++) {
+        if (i >= size) {
+            break;
+        }
+        i <<= 1;
+    }
+    return n;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/ge", method_08859768__2GeFP10tmh_headeriUiUiP9GeTexture);
+#pragma opt_unroll_loops on
+int Ge::method_08859768(tmh_header *header, s32 picture, u32 image, u32 palette, GeTexture *texture) {
+    tmh_picture_header *pic;
+    tmh_image_header *img;
+    tmh_palette_header *pal;
+    s32 i;
+    u32 format;
+    u16 width, height;
+    tmh_image_header *data;
+    u32 palette_height;
+    u32 palette_width;
+    void *palette_data;
+
+    if ((s8)header->magic[0] != '.' || (s8)header->magic[1] != 'T' || (s8)header->magic[2] != 'M' || (s8)header->magic[3] != 'H') {
+        return 0;
+    }
+    if (picture >= header->picture_count) {
+        return 0;
+    }
+    pic = (tmh_picture_header *)(header + 1);
+    for (i = 0; i < picture; i++) {
+        pic = (tmh_picture_header *)((u8 *)pic + pic->size);
+    }
+    if (pic->type != 0) {
+        return 0;
+    }
+    if (image >= pic->image_count) {
+        return 0;
+    }
+    img = (tmh_image_header *)(pic + 1);
+    for (i = 0; i < (s32)image; i++) {
+        img = (tmh_image_header *)((u8 *)img + img->size);
+    }
+    if (img->type != 1) {
+        return 0;
+    }
+    data = img + 1;
+    format = img->format;
+    width = img->width;
+    height = img->height;
+    if (format == 1 || format == 3) {
+        palette_data = 0;
+        palette_width = 0;
+        palette_height = 0;
+    } else {
+        if (palette >= pic->palette_count) {
+            return 0;
+        }
+        pal = (tmh_palette_header *)(pic + 1);
+        for (i = 0; i < pic->image_count + palette; i++) {
+            pal = (tmh_palette_header *)((u8 *)pal + pal->size);
+        }
+        if (pal->type != 2) {
+            return 0;
+        }
+        palette_width = pal->width;
+        palette_height = *(s16 *)&pal->height;
+        palette_data = pal + 1;
+    }
+    texture->data = data;
+    texture->format = format;
+    texture->width = width;
+    texture->height = height;
+    texture->palette_data = (float *)palette_data;
+    texture->palette_width = palette_width;
+    texture->palette_height = palette_height;
+    return 1;
+}
+#pragma opt_unroll_loops reset
