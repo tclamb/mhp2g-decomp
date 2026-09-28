@@ -3,9 +3,12 @@
 #include "camera.hpp"
 #include "cockpit.hpp"
 #include "common.h"
+#include "data_manager.hpp"
 #include "enemy_manager.hpp"
+#include "game_sys.hpp"
 #include "hit_manager.hpp"
 #include "npc.hpp"
+#include "pac.hpp"
 #include "psptypes.h"
 #include "system.hpp"
 #include "vfpu.h"
@@ -461,7 +464,55 @@ float SubCamera::zoom_cam_rate(s16 timer, s16 total_timer, u8 state) {
 }
 
 // point_camera
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", point_camera__9SubCameraFv);
+int SubCamera::point_camera() {
+    Camera *camera = Camera::objectPtr;
+    DemoCameraData &d = data.demo;
+    int result;
+    if (d.is_quest_clear != 0 && (camera->rising_edge & 1) != 0 && GameSys::objectPtr->flag_0x480 == 0) {
+        return 1;
+    }
+    switch (cam_sub_state.byte) {
+    case 0:
+        cam_sub_state.byte++;
+        if (d.demo_id != 0xFF) d.pc = (ScePspUnion32 *)demo_cam_tbl[d.demo_id];
+        copy_q(&current_position, (ScePspFVector4 *)((u8 *)camera + 0x20));
+        copy_q(&d.pos_start, (ScePspFVector4 *)((u8 *)camera + 0x20));
+        copy_q(&d.pos_end, (ScePspFVector4 *)((u8 *)camera + 0x20));
+        copy_q(&current_target, (ScePspFVector4 *)((u8 *)camera + 0x30));
+        copy_q(&d.tar_start, (ScePspFVector4 *)((u8 *)camera + 0x30));
+        copy_q(&d.tar_end, (ScePspFVector4 *)((u8 *)camera + 0x30));
+        current_roll = *(float *)((u8 *)camera + 0xA0);
+        current_fov = *(float *)((u8 *)camera + 0xA8);
+        d.roll_start = d.roll_end = (s16)(10430.378f * current_roll);
+        d.fov_start = d.fov_end = (s16)(10430.378f * current_fov);
+        d.fov_shake_rate = 0;
+        d.roll_shake_rate = 0;
+        d.jib_shake_rate = 0;
+        d.truck_shake_rate = 0;
+        *(u32 *)&d.shake_rng = 0;
+        d.interpolation_type = 0;
+        d.interpolation_exponent = 1;
+        d.move_type = 1;
+        d.pos_offset_type = 5;
+        d.tar_offset_type = 4;
+        d.follow_target = 0;
+        d.pitch_yaw_start.pitch = 0;
+        d.pitch_yaw_end.pitch = 0;
+        d.pitch_yaw_start.yaw = 0;
+        d.pitch_yaw_end.yaw = 0;
+        d.offset_start = 512;
+        d.offset_end = 512;
+        timer = timer_total = -1;
+    case 1:
+        result = point_cam_sub();
+        if (result <= 0) break;
+        cam_sub_state.byte++;
+    case 2:
+        result = 1;
+        break;
+    }
+    return result;
+}
 
 int SubCamera::point_cam_sub() {
     DemoCameraData &d = data.demo;
@@ -1056,7 +1107,68 @@ void SubCamera::tri_diag(float *out, float *subdiag, float *diag, float *superdi
     }
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", ex_ev_camera__9SubCameraFv);
+struct CameraScriptExt {
+    u16 cameraScriptIndex;
+    u16 stagePacIndexOffset;
+    u16 flags;
+};
+extern CameraScriptExt D_eboot_08935A7C[10];
+extern "C" bool func_eboot_0888C914(SubCamera *);
+// Runs stage-PAC camera scripts; state transitions intentionally fall through.
+int SubCamera::ex_ev_camera() {
+    DemoCameraData &d = data.demo;
+    Camera *camera = Camera::objectPtr;
+    CameraScriptExt *selected = NULL;
+    if (d.is_quest_clear && (camera->rising_edge & 1) && *(u8 *)((u8 *)GameSys::objectPtr + 0x480) == 0) {
+        return 1;
+    }
+    int result = 0;
+    switch (cam_sub_state.byte) {
+    case 0: {
+        d.pc = NULL;
+        for (int i = 0; D_eboot_08935A7C[i].cameraScriptIndex != 0xFFFF; i++) {
+            if (d.demo_id == D_eboot_08935A7C[i].cameraScriptIndex) {
+                DataManager::entry &entry = DataManager::objectPtr->entries[0];
+                pac_header *pac = (entry.flags & 2) ? (pac_header *)entry.buffer : NULL;
+                if (pac) {
+                    d.pc = (ScePspUnion32 *)pac->data(D_eboot_08935A7C[i].stagePacIndexOffset + 6);
+                    // External-script index in the demo data tail at +0x9C.
+                    *(u8 *)((u8 *)&d + 0x9C) = i;
+                    selected = &D_eboot_08935A7C[*(u8 *)((u8 *)&d + 0x9C)];
+                    break;
+                }
+            }
+        }
+        if (d.pc == NULL) {
+            result = 1;
+            break;
+        }
+        if (selected->flags & 4) d.is_quest_clear = 1;
+        timer = 0;
+        if (*(u8 *)((u8 *)camera + 0xA7A) == 1) timer_total = 0;
+        else timer_total = 2;
+        cam_sub_state.byte = 1;
+    }
+    case 1:
+        func_eboot_0888C914(this);
+        if (timer_total != 0) {
+            timer_total--;
+            break;
+        }
+        cam_sub_state.byte = 2;
+    case 2:
+        if (func_eboot_0888C914(this) == false) {
+            timer++;
+            break;
+        }
+        cam_sub_state.byte = 3;
+    case 3:
+        timer = 0;
+        result = 1;
+        break;
+    }
+    return result;
+}
 
 // ex_ev_cam_sub
 INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888C914);
@@ -1161,7 +1273,43 @@ extern "C" int func_eboot_0888CFB8(SubCamera *self) {
     return 0;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888D070);
+extern "C" void func_eboot_0888D070(SubCamera *self) {
+    Camera *camera = Camera::objectPtr;
+    u8 *d = (u8 *)self + 0xA0;
+    if (d[0x8B] == 60) {
+        int active = *(u8 *)((u8 *)self + 0x133) != 0;
+        if (active == 1) {
+            return;
+        }
+        if ((*(u16 *)(d + 0x86) & 0x50) != 0) {
+            d[0x8B] = 0;
+            return;
+        }
+        // This early return keeps the timer store in the branch delay slot.
+        if ((u8)func_eboot_0888CFB8(self) != 0) {
+            return;
+        }
+        d[0x8B]--;
+        return;
+    }
+    if (d[0x8B] != 0) {
+        d[0x8B]--;
+        if ((*(u16 *)(d + 0x86) & 0x50) != 0) {
+            d[0x8B] = 0;
+        }
+    }
+    int active = *(u8 *)((u8 *)self + 0x133) != 0;
+    if (active == 1 && (u8)func_eboot_0888CFB8(self) == 1) {
+        Player *player = camera->player;
+        ScePspFVector4 delta;
+        d[0x8B] = 60;
+        vsub_t(&delta, (ScePspFVector4 *)((u8 *)player + 0x210),
+               (ScePspFVector4 *)((u8 *)player + 0x200));
+        if (d[0x8D] == 0) {
+            *(s16 *)(d + 0x80) = (int)(10430.378f * atan2f_s(delta.x, delta.z));
+        }
+    }
+}
 
 extern "C" bool func_eboot_088311B8(Cockpit *);
 
@@ -1446,7 +1594,23 @@ float SubCamera::cmGetGroundHit(ScePspFVector4 *camera_position, Player *player)
 }
 
 // SenkaiChousei
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888E338);
+extern "C" int func_eboot_0888E338(SubCamera *self, u32 angle, float lower, float upper, float strength) {
+    float left, right;
+    if (angle <= lower) return 0;
+    if (!(angle < upper)) {
+        if (angle <= 65536.0f - upper) return 0;
+        if (!(angle < 65536.0f - lower)) goto fail;
+        angle = 65536 - angle;
+        strength = -strength;
+    }
+    left = (int)angle - lower;
+    right = upper - (int)angle;
+    left = (1.0f / 65536.0f) * (left * left);
+    right = (1.0f / 65536.0f) * (right * right);
+    return (int)(strength * (left * right));
+fail:
+    return 0;
+}
 
 void SubCamera::cmd_set_pos(ScePspFVector4 *out, CameraCommand *pc) {
     DemoCameraData &d = data.demo;
@@ -1805,7 +1969,58 @@ extern "C" bool func_eboot_0888F7D0(SubCamera *self, ScePspFVector4 *position) {
 }
 
 // sdc_flag_set
-INCLUDE_ASM("asm/eboot/nonmatchings/sub_camera", func_eboot_0888F8D8);
+extern "C" int func_game_task_09A6A9B0(Player *);
+
+extern "C" void func_eboot_0888F8D8(SubCamera *self) {
+    Camera *camera = Camera::objectPtr;
+    Player *player = camera->player;
+    u8 *d = (u8 *)self + 0xA0;
+    *(u8 *)((u8 *)self + 0x133) = 0;
+    GameSys *sys = GameSys::objectPtr;
+    int game_flag = (sys->flags_0x6AF14 & 1) != 0;
+    if (game_flag == 0) {
+        u8 active;
+        switch (player->action_type) {
+        case 2:
+            switch (player->action_id) {
+            default:
+                active = 0;
+                break;
+            case 2:
+            case 5:
+            case 7:
+            case 14:
+                active = 1;
+                break;
+            }
+            break;
+        default:
+            active = 0;
+            break;
+        }
+        if (active == 1) {
+            d[0x93] = 1;
+        }
+    }
+    int value;
+    if (d[0x93] == 0) {
+        value = func_game_task_09A6A9B0(player);
+    } else {
+        value = -1;
+    }
+    s8 state = value;
+    if (state >= 0) {
+        if (*(s8 *)(d + 0x91) < 0) {
+            s8 timer = --*(s8 *)(d + 0x92);
+            if (timer > 0) {
+                state = -1;
+            }
+        }
+    } else {
+        d[0x92] = 3;
+    }
+    d[0x91] = state;
+}
 
 extern "C" int func_eboot_0888F9E8(SubCamera *self) {
     Camera *camera = Camera::objectPtr;

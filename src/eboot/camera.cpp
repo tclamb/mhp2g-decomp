@@ -89,7 +89,61 @@ void Camera::method_0881395C() {
     method_08816108();
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", method_08813990__6CameraFv);
+extern "C" int func_eboot_08815DE4(Camera *);
+extern "C" u8 func_eboot_08815EC8(Camera *, CameraDataEntry *, int);
+extern "C" void func_eboot_08815B44(Camera *);
+extern "C" void func_eboot_08815BD8(Camera *);
+extern "C" void func_eboot_08816144(Camera *);
+void Camera::method_08813990() {
+    u8 *p = (u8 *)this;
+    unknown_0xA88 = 0;
+    p[0xB14] = 0;
+    *(s16 *)(p + 0xB18) = 0;
+    *(s16 *)(p + 0xB16) = 0;
+    changeStageCamera = false;
+    if (p[0xB10] == 0) {
+        p[0xB10]++;
+        areas = 0;
+        area_id = 0xFF;
+        p[0xAAB] = 0xFF;
+        func_eboot_08815DE4(this);
+        p[0xAAB] = areas->index;
+        base_sub_type = 0;
+        if (areas->move_type == 0) base_sub_type = 0;
+        else base_sub_type = 2;
+        p[0xA8C] = base_sub_type;
+        for (int i = 0; i < 6; i++) subCameras[i].cam_init(i);
+        *(s16 *)(p + 0xA74) = 0;
+        rising_edge = 0;
+        buttons = 0;
+        *(s16 *)(p + 0xA78) = 0;
+        *(s16 *)(p + 0xA76) = 0;
+    } else {
+        func_eboot_08815B44(this);
+    }
+    if (p[0xAAB] == 0) {
+        if ((s8)func_eboot_08815DE4(this) > 0) {
+            area_id = p[0xAAB];
+            p[0xAAB] = areas->index;
+            changeStageCamera = true;
+        }
+    } else {
+        if (func_eboot_08815EC8(this, areas, 2) != 0) {
+            area_id = p[0xAAB];
+            changeStageCamera = true;
+            if ((s8)func_eboot_08815DE4(this) >= 0) p[0xAAB] = areas->index;
+        }
+    }
+    p[0xA8C] = base_sub_type;
+    switch (areas->move_type) {
+        case 0: base_sub_type = 0; break;
+        case 1: case 2: case 3: base_sub_type = 2; break;
+    }
+    for (int i = 0; i < 6; i++) subCameras[i].cam_sub();
+    func_eboot_08815BD8(this);
+    unknown_0xA81 = 0;
+    func_eboot_08816144(this);
+}
 
 extern s16 D_eboot_089310D8[8];
 extern float D_eboot_089310E8[3];
