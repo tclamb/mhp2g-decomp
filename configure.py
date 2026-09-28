@@ -380,7 +380,7 @@ def build_stuff(linker_entries_by_module_name: Dict[str, List[LinkerEntry]], git
     ninja.rule(
         "as",
         description="as $in",
-        command=f"cat $in | ./bin/pspas -EL -I include/ -G0 -march=allegrex -mabi=eabi -no-pad-sections -o $out && .venv/bin/python ./tools/fixup_elf.py $out",
+        command=f"cat $in | ./bin/pspas -EL -I include/ -G0 -march=allegrex -mabi=eabi -no-pad-sections -o $out && .venv/bin/python ./tools/fixup_elf.py $out && .venv/bin/python ./tools/zero_nonmatching.py $out",
     )
 
     ninja.rule(
@@ -394,7 +394,10 @@ def build_stuff(linker_entries_by_module_name: Dict[str, List[LinkerEntry]], git
             " --as-march=allegrex"
             " --as-mabi=32"
             " --macro-inc-path=./include/macro.inc"
-            f" {COMMON_COMPILE_FLAGS}",
+            f" {COMMON_COMPILE_FLAGS}"
+            # mwccgap reads the source from stdin when stdin is not a tty
+            " < /dev/null"
+            " && .venv/bin/python ./tools/zero_nonmatching.py $out",
     )
 
     ninja.rule(
