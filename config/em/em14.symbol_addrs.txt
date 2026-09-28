@@ -144,3 +144,7 @@ D_em14_09D26AB8 = 0x09D26AB8;
 D_em14_09D29C50 = 0x09D29C50;
 D_em14_09D2AB68 = 0x09D2AB68; // type:CameraOp size:0x370
 D_em14_09D2AED8 = 0x09D2AED8; // type:CameraOp size:0x5BC
+
+// Preserve original function boundaries across nearby C++ segment splits.
+func_em14_09D1AA70 = 0x09D1AA70; // type:func
+func_em14_09D1AAB0 = 0x09D1AAB0; // type:func

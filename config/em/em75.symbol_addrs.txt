@@ -301,3 +301,5 @@ D_em75_09D57488 = 0x09D57488; // type:CameraOp size:0x4
 D_em75_09D57490 = 0x09D57490; // type:CameraOp size:0x36C
 D_em75_09D58B40 = 0x09D58B40;
 D_em75_09D595B0 = 0x09D595B0;
+func_em75_09D21188 = 0x09D21188; // type:func size:0x24
+func_em75_09D211B0 = 0x09D211B0; // type:func size:0x8C

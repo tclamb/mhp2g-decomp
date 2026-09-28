@@ -136,3 +136,5 @@ D_em21_09D26E08 = 0x09D26E08;
 D_em21_09D28B68 = 0x09D28B68;
 D_em21_09D29450 = 0x09D29450; // type:CameraOp size:0x190
 D_em21_09D295E0 = 0x09D295E0; // type:CameraOp size:0x874
+func_em21_09D1D1A0 = 0x09D1D1A0; // type:func size:0x1C
+func_em21_09D1D1C0 = 0x09D1D1C0; // type:func size:0x10C

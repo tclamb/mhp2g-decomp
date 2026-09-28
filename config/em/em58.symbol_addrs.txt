@@ -139,3 +139,6 @@ D_em58_09D23778 = 0x09D23778;
 D_em58_09D23E10 = 0x09D23E10;
 D_em58_09D23E18 = 0x09D23E18;
 D_em58_09D24458 = 0x09D24458;
+
+// Preserve original function boundaries across nearby C++ segment splits.
+func_em58_09D16708 = 0x09D16708; // type:func
