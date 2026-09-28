@@ -1,7 +1,7 @@
 name: stage226
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/stage2/stage226
@@ -62,7 +62,8 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, stage226]
+  - [0x80, cpp, stage226_head]
+  - [0x148, cpp, stage226_tail]
   - [0x200, data, stage226]
   - [0x580, init, stage226]
   - [0x5c0, ctor, stage226]

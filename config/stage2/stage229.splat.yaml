@@ -1,7 +1,7 @@
 name: stage229
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/stage2/stage229
@@ -62,7 +62,9 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, stage229]
+  - [0x80, cpp, stage229_head_ctor]
+  - [0x118, asm, stage229_head_rest]
+  - [0x1F0, cpp, stage229_tail]
   - [0x2a8, pad]
   - [0x300, data, stage229]
   - [0x500, init, stage229]

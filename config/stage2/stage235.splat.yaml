@@ -1,7 +1,7 @@
 name: stage235
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/stage2/stage235
@@ -62,7 +62,10 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, stage235]
+  - [0x80, cpp, stage235_head_ctor]
+  - [0x118, asm, stage235_setup]
+  - [0x180, cpp, stage235_head_access]
+  - [0x1A8, cpp, stage235_tail]
   - [0x260, pad]
   - [0x280, data, stage235]
   - [0x480, init, stage235]

@@ -1,7 +1,7 @@
 name: stage210
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/stage2/stage210
@@ -62,7 +62,11 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, stage210]
+  - [0x80, cpp, stage210_head_ctor]
+  - [0x118, asm, stage210_setup]
+  - [0x4B0, cpp, stage210_head_access]
+  - [0x4D8, cpp, stage210_tail]
+  - [0x590, asm, stage210_suffix]
   - [0x1a50, pad]
   - [0x1a80, data, stage210]
   - [0x1f00, init, stage210]

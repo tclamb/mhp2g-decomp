@@ -1,7 +1,7 @@
 name: stage212
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/stage2/stage212
@@ -62,7 +62,10 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, stage212]
+  - [0x80, cpp, stage212_head_ctor]
+  - [0x118, asm, stage212_setup]
+  - [0x1A8, cpp, stage212_head_access]
+  - [0x1D0, cpp, stage212_tail]
   - [0x288, pad]
   - [0x300, data, stage212]
   - [0xd80, init, stage212]

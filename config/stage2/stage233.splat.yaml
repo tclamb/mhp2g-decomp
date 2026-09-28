@@ -1,7 +1,7 @@
 name: stage233
 options:
   add_set_gp_64: false
-  asm_inc_header: |-
+  asm_inc_header: |
     .set noat
     .set noreorder
   asm_path: asm/stage2/stage233
@@ -62,7 +62,8 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, stage233]
+  - [0x80, cpp, stage233_head]
+  - [0x148, cpp, stage233_tail]
   - [0x200, data, stage233]
   - [0x580, init, stage233]
   - [0x5c0, ctor, stage233]
