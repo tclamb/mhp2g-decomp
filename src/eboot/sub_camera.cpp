@@ -1053,9 +1053,9 @@ void SubCamera::cam_init_sub_playerEX() {
 }
 
 void SubCamera::cam_sub_playerEX() {
-    cam_plEX_fishing(data.playerEX.fishing_cam);
+    cam_plEX_fishing(&data.playerEX.fishing_cam);
     if (!isActive) {
-        cam_plEX_zoom(data.playerEX.zoom_cam);
+        cam_plEX_zoom(&data.playerEX.zoom_cam);
     }
 }
 
@@ -1075,18 +1075,18 @@ extern u32 *demo_cam_tbl[107];
 void SubCamera::cam_sub_demo() {
     int result;
 
-    DemoCameraData &d = data.demo;
+    DemoCameraData *d = &data.demo;
     Camera *c = Camera::objectPtr;
     isActive = false;
 
     switch (cam_sub_mode.byte) {
     case 0:
         if (c->next_demo_id != 0) {
-            d.demo_id = c->next_demo_id;
-            d.enemy = c->demo_enemy;
-            d.enable_stage_collision = false;
+            d->demo_id = c->next_demo_id;
+            d->enemy = c->demo_enemy;
+            d->enable_stage_collision = false;
             cam_sub_state.word = 0;
-            if (demo_cam_tbl[d.demo_id] == (void *)0xFFFFFFFF) {
+            if (demo_cam_tbl[d->demo_id] == (void *)0xFFFFFFFF) {
                 cam_sub_mode.byte = 2;
                 result = ex_ev_camera();
             } else {
@@ -1109,17 +1109,17 @@ void SubCamera::cam_sub_demo() {
         if (result <= 0) {
             isActive = true;
             if (result == 0) {
-                d.demo_state = 1;
+                d->demo_state = 1;
             } else {
-                d.demo_state = -1;
+                d->demo_state = -1;
             }
         } else {
             cam_sub_mode.byte = 0;
-            d.demo_id = 0;
-            d.demo_state = 0;
-            d.enemy = 0;
+            d->demo_id = 0;
+            d->demo_state = 0;
+            d->enemy = 0;
             c->zClipping = true;
-            d.is_quest_clear = false;
+            d->is_quest_clear = false;
         }
     }
 }
@@ -1219,16 +1219,16 @@ int SubCamera::cam_rail_move(CameraRailPoint *point, CameraRailDefinition *rail,
     }
 }
 
-void SubCamera::cam_plEX_fishing(FishingCameraData &d) {
+void SubCamera::cam_plEX_fishing(FishingCameraData *d) {
     Player *pl = Camera::objectPtr->player;
     isActive = false;
-    if (!(d.checkResult = Fishing_cam_chk())) {
-        d.state.byte = 0;
+    if (!(d->checkResult = Fishing_cam_chk())) {
+        d->state.byte = 0;
         return;
     }
-    if (d.state.byte == 0) {
-        ++d.state.byte;
-        d.stage_unique = pl->stage_unique;
+    if (d->state.byte == 0) {
+        ++d->state.byte;
+        d->stage_unique = pl->stage_unique;
         if (GameSys::objectPtr->stage_id != stages::SWAMP_N_4) {
             current_fov = DEGREES_TO_RADIANS(55);
         } else {
@@ -1249,7 +1249,7 @@ extern FishingCameraOffsets D_eboot_089312E0[39];
 extern float D_eboot_08931688[39];
 extern u8 D_eboot_08931724[267];
 
-bool SubCamera::fish_cam_sub(FishingCameraData &d) {
+bool SubCamera::fish_cam_sub(FishingCameraData *d) {
     Player *pl = Camera::objectPtr->player;
     int i = D_eboot_08931724[GameSys::objectPtr->stage_id];
     FishingCameraOffsets *offsets = &D_eboot_089312E0[i];
@@ -1273,83 +1273,83 @@ bool SubCamera::fish_cam_sub(FishingCameraData &d) {
     return true;
 }
 
-void SubCamera::cam_plEX_zoom(ZoomCameraData &d) {
+void SubCamera::cam_plEX_zoom(ZoomCameraData *d) {
     Camera *c = Camera::objectPtr;
     Player *pl = c->player;
     u8 type = c->current_cam_sub;
     isActive = 0;
 
     SubCamera *s = &c->subCameras[type];
-    copy_q(&d.positions[0], &s->current_position);
-    copy_q(&d.targets[0], &s->current_target);
-    d.fieldsOfView[0] = s->current_fov;
+    copy_q(&d->positions[0], &s->current_position);
+    copy_q(&d->targets[0], &s->current_target);
+    d->fieldsOfView[0] = s->current_fov;
 
-    switch (d.state.byte) {
+    switch (d->state.byte) {
     case 0: // push
-        if (d.animationState != 0 /* off */) {
-            if (d.animationState == 1 /* zooming in */) {
-                d.operationFrame = 0;
+        if (d->animationState != 0 /* off */) {
+            if (d->animationState == 1 /* zooming in */) {
+                d->operationFrame = 0;
             }
-            d.state.byte += 1;
-            if (d.stackSize != 0) {
-                copy_q(&d.positions[d.stackSize], &current_position);
-                copy_q(&d.targets[d.stackSize], &current_target);
-                d.fieldsOfView[d.stackSize] = current_fov;
+            d->state.byte += 1;
+            if (d->stackSize != 0) {
+                copy_q(&d->positions[d->stackSize], &current_position);
+                copy_q(&d->targets[d->stackSize], &current_target);
+                d->fieldsOfView[d->stackSize] = current_fov;
             }
-            d.stackSize++;
+            d->stackSize++;
             break;
         }
         return;
     case 1: // hold
-        if (d.animationState == 3 /* zooming out */) {
-            ++d.state.byte;
-        } else if (d.operationFrame < d.animationTotalFrames && ++d.operationFrame >= d.animationTotalFrames) {
-            d.animationState = 2;
+        if (d->animationState == 3 /* zooming out */) {
+            ++d->state.byte;
+        } else if (d->operationFrame < d->animationTotalFrames && ++d->operationFrame >= d->animationTotalFrames) {
+            d->animationState = 2;
         }
         break;
     case 2: // pop
-        if (d.operationFrame >= 1) {
-            d.operationFrame--;
+        if (d->operationFrame >= 1) {
+            d->operationFrame--;
         }
-        if (d.animationState == 1 /* zooming in */) {
-            d.state.byte = 1;
-        } else if (d.operationFrame == 0) {
-            if (--d.stackSize != 0) {
-                d.state.byte = 1;
-                d.animationState = 2;
-                d.operationFrame = 15;
-                d.animationTotalFrames = 15;
+        if (d->animationState == 1 /* zooming in */) {
+            d->state.byte = 1;
+        } else if (d->operationFrame == 0) {
+            if (--d->stackSize != 0) {
+                d->state.byte = 1;
+                d->animationState = 2;
+                d->operationFrame = 15;
+                d->animationTotalFrames = 15;
             } else {
-                d.state.byte = 0;
-                d.animationState = 0;
-                d.operationFrame = 0;
+                d->state.byte = 0;
+                d->animationState = 0;
+                d->operationFrame = 0;
                 return;
             }
         }
         break;
     }
 
-    int i = d.stackSize - 1;
-    float t = zoom_cam_rate(d.operationFrame, d.animationTotalFrames, d.state.byte);
+    int i = d->stackSize - 1;
+    float t = zoom_cam_rate(d->operationFrame, d->animationTotalFrames, d->state.byte);
 
     ScePspFVector4 tmp;
-    switch (d.targetTypes[i]) {
+    switch (d->targetTypes[i]) {
     case 0: // dialog
-        if (d.npcs[i]->pl_type == 4 /* NPC_POOGIE */) {
-            cpInterVector2(&d.direction, &pl->position, &d.npcs[i]->position, 0.5f, 0.5f);
-            d.direction.y += 64.0f;
+        if (d->npcs[i]->pl_type == 4 /* NPC_POOGIE */) {
+            cpInterVector2(&d->direction, &pl->position, &d->npcs[i]->position, 0.5f, 0.5f);
+            d->direction.y += 64.0f;
         } else {
-            cpInterVector2(&d.direction, &pl->position, &d.position, 0.5f, 0.5f);
-            d.direction.y += 150.0f;
+            cpInterVector2(&d->direction, &pl->position, &d->position, 0.5f, 0.5f);
+            d->direction.y += 150.0f;
         }
-        copy_q(&current_position, &d.positions[i]);
+        copy_q(&current_position, &d->positions[i]);
         break;
     case 1: // item box
     case 4: // book edit hair
     case 5: // book edit clothing
         if (Camera::objectPtr->enableCameraControls == true) {
             float maxY, minY, minX, maxX;
-            switch (d.targetTypes[i]) {
+            switch (d->targetTypes[i]) {
             case 1:
             case 5:
                 maxY = 160.0f;
@@ -1364,47 +1364,47 @@ void SubCamera::cam_plEX_zoom(ZoomCameraData &d) {
                 break;
             }
             if (Pad::BUTTONS & Ctrl::UP) {
-                d.yCenters[i] += 2.0f;
-                if (d.yCenters[i] > maxY) {
-                    d.yCenters[i] = maxY;
+                d->yCenters[i] += 2.0f;
+                if (d->yCenters[i] > maxY) {
+                    d->yCenters[i] = maxY;
                 }
             }
             if (Pad::BUTTONS & Ctrl::DOWN) {
-                d.yCenters[i] -= 2.0f;
-                if (d.yCenters[i] < minY) {
-                    d.yCenters[i] = minY;
+                d->yCenters[i] -= 2.0f;
+                if (d->yCenters[i] < minY) {
+                    d->yCenters[i] = minY;
                 }
             }
             if (Pad::BUTTONS & Ctrl::LEFT) {
-                d.zSpacings[i] -= 8.0f;
-                if (d.zSpacings[i] < minX) {
-                    d.zSpacings[i] = minX;
+                d->zSpacings[i] -= 8.0f;
+                if (d->zSpacings[i] < minX) {
+                    d->zSpacings[i] = minX;
                 }
             }
             if (Pad::BUTTONS & Ctrl::RIGHT) {
-                d.zSpacings[i] += 8.0f;
-                if (d.zSpacings[i] > maxX) {
-                    d.zSpacings[i] = maxX;
+                d->zSpacings[i] += 8.0f;
+                if (d->zSpacings[i] > maxX) {
+                    d->zSpacings[i] = maxX;
                 }
             }
         }
         // fallthrough
     case 3: // book edit submenu
-        copy_q(&d.direction, &pl->position);
-        d.direction.y += d.yCenters[i];
-        SubVector(&tmp, &d.positions[i], &d.direction);
+        copy_q(&d->direction, &pl->position);
+        d->direction.y += d->yCenters[i];
+        SubVector(&tmp, &d->positions[i], &d->direction);
         flvecNormalize(&tmp);
-        vscl_t(&tmp, &tmp, d.zSpacings[i]);
-        vadd_q(&tmp, &d.direction, &tmp);
-        cpInterVector(&current_position, &tmp, &d.positions[i], t);
+        vscl_t(&tmp, &tmp, d->zSpacings[i]);
+        vadd_q(&tmp, &d->direction, &tmp);
+        cpInterVector(&current_position, &tmp, &d->positions[i], t);
         break;
     case 2: // kitchen table
-        cpInterVector(&current_position, &d.position, &d.positions[i], t);
+        cpInterVector(&current_position, &d->position, &d->positions[i], t);
         break;
     }
 
-    cpInterVector(&current_target, &d.direction, &d.targets[i], t);
-    current_fov = d.fieldOfView * t + d.fieldsOfView[i] * (1.0f - t);
+    cpInterVector(&current_target, &d->direction, &d->targets[i], t);
+    current_fov = d->fieldOfView * t + d->fieldsOfView[i] * (1.0f - t);
     current_roll = s->current_roll;
     isActive = 1;
 }
@@ -1478,140 +1478,140 @@ int SubCamera::point_camera() {
 }
 
 int SubCamera::point_cam_sub() {
-    DemoCameraData &d = data.demo;
+    DemoCameraData *d = &data.demo;
     int result;
     ScePspUnion32 *pc;
     bool running = true;
-    pc = d.pc;
-    d.error = 0;
+    pc = d->pc;
+    d->error = 0;
     while (running) {
         CameraCommand *cmd = reinterpret_cast<CameraCommand *>(pc);
         ScePspUnion32 *old_pc = pc;
         pc += old_pc->c[1];
         switch (old_pc->c[0]) {
         case 0:
-            d.move_type = old_pc->c[2];
+            d->move_type = old_pc->c[2];
             break;
         case 1:
-            d.pos_offset_type = old_pc->c[2];
-            d.pos_offset_joint_id = old_pc->c[3];
+            d->pos_offset_type = old_pc->c[2];
+            d->pos_offset_joint_id = old_pc->c[3];
             break;
         case 2:
-            cmd_set_pos(&d.pos_start, cmd);
+            cmd_set_pos(&d->pos_start, cmd);
             break;
         case 3:
-            cmd_set_pos(&d.pos_end, cmd);
+            cmd_set_pos(&d->pos_end, cmd);
             break;
         case 4:
-            d.tar_offset_type = old_pc->c[2];
-            d.tar_offset_joint_id = old_pc->c[3];
+            d->tar_offset_type = old_pc->c[2];
+            d->tar_offset_joint_id = old_pc->c[3];
             break;
         case 5:
-            cmd_set_tar(&d.tar_start, cmd);
+            cmd_set_tar(&d->tar_start, cmd);
             break;
         case 6:
-            cmd_set_tar(&d.tar_end, cmd);
+            cmd_set_tar(&d->tar_end, cmd);
             break;
         case 7:
-            d.follow_target = old_pc->c[2];
+            d->follow_target = old_pc->c[2];
             break;
         case 8:
-            d.pitch_yaw_start.pitch = old_pc->s[1];
+            d->pitch_yaw_start.pitch = old_pc->s[1];
             break;
         case 9:
-            d.pitch_yaw_end.pitch = old_pc->s[1];
+            d->pitch_yaw_end.pitch = old_pc->s[1];
             break;
         case 10:
-            d.pitch_yaw_start.yaw = old_pc->s[1];
+            d->pitch_yaw_start.yaw = old_pc->s[1];
             break;
         case 11:
-            d.pitch_yaw_end.yaw = old_pc->s[1];
+            d->pitch_yaw_end.yaw = old_pc->s[1];
             break;
         case 12:
-            d.offset_start = 0.0625f * cmd->type4.arg0;
+            d->offset_start = 0.0625f * cmd->type4.arg0;
             break;
         case 13:
-            d.offset_end = 0.0625f * cmd->type4.arg0;
+            d->offset_end = 0.0625f * cmd->type4.arg0;
             break;
         case 14:
-            d.roll_start = old_pc->s[1];
+            d->roll_start = old_pc->s[1];
             break;
         case 15:
-            d.roll_end = old_pc->s[1];
+            d->roll_end = old_pc->s[1];
             break;
         case 16:
-            d.fov_start = old_pc->s[1];
+            d->fov_start = old_pc->s[1];
             break;
         case 17:
-            d.fov_end = old_pc->s[1];
+            d->fov_end = old_pc->s[1];
             break;
         case 18:
             timer = timer_total = old_pc->s[1];
             break;
         case 19:
-            d.truck_shake_phase = old_pc->s[1];
+            d->truck_shake_phase = old_pc->s[1];
             break;
         case 20:
-            d.truck_shake_rate = old_pc->s[1];
+            d->truck_shake_rate = old_pc->s[1];
             break;
         case 21:
-            d.truck_shake_magnitude_start = old_pc->s[1];
+            d->truck_shake_magnitude_start = old_pc->s[1];
             break;
         case 22:
-            d.truck_shake_magnitude_end = old_pc->s[1];
+            d->truck_shake_magnitude_end = old_pc->s[1];
             break;
         case 23:
-            d.jib_shake_phase = old_pc->s[1];
+            d->jib_shake_phase = old_pc->s[1];
             break;
         case 24:
-            d.jib_shake_rate = old_pc->s[1];
+            d->jib_shake_rate = old_pc->s[1];
             break;
         case 25:
-            d.jib_shake_magnitude_start = old_pc->s[1];
+            d->jib_shake_magnitude_start = old_pc->s[1];
             break;
         case 26:
-            d.jib_shake_magnitude_end = old_pc->s[1];
+            d->jib_shake_magnitude_end = old_pc->s[1];
             break;
         case 27:
-            d.roll_shake_phase = old_pc->s[1];
+            d->roll_shake_phase = old_pc->s[1];
             break;
         case 28:
-            d.roll_shake_rate = old_pc->s[1];
+            d->roll_shake_rate = old_pc->s[1];
             break;
         case 29:
-            d.roll_shake_magnitude_start = old_pc->s[1];
+            d->roll_shake_magnitude_start = old_pc->s[1];
             break;
         case 30:
-            d.roll_shake_magnitude_end = old_pc->s[1];
+            d->roll_shake_magnitude_end = old_pc->s[1];
             break;
         case 31:
-            d.fov_shake_phase = old_pc->s[1];
+            d->fov_shake_phase = old_pc->s[1];
             break;
         case 32:
-            d.fov_shake_rate = old_pc->s[1];
+            d->fov_shake_rate = old_pc->s[1];
             break;
         case 33:
-            d.fov_shake_magnitude_start = old_pc->s[1];
+            d->fov_shake_magnitude_start = old_pc->s[1];
             break;
         case 34:
-            d.fov_shake_magnitude_end = old_pc->s[1];
+            d->fov_shake_magnitude_end = old_pc->s[1];
             break;
         case 35: {
             s8 pct = old_pc->c[3];
             s8 i = old_pc->c[2];
-            d.shake_rngs[i] = pct;
+            d->shake_rngs[i] = pct;
             break;
         }
         case 36:
             cmd_copy(old_pc->c[2]);
             break;
         case 37:
-            d.interpolation_type = (old_pc->s[1] >> 14) & 0x3;
-            d.interpolation_exponent = 0.0009765625f * (old_pc->s[1] & 0x3FFF);
+            d->interpolation_type = (old_pc->s[1] >> 14) & 0x3;
+            d->interpolation_exponent = 0.0009765625f * (old_pc->s[1] & 0x3FFF);
             break;
         case 38:
             timer = timer_total = old_pc->s[1];
-            d.loop_pc = pc;
+            d->loop_pc = pc;
             break;
         case 39:
             if (old_pc->c[2] != 0) {
@@ -1619,25 +1619,25 @@ int SubCamera::point_cam_sub() {
             }
             timer--;
             if (timer_total <= 0 || timer >= 0) {
-                pc = d.loop_pc;
+                pc = d->loop_pc;
                 running = false;
                 result = 0;
             } else {
-                copy_q(&d.pos_start, &current_position);
-                copy_q(&d.tar_start, &current_target);
-                d.pitch_yaw_start = d.pitch_yaw_end;
-                d.roll_start = d.roll_end;
-                d.fov_start = d.fov_end;
-                d.truck_shake_rate = 0;
-                d.jib_shake_rate = 0;
-                d.roll_shake_rate = 0;
-                d.fov_shake_rate = 0;
-                d.truck_shake_magnitude_start = d.truck_shake_magnitude_end;
-                d.jib_shake_magnitude_start = d.jib_shake_magnitude_end;
-                d.roll_shake_magnitude_start = d.roll_shake_magnitude_end;
-                d.fov_shake_magnitude_start = d.fov_shake_magnitude_end;
-                d.interpolation_type = 0;
-                d.interpolation_exponent = 1.0f;
+                copy_q(&d->pos_start, &current_position);
+                copy_q(&d->tar_start, &current_target);
+                d->pitch_yaw_start = d->pitch_yaw_end;
+                d->roll_start = d->roll_end;
+                d->fov_start = d->fov_end;
+                d->truck_shake_rate = 0;
+                d->jib_shake_rate = 0;
+                d->roll_shake_rate = 0;
+                d->fov_shake_rate = 0;
+                d->truck_shake_magnitude_start = d->truck_shake_magnitude_end;
+                d->jib_shake_magnitude_start = d->jib_shake_magnitude_end;
+                d->roll_shake_magnitude_start = d->roll_shake_magnitude_end;
+                d->fov_shake_magnitude_start = d->fov_shake_magnitude_end;
+                d->interpolation_type = 0;
+                d->interpolation_exponent = 1.0f;
                 timer = -1;
                 timer_total = -1;
             }
@@ -1646,14 +1646,14 @@ int SubCamera::point_cam_sub() {
             cmd_cam_move(cmd);
             break;
         case 43:
-            d.enable_stage_collision = true;
+            d->enable_stage_collision = true;
             break;
         case 45:
-            d.jump_pc = pc;
+            d->jump_pc = pc;
             break;
         case 44:
-            if (d.jump_pc != 0) {
-                pc = d.jump_pc;
+            if (d->jump_pc != 0) {
+                pc = d->jump_pc;
             }
             break;
         case 41:
@@ -1665,10 +1665,10 @@ int SubCamera::point_cam_sub() {
             result = -1;
             break;
         }
-        if (d.error != 0) {
+        if (d->error != 0) {
             return 1;
         }
-        d.pc = pc;
+        d->pc = pc;
     }
     return result;
 }
@@ -2206,21 +2206,21 @@ bool SubCamera::ex_ev_cam_sub() {
 
 void SubCamera::std_cam_sw_set_sub() {
     Camera *c = Camera::objectPtr;
-    StdCameraData &d = data.std;
+    StdCameraData *d = &data.std;
     if (Camera::objectPtr->current_cam_sub == 0 && Camera::objectPtr->subCameras[5].isActive == false) {
         if (Manual_cam_chk() == true) {
-            d.buttons = c->buttons;
-            d.rising_edge = c->rising_edge;
+            d->buttons = c->buttons;
+            d->rising_edge = c->rising_edge;
             return;
         }
         if (Osk::objectPtr->visible == false) {
-            d.buttons = c->buttons & Ctrl::L_TRIGGER;
-            d.rising_edge = c->rising_edge & Ctrl::L_TRIGGER;
+            d->buttons = c->buttons & Ctrl::L_TRIGGER;
+            d->rising_edge = c->rising_edge & Ctrl::L_TRIGGER;
             return;
         }
     }
-    d.rising_edge = 0;
-    d.buttons = 0;
+    d->rising_edge = 0;
+    d->buttons = 0;
 }
 
 void SubCamera::GetPanTarget(ScePspFVector4 *out, CameraAreaCnf *data) {
@@ -2625,8 +2625,8 @@ float SubCamera::vInnerProductXZ(ScePspFVector4 *a, ScePspFVector4 *b) {
 }
 
 ScePspFMatrix4 *SubCamera::get_em_local() {
-    DemoCameraData &d = data.demo;
-    Enemy *e = d.enemy;
+    DemoCameraData *d = &data.demo;
+    Enemy *e = d->enemy;
     if (e) {
         for (int i = 0; i < 20; ++i) {
             if (EnemyManager::objectPtr->by_index(i) == e) {
@@ -2634,19 +2634,19 @@ ScePspFMatrix4 *SubCamera::get_em_local() {
             }
         }
     }
-    d.error = true;
+    d->error = true;
     return 0;
 }
 
 void SubCamera::get_angle(CameraAngle *out) {
-    DemoCameraData &d = data.demo;
+    DemoCameraData *d = &data.demo;
     if (timer_total > 0) {
-        out->pitch = d.pitch_yaw_start.pitch - d.pitch_yaw_end.pitch;
-        out->pitch = d.pitch_yaw_end.pitch + out->pitch * timer / timer_total;
-        out->yaw = d.pitch_yaw_start.yaw - d.pitch_yaw_end.yaw;
-        out->yaw = d.pitch_yaw_end.yaw + out->yaw * timer / timer_total;
+        out->pitch = d->pitch_yaw_start.pitch - d->pitch_yaw_end.pitch;
+        out->pitch = d->pitch_yaw_end.pitch + out->pitch * timer / timer_total;
+        out->yaw = d->pitch_yaw_start.yaw - d->pitch_yaw_end.yaw;
+        out->yaw = d->pitch_yaw_end.yaw + out->yaw * timer / timer_total;
     } else {
-        *out = d.pitch_yaw_start;
+        *out = d->pitch_yaw_start;
     }
 }
 
@@ -2752,7 +2752,7 @@ s16 SubCamera::SenkaiChousei(u32 angle, float min, float max, float rate) {
 }
 
 void SubCamera::cmd_set_pos(ScePspFVector4 *out, CameraCommand *pc) {
-    DemoCameraData &d = data.demo;
+    DemoCameraData *d = &data.demo;
     Player *pl = Camera::objectPtr->player;
     float divisor = 1 / 4096.0f;
 
@@ -2762,10 +2762,10 @@ void SubCamera::cmd_set_pos(ScePspFVector4 *out, CameraCommand *pc) {
 
     Joint *j;
     ScePspFMatrix4 *m;
-    switch (d.pos_offset_type) {
+    switch (d->pos_offset_type) {
     case 2:
         j = pl->hierarchy.roots[0];
-        nlCalcPoint(out, out, &j[d.pos_offset_joint_id].globalPose);
+        nlCalcPoint(out, out, &j[d->pos_offset_joint_id].globalPose);
         break;
     case 0:
         nlCalcPoint(out, out, &pl->transform);
@@ -2780,7 +2780,7 @@ void SubCamera::cmd_set_pos(ScePspFVector4 *out, CameraCommand *pc) {
         }
         break;
     case 4:
-        vadd_q(out, out, &d.tar_start);
+        vadd_q(out, out, &d->tar_start);
         break;
     case 5:
     default:
@@ -2789,7 +2789,7 @@ void SubCamera::cmd_set_pos(ScePspFVector4 *out, CameraCommand *pc) {
 }
 
 void SubCamera::cmd_set_tar(ScePspFVector4 *out, CameraCommand *pc) {
-    DemoCameraData &d = data.demo;
+    DemoCameraData *d = &data.demo;
     Player *pl = Camera::objectPtr->player;
     float divisor = 1 / 4096.0f;
 
@@ -2799,10 +2799,10 @@ void SubCamera::cmd_set_tar(ScePspFVector4 *out, CameraCommand *pc) {
 
     Joint *j;
     ScePspFMatrix4 *m;
-    switch (d.tar_offset_type) {
+    switch (d->tar_offset_type) {
     case 2:
         j = pl->hierarchy.roots[0];
-        nlCalcPoint(out, out, &j[d.tar_offset_joint_id].globalPose);
+        nlCalcPoint(out, out, &j[d->tar_offset_joint_id].globalPose);
         break;
     case 0:
         nlCalcPoint(out, out, &pl->transform);
@@ -2823,50 +2823,50 @@ void SubCamera::cmd_set_tar(ScePspFVector4 *out, CameraCommand *pc) {
 }
 
 void SubCamera::cmd_copy(int flags) {
-    DemoCameraData &d = data.demo;
+    DemoCameraData *d = &data.demo;
     if (flags & 1) {
-        copy_q(&d.pos_end, &d.pos_start);
+        copy_q(&d->pos_end, &d->pos_start);
     }
     if (flags & 2) {
-        copy_q(&d.tar_end, &d.tar_start);
+        copy_q(&d->tar_end, &d->tar_start);
     }
     if (flags & 4) {
-        d.roll_end = d.roll_start;
+        d->roll_end = d->roll_start;
     }
     if (flags & 8) {
-        d.fov_end = d.fov_start;
+        d->fov_end = d->fov_start;
     }
     if (flags & 16) {
-        d.truck_shake_magnitude_end = d.truck_shake_magnitude_start;
+        d->truck_shake_magnitude_end = d->truck_shake_magnitude_start;
     }
     if (flags & 32) {
-        d.jib_shake_magnitude_end = d.jib_shake_magnitude_start;
+        d->jib_shake_magnitude_end = d->jib_shake_magnitude_start;
     }
     if (flags & 64) {
-        d.roll_shake_magnitude_end = d.roll_shake_magnitude_start;
+        d->roll_shake_magnitude_end = d->roll_shake_magnitude_start;
     }
     if (flags & 128) {
-        d.fov_shake_magnitude_end = d.fov_shake_magnitude_start;
+        d->fov_shake_magnitude_end = d->fov_shake_magnitude_start;
     }
 }
 
 inline float SubCamera::interpolant() {
-    DemoCameraData &d = data.demo;
+    DemoCameraData *d = &data.demo;
     float t;
     if (timer_total >= 1) {
         t = (float)timer / timer_total;
-        switch (d.interpolation_type) {
+        switch (d->interpolation_type) {
         case 1:
-            t = sceVfpuScalarPow(t, d.interpolation_exponent);
+            t = sceVfpuScalarPow(t, d->interpolation_exponent);
             break;
         case 2:
-            t = 1.0f - sceVfpuScalarPow(1.0f - t, d.interpolation_exponent);
+            t = 1.0f - sceVfpuScalarPow(1.0f - t, d->interpolation_exponent);
             break;
         case 3:
             if (t < 0.5f) {
-                t = 0.5f * sceVfpuScalarPow(2.0f * t, d.interpolation_exponent);
+                t = 0.5f * sceVfpuScalarPow(2.0f * t, d->interpolation_exponent);
             } else {
-                t = 1.0f - 0.5f * sceVfpuScalarPow(2.0f * (1.0f - t), d.interpolation_exponent);
+                t = 1.0f - 0.5f * sceVfpuScalarPow(2.0f * (1.0f - t), d->interpolation_exponent);
             }
             break;
         default:
@@ -2886,7 +2886,7 @@ ScePspFVector4 D_eboot_089AA220 = {0, 0, 500.0f, 0};
 
 void SubCamera::cmd_cam_move(CameraCommand *pc) {
     Player *pl = Camera::objectPtr->player;
-    DemoCameraData &d = data.demo;
+    DemoCameraData *d = &data.demo;
 
     ScePspFVector4 offset;
     CameraAngle angle;
@@ -2898,18 +2898,18 @@ void SubCamera::cmd_cam_move(CameraCommand *pc) {
     float u = 1.0f - t;
 
     offset = D_eboot_089AA220;
-    switch (d.move_type) {
+    switch (d->move_type) {
     case 0:
         get_angle(&angle);
         flmatInit(&rotation);
         flmatRotXYZ33(&rotation, divisor * angle.pitch , divisor * angle.yaw, 0);
-        if (d.follow_target == 1) {
-            cpInterVector(&current_position, &d.pos_start, &d.pos_end, t);
+        if (d->follow_target == 1) {
+            cpInterVector(&current_position, &d->pos_start, &d->pos_end, t);
             flvecApplyMat33_2(&offset, &rotation);
-            switch (d.pos_offset_type) {
+            switch (d->pos_offset_type) {
             case 2: {
                 Joint *j = pl->hierarchy.roots[0];
-                flvecApplyMat33_2(&offset, &j[d.tar_offset_joint_id].globalPose);
+                flvecApplyMat33_2(&offset, &j[d->tar_offset_joint_id].globalPose);
                 break;
             }
             case 0:
@@ -2929,13 +2929,13 @@ void SubCamera::cmd_cam_move(CameraCommand *pc) {
             }
             vadd_q(&current_target, &current_position, &offset);
         } else {
-            cpInterVector(&current_target, &d.tar_start, &d.tar_end, t);
-            offset.z = d.offset_start * t + d.offset_end * u;
+            cpInterVector(&current_target, &d->tar_start, &d->tar_end, t);
+            offset.z = d->offset_start * t + d->offset_end * u;
             flvecApplyMat33_2(&offset, &rotation);
-            switch (d.tar_offset_type) {
+            switch (d->tar_offset_type) {
             case 2: {
                 Joint *j = pl->hierarchy.roots[0];
-                m =  &j[d.pos_offset_joint_id].globalPose;
+                m =  &j[d->pos_offset_joint_id].globalPose;
                 flvecApplyMat33_2(&offset, m);
                 break;
             }
@@ -2958,12 +2958,12 @@ void SubCamera::cmd_cam_move(CameraCommand *pc) {
         }
         break;
     case 1:
-        cpInterVector2(&current_target, &d.tar_start, &d.tar_end, t, u);
-        cpInterVector2(&current_position, &d.pos_start, &d.pos_end, t, u);
+        cpInterVector2(&current_target, &d->tar_start, &d->tar_end, t, u);
+        cpInterVector2(&current_position, &d->pos_start, &d->pos_end, t, u);
         break;
     }
 
-    if (d.enable_stage_collision) {
+    if (d->enable_stage_collision) {
         ScePspFVector4 hit;
         if (HitManager::objectPtr->GetWallHitLineCam(&current_target, &current_position, 28.0f, &hit, 0x8000 | 0x8 | 0x1 /* CLIMBING_WALL | CEILING | FLOOR */)) {
             copy_q(&current_position, &hit);
@@ -2974,40 +2974,40 @@ void SubCamera::cmd_cam_move(CameraCommand *pc) {
         }
     }
 
-    float roll_start = (d.roll_start * divisor);
+    float roll_start = (d->roll_start * divisor);
     roll_start *= t;
-    float roll_end = (d.roll_end * divisor);
+    float roll_end = (d->roll_end * divisor);
     roll_end *= u;
     current_roll = roll_start  + roll_end;
     float new_var = 1.0f;
-    float fov_start = (d.fov_start * divisor);
+    float fov_start = (d->fov_start * divisor);
     fov_start *= t;
-    float fov_end = (d.fov_end * divisor);
+    float fov_end = (d->fov_end * divisor);
     fov_end *= u;
     current_fov = fov_start + fov_end;
 
-    if (d.roll_shake_rate != 0) {
-        float shake_start = d.roll_shake_magnitude_start * t;
-        float shake_end = d.roll_shake_magnitude_end * u;
+    if (d->roll_shake_rate != 0) {
+        float shake_start = d->roll_shake_magnitude_start * t;
+        float shake_end = d->roll_shake_magnitude_end * u;
         float shake = shake_start + shake_end;
         float dummy_divisor = dummy(divisor);
-        shake *= flCos((d.roll_shake_phase * 3.1415927f) / 32768);
-        d.roll_shake_phase += d.roll_shake_rate;
-        if (d.shake_rng.roll != 0) {
-            shake += shake * d.shake_rng.roll * ((u8)System::objectPtr->next_index(1) - 0x80) * (1 / 32640.0f);
+        shake *= flCos((d->roll_shake_phase * 3.1415927f) / 32768);
+        d->roll_shake_phase += d->roll_shake_rate;
+        if (d->shake_rng.roll != 0) {
+            shake += shake * d->shake_rng.roll * ((u8)System::objectPtr->next_index(1) - 0x80) * (1 / 32640.0f);
         }
         current_roll += dummy_divisor * shake;
     }
 
-    if (d.fov_shake_rate != 0) {
-        float shake_start = d.fov_shake_magnitude_start * t;
-        float shake_end =   d.fov_shake_magnitude_end * u;
+    if (d->fov_shake_rate != 0) {
+        float shake_start = d->fov_shake_magnitude_start * t;
+        float shake_end =   d->fov_shake_magnitude_end * u;
         float shake = shake_start + shake_end;
         float dummy_divisor = dummy(divisor);
-        shake *= flCos((d.fov_shake_phase * 3.1415927f) / 32768);
-        d.fov_shake_phase += d.fov_shake_rate;
-        if (d.shake_rng.fov != 0) {
-            float percent = shake * d.shake_rng.fov * ((u8)System::objectPtr->next_index(1) - 0x80) * (1 / 32640.0f);
+        shake *= flCos((d->fov_shake_phase * 3.1415927f) / 32768);
+        d->fov_shake_phase += d->fov_shake_rate;
+        if (d->shake_rng.fov != 0) {
+            float percent = shake * d->shake_rng.fov * ((u8)System::objectPtr->next_index(1) - 0x80) * (1 / 32640.0f);
             shake += percent;
         }
         current_fov += dummy_divisor * shake;
@@ -3018,31 +3018,31 @@ void SubCamera::cmd_cam_move(CameraCommand *pc) {
     shift.x = 0;
     u8 has_shift = 0;
 
-    if (d.truck_shake_rate != 0) {
-        float shake_start = d.truck_shake_magnitude_start * t;
-        float shake_end =   d.truck_shake_magnitude_end * u;
+    if (d->truck_shake_rate != 0) {
+        float shake_start = d->truck_shake_magnitude_start * t;
+        float shake_end =   d->truck_shake_magnitude_end * u;
         float shake = shake_start + shake_end;
-        shake *= flCos((d.truck_shake_phase * 3.1415927f) / 32768);
-        d.truck_shake_phase += d.truck_shake_rate;
+        shake *= flCos((d->truck_shake_phase * 3.1415927f) / 32768);
+        d->truck_shake_phase += d->truck_shake_rate;
         shift.x = shake;
         has_shift |= 1;
-        if (d.shake_rng.truck != 0) {
+        if (d->shake_rng.truck != 0) {
             // unused
-            shake += shake * d.shake_rng.truck * ((u8)System::objectPtr->next_index(1) - 0x80) * (1 / 32640.0f);
+            shake += shake * d->shake_rng.truck * ((u8)System::objectPtr->next_index(1) - 0x80) * (1 / 32640.0f);
         }
     }
 
-    if (d.jib_shake_rate != 0) {
-        float shake_start = d.jib_shake_magnitude_start * t;
-        float shake_end =   d.jib_shake_magnitude_end * u;
+    if (d->jib_shake_rate != 0) {
+        float shake_start = d->jib_shake_magnitude_start * t;
+        float shake_end =   d->jib_shake_magnitude_end * u;
         float shake = shake_start + shake_end;
-        shake *= flCos((d.jib_shake_phase * 3.1415927f) / 32768);
-        d.jib_shake_phase += d.jib_shake_rate;
+        shake *= flCos((d->jib_shake_phase * 3.1415927f) / 32768);
+        d->jib_shake_phase += d->jib_shake_rate;
         shift.y = shake;
         has_shift |= 1;
-        if (d.shake_rng.jib != 0) {
+        if (d->shake_rng.jib != 0) {
             // unused
-            shake += shake * d.shake_rng.jib * ((u8)System::objectPtr->next_index(1) - 0x80) * (1 / 32640.0f);
+            shake += shake * d->shake_rng.jib * ((u8)System::objectPtr->next_index(1) - 0x80) * (1 / 32640.0f);
         }
     }
 

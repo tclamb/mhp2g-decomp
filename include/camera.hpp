@@ -388,9 +388,9 @@ struct SubCamera {
     void cam_rail_move_sub(CameraRailPoint *point, CameraRailDefinition *rail, int spline, float t);
     int cam_rail_move_0(CameraRailPoint *point, CameraRailDefinition *rail, ScePspFVector4 *position);;
     int cam_rail_move(CameraRailPoint *point, CameraRailDefinition *rail, ScePspFVector4 *position);;
-    void cam_plEX_fishing(FishingCameraData&);
-    bool fish_cam_sub(FishingCameraData &);
-    void cam_plEX_zoom(ZoomCameraData&);
+    void cam_plEX_fishing(FishingCameraData *);
+    bool fish_cam_sub(FishingCameraData *);
+    void cam_plEX_zoom(ZoomCameraData *);
     float zoom_cam_rate(s16 timer, s16 total_timer, u8 state);\
     int point_camera();
     int point_cam_sub();
