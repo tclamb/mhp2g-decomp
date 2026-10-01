@@ -720,7 +720,6 @@ void SubCamera::cam_sub_gunner() {
     copy_q(&current_target, &d->target);
 }
 
-// cam_init_sub_stg
 void SubCamera::cam_init_sub_stg() {
     current_roll = 0;
     current_fov = DEGREES_TO_RADIANS(55);
@@ -957,7 +956,7 @@ void SubCamera::cam_sub_pchngr() {
             d->crosshair = 1;
             if (pl->pl_scope_chk() == true) {
                 d->is_variable = true;
-                d->min_fov = (float)PI * 20 / 180;
+                d->min_fov = DEGREES_TO_RADIANS_F(20);
                 d->max_fov = DEGREES_TO_RADIANS(55);
                 d->inv_fov_range = 1.0f / (DEGREES_TO_RADIANS(55) - DEGREES_TO_RADIANS(20));
             }

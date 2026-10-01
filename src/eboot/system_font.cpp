@@ -136,7 +136,7 @@ void SystemFont::setColor(s32 fontColorId, u32 alpha, u32 rgb) {
     } else {
         color = &fontColors[fontColorId];
     }
-    *color =  (alpha & 0xFF000000) | (rgb & 0xFF0000) >> 16 | (rgb & 0xFF00) | (rgb & 0xFF) << 16;
+    *color = (alpha & 0xFF000000) | (rgb & 0xFF0000) >> 16 | (rgb & 0xFF00) | (rgb & 0xFF) << 16;
 }
 
 void SystemFont::initializeColors() {

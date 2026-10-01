@@ -27,6 +27,8 @@ struct PowerEventType {
 
 struct DataManager : Singleton<DataManager> {
     enum {
+        LOADING = 1,
+        READY = 2,
         NUM_ENTRIES = 0x2B,
     };
 
@@ -60,7 +62,7 @@ struct DataManager : Singleton<DataManager> {
     void duplicate(s32 dst_slot, s32 src_slot);
     u32 copy(void *dst, s32 src_slot, u32 size);
     void cache_emmodel(u8 em_id);
-    bool is_loaded(s32 index);
+    bool is_loading(s32 index);
     void free(s32 index);
     u8 *emmodel_pac(u8 em_id);
     bool is_pac_cached(u8 em_id);

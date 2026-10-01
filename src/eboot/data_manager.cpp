@@ -78,7 +78,7 @@ inline void DataManager::clear_pacs_inner() {
     write_head = volatile_memory;
 
     for (int i = 0x15; i <= NUM_ENTRIES - 1; ++i) {
-        entries[i].flags &= ~(1 << 1);
+        entries[i].flags &= ~READY;
     }
 
     FileSys::objectPtr->update_ringbuf(1);
@@ -105,12 +105,12 @@ void DataManager::update() {
     }
     for (int i = 0; i < NUM_ENTRIES; ++i) {
         u16 flags = entries[i].flags;
-        if (((flags & 1) != 0)
-          && ((flags & 2) == 0)
+        if (((flags & LOADING) != 0)
+          && ((flags & READY) == 0)
           && !FileSys::objectPtr->is_loading(entries[i].file_id)) {
             if (entries[i].was_cancelled != 1) {
-                entries[i].flags &= ~1;
-                entries[i].flags |= 2;
+                entries[i].flags &= ~LOADING;
+                entries[i].flags |= READY;
             } else {
                 entries[i].flags = 0;
             }
@@ -145,7 +145,7 @@ void DataManager::load(s32 index, s32 file_id, u32 size) {
     }
     e.was_cancelled = false;
     FileSys::objectPtr->load_file_async(file_id, e.buffer, -1, notify_on_cancel, &e.was_cancelled, true);
-    e.flags |= 1;
+    e.flags |= LOADING;
     e.file_id = file_id;
 }
 
@@ -159,7 +159,7 @@ void DataManager::duplicate(s32 destination_index, s32 source_index) {
     sceKernelDcacheWritebackInvalidateAll();
     sceDmacMemcpy(destination.buffer, source.buffer, size);
 
-    destination.flags |= 2;
+    destination.flags |= READY;
     destination.file_id = source.file_id;
 }
 
@@ -181,7 +181,7 @@ inline s32 DataManager::next_emmodel_index() {
 
     entry *e = &entries[global.largeEnemyCount(target_0_count) + 9];
     for (offset = global.largeEnemyCount(target_0_count); offset < 4; ++offset) {
-        if ((e->flags & 3) == 0) {
+        if ((e->flags & (LOADING | READY)) == 0) {
             break;
         }
         e++;
@@ -194,7 +194,7 @@ inline s32 DataManager::next_pac_index() {
     int target_0_count = global.targets[0].count_0x1e;
     entry *e = &entries[global.largeEnemyCount(target_0_count) + 9];
     for (s32 offset = global.largeEnemyCount(target_0_count); offset < 4; ++offset) {
-        if ((e->flags & 3) == 0) {
+        if ((e->flags & (LOADING | READY)) == 0) {
             return offset;
         }
         e++;
@@ -207,7 +207,7 @@ void DataManager::cache_emmodel(u8 em_id) {
     int src_offset = 0;
     for (; src_offset < 4; ++src_offset) {
         u16 file_id = 0x17AB + em_id;
-        if ((src->flags & 2) != 0 && (src->file_id == file_id)) {
+        if ((src->flags & READY) != 0 && (src->file_id == file_id)) {
             break;
         }
         src++;
@@ -217,9 +217,9 @@ void DataManager::cache_emmodel(u8 em_id) {
     duplicate(9 + dst, 0x16 + src_offset);
 }
 
-bool DataManager::is_loaded(s32 index) {
+bool DataManager::is_loading(s32 index) {
     u16 flags = entries[index].flags;
-    return flags & 1 && !(flags & 2);
+    return flags & LOADING && !(flags & READY);
 }
 
 void DataManager::free(s32 index) {
@@ -232,7 +232,7 @@ u8 *DataManager::emmodel_pac(u8 em_id) {
     entry *e = &entries[9];
     for (int i = 0; i < 4; ++i) {
         u16 file_id = 0x17AB + em_id;
-        if (e->flags & 2 && e->file_id == file_id) {
+        if (e->flags & READY && e->file_id == file_id) {
             return e->buffer;
         }
         ++e;
@@ -247,7 +247,7 @@ bool DataManager::is_pac_cached(u8 em_id) {
 s32 DataManager::find_pac(u16 file_id) {
     entry *e = &entries[0x15];
     for (s32 i = 0x15; i <= NUM_ENTRIES - 1; ++i) {
-        if ((e->flags & 2) != 0 && e->file_id == file_id) {
+        if ((e->flags & READY) != 0 && e->file_id == file_id) {
             return i;
         }
         ++e;
@@ -259,7 +259,7 @@ s8 DataManager::find_emmodel(u8 em_id) {
     entry *e = &entries[9];
     for (s8 i = 0; i < 4; ++i) {
         u16 file_id = 0x17AB + em_id;
-        if ((e->flags & 2) != 0 && e->file_id == file_id) {
+        if ((e->flags & READY) != 0 && e->file_id == file_id) {
             return i;
         }
         ++e;
@@ -274,7 +274,7 @@ void DataManager::load_emmodel(u8 em_id, u32 size, s32 index) {
             int target_0_count = global.targets[0].count_0x1e;
             entry *e = &entries[global.largeEnemyCount(target_0_count) + 9];
             for (s32 offset = global.largeEnemyCount(target_0_count); offset < 4; ++offset) {
-                if ((e->flags & 3) == 0) {
+                if ((e->flags & (LOADING | READY)) == 0) {
                     u16 file_id = em_id + 0x17AB;
                     load(offset + 9, file_id, size);
                     return;
@@ -284,7 +284,7 @@ void DataManager::load_emmodel(u8 em_id, u32 size, s32 index) {
         }
     } else {
         entry *e = &entries[index + 9];
-        if ((e->flags & 2) != 0) {
+        if ((e->flags & READY) != 0) {
             u16 file_id = em_id + 0x17AB;
             if (e->file_id == file_id) {
                 return;
@@ -321,7 +321,7 @@ void DataManager::load_emmodel(u8 em_id) {
 
         entry *e = &entries[global.largeEnemyCount(target_0_count) + 0x16];
         for (s32 offset = global.largeEnemyCount(target_0_count); offset < 4; ++offset) {
-            if ((e->flags & 3) == 0) {
+            if ((e->flags & (LOADING | READY)) == 0) {
                 u16 file_id = em_id + 0x17AB;
                 load(offset + 0x16, file_id, 0);
                 return;
@@ -342,7 +342,7 @@ struct implicit_converter {
 void DataManager::free_emmodel(u8 em_id) {
     entry *e = &entries[9];
     for (int i = 0; i < 4; ++i) {
-        if ((e->flags & 3) != 0 && implicit_converter(em_id + 0x17AB) == e->file_id) {
+        if ((e->flags & (LOADING | READY)) != 0 && implicit_converter(em_id + 0x17AB) == e->file_id) {
             free(i + 9);
         }
         ++e;
@@ -352,7 +352,7 @@ void DataManager::free_emmodel(u8 em_id) {
 void DataManager::free_all_emmodels() {
     entry *e = &entries[9];
     for (int i = 0; i < 4; ++i) {
-        if (e->flags & 3) {
+        if (e->flags & (LOADING | READY)) {
             free(i + 9);
         }
         ++e;
