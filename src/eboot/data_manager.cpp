@@ -96,7 +96,7 @@ void DataManager::clear_pacs() {
 
 void DataManager::update() {
     if (f0x216_flag) {
-        if (!GameSys::objectPtr->flag_0x480) {
+        if (!GameSys::objectPtr->is_gallery) {
             if (ready_flag && !loading_flag && allocate_volatile_memory()) {
                 loading_flag = true;
                 clear_pacs_inner();

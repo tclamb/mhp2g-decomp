@@ -87,6 +87,23 @@ struct UserData {
     bool getItemBit(u16 itemId);
 };
 
+struct Options {
+    s8 language;
+    s8 sound;
+    s8 bgmVolume;
+    s8 seVolume;
+    s8 quickContinue;
+    s8 backgroundLoading;
+    s8 dataInstall;
+    s8 scope;
+    s8 cameraType;
+    s8 cameraSetting;
+    s8 aiming;
+    s8 manualLobbySelection;
+    s8 xaxisControl;
+    s8 bowgunShoulderCam;
+};
+
 struct GameSys : Singleton<GameSys> {
     u8 pad_0x0[0x1C];
     u16 short_0x1C;
@@ -101,13 +118,11 @@ struct GameSys : Singleton<GameSys> {
     u8 pad_0x410[0x422-0x410];
     bool allow_hidden_flag;
     u8 pad_0x423[0x480 - 0x423];
-    bool flag_0x480;
+    bool is_gallery;
     u8 pad_0x481[0x4A0 - 0x481];
     UserData userData;
-    u8 pad_0x6ADD8[0x6ADDD - 0x6ADD8];
-    s8 flag_0x6ADDD;
-    bool flag_0x6ADDE;
-    u8 pad_0x6ADDF[0x6AF0C - 0x6ADDF];
+    Options options;
+    u8 pad_0x6ADE6[0x6AF0C - 0x6ADE6];
     bool flag_0x6AF0C;
     u16 stage_id;
     u8 mapId;
@@ -123,9 +138,10 @@ struct GameSys : Singleton<GameSys> {
     char *method_0885143C(u16);
     char *method_08851448(u16);
     int itemBoxSize();
+    bool Game_clear_ck(int);
 
     inline bool unknownTest() {
-        return GameSys::objectPtr->flag_0x6ADDD && !GameSys::objectPtr->flag_0x480;
+        return GameSys::objectPtr->options.backgroundLoading && !GameSys::objectPtr->is_gallery;
     }
 };
 
@@ -133,5 +149,4 @@ struct GameSys : Singleton<GameSys> {
 extern "C" {
     char *func_eboot_088515A0(GameSys *, u16);
     int func_eboot_088566DC(GameSys *);
-    bool func_eboot_0884F9A0(GameSys *, int);
 }

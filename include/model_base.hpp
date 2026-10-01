@@ -4,6 +4,7 @@
 
 #include "joint.hpp"
 #include "draw.hpp"
+#include "common.h"
 
 struct Hierarchy {
     inline Hierarchy() {
@@ -186,6 +187,8 @@ struct ModelBase : Draw {
     int compile_pmo(void *, pmo_header *, pmo_mesh_data *);
     int compile_tmh(void *, tmh_header *);
     void reset_transform();
+    void get_joint_pos(ScePspFVector4 *out, s16 joint_id);
+    ScePspFMatrix4 *get_joint_wmat(s16 joint_id);
 
     static void operator delete(void *p);
 };

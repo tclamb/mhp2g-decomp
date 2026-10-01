@@ -17,6 +17,8 @@ extern "C" {
 #endif
 
 float sceVfpuScalarPow(float, float);
+float sceVfpuScalarAsin(float);
+float sceVfpuScalarAcos(float);
 void sceVfpuQuaternionFromRotate(ScePspFVector4 *out, ScePspFVector4 *axis, float angle);
 void sceVfpuQuaternionToMatrix(ScePspFMatrix4 *out, ScePspFVector4 *quaternion);
 
@@ -522,7 +524,7 @@ inline float vsin_s_slow(float radians) {
 }
 
 
-inline float atan2f_s(float y, float x) {
+inline float flArcTan2(float y, float x) {
     float result;
 #if defined (__MWERKS__)
     // implementation using asin and the identity:
@@ -749,12 +751,47 @@ inline void flmatRotXYZ33(ScePspFMatrix4 *m, float alpha, float beta, float gamm
 #endif
 }
 
+inline float cpAng2Rad(s32 ang) {
+    return (int)(u16)ang * (float)(PI / 32768);
+}
+
+inline void cpAng2Rad_all(ScePspIVector4 *in, ScePspFVector4 *out) {
+    out->x = cpAng2Rad(in->x);
+    out->y = cpAng2Rad(in->y);
+    out->z = cpAng2Rad(in->z);
+    out->w = 0;
+}
+
+inline void cpRotMatrix(ScePspFMatrix4 *out, ScePspIVector4 *ang) {
+    ScePspFVector4 rad;
+    cpAng2Rad_all(ang, &rad);
+    flmatInit(out);
+    flmatRotXYZ33(out, rad.x, rad.y, rad.z);
+}
 
 inline void flvecApplyMat33_2(ScePspFVector4 *v, ScePspFMatrix4 *m) {
     flvecApplyMat33(v, v, m);
 }
 
-inline float Acos(float a) {
+inline float flSin(float a) {
+#if defined(__MWERKS__)
+    float result;
+    __asm__ (
+        "lv.s   S000, 0x0(%1)"
+        "vcst.s S001, 5"
+        "vmul.s S000, S000, S001"
+        "vsin.s S010, S000"
+        "sv.s   S010, 0x0(%0)"
+        : "=m" (result)
+        : "m" (a)
+    );
+    return result;
+#else
+    return sinf(a);
+#endif
+}
+
+inline float flCos(float a) {
 #if defined(__MWERKS__)
     float result;
     __asm__ (
@@ -907,6 +944,50 @@ inline float flvecCalcDistance(ScePspFVector4 *p, ScePspFVector4 *q) {
     return result;
 }
 
+inline float flvecCalcLength(ScePspFVector4 *p) {
+    float result;
+#if defined (__MWERKS__)
+    __asm__ (
+        "lv.q C000, 0x0(%1)"
+        "vdot.t S010, C000, C000"
+        "vsqrt.s S010, S010"
+        "sv.s S010, 0x0(%0)"
+        : "=m"(result)
+        : "m"(*p)
+    );
+#else
+    result = sqrtf(p->x * p->x + p->y * p->y + p->z * p->z);
+#endif
+    return result;
+}
+
+inline void flvecRotX(ScePspFVector4 *v, float angle) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C000, 0x0(%0)"
+        "lv.q C100, 0x0(%0)"
+        "lv.s S110, 0x00(%1)"
+        "vcst.s S111, VFPU_2_PI"
+        "vmul.s S122, S110, S111"
+        "vsin.s S120, S122"
+        "vcos.s S121, S122"
+        "vmul.s S001, S121, S101"
+        "vmul.s S130, S120, S102"
+        "vsub.s S001, S001, S130"
+        "vmul.s S002, S120, S101"
+        "vmul.s S130, S121, S102"
+        "vadd.s S002, S002, S130"
+        "sv.q C000, 0x0(%0)"
+        : "=m" (*v)
+        : "m" (angle)
+    );
+#else
+    float y = v->y, z = v->z;
+    v->y = cosf(angle) * y - sinf(angle) * z;
+    v->z = sinf(angle) * y + cosf(angle) * z;
+#endif
+}
+
 inline void flvecRotY(ScePspFVector4 *v, float angle) {
 #if defined(__MWERKS__)
     __asm__ (
@@ -932,6 +1013,150 @@ inline void flvecRotY(ScePspFVector4 *v, float angle) {
     v->x = cosf(angle) * x + sinf(angle) * z;
     v->z = cosf(angle) * z - sinf(angle) * x;
 #endif
+}
+
+inline float flvecInnerProduct(ScePspFVector4 *a, ScePspFVector4 *b) {
+    float result;
+#if defined (__MWERKS__)
+    __asm__ (
+        "lv.q C000, %1"
+        "lv.q C010, %2"
+        "vdot.t S100, C000, C010"
+        "sv.s S100, %0"
+        : "=m"(result)
+        : "m"(*a), "m"(*b)
+    );
+#else
+    result = a->x * b->x + a->y * b->y + a->z * b->z;
+#endif
+    return result;
+}
+
+inline void flmatInvert(ScePspFMatrix4 *out, ScePspFMatrix4 *in) {
+#if defined (__MWERKS__)
+    __asm__ (
+        "lv.q    C100, 0x0(%1)"
+        "lv.q    C110, 0x10(%1)"
+        "lv.q    C120, 0x20(%1)"
+        "lv.q    C130, 0x30(%1)"
+        "vmidt.q E000"
+        "vmidt.q E200"
+        "vdot.t  S300, C100, C100"
+        "vsqrt.s S300, S300"
+        "vdot.t  S301, C110, C110"
+        "vsqrt.s S301, S301"
+        "vdot.t  S302, C120, C120"
+        "vsqrt.s S302, S302"
+        "vdiv.t  C200, R100, C300"
+        "vdiv.t  C210, R101, C300"
+        "vdiv.t  C220, R102, C300"
+        "vneg.t  C310, C130"
+        "vmul.t  C320, R200, C310"
+        "vfad.t  S230, C320"
+        "vmul.t  C320, R201, C310"
+        "vfad.t  S231, C320"
+        "vmul.t  C320, R202, C310"
+        "vfad.t  S232, C320"
+        "vdiv.t  C000, C200, C300"
+        "vdiv.t  C010, C210, C300"
+        "vdiv.t  C020, C220, C300"
+        "vdiv.t  C030, C230, C300"
+        "sv.q    C000, 0x0(%0)"
+        "sv.q    C010, 0x10(%0)"
+        "sv.q    C020, 0x20(%0)"
+        "sv.q    C030, 0x30(%0)"
+        : "=m" (*out) : "m" (*in)
+    );
+#else
+    // the inverse of a homogeneous transformation matrix
+    // {{R, d}, {0, 1}} is {{Rᵀ, -Rᵀd}, {0, 1}}
+    // the input matrix _should_ always have unit vectors for the rotation submatrix columns,
+    // but in case it doesn't, the divisions ensure the output does
+    float c1 = sqrtf(in->x.x * in->x.x + in->x.y * in->x.y + in->x.z + in->x.z),
+          c2 = sqrtf(in->x.x * in->x.x + in->x.y * in->x.y + in->x.z + in->x.z),
+          c3 = sqrtf(in->x.x * in->x.x + in->x.y * in->x.y + in->x.z + in->x.z);
+
+    out->x.x = in->x.x / c1 / c1; out->x.y = in->y.x / c1 / c2; out->x.z = in->z.x / c1 / c3; out->x.w = 0.0f;
+    out->y.x = in->x.y / c2 / c1; out->y.y = in->y.y / c2 / c2; out->y.z = in->z.y / c2 / c3; out->y.w = 0.0f;
+    out->z.x = in->x.z / c3 / c1; out->z.y = in->y.z / c3 / c2; out->z.z = in->z.z / c3 / c3; out->z.w = 0.0f;
+
+    out->w.x = -(in->w.x * in->x.x / c1 + in->w.y * in->y.x / c2 + in->w.z * in->z.x / c3) / c1;
+    out->w.y = -(in->w.x * in->x.y / c1 + in->w.y * in->y.y / c2 + in->w.z * in->z.y / c3) / c2;
+    out->w.z = -(in->w.x * in->x.z / c1 + in->w.y * in->y.z / c2 + in->w.z * in->z.z / c3) / c3;
+    out->w.w = 1.0f;
+#endif
+}
+
+inline void plvecRotY(ScePspFVector4 *v, float angle) {
+#if defined (__MWERKS__)
+    __asm__ (
+        "lv.q   C000, 0x0(%0)"
+        "lv.q   C100, 0x0(%0)"
+        "lv.s   S110, 0x0(%1)"
+        "vcst.s S111, VFPU_2_PI"
+        "vmul.s S122, S110, S111"
+        "vsin.s S120, S122"
+        "vcos.s S121, S122"
+        "vmul.s S000, S121, S100"
+        "vmul.s S130, S120, S102"
+        "vadd.s S000, S000, S130"
+        "vmul.s S002, S120, S100"
+        "vmul.s S130, S121, S102"
+        "vsub.s S002, S130, S002"
+        "sv.q   C000, 0x0(%0)"
+        : "=m" (*v) : "m" (angle)
+    );
+#else
+    float x = v->x, z = v->z;
+    v->x = cosf(angle) * x + sinf(angle) * z;
+    v->z = -sinf(angle) * x + cosf(angle) * z;
+#endif
+}
+
+inline void plvecCopy(ScePspFVector4 *out, ScePspFVector4 *in) {
+    copy_q(out, in);
+}
+
+inline void flvecCopy(ScePspFVector4 *out, ScePspFVector4 *in) {
+    copy_q(out, in);
+}
+
+inline void flmatGetTrans(ScePspFVector4 *out, ScePspFMatrix4 *in) {
+    out->x = in->w.x;
+    out->y = in->w.y;
+    out->z = in->w.z;
+}
+
+inline void flmatCopy(ScePspFMatrix4 *out, ScePspFMatrix4 *in) {
+#if defined(__MWERKS__)
+    __asm__ (
+        "lv.q C000, 0x0(%1)"
+        "lv.q C010, 0x10(%1)"
+        "lv.q C020, 0x20(%1)"
+        "lv.q C030, 0x30(%1)"
+        "sv.q C000, 0x0(%0)"
+        "sv.q C010, 0x10(%0)"
+        "sv.q C020, 0x20(%0)"
+        "sv.q C030, 0x30(%0)"
+        : "=m"(*out)
+        : "m"(*in)
+    );
+#else
+    *out = *in;
+#endif
+}
+
+inline float CalcDistanceXZ(ScePspFVector4 *p, ScePspFVector4 *q) {
+    ScePspFVector4 a, b;
+    copy_q(&a, p);
+    copy_q(&b, q);
+    a.y = 0.0f;
+    b.y = 0.0f;
+    return flvecCalcDistance(&a, &b);
+}
+
+inline s16 AarcTan2(float y, float x) {
+    return flArcTan2(y, x) * (float)(32768 / PI);
 }
 
 #ifdef __cplusplus

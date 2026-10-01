@@ -509,7 +509,7 @@ void StageBase::vtable_0x88(pmo *pmo, void *data) {
             emit_world_model(&local_transform, &pmo->scale);
 
             ScePspFVector4 camera_position;
-            func_eboot_08814E84(Camera::objectPtr, &camera_position);
+            Camera::objectPtr->get_camera_pos(&camera_position);
 
             float d2 = distanceSquared(position, &camera_position);
             if (d2 <= 2250000.0f + args->cutoff * args->cutoff) {
@@ -651,7 +651,7 @@ void StageBase::vtable_0x1C() {
     int i;
     stage_sound *sound = vtable_0xB0();
     for (i = 0; i < vtable_0xAC(); ++i, ++sound) {
-        if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) == false && func_eboot_0884F9A0(GameSys::objectPtr, 0) == true) {
+        if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) == false && GameSys::objectPtr->Game_clear_ck(0) == true) {
             func_eboot_08885198(Sound::objectPtr, sound->unknown_0x4, 0xC0, i + 1, 0);
         } else {
             if (func_eboot_088D0824(Evdemo::objectPtr, sound->unknown_0x8, 0) != false) {
@@ -683,7 +683,7 @@ void StageBase::vtable_0x20() {
             if (shorts[1] == 0x17 && shorts[11] == 0) {
                 ScePspFVector4 *position = vtable_0x44();
                 if (position != NULL) {
-                    if ((0 < (GameSys::objectPtr->flags_0x6AF14 & 1)) == 0) {
+                    if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) == false) {
                         u8 byte_0x2E = GameSys::objectPtr->byte_0x2E;
                         switch (byte_0x2E) {
                         default:
@@ -709,8 +709,8 @@ void StageBase::vtable_0x20() {
     }
     stage_sound *sound = vtable_0xB0();
     for (int i = 0; i < vtable_0xAC(); ++i, ++sound) {
-        if ((0 < (GameSys::objectPtr->flags_0x6AF14 & 1)) == 0 &&
-            func_eboot_0884F9A0(GameSys::objectPtr, 0) == 1) {
+        if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) == false &&
+            GameSys::objectPtr->Game_clear_ck(0) == true) {
             if (func_eboot_088852C8(Sound::objectPtr, sound->unknown_0x4, 0xC0, i + 1) != 0) {
                 func_eboot_08885198(Sound::objectPtr, sound->unknown_0x4, 0xC0, i + 1, 0);
             }
@@ -976,7 +976,7 @@ bool StageBase::vtable_0xA4() {
 }
 
 inline u16 atan2s16(float y, float x) {
-    return (int)((65536.0f * atan2f_s(y, x)) / 6.2831855f + 0.5f);
+    return (int)((65536.0f * flArcTan2(y, x)) / 6.2831855f + 0.5f);
 }
 
 void StageBase::draw_sky_gradient() {

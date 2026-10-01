@@ -1158,7 +1158,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08830BA0);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08830F80);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_088311B8);
+INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", Cockpit_menu_chk__7CockpitFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_088311F0);
 

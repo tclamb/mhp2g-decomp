@@ -33,7 +33,7 @@ struct ObjBase : ModelBase {
     void updateStagePosition();
     void toStagePosition(ScePspFVector4 *out, u16 stageId, ScePspFVector4 *in);
     u32 method_08865C80(u32 flag);
-    bool pl_action_ck(u8 type, u8 id);
+    bool act_ck(u8 type, u8 id);
     void method_08865D4C();
     void method_08865D7C();
     int method_08865DCC(s16);
@@ -53,9 +53,9 @@ struct ObjBase : ModelBase {
     u16 pl_id;
     u8 pl_type;
     u8 kind;
-    ScePspFVector4 unknown_0x1F0;
+    ScePspIVector4 rotation __attribute__((aligned(16)));
     ScePspFVector4 position;
-    ScePspFVector4 last_position;
+    ScePspFVector4 next_position;
     ScePspFVector4 scale;
     u8 alpha;
     u8 padding_0x231[0x244 - 0x231];
@@ -79,12 +79,15 @@ struct ObjBase : ModelBase {
     u8 action_type;
     u8 action_id;
     u16 stageId;
-    u8 padding_0x29C[0x2AC - 0x29C];
+    u8 em_ride_state;
+    u8 padding_0x29D[0x2AC - 0x29D];
     ScePspUnion32 diffuse_light_colors[3];
     u8 padding_0x2B8[2];
     u16 unknown_0x2BA;
     u16 unknown_0x2BC;
-    u8 padding_0x2BE[0x320 - 0x2BE];
+    u8 padding_0x2BE[0x2C0 - 0x2BE];
+    u32 em_dir;
+    u8 padding_0x2C4[0x320 - 0x2C4];
     u16 next_rotation;
     u8 padding_0x322[0x324 - 0x322];
     ScePspSVector4 unknown_0x324;
@@ -96,7 +99,7 @@ struct ObjBase : ModelBase {
     MemFn memFn;
     u32 unknown_0x408;
     u32 unknown_0x40C;
-    u32 unknown_0x410;
+    u32 flags_0x410;
     u32 unknown_0x414;
     u8 padding_0x418[0x480 - 0x418];
 

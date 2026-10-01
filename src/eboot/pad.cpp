@@ -67,7 +67,7 @@ void Pad::update() {
     if ((ctrl.analogX | ctrl.analogY) == 0) {
         rads = 0.0f;
     } else {
-        rads = atan2f_s(-ctrl.analogY, ctrl.analogX);
+        rads = flArcTan2(-ctrl.analogY, ctrl.analogX);
         if (rads < 0.0f) {
             rads += 6.2831855f;
         }

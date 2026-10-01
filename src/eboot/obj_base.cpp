@@ -13,7 +13,7 @@ ObjBase::ObjBase() {
     state_0x1D4 = 0;
     unknown_0x414 = 0;
     kind = 3;
-    unknown_0x410 = 0;
+    flags_0x410 = 0;
     setMemFn(&ObjBase::vtable_0x10);
 }
 
@@ -31,9 +31,9 @@ void ObjBase::operator delete(void *) {
 
 void ObjBase::vtable_0x10() {
     reset_transform();
-    memset(&unknown_0x1F0, 0, sizeof(unknown_0x1F0));
+    memset(&rotation, 0, sizeof(rotation));
     memset(&position, 0, sizeof(position));
-    memset(&last_position, 0, sizeof(last_position));
+    memset(&next_position, 0, sizeof(next_position));
     // inline method?
     scale.z = 1; scale.y = 1; scale.x = 1;
     // inline method?
@@ -210,7 +210,7 @@ u32 ObjBase::method_08865C80(u32 flag) {
     }
 }
 
-bool ObjBase::pl_action_ck(u8 type, u8 id) {
+bool ObjBase::act_ck(u8 type, u8 id) {
     if (action_type == type && action_id == id) {
         return true;
     }
@@ -265,9 +265,9 @@ INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865E8C);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", vtable_0x2C__7ObjBaseFv);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865F1C);
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", get_joint_pos__9ModelBaseFP14ScePspFVector4s);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865F60);
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", get_joint_wmat__9ModelBaseFs);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_base", func_eboot_08865F84);
 

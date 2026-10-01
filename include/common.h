@@ -6,8 +6,10 @@
 #define ext(x, pos, size) (((x) >> (pos)) & ((1 << (size)) - 1))
 
 #define DEGREES_TO_VFPU(degrees) ((degrees) / 90.0f)
-#define PI 3.141592653589793238462643383279502884
+#define PI 3.14159265358979323846264338327950288
 #define DEGREES_TO_RADIANS(degrees) ((degrees) * PI / 180.0f)
+// TODO: explore if there's an expression that works in all cases
+#define DEGREES_TO_RADIANS_F(degrees) ((degrees) * (float)PI / 180.0f)
 
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
@@ -27,6 +29,12 @@ typedef unsigned long uint64_t;
 #include <stdarg.h> // IWYU pragma: export
 #endif
 
+#ifdef __MWERKS__
+#define DECLSPEC_DATA __declspec(data)
+#else
+#define DECLSPEC_DATA
+#endif
+
 extern "C" {
     int memcmp(const void*, const void*, long unsigned int);
     void *memset(void*, int,  long unsigned int);
@@ -36,7 +44,10 @@ extern "C" {
     int sprintf(char*, const char*, ...);
 }
 
-inline void *zero(void *dst, u32 size) {
+inline void *clear(void *dst, u32 size) {
+#ifdef __MWERKS__
+    return __clear((char *)dst, size);
+#else
     u8 *p = (u8 *)dst;
     u32 n = size;
     if (p && n != 0) {
@@ -45,6 +56,7 @@ inline void *zero(void *dst, u32 size) {
         } while(--n != 0);
     }
     return dst;
+#endif
 }
 
 #include "enums.hpp" // IWYU pragma: export

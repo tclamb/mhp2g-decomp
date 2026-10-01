@@ -1,9 +1,9 @@
 #include "camera.hpp"
 
+#include "common.h"
+#include "ge.hpp"
 #include "game_sys.hpp"
 #include "player_manager.hpp"
-
-//#define BUILD_NON_MATCHING
 
 template<> Camera *Singleton<Camera>::objectPtr;
 
@@ -11,7 +11,7 @@ Camera::Camera() {
     zClipping = true;
     unknown_0xB70 = 1808;
     unknown_0xB74 = 1912;
-    unknown_0xC = DEGREES_TO_VFPU(78.5);
+    current_fov = DEGREES_TO_VFPU(78.5);
     unknown_0x10 = -999;
     unknown_0xB34 = 0;
 }
@@ -19,50 +19,26 @@ Camera::Camera() {
 ScePspFVector4 D_eboot_089310B0 = {0, 0, -50, 0};
 ScePspFVector4 D_eboot_089310C0 = {0, 1, 0, 0};
 
-// 1 instruction swap
-#ifdef BUILD_NONMATCHING
-
-#include "ge.hpp"
-
-// TODO: try zero() in common.h
-inline void *inline_memset(void *dst, int val, u32 size) {
-    u8 *p = (u8 *)dst;
-    if (p) {
-        u32 n = size;
-        while (n != 0) {
-            *p++ = val;
-            --n;
-        }
-    }
-    return dst;
-}
-
 void Camera::method_088137C8() {
     ScePspFVector4 p, q, r;
     p = D_eboot_089310B0;
-    inline_memset(&q, 0, sizeof(q));
+    clear(&q, sizeof(q));
     r = D_eboot_089310C0;
 
     Ge::objectPtr->norm = 1;
     near_z = 30;
     far_z = 65000;
-    unknown_0xC = DEGREES_TO_VFPU(78.5);
-    unknown_0x8 = (float)(30.0 / 17.0);
+    current_fov = DEGREES_TO_VFPU(78.5);
+    aspect_ratio = 480.0f / 272;
     method_08817024();
     method_08815028(&p, &q, &r);
     unknown_0xDC0 = 0;
-    unknown_0xAA9 = 0;
+    enableCameraControls = 0;
     method_0881395C();
-    unknown_0x14 = 3;
-    cameraScriptIndex = 0;
-    unknown_0xA7C = 0;
+    height_id = 3;
+    next_demo_id = 0;
+    demo_enemy = NULL;
 }
-
-#else
-
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", method_088137C8__6CameraFv);
-
-#endif
 
 void Camera::method_088138DC() {
     unknown_0xB10 = 0;
@@ -73,9 +49,9 @@ void Camera::method_088138DC() {
     unknown_0xB00 = 0;
     unknown_0xAE0 = 0;
     unknown_0xAC0 = 0;
-    unknown_0xA81 = 0;
+    wyvern_find_player_flag = 0;
     unknown_0xA8A = 0;
-    unknown_0xA88 = 0;
+    is_std_cam = false;
     demo_enemy = 0;
     next_demo_id = 0;
     method_08815744();
@@ -85,8 +61,8 @@ void Camera::method_088138DC() {
 void Camera::method_0881395C() {
     near_z = 30;
     far_z = 65000;
-    unknown_0xC = DEGREES_TO_VFPU(78.5);
-    unknown_0x8 = (float)(30.0 / 17.0);
+    current_fov = DEGREES_TO_VFPU(78.5);
+    aspect_ratio = (float)(30.0 / 17.0);
     unknown_0xB34 = 0;
     method_08816108();
 }
@@ -231,7 +207,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08814E08);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08814E40);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08814E84);
+INCLUDE_ASM("asm/eboot/nonmatchings/camera", get_camera_pos__6CameraFP14ScePspFVector4);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08814EA4);
 
@@ -271,7 +247,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/camera", method_08816108__6CameraFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08816144);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_088164C0);
+INCLUDE_ASM("asm/eboot/nonmatchings/camera", flmatMakeLookAt__FP14ScePspFMatrix4P14ScePspFVector4P14ScePspFVector4P14ScePspFVector4);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08816698);
 
@@ -279,7 +255,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08816724);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08816B24);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08816B44);
+INCLUDE_ASM("asm/eboot/nonmatchings/camera", Roll2Upvec__FP14ScePspFVector4P14ScePspFVector4P14ScePspFVector4f);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/camera", func_eboot_08816BE8);
 
@@ -302,39 +278,54 @@ u8 pad_089310F4[12] = {};
 ScePspFVector4 D_eboot_08931100 = {0, 0, 320, 0};
 ScePspFVector4 D_eboot_08931110 = {0, 0, -1000, 0};
 
-struct SmallCameraData {
-    float unknown_0x0;
-    float unknown_0x4;
-    float unknown_0x8;
-    float unknown_0xC;
-    float unknown_0x10;
-    float unknown_0x14;
-    float unknown_0x18;
+CameraFollowDefinition cam_cnf_chs = {
+    .fov = DEGREES_TO_RADIANS(50),
+    .roll = 0.0f,
+    .entries = {
+        {
+            .y_offset = 300.0f,
+            .z_offset = 160.0f,
+            .height = 184.0f,
+            .min_height = 80.0f,
+        },
+        {
+            .y_offset = 270.0f,
+            .z_offset = 490.0f,
+            .height = 170.0f,
+            .min_height = 80.0f,
+        },
+        {
+            .y_offset = 140.0f,
+            .z_offset = 490.0f,
+            .height = 170.0f,
+            .min_height = 80.0f,
+        },
+        {
+            .y_offset = 60.0f,
+            .z_offset = 450.0f,
+            .height = 210.0f,
+            .min_height = 60.0f,
+        },
+        {
+            .y_offset = 400.0f,
+            .z_offset = 220.0f,
+            .height = 195.0f,
+            .min_height = 80.0f,
+        },
+    },
 };
 
-struct BigCameraData {
-    float unknown_0x0[8];
-    SmallCameraData unknown_0x20 __attribute__((aligned(0x10)));
-    SmallCameraData unknown_0x40 __attribute__((aligned(0x10)));
-    SmallCameraData unknown_0x60 __attribute__((aligned(0x10)));
-    SmallCameraData unknown_0x80 __attribute__((aligned(0x10)));
-    SmallCameraData unknown_0xA0 __attribute__((aligned(0x10)));
-    SmallCameraData unknown_0xC0 __attribute__((aligned(0x10)));
-    SmallCameraData unknown_0xE0 __attribute__((aligned(0x10)));
+UnalignedCameraFollowHeightEntry cam_cnf_chs_kabegiwa = {
+    .y_offset = 280.0f,
+    .z_offset = 500.0f,
+    .height = 170.0f,
+    .min_height = 80.0f,
 };
 
-BigCameraData D_eboot_08931120 = {
-    {5 * PI / 18},
-    {0, 300, 160, 0, 184, 0, 80},
-    {0, 270, 490, 0, 170, 0, 80},
-    {0, 140, 490, 0, 170, 0, 80},
-    {0, 60, 450, 0, 210, 0, 60},
-    {0, 400, 220, 0, 195, 0, 80}
-};
-
-SmallCameraData D_eboot_08931220[2] = {
-    {0, 280, 500, 0, 170, 0, 80},
-    {0, 250, 100, 0, 0, 0, 80},
+UnalignedCameraFollowHeightEntry cam_cnf_chs_falldown = {
+    .y_offset = 250.0f,
+    .z_offset = 100.0f,
+    .min_height = 80.0f,
 };
 
 u8 pad_08931258[8] = {};
@@ -670,8 +661,8 @@ s8 D_eboot_08935A20[90] = {
 };
 
 struct CameraScriptExt {
-    u16 cameraScriptIndex;
-    u16 stagePacIndexOffset;
+    u16 demo_id;
+    u16 pac_offset;
     u16 flags;
 };
 

@@ -1,4 +1,4 @@
-func_eboot_0884F9A0 = 0x0884F9A0; // type:func
+Game_clear_ck__7GameSysFi = 0x0884F9A0; // type:func
 func_eboot_08883858 = 0x08883858; // type:func
 func_eboot_0888444C = 0x0888444C; // type:func
 func_eboot_08885198 = 0x08885198; // type:func

@@ -129,7 +129,7 @@ void FileSys::draw_loading_screen() {
     switch (unknown_0x2fa0c) {
     case 0:
         if ((MemoryStick::objectPtr->flag_0x970 == 0) && (MemoryStick::objectPtr->flag_0x971 == 0) && (unknown_0x2fa08 != 0)) {
-            GameSys::objectPtr->flag_0x6ADDE = 0;
+            GameSys::objectPtr->options.dataInstall = 0;
             if (unknown_0x2fa04 != 0) {
                 switch (unknown_0x2fa08) {
                 case 1:
@@ -181,7 +181,7 @@ void FileSys::draw_loading_screen() {
                     format_string_id = 0x48;
                     break;
                 }
-                if ((GameSys::objectPtr->flag_0x480 != 0) && (format_string_id == 0x44)) {
+                if ((GameSys::objectPtr->is_gallery != 0) && (format_string_id == 0x44)) {
                     format_string_id = 0x65;
                 }
                 if (format_string_argument_id != 0) {

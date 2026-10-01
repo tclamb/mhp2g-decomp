@@ -1004,7 +1004,7 @@ void SystemFont::printTextUtf8x(s16 n, u8 *utf8x) {
     char *(buffers[2]);
     s16 command;
 
-    zero(buffers, sizeof(buffers));
+    ::clear(buffers, sizeof(buffers));
 
     char *p = bufferOne;
     int raw = false;
@@ -2057,7 +2057,7 @@ char *SystemFont::parseCommand(char *p, s16 *out, s16 type, u8 encoding) {
     case 'C':
         ++p;
         switch (type) {
-        case ParseResult::COMMAND:
+        case ParseResult::COMMAND: {
             char c = *p;
             s16 i = 0;
             if (c >= '0' && c <= '9') {
@@ -2072,6 +2072,7 @@ char *SystemFont::parseCommand(char *p, s16 *out, s16 type, u8 encoding) {
             }
             *out = 0x100 | i;
             break;
+        }
         case ParseResult::HALF_WIDTHS:
             p += 2;
             *out = -4;

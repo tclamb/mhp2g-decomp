@@ -110,14 +110,14 @@ struct Cockpit : Singleton<Cockpit> {
     u32 flags_0x528;
     u8 unknown_0x52C;
     u8 unknown_0x52D;
-    u8 unknown_0x52E;
+    bool is_supply_box_open;
     u8 unknown_0x52F;
     Player *player;
     u8 renderGroup;
     u8 pad_0x535[0x537 - 0x535];
     u8 yesNoIndex;
     u8 pad_0x538[0x554 - 0x538];
-    u8 unknown_0x554;
+    bool is_delivery_box_open;
     u8 pad_0x555[0x57C - 0x555];
     u8 unknown_0x57C;
     u8 unknown_0x57D;
@@ -189,6 +189,8 @@ struct Cockpit : Singleton<Cockpit> {
     void method_0882FBEC(CockpitMenu *menu, char *header, int size, u8 alpha, int stringTableId);
 
     const MonsterListDefinition *method_0882FFAC(u8 enemyType);
+
+    bool Cockpit_menu_chk();
 
     void method_0883139C(s16 a, s16 b, u16 *, s16, s8 *);
 
