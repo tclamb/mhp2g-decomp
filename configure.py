@@ -15,6 +15,7 @@ import pycdlib
 import urllib.request
 import zipfile
 import re
+import hashlib
 
 import ninja_syntax
 import splat
@@ -882,6 +883,36 @@ SECTIONS
 
     return args
 
+def sha1sum(path):
+    with path.open('rb') as f:
+        return hashlib.file_digest(f, 'sha1').hexdigest()
+
+def patch_toolchain():
+    mwccpsp = BIN_DIR / 'mwccpsp.exe'
+    if sha1sum(mwccpsp) == '3dc756594b1a46d27203c27a3c38e7c868eb3419':
+        with mwccpsp.open('r+b') as f:
+            # Original implementation only halfway transitioned from pascal strings:
+            #     char *buf = lalloc(filename[0] + 10);
+            #     sprintf(buf, "__sinit_%*.*s", -filename[0], filename[0], filename);
+            #
+            # This ends up padding (or truncating!) static initializer symbols
+            # based on the first letter of the source filename.
+            #
+            # Patch changes this to use a fixed buffer size:
+            #     char *buf = lalloc(0x7F + 10);
+            #     sprintf(buf, "__sinit_%*.*s", 0, 0x7F, filename);
+            f.seek(0x35b00)
+            f.write(b'\x31\xdb\x83\xc3\x7f')
+            f.seek(0x35b20)
+            f.write(b'\x6a\x7f\x6a\x00')
+    mwldpsp = BIN_DIR / 'mwldpsp.exe'
+    if sha1sum(mwldpsp) == '40e4eb915d5ff9a719fe79542045a0bf9df3f819':
+        with mwldpsp.open('r+b') as f:
+            # Eliminate a sanity check that checks if a section's sum of symbol sizes exceeds the section size.
+            # This can happen with the added nonmatching symbols used for progress reporting.
+            # Patch skips the check unconditionally (JBE -> JMP).
+            f.seek(0x2b98e)
+            f.write(b'\xe9\x84\x00')
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Configure the project")
@@ -934,4 +965,5 @@ if __name__ == "__main__":
     for overlay in all_overlays:
         split_module(overlay)
         extract_assets(overlay)
+    patch_toolchain()
     build_stuff(linker_entries_by_module_name, github_workflow=args.github_workflow)
