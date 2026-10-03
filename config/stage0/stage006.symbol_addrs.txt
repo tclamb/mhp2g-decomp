@@ -1,10 +1,10 @@
 push_prop_089B95DC__12StageManagerFP11prop_params = 0x088C79C4; // type:func
 __ct__9StageBaseFv = 0x088CA15C; // type:func
 __dt__9StageBaseFv = 0x088CA1E4; // type:func
-vtable_0x5C__9StageBaseFv = 0x088CAD38;
-vtable_0x6C__9StageBaseFv = 0x088CB428;
-vtable_0x7C__9StageBaseFv = 0x088CBEF8;
-vtable_0x8C__9StageBaseFv = 0x088CC448;
+vtable_0x5C__9StageBaseFP3pmoPvUc = 0x088CAD38;
+vtable_0x6C__9StageBaseFP3pmoPvUc = 0x088CB428;
+vtable_0x7C__9StageBaseFP3pmoPvUc = 0x088CBEF8;
+vtable_0x8C__9StageBaseFP3pmoPvUc = 0x088CC448;
 start_sounds__9StageBaseFv = 0x088CCCE4;
 exits__9StageBaseFUi = 0x088CD47C;
 exit_count__9StageBaseFUi = 0x088CD4AC;
