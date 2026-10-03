@@ -29,9 +29,9 @@ StageBase::~StageBase() {
 
 void StageBase::drawStg() {
     pmo *pmo = &model_pmo;
-    stage_draw_command *command = vtable_0x48()->model_commands;
+    stage_draw_command *command = draw_commands()->model_commands;
     emit_world_model(&transform, &pmo->scale);
-    for (int i = 0; i < vtable_0x48()->model_commands_length; ++i, ++command) {
+    for (int i = 0; i < draw_commands()->model_commands_length; ++i, ++command) {
         ge::atest(0xFF, command->alpha_threshold, GE_OP_AT_LEAST);
         if ((command->flags & 1) == 0 || !GameSys::objectPtr->allow_hidden_flag) {
             if ((command->flags & 4) != 0) {
@@ -78,7 +78,7 @@ void StageBase::drawStg() {
                 // fallthrough
             case 19:
                 // stage-defined opcode (see stages 13, 17, 39, 46, 66, 80, 99, 124, 192)
-                vtable_0x98(pmo, command->data);
+                draw_stage_defined(pmo, command->data);
             default:
                 break;
             }
@@ -94,9 +94,9 @@ void StageBase::drawStg() {
 
 void StageBase::drawSet() {
     pmo *pmo = &prop_pmo;
-    stage_draw_command *command = vtable_0x48()->prop_commands;
+    stage_draw_command *command = draw_commands()->prop_commands;
     emit_world_model(&transform, &pmo->scale);
-    for (int i = 0; i < vtable_0x48()->prop_commands_length; ++i, ++command) {
+    for (int i = 0; i < draw_commands()->prop_commands_length; ++i, ++command) {
         ge::atest(0xFF, command->alpha_threshold, GE_OP_AT_LEAST);
         if ((command->flags & 1) == 0 || !GameSys::objectPtr->allow_hidden_flag) {
             if ((command->flags & 4) != 0) {
@@ -155,7 +155,7 @@ void StageBase::drawSet() {
                 vtable_0x90(pmo, command->data, command->mesh_index);
                 break;
             case 19:
-                vtable_0x98(pmo, command->data);
+                draw_stage_defined(pmo, command->data);
                 break;
             default:
                 break;
@@ -630,7 +630,7 @@ void StageBase::vtable_0x94(pmo *pmo, void *data, u8 mesh_index) {
     pmo->drawMesh(NULL, &model_tmh, mesh_index);
 }
 
-void StageBase::vtable_0x98(pmo *, void *) {
+void StageBase::draw_stage_defined(pmo *, void *) {
     // empty
 }
 
@@ -647,10 +647,10 @@ void StageBase::clear() {
     set_ptmf_0x3D8(&StageBase::vtable_0x4C);
 }
 
-void StageBase::vtable_0x1C() {
+void StageBase::start_sounds() {
     int i;
-    stage_sound *sound = vtable_0xB0();
-    for (i = 0; i < vtable_0xAC(); ++i, ++sound) {
+    stage_sound *sound = sounds();
+    for (i = 0; i < sound_count(); ++i, ++sound) {
         if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) == false && GameSys::objectPtr->Game_clear_ck(0) == true) {
             func_eboot_08885198(Sound::objectPtr, sound->unknown_0x4, 0xC0, i + 1, 0);
         } else {
@@ -666,22 +666,22 @@ void StageBase::vtable_0x1C() {
     }
 }
 
-int StageBase::vtable_0xAC() {
+int StageBase::sound_count() {
     return definitions()->sound_count;
 }
 
-stage_sound *StageBase::vtable_0xB0() {
+stage_sound *StageBase::sounds() {
     return definitions()->sounds;
 }
 
-void StageBase::vtable_0x20() {
+void StageBase::update_sounds() {
     if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) != true) {
         int i;
         u16 *shorts = StageManager::objectPtr->stage->definitions()->unknown_0x10;
         for (i = 0; i < (int)StageManager::objectPtr->stage->definitions()->unknown_0x3E; ++i, shorts += 12) {
             int global_sound = 0;
             if (shorts[1] == 0x17 && shorts[11] == 0) {
-                ScePspFVector4 *position = vtable_0x44();
+                ScePspFVector4 *position = &fish_spots()->center;
                 if (position != NULL) {
                     if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) == false) {
                         u8 byte_0x2E = GameSys::objectPtr->byte_0x2E;
@@ -707,8 +707,8 @@ void StageBase::vtable_0x20() {
             }
         }
     }
-    stage_sound *sound = vtable_0xB0();
-    for (int i = 0; i < vtable_0xAC(); ++i, ++sound) {
+    stage_sound *sound = sounds();
+    for (int i = 0; i < sound_count(); ++i, ++sound) {
         if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) == false &&
             GameSys::objectPtr->Game_clear_ck(0) == true) {
             if (func_eboot_088852C8(Sound::objectPtr, sound->unknown_0x4, 0xC0, i + 1) != 0) {
@@ -738,20 +738,20 @@ void StageBase::call_ptmf_0x3D8() {
 void StageBase::destroy() {
     func_eboot_08885198(Sound::objectPtr, 6, 0xC0, 0, 0);
     int i;
-    stage_sound *sound = vtable_0xB0();
-    for (i = 0; i < vtable_0xAC(); ++i, ++sound) {
+    stage_sound *sound = sounds();
+    for (i = 0; i < sound_count(); ++i, ++sound) {
         func_eboot_08885198(Sound::objectPtr, sound->unknown_0x4, 0xC0, i + 1, 0);
     }
 }
 
 void StageBase::draw() {
     if (GameSys::objectPtr->stage_id != 0) {
-        if (vtable_0x48() != 0) {
+        if (draw_commands() != 0) {
             vmidt_q(&transform);
-            if (vtable_0x48()->model_commands != 0) {
+            if (draw_commands()->model_commands != 0) {
                 drawStg();
             }
-            if (vtable_0x48()->prop_commands != 0) {
+            if (draw_commands()->prop_commands != 0) {
                 drawSet();
             }
         }
@@ -796,7 +796,7 @@ void StageBase::emit_fog() {
     }
 }
 
-void StageBase::vtable_0x24() {
+void StageBase::spawn_props() {
     method_088CEA2C();
 }
 
@@ -868,7 +868,7 @@ void StageBase::vtable_0x4C() {
     sky_gradient_vdata[2].z = 0;
     sky_gradient_vdata[0].z = 0;
     flags |= Draw::VISIBLE;
-    vtable_0x1C();
+    start_sounds();
     method_088CDCAC();
     set_ptmf_0x3D8(&StageBase::vtable_0x50);
 }
@@ -934,7 +934,7 @@ void StageBase::vtable_0x50() {
         }
     }
     method_088CDCAC();
-    vtable_0x20();
+    update_sounds();
     ++unknown_0x1C0;
     unknown_0x1C2 += 0x2E;
 }
@@ -944,7 +944,7 @@ bool StageBase::method_088CDC74() {
 }
 
 void StageBase::method_088CDCAC() {
-    if (vtable_0xA4() == false) {
+    if (has_environment_state() == false) {
         unknown_0x444 = 0;
         return;
     }
@@ -971,7 +971,7 @@ void StageBase::method_088CDCAC() {
     unknown_0x444 = 1;
 }
 
-bool StageBase::vtable_0xA4() {
+bool StageBase::has_environment_state() {
     return false;
 }
 
@@ -1178,7 +1178,7 @@ stage_definitions_0x2C_t *StageBase::method_088CEDF0() {
     return result;
 }
 
-stage_definitions_0x28_t *StageBase::vtable_0x34() {
+stage_definitions_0x28_t *StageBase::diffuse_light_regions() {
     return NULL;
 }
 
@@ -1186,26 +1186,26 @@ void *StageBase::vtable_0x38() {
     return NULL;
 }
 
-stage_draw_commands *StageBase::vtable_0x48() {
+stage_draw_commands *StageBase::draw_commands() {
     return NULL;
 }
 
-void *StageBase::vtable_0x3C() {
+u8 *StageBase::fish_table(u8) {
     return NULL;
 }
 
-void *StageBase::vtable_0x40() {
+int StageBase::fish_spot_count() {
+    return 0;
+}
+
+stage_fish_spot *StageBase::fish_spots() {
     return NULL;
 }
 
-ScePspFVector4 *StageBase::vtable_0x44() {
-    return NULL;
+u8 StageBase::sound_zone_count() {
+    return definitions()->sound_zone_count;
 }
 
-u8 StageBase::vtable_0xB4() {
-    return definitions()->unknown_0x40;
-}
-
-stage_definitions_0x38_t *StageBase::vtable_0xB8() {
-    return definitions()->unknown_0x38;
+stage_definitions_0x38_t *StageBase::sound_zones() {
+    return definitions()->sound_zones;
 }

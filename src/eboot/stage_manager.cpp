@@ -670,7 +670,7 @@ u32 StageManager::stage_unknown_0x444_thunk() {
 }
 
 bool StageManager::stage_vtable_0xA8() {
-    return stage->vtable_0xA8();
+    return stage->allows_lightning_rod();
 }
 
 // inferred from 0x1787 corresponding to the first farm variant stage pac

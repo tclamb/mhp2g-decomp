@@ -4476,7 +4476,7 @@ rom:0x1bae48 reloc:MIPS_32 symbol:func_stage045_09D5E168
 rom:0x1bae4c reloc:MIPS_32 symbol:func_stage045_09D5E190
 rom:0x1bae58 reloc:MIPS_32 symbol:func_stage046_09D5E038
 rom:0x1bae6c reloc:MIPS_32 symbol:func_stage046_09D5E7F8
-rom:0x1bae70 reloc:MIPS_32 symbol:func_stage046_09D5E808
+rom:0x1bae70 reloc:MIPS_32 symbol:update_sounds__8Stage046Fv
 rom:0x1bae74 reloc:MIPS_32 symbol:func_stage046_09D5E098
 rom:0x1bae78 reloc:MIPS_32 symbol:func_stage046_09D5E300
 rom:0x1bae8c reloc:MIPS_32 symbol:func_stage046_09D5E310
