@@ -6,16 +6,16 @@ struct Stage266 : StageBase {
     Stage266();
     virtual ~Stage266();
 
-    virtual void vtable_0x24();
+    virtual void spawn_props();
     virtual stage_definitions *definitions();
-    virtual stage_draw_commands *vtable_0x48();
-    virtual bool vtable_0xA0();
-    virtual bool vtable_0xA4();
-    virtual bool vtable_0xA8();
-    virtual int vtable_0xAC();
-    virtual stage_sound *vtable_0xB0();
-    virtual u8 vtable_0xB4();
-    virtual stage_definitions_0x38_t *vtable_0xB8();
+    virtual stage_draw_commands *draw_commands();
+    virtual bool can_use_binoculars();
+    virtual bool has_environment_state();
+    virtual bool allows_lightning_rod();
+    virtual int sound_count();
+    virtual stage_sound *sounds();
+    virtual u8 sound_zone_count();
+    virtual stage_definitions_0x38_t *sound_zones();
 
     static void operator delete(void *);
 };
@@ -146,12 +146,12 @@ Stage266::~Stage266() {
     // empty
 }
 
-void Stage266::vtable_0x24() {
+void Stage266::spawn_props() {
     StageManager::objectPtr->push_prop_089B94DC(&D_stage266_09D5E4D0);
     StageManager::objectPtr->push_prop_089B94FC(1, &D_stage266_09D5EA70, 0, 0x100, 0, 0, 1);
     StageManager::objectPtr->push_prop_089B975C(&D_stage266_09D5E4F0);
     StageManager::objectPtr->push_prop_089B975C(&D_stage266_09D5E520);
-    StageBase::vtable_0x24();
+    StageBase::spawn_props();
 }
 
 stage_definitions *Stage266::definitions() {
@@ -162,34 +162,34 @@ void Stage266::operator delete(void *) {
     // empty
 }
 
-stage_draw_commands *Stage266::vtable_0x48() {
+stage_draw_commands *Stage266::draw_commands() {
     return &D_stage266_09D5E4B8;
 }
 
-bool Stage266::vtable_0xA0() {
+bool Stage266::can_use_binoculars() {
     return true;
 }
 
-bool Stage266::vtable_0xA4() {
+bool Stage266::has_environment_state() {
     return false;
 }
 
-bool Stage266::vtable_0xA8() {
+bool Stage266::allows_lightning_rod() {
     return false;
 }
 
-int Stage266::vtable_0xAC() {
+int Stage266::sound_count() {
     return definitions()->sound_count;
 }
 
-stage_sound *Stage266::vtable_0xB0() {
+stage_sound *Stage266::sounds() {
     return definitions()->sounds;
 }
 
-u8 Stage266::vtable_0xB4() {
-    return definitions()->unknown_0x40;
+u8 Stage266::sound_zone_count() {
+    return definitions()->sound_zone_count;
 }
 
-stage_definitions_0x38_t *Stage266::vtable_0xB8() {
-    return definitions()->unknown_0x38;
+stage_definitions_0x38_t *Stage266::sound_zones() {
+    return definitions()->sound_zones;
 }
