@@ -1,8 +1,8 @@
-push_prop_089B92BC__12StageManagerFP11prop_paramsUi = 0x088C5F88; // type:func
-push_prop_089B953C__12StageManagerFP11prop_params = 0x088C74FC; // type:func
-push_prop_089B95BC__12StageManagerFP11prop_params = 0x088C78CC; // type:func
-push_prop_089B95DC__12StageManagerFP11prop_params = 0x088C79C4; // type:func
-push_prop_089B96DC__12StageManagerFv = 0x088C8D9C; // type:func
+Set01_set__12StageManagerFP11prop_paramsUi = 0x088C5F88; // type:func
+Set21_set__12StageManagerFP11prop_params = 0x088C74FC; // type:func
+Set25_set__12StageManagerFP11prop_params = 0x088C78CC; // type:func
+Set26_set__12StageManagerFP11prop_params = 0x088C79C4; // type:func
+Set44_set__12StageManagerFv = 0x088C8D9C; // type:func
 __ct__9StageBaseFv = 0x088CA15C; // type:func
 __dt__9StageBaseFv = 0x088CA1E4; // type:func
 vtable_0x5C__9StageBaseFv = 0x088CAD38;

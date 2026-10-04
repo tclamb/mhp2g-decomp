@@ -7932,7 +7932,7 @@ rom:0xc451c reloc:MIPS_26 symbol:func_game_sub_09CB54D8
 rom:0xc4620 reloc:MIPS_26 symbol:func_game_sub_09CB5C20
 rom:0xc4728 reloc:MIPS_26 symbol:func_game_sub_09CB6468
 rom:0xc4824 reloc:MIPS_26 symbol:func_game_sub_09CB6968
-rom:0xc48c4 reloc:MIPS_26 symbol:__ct__13prop_089B931CFv
+rom:0xc48c4 reloc:MIPS_26 symbol:__ct__13StageEffect04Fv
 rom:0xc4928 reloc:MIPS_26 symbol:func_game_sub_09CB7008
 rom:0xc4a38 reloc:MIPS_26 symbol:func_game_sub_09CB76E0
 rom:0xc4b30 reloc:MIPS_26 symbol:func_game_sub_09CB8110

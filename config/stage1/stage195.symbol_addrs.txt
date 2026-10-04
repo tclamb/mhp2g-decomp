@@ -1,4 +1,4 @@
-push_prop_089B937C__12StageManagerFiP11prop_paramsUiUiUcUsUsUsUiUi = 0x088C659C; // type:func
+Set07_set__12StageManagerFiP11prop_paramsUiUiUcUsUsUsUiUi = 0x088C659C; // type:func
 __ct__9StageBaseFv = 0x088CA15C; // type:func
 __dt__9StageBaseFv = 0x088CA1E4; // type:func
 vtable_0x5C__9StageBaseFv = 0x088CAD38;

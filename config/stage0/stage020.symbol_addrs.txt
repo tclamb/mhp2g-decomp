@@ -1,4 +1,4 @@
-push_prop_089B951C__12StageManagerFUc = 0x088C7404; // type:func
+Set20_set__12StageManagerFUc = 0x088C7404; // type:func
 __ct__9StageBaseFv = 0x088CA15C; // type:func
 __dt__9StageBaseFv = 0x088CA1E4; // type:func
 vtable_0x5C__9StageBaseFv = 0x088CAD38;

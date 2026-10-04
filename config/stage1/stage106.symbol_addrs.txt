@@ -1,7 +1,7 @@
 func_eboot_08872E24 = 0x08872E24; // type:func
-push_prop_089B931C__12StageManagerFP11prop_paramsUiUsUsUiUs = 0x088C6290; // type:func
-push_prop_089B937C__12StageManagerFiP11prop_paramsUiUiUcUsUsUsUiUi = 0x088C659C; // type:func
-push_prop_089B943C__12StageManagerFP11prop_params = 0x088C6CA4; // type:func
+Set04_set__12StageManagerFP11prop_paramsUiUsUsUiUs = 0x088C6290; // type:func
+Set07_set__12StageManagerFiP11prop_paramsUiUiUcUsUsUsUiUi = 0x088C659C; // type:func
+Set13_set__12StageManagerFP11prop_params = 0x088C6CA4; // type:func
 __ct__9StageBaseFv = 0x088CA15C; // type:func
 __dt__9StageBaseFv = 0x088CA1E4; // type:func
 vtable_0x5C__9StageBaseFv = 0x088CAD38;

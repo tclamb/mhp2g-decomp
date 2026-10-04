@@ -1,5 +1,5 @@
-push_prop_089B92BC__12StageManagerFP11prop_paramsUi = 0x088C5F88; // type:func
-push_prop_089B931C__12StageManagerFP11prop_paramsUiUsUsUiUs = 0x088C6290; // type:func
+Set01_set__12StageManagerFP11prop_paramsUi = 0x088C5F88; // type:func
+Set04_set__12StageManagerFP11prop_paramsUiUsUsUiUs = 0x088C6290; // type:func
 __ct__9StageBaseFv = 0x088CA15C; // type:func
 __dt__9StageBaseFv = 0x088CA1E4; // type:func
 vtable_0x5C__9StageBaseFv = 0x088CAD38;

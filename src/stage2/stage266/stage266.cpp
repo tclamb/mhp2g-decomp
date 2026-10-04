@@ -120,15 +120,15 @@ stage_draw_commands D_stage266_09D5E4B8 = {
 
 u8 padding_09D5E4C4[0xC] = {};
 
-prop_089B94DC_data D_stage266_09D5E4D0 = {4, 10, {7379, 70, 11113}};
+StageEffect18Data D_stage266_09D5E4D0 = {4, 10, {7379, 70, 11113}};
 
-prop_089B975C_data D_stage266_09D5E4F0 = {
+StageEffect49Data D_stage266_09D5E4F0 = {
     5,
     {10300, 50, 8700},
     {2400, 1000, 1000}
 };
 
-prop_089B975C_data D_stage266_09D5E520 = {
+StageEffect49Data D_stage266_09D5E520 = {
     5,
     {7900, 50, 13000},
     {6300, 1000, 1000}
@@ -147,10 +147,10 @@ Stage266::~Stage266() {
 }
 
 void Stage266::vtable_0x24() {
-    StageManager::objectPtr->push_prop_089B94DC(&D_stage266_09D5E4D0);
-    StageManager::objectPtr->push_prop_089B94FC(1, &D_stage266_09D5EA70, 0, 0x100, 0, 0, 1);
-    StageManager::objectPtr->push_prop_089B975C(&D_stage266_09D5E4F0);
-    StageManager::objectPtr->push_prop_089B975C(&D_stage266_09D5E520);
+    StageManager::objectPtr->Set18_set(&D_stage266_09D5E4D0);
+    StageManager::objectPtr->Set19_set(1, &D_stage266_09D5EA70, 0, 0x100, 0, 0, 1);
+    StageManager::objectPtr->Set49_set(&D_stage266_09D5E4F0);
+    StageManager::objectPtr->Set49_set(&D_stage266_09D5E520);
     StageBase::vtable_0x24();
 }
 

@@ -918,13 +918,13 @@ void StageBase::vtable_0x50() {
                         case stages::GREAT_FOREST_N_2: {
                             stage_definitions *assets = StageManager::objectPtr->stage->definitions();
                             u32 flags = BugDrawFlag::RANDOM_SPAWN_POSITION;
-                            StageManager::objectPtr->push_prop_089B969C(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
+                            StageManager::objectPtr->Set33_set(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
                             break;
                         }
                         default: {
                             stage_definitions *assets = StageManager::objectPtr->stage->definitions();
                             u32 flags = BugDrawFlag::RANDOM_SPAWN_POSITION | BugDrawFlag::SCALE_WITH_ALPHA;
-                            StageManager::objectPtr->push_prop_089B969C(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
+                            StageManager::objectPtr->Set33_set(flags, assets->bug_mesh_index, &spawn_center, &spawn_box);
                             break;
                         }
                     }

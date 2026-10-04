@@ -13,24 +13,24 @@ struct prop_params {
     float floats[4];
 };
 
-struct base_prop : Draw {
-    typedef void (base_prop::*ptmf)(void);
+struct StageEffectBase : Draw {
+    typedef void (StageEffectBase::*ptmf)(void);
 
-    base_prop() {
+    StageEffectBase() {
         next = 0;
         prev = 0;
         prop_pmo = 0;
         prop_tmh = 0;
     }
-    virtual ~base_prop();
+    virtual ~StageEffectBase();
     virtual void draw() = 0;
     virtual void vtable_0x10();
     virtual void setup() = 0;
     virtual void update() = 0;
     virtual void call_ptmf();
 
-    base_prop *prev;
-    base_prop *next;
+    StageEffectBase *prev;
+    StageEffectBase *next;
     u8 unknown_0x18;
     u8 undefined_0x19[3];
     ptmf ptmf_0x1C;
@@ -48,13 +48,13 @@ struct base_prop : Draw {
     }
 };
 
-struct prop_089B94DC_data {
+struct StageEffect18Data {
     u16 mesh_index;
     u16 period;
     ScePspFVector4 position;
 };
 
-struct prop_089B975C_data {
+struct StageEffect49Data {
     u8 mesh_index;
     ScePspFVector4 min_position;
     ScePspFVector4 spawn_box;
@@ -76,7 +76,7 @@ struct StageManager : Singleton<StageManager> {
     u8 unknown_0xA2C4[4];
     u8 unknown_0xA2C8;
     ScePspFVector4 unknown_0xA2D0;
-    base_prop *prop_list;
+    StageEffectBase *prop_list;
     pac_header *stage_pac;
     u8 unknown_0xA2E8[0x100];
     u8 flag_0xA3E8;
@@ -93,57 +93,57 @@ struct StageManager : Singleton<StageManager> {
     void call_prop_list_ptmf();
     void destroy_prop_list();
 
-    void push_prop_089B927C(prop_params *params);
-    void push_prop_089B92BC(prop_params *params, u32 arg3);
-    void push_prop_089B92DC(prop_params *params, u32 arg3);
-    void push_prop_089B92FC(prop_params *params);
-    void push_prop_089B931C(prop_params *params, u32 arg3, u16 arg4, u16 arg5, u32 arg6, u16 arg7);
-    void push_prop_089B933C(prop_params *params);
-    void push_prop_089B935C(prop_params *params);
-    void push_prop_089B937C(int pmo_index, prop_params *params, u32 arg3, u32 arg4, u8 arg5, u16 arg6, u16 arg7, u16 arg8, u32 arg9, u32 arg10);
-    void push_prop_089B939C(prop_params *params, int pmo_index);
-    void push_prop_089B93BC(prop_params *params);
-    void push_prop_089B93DC(prop_params *params);
-    void push_prop_089B93FC(prop_params *params);
-    void push_prop_089B941C(prop_params *params, u32 arg3, u32 arg4, u32 arg5, u32 *arg6, u16 arg7, u32 arg8, u32 arg9, u32 arg10, u16 arg11);
-    void push_prop_089B943C(prop_params *params);
-    void push_prop_089B945C(prop_params *params);
-    void push_prop_089B947C(prop_params *params);
-    void push_prop_089B949C(prop_params *params);
-    void push_prop_089B94BC(prop_params *params, u32 arg3);
-    void push_prop_089B94DC(prop_089B94DC_data *data);
-    void push_prop_089B94FC(u32, ScePspFVector4 *, u32, u32, u8, u16, int);
-    void push_prop_089B951C(u8 arg2);
-    void push_prop_089B953C(prop_params *params);
-    void push_prop_089B955C();
-    void push_prop_089B957C(prop_params *params);
-    void push_prop_089B959C(prop_params *params);
-    void push_prop_089B95BC(prop_params *params);
-    void push_prop_089B95DC(prop_params *params);
-    void push_prop_089B95FC(prop_params *params);
-    void push_prop_089B961C(prop_params *params);
-    void push_prop_089B963C(prop_params *params, u16 arg3, u16 arg4);
-    void push_prop_089B965C(prop_params *params);
-    void push_prop_089B6208(prop_params *params);
-    void push_prop_089B967C(prop_params *params);
-    void push_prop_089B969C(u32 bug_flags, s16 bug_mesh_id, ScePspFVector4 *spawn_center, ScePspFVector4 *spawn_box);
-    void push_prop_089B6258(prop_params *params, u32 arg3);
-    void push_prop_089B96BC(prop_params *params);
-    void push_prop_089B6278();
-    void push_prop_089B6298(u8 arg2, prop_params *params, u16 arg4, u32 *arg5, u32 *arg6);
-    void push_prop_089B62B8(prop_params *params);
-    void push_prop_089B62D8(prop_params *params);
-    void push_prop_089B62F8(u8 arg2, prop_params *params, u16 arg4, u16 arg5, u32 *arg6, u32 *arg7);
-    void push_prop_089B6318(u8 arg2, u32 arg3, u16 arg4);
-    void push_prop_089B6338(u8 arg2, u32 arg3, u8 arg4, u32 *arg5, u32 *arg6);
-    void push_prop_089B6358(u32 arg2, u8 arg3, float arg4, u32 arg5);
-    void push_prop_089B6358(u32 *arg2); // Matrix4?
-    void push_prop_089B96DC();
-    void push_prop_089B96FC(prop_params *params);
-    void push_prop_089C41C8();
-    void push_prop_089B971C(prop_params *params, int pmo_index);
-    void push_prop_089B973C(prop_params *params);
-    void push_prop_089B975C(prop_089B975C_data *data);
+    void Set00_set(prop_params *params);
+    void Set01_set(prop_params *params, u32 arg3);
+    void Set02_set(prop_params *params, u32 arg3);
+    void Set03_set(prop_params *params);
+    void Set04_set(prop_params *params, u32 arg3, u16 arg4, u16 arg5, u32 arg6, u16 arg7);
+    void Set05_set(prop_params *params);
+    void Set06_set(prop_params *params);
+    void Set07_set(int pmo_index, prop_params *params, u32 arg3, u32 arg4, u8 arg5, u16 arg6, u16 arg7, u16 arg8, u32 arg9, u32 arg10);
+    void Set08_set(prop_params *params, int pmo_index);
+    void Set09_set(prop_params *params);
+    void Set10_set(prop_params *params);
+    void Set11_set(prop_params *params);
+    void Set12_set(prop_params *params, u32 arg3, u32 arg4, u32 arg5, u32 *arg6, u16 arg7, u32 arg8, u32 arg9, u32 arg10, u16 arg11);
+    void Set13_set(prop_params *params);
+    void Set14_set(prop_params *params);
+    void Set15_set(prop_params *params);
+    void Set16_set(prop_params *params);
+    void Set17_set(prop_params *params, u32 arg3);
+    void Set18_set(StageEffect18Data *data);
+    void Set19_set(u32, ScePspFVector4 *, u32, u32, u8, u16, int);
+    void Set20_set(u8 arg2);
+    void Set21_set(prop_params *params);
+    void Set22_set();
+    void Set23_set(prop_params *params);
+    void Set24_set(prop_params *params);
+    void Set25_set(prop_params *params);
+    void Set26_set(prop_params *params);
+    void Set27_set(prop_params *params);
+    void Set28_set(prop_params *params);
+    void Set29_set(prop_params *params, u16 arg3, u16 arg4);
+    void Set30_set(prop_params *params);
+    void Set31_set(prop_params *params);
+    void Set32_set(prop_params *params);
+    void Set33_set(u32 bug_flags, s16 bug_mesh_id, ScePspFVector4 *spawn_center, ScePspFVector4 *spawn_box);
+    void Set34_set(prop_params *params, u32 arg3);
+    void Set35_set(prop_params *params);
+    void Set36_set();
+    void Set37_set(u8 arg2, prop_params *params, u16 arg4, u32 *arg5, u32 *arg6);
+    void Set38_set(prop_params *params);
+    void Set39_set(prop_params *params);
+    void Set40_set(u8 arg2, prop_params *params, u16 arg4, u16 arg5, u32 *arg6, u32 *arg7);
+    void Set41_set(u8 arg2, u32 arg3, u16 arg4);
+    void Set42_set(u8 arg2, u32 arg3, u8 arg4, u32 *arg5, u32 *arg6);
+    void Set43_set(u32 arg2, u8 arg3, float arg4, u32 arg5);
+    void Set43_set(u32 *arg2); // Matrix4?
+    void Set44_set();
+    void Set45_set(prop_params *params);
+    void Set46_set();
+    void Set47_set(prop_params *params, int pmo_index);
+    void Set48_set(prop_params *params);
+    void Set49_set(StageEffect49Data *data);
 
     void stage_clear();
     void stage_destroy();
@@ -157,8 +157,8 @@ struct StageManager : Singleton<StageManager> {
     void compile_pac(pac_header *pac, bool load_all);
     void vram_clear();
     u8 *vram_alloc(s32 size);
-    void push(base_prop *prop);
-    void free(base_prop *prop);
+    void push(StageEffectBase *prop);
+    void free(StageEffectBase *prop);
     u16 find_map_stage_index(int map_id, u16 stage_id);
     stage_exit *stage_exits();
     s8 stage_exit_count();
@@ -190,7 +190,7 @@ private:
         return prop;
     }
 
-    inline void link_model(base_prop *prop, int pmo_index) {
+    inline void link_model(StageEffectBase *prop, int pmo_index) {
         if (pmo_index == 0) {
             StageBase *st = stage;
             prop->prop_pmo = &st->model_pmo;

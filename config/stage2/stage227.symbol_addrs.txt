@@ -1,7 +1,7 @@
-push_prop_089B94DC__12StageManagerFP18prop_089B94DC_data = 0x088C718C; // type:func
-push_prop_089B95DC__12StageManagerFP11prop_params = 0x088C79C4; // type:func
-push_prop_089B96BC__12StageManagerFP11prop_params = 0x088C82DC; // type:func
-push_prop_089B973C__12StageManagerFP11prop_params = 0x088C9194; // type:func
+Set18_set__12StageManagerFP17StageEffect18Data = 0x088C718C; // type:func
+Set26_set__12StageManagerFP11prop_params = 0x088C79C4; // type:func
+Set35_set__12StageManagerFP11prop_params = 0x088C82DC; // type:func
+Set48_set__12StageManagerFP11prop_params = 0x088C9194; // type:func
 __ct__9StageBaseFv = 0x088CA15C; // type:func
 __dt__9StageBaseFv = 0x088CA1E4; // type:func
 vtable_0x5C__9StageBaseFv = 0x088CAD38;
