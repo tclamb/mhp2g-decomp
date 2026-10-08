@@ -62,11 +62,19 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, em83]
+  - [0x80, asmtu, em83]
+  - [0x10f40, asmtu, shell46]
+  - [0x11420, asmtu, effect66]
+  - [0x12328, asmtu, effect70]
   - [0x12fc4, pad]
-  - [0x13000, data, em83]
-  - [0x17000, bss, em83]
+  - [0x13000, .data, em83]
+  - [0x15808, .data, shell46]
+  - [0x16100, .data, effect66]
+  - [0x16750, .data, effect70]
+  - [0x16a84, pad]
+  - [0x16b00, .rodata, em83]
+  - {start: 0x17000, type: .bss, vram: 0x09D2C100, name: em83}
   type: code
-  vram: 0x09d15140
+  vram: 0x09D15140
 - - 0x17000
 sha1: 2f893316ea366d26bb566790ce433e0b716079e9

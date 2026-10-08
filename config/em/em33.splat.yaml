@@ -62,11 +62,18 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, em33]
+  - [0x80, asmtu, em33]
+  - [0x5cd0, asmtu, effect55]
+  - [0x63b0, asmtu, effect65]
   - [0x6d08, pad]
-  - [0x6d80, data, em33]
-  - [0xc600, bss, em33]
+  - [0x6d80, .data, em33]
+# - [0xbb90, .data, em33_demo]
+  - [0xbfe8, .data, effect55]
+  - [0xc258, .data, effect65]
+  - [0xc3a0, pad]
+  - [0xc400, .rodata, em33]
+  - {start: 0xc600, type: .bss, vram: 0x09D21700, name: em33}
   type: code
-  vram: 0x09d15140
+  vram: 0x09D15140
 - - 0xc600
 sha1: c8778f6244051961cf6fb2585129c6de393b185c

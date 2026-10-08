@@ -62,10 +62,15 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, em21]
-  - [0x10880, data, em21]
-  - [0x15180, bss, em21]
+  - [0x80, asmtu, em21]
+  - [0x103c8, asmtu, shell20]
+  - [0x10880, .data, em21]
+  - [0x13ae8, .data, shell20]
+# - [0x14350, .data, em21_demo]
+  - [0x14d54, pad]
+  - [0x14d80, .rodata, em21]
+  - {start: 0x15180, type: .bss, vram: 0x09D2A280, name: em21}
   type: code
-  vram: 0x09d15140
+  vram: 0x09D15140
 - - 0x15180
 sha1: df356c341c4ab3424d04a08ccf1341c1a7cc9cfc
