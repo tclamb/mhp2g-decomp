@@ -62,72 +62,246 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asmtu, game_task_ovl] # temporary
-  - [0x4818, asmtu, bgm_server_game_task] # inline methods?
-  - [0x6020, asmtu, player_089B6378] # player subclass with weapon animations
-  - [0x139d0, asmtu, player_089B63FC] # most-derived player type; local?
-  - [0x4e068, asmtu, object_089B6480]
-  - [0x4ec80, asmtu, object_089B64A8]
-  - [0x4f858, asmtu, object_089B64D0]
-  - [0x50cd8, asmtu, object_089B64F8]
-  - [0x51320, asmtu, object_089B6520]
-  - [0x51880, asmtu, object_089B6548] # vespoid effect?
-  - [0x52028, asmtu, enemy_manager] # large monster vtables here
-  - [0x65400, asmtu, enemy] # enemy base type constructor & remaining class methods
-  # - [0x7b5d8, asmtu, kelbi] # & anteka
-  # - [0x81360, asmtu, mosswine] # variant
-  # - [0x862c0, asmtu, cephalos] # & cephadrome
-  # - [0x949f8, asmtu, felyne] # & melynx
-  # - [0x9a858, asmtu, veggie_elder]
-  # - [0x9cde0, asm] # method 0x18 for vtables thru treshi, maybe these all belong in same tu?
-  # - [0x9f3b8, asmtu, aptonoth]
-  # - [0xa7d80, asmtu, velociprey] # & variants
-  # - [0xaf560, asmtu, cat_cart]
-  # - [0xafea8, asmtu, vespoid] # regular & queen
-  # - [0xb5fb8, asmtu, velocidrome] # & variants
-  # - [0xbd858, asmtu, rock]
-  # - [0xbdf48, asmtu, hermitaur] # ceanataur, daimyo, shogun, variants
-  # - [0xd1380, asmtu, blango] # conga, congalala, rajang
-  # - [0xeeb80, asmtu, great_thunderbug]
-  # - [0xf1590, asmtu. shakalaka]
-  # - [0xf7e68, asmtu, remobra]
-  # - [0xfc290, asmtu, bulldrome]
-  # - [0x101c10, asmtu, treshi]
+  - [0x80, asmtu, game_task_ovl]
+  - [0x4818, asmtu, bgm_server_game_task]
+  - [0x6020, asmtu, player_quest]
+  - [0x139d0, asmtu, player_cat]
+  - [0x2bb38, asmtu, pl_attack]
+  - [0x2c930, asmtu, pl_chat]
+  - [0x2da40, asmtu, pl_damage]
+  - [0x31ce8, asmtu, pl_demo]
+  - [0x326f0, asmtu, pl_die]
+  - [0x32ea8, asmtu, pl_draw]
+  - [0x37eb8, asmtu, pl_effect]
+  - [0x39a68, asmtu, pl_egg]
+  - [0x3b660, asmtu, pl_normal]
+  - [0x4e068, asmtu, effect51]
+  - [0x4ec80, asmtu, effect53]
+  - [0x4f858, asmtu, effect58]
+  - [0x50cd8, asmtu, effect59]
+  - [0x51320, asmtu, effect68]
+  - [0x51880, asmtu, effect72]
+  - [0x52028, asmtu, enemy_manager]
+  - [0x558b8, asmtu, em_cmd]
+  - [0x65400, asmtu, enemy]
+  - [0x7b5d8, asmtu, em03] # kelbi & anteka
+  - [0x81360, asmtu, em04] # mosswine, bullfango, poogie
+  - [0x862c0, asmtu, em08] # cephadrome & cephalos
+  - [0x949f8, asmtu, em09] # felyne & melynx
+  - [0x9a858, asmtu, em10] # veggie elder
+# - [0x9cde0, asmtu, em_snd_sub] # for em10, em16, em18, em19, em27, em74
+  - [0x9f3b8, asmtu, em12] # aptonoth & apceros
+  - [0xa7d80, asmtu, em16] # velociprey, genprey, ioprey, giaprey
+  - [0xaf560, asmtu, em18] # cat cart
+  - [0xafea8, asmtu, em19] # vespoid & vespoid queen
+  - [0xb5fb8, asmtu, em27] # velocidrome, gendrome, iodrome, giadrome
+  - [0xbd858, asmtu, em29] # rock
+  - [0xbdf48, asmtu, em48] # daimyo hermitaur
+  - [0xd1380, asmtu, em51] # blangonga, congalala, blango, conga, rajang
+  - [0xeeb80, asmtu, em56] # great thunderbug
+  - [0xf1590, asmtu, em57] # shakalaka & king shakalaka
+  - [0xf7e68, asmtu, em63] # remobra
+# - [0xf7e68, asmtu, em66] # .data only; hermitaur, ceanataur
+# - [0xf7e68, asmtu, em67] # .data only; shogun ceanataur, ceanataur
+  - [0xfc290, asmtu, em68] # bulldrome
+  - [0x101c10, asmtu, em74] # treshi
   - [0x103630, asmtu, shell_manager]
+  - [0x107da0, asmtu, shell_base]
+  - [0x108e80, asmtu, shell00]
+  - [0x109ff0, asmtu, shell01]
+  - [0x10a700, asmtu, shell02]
+  - [0x10ad60, asmtu, shell03]
+  - [0x10ded8, asmtu, shell06]
+  - [0x113b18, asmtu, shell07]
+  - [0x113fc0, asmtu, shell08]
+  - [0x121c28, asmtu, shell09]
+  - [0x122d18, asmtu, shell10]
+  - [0x125c90, asmtu, shell11]
+  - [0x126218, asmtu, shell12]
+  - [0x127560, asmtu, shell13]
+  - [0x127a60, asmtu, shell14]
+  - [0x1295c0, asmtu, shell15]
+  - [0x129ad0, asmtu, shell21]
+  - [0x129f90, asmtu, shell22]
+  - [0x12cb88, asmtu, shell23]
+  - [0x12d048, asmtu, shell24]
+  - [0x12fe28, asmtu, shell26]
+  - [0x130578, asmtu, shell27]
+  - [0x130ff8, asmtu, shell28]
+  - [0x1333f0, asmtu, shell33]
+  - [0x13bfe8, asmtu, shell34]
+  - [0x13c570, asmtu, shell36]
+  - [0x13cac8, asmtu, shell37]
+  - [0x13cd40, asmtu, shell38]
+  - [0x13d8d0, asmtu, shell41]
+  - [0x13dd48, asmtu, shell48]
+  - [0x13e330, asmtu, shell49]
+  - [0x13f328, asmtu, shell50]
+  - [0x13f748, asmtu, shell51]
+  - [0x1406c8, asmtu, effect52]
+  - [0x141710, asmtu, we00] # gs
+  - [0x143ff8, asmtu, we01] # hbg/lbg
+  - [0x1451d0, asmtu, we02] # hammer
+  - [0x1476c0, asmtu, we03] # lance
+  - [0x148b20, asmtu, we04] # sns
+  - [0x149c50, asmtu, we06] # dual blade
+  - [0x14bc28, asmtu, we07] # ls
+  - [0x14f0a8, asmtu, we08] # hh
+  - [0x153828, asmtu, we09] # gl
+  - [0x155b48, asmtu, we10] # bow
   - [0x157e44, pad]
   - [0x157e80, .data, game_task_ovl]
   - [0x158110, .data, bgm_server_game_task]
-  - [0x1581e0, .data, player_089B6378]
-  - [0x1582b0, .data, player_089B63FC]
-  - [0x158520, .data, object_089B6480]
-  - [0x158870, .data, object_089B64A8]
-  - [0x158b18, .data, object_089B64D0]
-  - [0x158fd0, .data, object_089B64F8]
-  - [0x159398, .data, object_089B6520]
-  - [0x1594d0, .data, object_089B6548]
+  - [0x1581e0, .data, player_quest]
+  - [0x1582b0, .data, player_cat]
+  - [0x158520, .data, effect51]
+  - [0x158870, .data, effect53]
+  - [0x158b18, .data, effect58]
+  - [0x158fd0, .data, effect59]
+  - [0x159398, .data, effect68]
+  - [0x1594d0, .data, effect72]
   - [0x159510, .data, enemy_manager]
   - [0x1596a0, .data, enemy]
-  - [0x19c3b0, .data, shell_manager] # may be a few bytes earlier
+  - [0x174638, .data, em03]
+  - [0x1751d0, .data, em04]
+  - [0x176018, .data, em08]
+  - [0x177bd8, .data, em09]
+  - [0x1788d8, .data, em10]
+  - [0x179b20, .data, em12]
+  - [0x17a838, .data, em16]
+  - [0x17c2e0, .data, em18]
+  - [0x17c368, .data, em19]
+  - [0x17cfa8, .data, em27]
+  - [0x187058, .data, em29]
+  - [0x187940, .data, em48]
+  - [0x18d288, .data, em51]
+  - [0x195e78, .data, em56]
+  - [0x196250, .data, em57]
+  - [0x196dd0, .data, em63]
+# - [0x197560, .data, em66]
+# - [0x199f70, .data, em67]
+  - [0x19ae90, .data, em68]
+  - [0x19c360, .data, em74]
+  - [0x19c3b0, .data, shell_manager]
+  - [0x19c3c0, .data, shell_base]
+  - [0x19c490, .data, shell00]
+  - [0x19d670, .data, shell01]
+  - [0x19e3e0, .data, shell02]
+  - [0x19e988, .data, shell03]
+  - [0x19ee30, .data, shell06]
+  - [0x19fd48, .data, shell07]
+  - [0x1a03f0, .data, shell08]
+  - [0x1a25b8, .data, shell09]
+  - [0x1a3990, .data, shell10]
+  - [0x1a3dd8, .data, shell11]
+  - [0x1a44b0, .data, shell12]
+  - [0x1a4590, .data, shell13]
+  - [0x1a4948, .data, shell14]
+  - [0x1a4a80, .data, shell15]
+  - [0x1a4d80, .data, shell21]
+  - [0x1a5730, .data, shell22]
+  - [0x1a6008, .data, shell23]
+  - [0x1a69b8, .data, shell24]
+  - [0x1a6ee0, .data, shell26]
+  - [0x1a7f58, .data, shell27]
+  - [0x1a93a0, .data, shell28]
+  - [0x1a94e0, .data, shell33]
+  - [0x1ab990, .data, shell34]
+  - [0x1abab0, .data, shell36]
+  - [0x1abc90, .data, shell37]
+  - [0x1abd40, .data, shell38]
+  - [0x1ac070, .data, shell41]
+  - [0x1ac228, .data, shell48]
+  - [0x1ac3b0, .data, shell49]
+  - [0x1ac448, .data, shell51]
+  - [0x1ac5c8, .data, effect52]
+  - [0x1ac790, .data, we00]
+  - [0x1ac7a0, .data, we01]
+  - [0x1ac7c0, .data, we06]
+  - [0x1ac808, .data, we08]
+  - [0x1aca18, .data, we09]
+  - [0x1aca30, .data, we10]
+  - [0x1acc10, pad]
   - [0x1acc80, .rodata, game_task_ovl]
   - [0x1acda8, .rodata, bgm_server_game_task]
-  - [0x1ace00, .rodata, player_089B6378]
-  - [0x1ad010, .rodata, player_089B63FC]
+  - [0x1ace00, .rodata, player_quest]
+  - [0x1ad010, .rodata, player_cat]
+  - [0x1ad430, .rodata, pl_attack]
+  - [0x1ad460, .rodata, pl_chat]
+  - [0x1ad4a8, .rodata, pl_damage]
+  - [0x1ad548, .rodata, pl_demo]
+  - [0x1ad568, .rodata, pl_draw]
+  - [0x1ad5c8, .rodata, pl_effect]
+  - [0x1ad5f0, .rodata, pl_egg]
+  - [0x1ad648, .rodata, pl_normal]
   - [0x1ad9f8, .rodata, enemy_manager]
+  - [0x1adb60, .rodata, em_cmd]
   - [0x1add00, .rodata, enemy]
+  - [0x1adde8, .rodata, em03]
+  - [0x1adf90, .rodata, em04]
+  - [0x1ae0f0, .rodata, em08]
+  - [0x1ae3f8, .rodata, em09]
+  - [0x1ae520, .rodata, em10]
+  - [0x1ae800, .rodata, em12]
+  - [0x1aea20, .rodata, em16]
+  - [0x1aed10, .rodata, em19]
+  - [0x1aeec8, .rodata, em27]
+  - [0x1af168, .rodata, em29]
+  - [0x1af1d8, .rodata, em48]
+  - [0x1af738, .rodata, em51]
+  - [0x1b0280, .rodata, em56]
+  - [0x1b0360, .rodata, em57]
+  - [0x1b05a0, .rodata, em63]
+  - [0x1b0718, .rodata, em68]
   - [0x1b08e8, .rodata, shell_manager]
+  - [0x1b0930, .rodata, shell_base]
+  - [0x1b0958, .rodata, shell00]
+  - [0x1b0978, .rodata, shell06]
+  - [0x1b0a68, .rodata, shell08]
+  - [0x1b0fc8, .rodata, shell10]
+  - [0x1b1088, .rodata, shell12]
+  - [0x1b10c8, .rodata, shell14]
+  - [0x1b10f0, .rodata, shell22]
+  - [0x1b1188, .rodata, shell33]
+  - [0x1b13a8, .rodata, shell36]
+  - [0x1b13c0, .rodata, we00]
+  - [0x1b14d8, .rodata, we01]
+  - [0x1b1500, .rodata, we02]
+  - [0x1b1550, .rodata, we03]
+  - [0x1b1598, .rodata, we04]
+  - [0x1b15d0, .rodata, we06]
+  - [0x1b1648, .rodata, we07]
+  - [0x1b1778, .rodata, we08]
+  - [0x1b18b0, .rodata, we09]
+  - [0x1b1980, .rodata, we10]
   - [0x1b19f4, pad]
   - [0x1b1a00, .init, enemy_manager]
-  - [0x1b1b70, .init, enemy]
+  - [0x1b1b70, .init, em57]
   - [0x1b1ba0, .init, shell_manager]
   - [0x1b1be0, .ctor, enemy_manager]
-  - [0x1b1be4, .ctor, enemy]
+  - [0x1b1be4, .ctor, em57]
   - [0x1b1be8, .ctor, shell_manager]
   - [0x1b1bec, pad]
-  - {start: 0x1b1c00, type: .bss, vram: 0x09C0C180, name: game_task_ovl}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0C180, name: effect58}
   - {start: 0x1b1c00, type: .bss, vram: 0x09C0C190, name: enemy_manager}
-  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D588, name: enemy}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D438, name: enemy}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D588, name: em03}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D5A8, name: em08}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D5B0, name: em10}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D7B0, name: em12}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D830, name: em19}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D838, name: em27}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D840, name: em48}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D8C0, name: em51}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D8D8, name: em56}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D8E8, name: em57}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D8F8, name: em63}
+# - {start: 0x1b1c00, type: .bss, vram: 0x09C0D900, name: em66}
+# - {start: 0x1b1c00, type: .bss, vram: 0x09C0D950, name: em67}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C0D990, name: em68}
   - {start: 0x1b1c00, type: .bss, vram: 0x09C0D998, name: shell_manager}
+  - {start: 0x1b1c00, type: .bss, vram: 0x09C14258, name: shell22}
   type: code
-  vram: 0x09a5a5c0
+  vram: 0x09A5A5C0
 - - 0x1b1c00
 sha1: d266db8245d34420e7cada7ffc1661d3b39a1bb6

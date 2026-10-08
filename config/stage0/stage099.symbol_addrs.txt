@@ -12,5 +12,5 @@ vtable_0x24__9StageBaseFv = 0x088CD614; // type:func
 method_088CDC74__9StageBaseFv = 0x088CDC74; // type:func
 draw_sky_gradient__9StageBaseFv = 0x088CDDBC; // type:func
 __register_global_object = 0x08909D80; // type:func
-D_eboot_089BEF88 = 0x089BEF88;
+__vt__8Stage099 = 0x089BEF88;
 objectPtr__25Singleton<12StageManager> = 0x09A4ADA0; // filename:D_eboot_09A4ADA0

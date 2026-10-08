@@ -68,10 +68,9 @@ segments:
   - [0xf8f8, asmtu, farm_sys]
   - [0x11fe8, asmtu, dialog]
   - [0x12948, asmtu, effect_manager]
-  - [0x1b1b8, asmtu, hit_sub0]
-  - [0x1d818, asmtu, hit_manager]
-  - [0x28f58, asmtu, hit_shell]
-  - [0x2be70, asmtu, hit_player]
+  - [0x1b1b8, asmtu, hit]
+  - [0x1d818, asmtu, hit_sub0]
+  - [0x28ae8, asmtu, hitcheck]
   - [0x3dac8, asmtu, gamestage]
   - [0x3db18, asmtu, effect_handle]
   - [0x3db70, asmtu, effect_base]
@@ -160,8 +159,8 @@ segments:
   - [0xb6e70, .data, training]
   - [0xb74d0, .data, farm_sys]
   - [0xb9f70, .data, effect_manager]
-  - [0xba4a0, .data, hit_manager]
-  - [0xba4e8, .data, hit_player]
+  - [0xba4a0, .data, hit_sub0]
+  - [0xba4e8, .data, hitcheck]
   - [0xba598, .data, gamestage]
   - [0xcc130, .data, effect_base]
   - [0xcc1d0, .data, effect01]
@@ -248,8 +247,7 @@ segments:
   - [0xe00f0, .rodata, training]
   - [0xe02d8, .rodata, farm_sys]
   - [0xe0300, .rodata, effect_manager]
-  - [0xe0398, .rodata, hit_shell]
-  - [0xe0588, .rodata, hit_player]
+  - [0xe0398, .rodata, hitcheck]
   - [0xe05e8, .rodata, effect02]
   - [0xe0680, .rodata, effect04]
   - [0xe0778, .rodata, effect05]
@@ -281,7 +279,7 @@ segments:
   - [0xe2304, .init, farm_sys]
   - [0xe2340, .init, dialog]
   - [0xe2364, .init, effect_manager]
-  - [0xe23a0, .init, hit_manager]
+  - [0xe23a0, .init, hit_sub0]
   - [0xe23c4, .init, gamestage]
   - [0xe23f0, .ctor, lb_event]
   - [0xe23f4, .ctor, kitchen]
@@ -289,7 +287,7 @@ segments:
   - [0xe23fc, .ctor, farm_sys]
   - [0xe2400, .ctor, dialog]
   - [0xe2404, .ctor, effect_manager]
-  - [0xe2408, .ctor, hit_manager]
+  - [0xe2408, .ctor, hit_sub0]
   - [0xe240c, .ctor, gamestage]
   - [0xe2410, pad]
   - {start: 0xe2480, type: .bss, vram: 0x09CF6700, name: lb_event}
@@ -298,7 +296,7 @@ segments:
   - {start: 0xe2480, type: .bss, vram: 0x09CF6B50, name: farm_sys}
   - {start: 0xe2480, type: .bss, vram: 0x09CF6B78, name: dialog}
   - {start: 0xe2480, type: .bss, vram: 0x09CF6BB0, name: effect_manager}
-  - {start: 0xe2480, type: .bss, vram: 0x09D146E8, name: hit_manager}
+  - {start: 0xe2480, type: .bss, vram: 0x09D146E8, name: hit_sub0}
   - {start: 0xe2480, type: .bss, vram: 0x09D14FE8, name: gamestage}
   - {start: 0xe2480, type: .bss, vram: 0x09D15008, name: effect10}
   - {start: 0xe2480, type: .bss, vram: 0x09D15018, name: effect15}

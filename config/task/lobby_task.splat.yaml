@@ -62,14 +62,150 @@ segments:
   subalign: 4
   subsegments:
   - [0x40, pad]
-  - [0x80, asm, lobby_task_ovl]
+  - [0x80, asmtu, book]
+  - [0x3b90, asmtu, destination]
+  - [0x4790, asmtu, shop_farm]
+  - [0x9190, asmtu, shift]
+  - [0xccb0, asmtu, lobby_task_ovl]
+  - [0x1a640, asmtu, lb_manager]
+  - [0x1d508, asmtu, lb_player_load]
+  - [0x1f2c8, asmtu, shop]
+  - [0x26e78, asmtu, guild]
+  - [0x2ebf0, asmtu, join]
+  - [0x31fe0, asmtu, farm_field]
+  - [0x33ac0, asmtu, farm_tree]
+  - [0x34258, asmtu, farm_fish]
+  - [0x345f0, asmtu, farm_bomb]
+  - [0x34cb0, asmtu, farm_legend]
+  - [0x35040, asmtu, farm_treanya]
+  - [0x361c8, asmtu, lb_talk]
+  - [0x404e0, asmtu, shop_armor_sub]
+  - [0x49c30, asmtu, player_lobby]
+  - [0x52470, asmtu, pl_kitchen]
+  - [0x52b48, asmtu, pl_farm]
+  - [0x55cc8, asmtu, preview_player]
+  - [0x58cc8, asmtu, npc]
+  - [0x7bc20, asmtu, npc_manager]
+  - [0x7d3b0, asmtu, item_box]
+  # - [0x8ef88, asmtu, lb_demo] # .data only; include in item_box?
+  - [0x8ef88, asmtu, broadcast]
+  - [0x8fd70, asmtu, shop_cat]
+  - [0x92d98, asmtu, effect44]
+  - [0x93938, asmtu, effect45]
+  - [0x94f48, asmtu, effect46]
+  - [0x96058, asmtu, effect47]
+  - [0x96d78, asmtu, effect48]
+  - [0x986b8, asmtu, stage_effect31]
+  - [0x98be0, asmtu, stage_effect34]
+  - [0x999d8, asmtu, stage_effect36]
+  - [0x9b000, asmtu, stage_effect37]
+  - [0x9c5a0, asmtu, stage_effect38]
+  - [0x9cce0, asmtu, stage_effect39]
+  - [0x9d338, asmtu, stage_effect40]
+  - [0x9e698, asmtu, stage_effect41]
+  - [0x9f5b8, asmtu, stage_effect42]
+  - [0xa1188, asmtu, stage_effect43]
   - [0xa2358, pad]
-  - [0xa2380, data, lobby_task_ovl]
-  - [0xb0400, init, lobby_task_ovl]
-  - [0xb0640, ctor, lobby_task_ovl]
+  - [0xa2380, .data, book]
+  - [0xa35b8, .data, destination]
+  - [0xa3678, .data, shop_farm]
+  - [0xa3928, .data, shift]
+  - [0xa3a48, .data, lobby_task_ovl]
+  - [0xa4728, .data, lb_manager]
+  - [0xa4930, .data, lb_player_load]
+  - [0xa4948, .data, shop]
+  - [0xa4da8, .data, guild]
+  - [0xa51f8, .data, join]
+  - [0xa53c8, .data, farm_field]
+  - [0xa5470, .data, farm_tree]
+  - [0xa54b0, .data, farm_fish]
+  - [0xa54c8, .data, farm_bomb]
+  - [0xa54f0, .data, farm_legend]
+  - [0xa54f8, .data, farm_treanya]
+  - [0xa5590, .data, lb_talk]
+  - [0xa6bc8, .data, shop_armor_sub]
+  - [0xa8340, .data, player_lobby]
+  - [0xa8480, .data, preview_player]
+  - [0xa8de0, .data, npc]
+  - [0xa9210, .data, npc_manager]
+  - [0xab560, .data, item_box]
+  # - [0xabb18, .data, lb_demo]
+  - [0xadce0, .data, broadcast]
+  - [0xadd10, .data, shop_cat]
+  - [0xaddf0, .data, effect44]
+  - [0xadea8, .data, effect45]
+  - [0xae0d0, .data, effect46]
+  - [0xae1a0, .data, effect47]
+  - [0xae1e0, .data, effect48]
+  - [0xae270, .data, stage_effect31]
+  - [0xae2a0, .data, stage_effect34]
+  - [0xae320, .data, stage_effect36]
+  - [0xae438, .data, stage_effect37]
+  - [0xae490, .data, stage_effect38]
+  - [0xae4d0, .data, stage_effect39]
+  - [0xae5c8, .data, stage_effect40]
+  - [0xae7a8, .data, stage_effect41]
+  - [0xae970, .data, stage_effect42]
+  - [0xaeb18, .data, stage_effect43]
+  - [0xaebe0, pad]
+  - [0xaec00, .rodata, book]
+  - [0xaec50, .rodata, destination]
+  - [0xaec68, .rodata, shop_farm]
+  - [0xaed98, .rodata, shift]
+  - [0xaedf8, .rodata, lobby_task_ovl]
+  - [0xaeec0, .rodata, lb_manager]
+  - [0xaef30, .rodata, lb_player_load]
+  - [0xaef90, .rodata, shop]
+  - [0xaf008, .rodata, guild]
+  - [0xaf1a0, .rodata, join]
+  - [0xaf200, .rodata, farm_field]
+  - [0xaf228, .rodata, farm_tree]
+  - [0xaf248, .rodata, farm_bomb]
+  - [0xaf260, .rodata, farm_legend]
+  - [0xaf278, .rodata, farm_treanya]
+  - [0xaf2a0, .rodata, lb_talk]
+  - [0xaf6b8, .rodata, shop_armor_sub]
+  - [0xaf818, .rodata, player_lobby]
+  - [0xafa80, .rodata, pl_kitchen]
+  - [0xafaa8, .rodata, pl_farm]
+  - [0xafb10, .rodata, preview_player]
+  - [0xafbc0, .rodata, npc]
+  - [0xb01f8, .rodata, item_box]
+  - [0xb03a8, .rodata, shop_cat]
+  - [0xb03e8, .rodata, effect45]
+  - [0xb0400, .init, lb_manager]
+  - [0xb0518, .init, lb_player_load]
+  - [0xb0554, .init, npc_manager]
+  - [0xb0618, .init, broadcast]
+  - [0xb0640, .ctor, lb_manager]
+  - [0xb0644, .ctor, lb_player_load]
+  - [0xb0648, .ctor, npc_manager]
+  - [0xb064C, .ctor, broadcast]
   - [0xb0650, pad]
-  - [0xb0680, bss, lobby_task_ovl]
+  - {start: 0xb0680, type: .bss, vram: 0x09B0AC00, name: book}
+  - {start: 0xb0680, type: .bss, vram: 0x09B0AC08, name: destination}
+  - {start: 0xb0680, type: .bss, vram: 0x09B0AC10, name: shop_farm}
+  - {start: 0xb0680, type: .bss, vram: 0x09B0AC18, name: shift}
+  - {start: 0xb0680, type: .bss, vram: 0x09B0AC20, name: lobby_task_ovl}
+  - {start: 0xb0680, type: .bss, vram: 0x09B0AC28, name: lb_manager}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1DED0, name: lb_player_load}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E310, name: shop}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E498, name: guild}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E5A0, name: join}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E5A8, name: farm_field}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E5B0, name: farm_tree}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E5B8, name: farm_fish}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E5C0, name: farm_bomb}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E648, name: farm_legend}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E650, name: farm_treanya}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E658, name: shop_armor_sub}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E670, name: player_lobby}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E690, name: npc_manager}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E710, name: broadcast}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E790, name: shop_cat}
+  - {start: 0xb0680, type: .bss, vram: 0x09B1E798, name: stage_effect34}
+
   type: code
-  vram: 0x09a5a5c0
+  vram: 0x09A5A5C0
 - - 0xb0680
 sha1: db79739900f45e4313858218b9242b73099b733b
