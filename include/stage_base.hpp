@@ -52,14 +52,24 @@ struct stage_definitions {
     stage_definitions_0x2C_t *unknown_0x2C;
     stage_exit *exits;
     stage_sound *sounds;
-    stage_definitions_0x38_t *unknown_0x38;
+    stage_definitions_0x38_t *sound_zones;
     u8 unknown_0x3C;
     u8 exit_count;
     s8 unknown_0x3E;
     u8 sound_count;
-    u8 unknown_0x40;
+    u8 sound_zone_count;
     u8 unknown_0x41;
     u16 unknown_0x42;
+};
+
+// One fishing spot; fish_spots() returns fish_spot_count() of them. func_game_sub_09C8F808
+// spawns fish_count fish-shadow effects at center, and 09C8FD08 keeps them within radius.
+struct stage_fish_spot {
+    ScePspFVector4 center;
+    float radius;
+    u32 unknown_0x14;
+    s32 fish_count;
+    u32 unknown_0x1C;
 };
 
 struct stage_draw_command {
@@ -104,18 +114,20 @@ struct StageBase : ModelBase {
     virtual void clear();
     virtual void call_ptmf_0x3D8();
     virtual void destroy();
-    virtual void vtable_0x1C();
-    virtual void vtable_0x20();
-    virtual void vtable_0x24();
+    virtual void start_sounds();
+    virtual void update_sounds();
+    virtual void spawn_props();
     virtual stage_definitions *definitions();
     virtual stage_exit *exits(u32 map_id);
     virtual s8 exit_count(u32 map_id);
-    virtual stage_definitions_0x28_t *vtable_0x34();
+    // Light regions that select the preset copied into lights[i].diffuse of the object
+    // (ObjBase::diffuse_light_color_override); same layout as definitions()->unknown_0x28.
+    virtual stage_definitions_0x28_t *diffuse_light_regions();
     virtual void *vtable_0x38();
-    virtual void *vtable_0x3C();
-    virtual void *vtable_0x40();
-    virtual ScePspFVector4 *vtable_0x44();
-    virtual stage_draw_commands *vtable_0x48();
+    virtual u8 *fish_table(u8 table_index);
+    virtual int fish_spot_count();
+    virtual stage_fish_spot *fish_spots();
+    virtual stage_draw_commands *draw_commands();
     virtual void vtable_0x4C();
     virtual void vtable_0x50();
     virtual void vtable_0x54(pmo *, void *, u8);
@@ -135,15 +147,20 @@ struct StageBase : ModelBase {
     virtual void vtable_0x8C(pmo *, void *, u8);
     virtual void vtable_0x90(pmo *, void *, u8);
     virtual void vtable_0x94(pmo *, void *, u8);
-    virtual void vtable_0x98(pmo *, void *);
+    virtual void draw_stage_defined(pmo *, void *);
     virtual void draw_sky_gradient();
-    virtual bool vtable_0xA0();
-    virtual bool vtable_0xA4();
-    virtual bool vtable_0xA8() { return false; }
-    virtual int vtable_0xAC();
-    virtual stage_sound *vtable_0xB0();
-    virtual u8 vtable_0xB4();
-    virtual stage_definitions_0x38_t *vtable_0xB8();
+    virtual bool can_use_binoculars();
+    // Enables the timed state in unknown_0x444: 0 for the first 900 quest ticks, then 1/0 alternating
+    // every 7200 ticks, 2 while an enemy of group 54 is in the area. It selects the BGM, the
+    // transition sound and the per-mesh values of the screen-covering overlay props.
+    virtual bool has_environment_state();
+    // True where the Lightning Rod (item 0x50) can be used. The same flag forbids the bomb barrels
+    // (items 0x54..0x59, 0x5C, 0x368): see func_game_task_09A6A438 and func_game_task_09A6A398.
+    virtual bool allows_lightning_rod() { return false; }
+    virtual int sound_count();
+    virtual stage_sound *sounds();
+    virtual u8 sound_zone_count();
+    virtual stage_definitions_0x38_t *sound_zones();
 
     static void operator delete(void *p);
 

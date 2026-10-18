@@ -960,7 +960,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08827194);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08827218);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", vtable_0xA0__9StageBaseFv);
+INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", can_use_binoculars__9StageBaseFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_0882774C);
 
