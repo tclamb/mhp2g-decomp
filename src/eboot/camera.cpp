@@ -1300,8 +1300,6 @@ void Camera::View_move() {
     flmatSetXYZ33(&rview_matY, 0, pan, 0);
 }
 
-#if 0
-// odd regswap (t4 <-> v1)
 void flmatMakeLookAt(ScePspFMatrix4 *out, ScePspFVector4 *position, ScePspFVector4 *target, ScePspFVector4 *up) {
     ScePspFVector4 e3;
     ScePspFVector4 e4;
@@ -1316,18 +1314,15 @@ void flmatMakeLookAt(ScePspFMatrix4 *out, ScePspFVector4 *position, ScePspFVecto
     flvecOuterProduct(&e4, &e1, &e3);
     copy_q(&out->x, &e3);
     copy_q(&out->y, &e4);
-    copy_q(&out->z, &e2);
+    copy_q(&out->z, &e1);
     sv_q(&out->w, 0, 0, 0, 0);
     transpose_q(out);
     sv_q(&out->w,
         -flvecInnerProduct(position, &e3),
         -flvecInnerProduct(position, &e4),
-        -flvecInnerProduct(position, &e2),
+        -flvecInnerProduct(position, &e1),
         1.0f);
 }
-#else
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", flmatMakeLookAt__FP14ScePspFMatrix4P14ScePspFVector4P14ScePspFVector4P14ScePspFVector4);
-#endif
 
 void Camera::view_set(ScePspFVector4 *pos, ScePspFVector4 *tar, float f) {
     sv_q(&up, 0.0f, 1.0f, 0.0f, 0.0f);
@@ -1443,26 +1438,25 @@ bool Camera::z_clip_check(ScePspFVector4 *p, float delta) {
     return true;
 }
 
-int Camera::clip_check(ScePspFVector4 *p, float tolerance) {
+bool Camera::clip_check(ScePspFVector4 *p, float tolerance) {
     float f = clip_min_z;
     return clip_check(p, tolerance, f);
 }
 
-#if 0
 // a few regswaps
-int Camera::clip_check(ScePspFVector4 *p, float delta, float tolerance) {
+bool Camera::clip_check(ScePspFVector4 *p, float delta, float tolerance) {
     if (zClipping == false) {
         return true;
     }
 
-    float minz, z = worldToView.x.z * p->x
+    float z = worldToView.x.z * p->x
         + worldToView.y.z * p->y
         + worldToView.z.z * p->z
         + worldToView.w.z;
     if (z - delta > clip_max_z) {
         return false;
     }
-    if (z + delta < minz) {
+    if (z + delta < tolerance) {
         return false;
     }
 
@@ -1470,10 +1464,10 @@ int Camera::clip_check(ScePspFVector4 *p, float delta, float tolerance) {
         + worldToView.y.x * p->y
         + worldToView.z.x * p->z
         + worldToView.w.x;
-    if (tolerance > x * left_clip_plane.x + z * left_clip_plane.z) {
+    if (x * left_clip_plane.x + z * left_clip_plane.z > delta) {
         return false;
     }
-    if (x * right_clip_plane.x + z * right_clip_plane.z > tolerance) {
+    if (x * right_clip_plane.x + z * right_clip_plane.z > delta) {
         return false;
     }
 
@@ -1481,18 +1475,15 @@ int Camera::clip_check(ScePspFVector4 *p, float delta, float tolerance) {
         + worldToView.y.y * p->y
         + worldToView.z.y * p->z
         + worldToView.w.y;
-    if (tolerance > y * top_clip_plane.y + z * top_clip_plane.z) {
+    if (y * top_clip_plane.y + z * top_clip_plane.z > delta) {
         return false;
     }
-    if (y * bottom_clip_plane.y + z * bottom_clip_plane.z > tolerance) {
+    if (y * bottom_clip_plane.y + z * bottom_clip_plane.z > delta) {
         return false;
     }
 
     return true;
 }
-#else
-INCLUDE_ASM("asm/eboot/nonmatchings/camera", clip_check__6CameraFP14ScePspFVector4ff);
-#endif
 
 void Camera::SetViewport() {
     float far = 0.5f * far_z;

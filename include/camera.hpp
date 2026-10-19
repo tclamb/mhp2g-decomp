@@ -814,8 +814,8 @@ struct Camera : Singleton<Camera> {
     void plMakePlaneFromPoints(ScePspFVector4 *, ScePspFVector4 *, ScePspFVector4 *, ScePspFVector4 *);
     void plSetupFOVClipPlanes();
     bool z_clip_check(ScePspFVector4 *, float);
-    int clip_check(ScePspFVector4 *, float);
-    int clip_check(ScePspFVector4 *, float, float);
+    bool clip_check(ScePspFVector4 *, float);
+    bool clip_check(ScePspFVector4 *, float, float);
     void SetViewport();
 
 private:

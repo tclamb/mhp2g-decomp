@@ -352,57 +352,48 @@ inline float max(float x, float y) {
     return result;
 }
 
-int DrawManager::addObj(u8 group, ObjBase *character, bool no_culling) {
-    int result;
-    do {
-        character->flags &= ~Draw::VISIBLE;
-        if (no_culling == false) {
-            float s = character->scale.x;
-            s = max(s, character->scale.y);
-            s = max(s, character->scale.z);
+void DrawManager::addObj(u8 group, ObjBase *character, bool no_culling) {
+    character->flags &= ~Draw::VISIBLE;
+    if (no_culling == false) {
+        float s = character->scale.x;
+        s = max(s, character->scale.y);
+        s = max(s, character->scale.z);
 
-            float z = character->position.z;
-            float y = character->position.y + (0.5f * (s * character->model_pmo.header->scale.y));
-            float x = character->position.x;
-            float w = 0;
+        float z = character->position.z;
+        float y = character->position.y + (0.5f * (s * character->model_pmo.header->scale.y));
+        float x = character->position.x;
+        float w = 0;
 
-            ScePspFVector4 position;
-            sv_q(&position, x, y, z, 0);
+        ScePspFVector4 position;
+        sv_q(&position, x, y, z, 0);
 
-            result = Camera::objectPtr->clip_check(&position, s * character->model_pmo.header->clipping_distance);
-            if ((u8)result == false) {
-                break;
-            }
+        if (Camera::objectPtr->clip_check(&position, s * character->model_pmo.header->clipping_distance) == false) {
+            return;
         }
-        if (character->alpha != 0xFF && group == RenderGroup::GROUP_5) {
-            group = RenderGroup::GROUP_7;
-        }
-        result = add(group, (Draw*)character, &character->position, no_culling);
-        if ((u8)result == true) {
-            character->flags |= Draw::VISIBLE;
-        }
-    } while(0);
-    return result;
+    }
+    if (character->alpha != 0xFF && group == RenderGroup::GROUP_5) {
+        group = RenderGroup::GROUP_7;
+    }
+    if (add(group, (Draw*)character, &character->position, no_culling) == true) {
+        character->flags |= Draw::VISIBLE;
+    }
 }
 
-int DrawManager::add(u8 group, ModelBase *model, bool no_culling) {
-    int result;
+void DrawManager::add(u8 group, ModelBase *model, bool no_culling) {
     model->flags &= ~Draw::VISIBLE;
     if (no_culling != false ||
-        (result = Camera::objectPtr->clip_check(&model->transform.w, model->model_pmo.header->clipping_distance), (u8)result != false)) {
-        result = add(group, model, &model->transform.w, no_culling);
-        if ((u8)result == true) {
+        Camera::objectPtr->clip_check(&model->transform.w, model->model_pmo.header->clipping_distance) != false) {
+        if (add(group, model, &model->transform.w, no_culling) == true) {
             model->flags |= Draw::VISIBLE;
         }
     }
-    return result;
 }
 
 inline Draw **DrawManager::head(u8 group, int index) {
     return &z_index_buckets[group][(z_index_bucket_length[group] - 1) - index];
 }
 
-int DrawManager::add(u8 group, Draw *object, ScePspFVector4 *position, bool no_culling) {
+bool DrawManager::add(u8 group, Draw *object, ScePspFVector4 *position, bool no_culling) {
     if (0 > group || group >= RenderGroup::GROUP_COUNT) {
         return false;
     }
