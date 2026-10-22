@@ -22,7 +22,7 @@ jobs:
     # Building and testing cannot work if the repository owner is not tclamb
     # due to the missing secrets to clone the CI dependencies
     if: github.repository == 'tclamb/mhp2g-decomp'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Clone main repo
         uses: actions/checkout@v6
