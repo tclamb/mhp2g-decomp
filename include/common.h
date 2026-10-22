@@ -42,6 +42,7 @@ extern "C" {
     void sceKernelDcacheWritebackInvalidateRange(const void *p, unsigned int size);
     void sceKernelDcacheInvalidateRange(const void *p, unsigned int size);
     int sprintf(char*, const char*, ...);
+    int sceKernelPowerTick(int);
 }
 
 inline void *clear(void *dst, u32 size) {

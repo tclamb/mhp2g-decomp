@@ -779,11 +779,11 @@ struct Camera : Singleton<Camera> {
     void PilebunkerCameraRequest();
     void FishWyvernCameraRequest(Enemy *enemy);
     void DemoCameraCancel();
-    s8 DemoCameraCheck();
+    int DemoCameraCheck();
     u8 GetDemoCameraID();
     u8 DemoCameraCheckQC();
     bool method_08814BE0();
-    s16 GetDemoCameraTimer();
+    int GetDemoCameraTimer();
     bool method_08814C50();
     bool method_08814CC4();
     bool PachingerCamChk(Player *player);

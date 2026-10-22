@@ -6,9 +6,9 @@
 struct FadeTask : Singleton<FadeTask>, TaskBase {
     virtual void load();
     void draw();
-    void fade(s16 durationFrames, u8 unused, bool endVisible);
-    void fadeBlack(s16 durationFrames, bool endVisible);
-    void fadeWhite(s16 durationFrames, bool endVisible);
+    void fade(s32 durationFrames, u8 unused, bool endVisible);
+    void fadeBlack(s32 durationFrames, bool endVisible);
+    void fadeWhite(s32 durationFrames, bool endVisible);
     virtual ~FadeTask();
     FadeTask();
 

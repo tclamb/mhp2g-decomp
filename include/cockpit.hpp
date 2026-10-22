@@ -207,3 +207,5 @@ struct Cockpit : Singleton<Cockpit> {
         objectPtr->flags_0x528 |= 0x20;
     }
 };
+
+extern "C" void func_eboot_08895A20(Cockpit *);

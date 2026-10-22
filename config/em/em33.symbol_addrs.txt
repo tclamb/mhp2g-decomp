@@ -1,6 +1,6 @@
 
 add__11DrawManagerFUcP4DrawP14ScePspFVector4b = 0x0884CADC; // type:func
-func_eboot_0884FA7C = 0x0884FA7C; // type:func
+Event_flag_ck__7GameSysFUs = 0x0884FA7C; // type:func
 func_eboot_08852040 = 0x08852040; // type:func
 func_eboot_088521F8 = 0x088521F8; // type:func
 drawMesh__3pmoFP9HierarchyP3tmhUc = 0x08861714; // type:func

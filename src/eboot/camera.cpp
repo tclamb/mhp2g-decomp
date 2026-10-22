@@ -666,11 +666,11 @@ void Camera::DemoCameraCancel() {
     d->is_quest_clear = false;
 }
 
-s8 Camera::DemoCameraCheck() {
+int Camera::DemoCameraCheck() {
     int state = subCameras[SubCameraId::DEMO].data.demo.demo_state;
     DemoCameraData *d = &subCameras[SubCameraId::DEMO].data.demo;
     if (state != 0) {
-        return state;
+        return (s8)state;
     } else if (next_demo_id != DemoId::NONE || d->demo_id != DemoId::NONE) {
         return 2;
     } else {
@@ -723,7 +723,7 @@ bool Camera::method_08814BE0() {
     return false;
 }
 
-s16 Camera::GetDemoCameraTimer() {
+int Camera::GetDemoCameraTimer() {
     if (GameSys::objectPtr->is_demo == false) {
         return -1;
     } else {

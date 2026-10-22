@@ -10,3 +10,7 @@ struct PlayerManager : Singleton<PlayerManager> {
 
     PlayerManager();
 };
+
+extern "C" {
+    void func_eboot_088DF734(PlayerManager *);
+}

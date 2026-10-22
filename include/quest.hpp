@@ -67,7 +67,11 @@ struct Quest : Singleton<Quest> {
     u8 pad_0x0[0x24];
     Enemy *camera_enemy;
     u32 mission_flags;
-    u8 pad_0x2C[0x720 - 0x2C];
+    u8 pad_0x2C[0x45 - 0x2C];
+    s8 field_0x45;
+    u8 pad_0x46[0x4C - 0x46];
+    void *field_0x4C;
+    u8 pad_0x50[0x720 - 0x50];
     Enemy *boss;
     u8 pad_0x724[0x768 - 0x724];
     QuestTarget targets[2];
@@ -86,10 +90,12 @@ struct Quest : Singleton<Quest> {
     }
 
     Quest();
+
+    int Quest_em_serch(u8 *em_types);
 };
 
 extern "C" {
-    void func_eboot_088711B8(Quest *, u16 st_id);
+    void func_eboot_088711B8(Quest *, u16 stage_id);
 
     ResourceNode *func_eboot_08869568(Quest *, int);
 

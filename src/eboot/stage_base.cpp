@@ -654,7 +654,7 @@ void StageBase::vtable_0x1C() {
         if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) == false && GameSys::objectPtr->Game_clear_ck(0) == true) {
             func_eboot_08885198(Sound::objectPtr, sound->unknown_0x4, 0xC0, i + 1, 0);
         } else {
-            if (func_eboot_088D0824(Evdemo::objectPtr, sound->unknown_0x8, 0) != false) {
+            if (Evdemo::objectPtr->stage_se_mute_chk(sound->unknown_0x8, 0) != false) {
                 continue;
             }
             if (sound->unknown_0x0 == 0) {
@@ -714,7 +714,7 @@ void StageBase::vtable_0x20() {
             if (func_eboot_088852C8(Sound::objectPtr, sound->unknown_0x4, 0xC0, i + 1) != 0) {
                 func_eboot_08885198(Sound::objectPtr, sound->unknown_0x4, 0xC0, i + 1, 0);
             }
-        } else if (func_eboot_088D0824(Evdemo::objectPtr, sound->unknown_0x8, 1) == 0) {
+        } else if (Evdemo::objectPtr->stage_se_mute_chk(sound->unknown_0x8, 1) == 0) {
             if (sound->unknown_0x0 == 0) {
                 StageManager::objectPtr->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC);
             } else {

@@ -2,7 +2,7 @@
 Em_set_quake_sub__6CameraFiP7ObjBase = 0x08813D50; // type:func
 func_eboot_0883096C = 0x0883096C; // type:func
 func_eboot_08844340 = 0x08844340; // type:func
-func_eboot_0884FA7C = 0x0884FA7C; // type:func
+Event_flag_ck__7GameSysFUs = 0x0884FA7C; // type:func
 method_088567AC__7GameSysFUi = 0x088567AC; // type:func
 bagDefinition__11ItemManagerFi = 0x0885C578; // type:func
 mesh_material_count__10pmo_headerFUi = 0x08862740; // type:func

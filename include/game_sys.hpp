@@ -4,6 +4,67 @@
 #include "enemy.hpp"
 #include "singleton.hpp"
 
+struct EventFlagId {
+    enum {
+        TRAINING_BASICS_DEMO_SEEN = 0x00DC,
+        TRAINING_GATHERING_DEMO_1_SEEN = 0x00DD,
+        TRAINING_GATHERING_DEMO_2_SEEN = 0x00DE,
+        TRAINING_GATHERING_DEMO_3_SEEN = 0x00DF,
+        TRAINING_GATHERING_DEMO_4_SEEN = 0x00E0,
+        TRAINING_COMBINING_DEMO_SEEN = 0x00E1,
+        TRAINING_FISHING_DEMO_SEEN = 0x00E2,
+        TRAINING_TRANSPORT_DEMO_SEEN = 0x00E3,
+        FOREST_AND_HILLS_INTRO_SEEN = 0x00E4,
+        DESERT_INTRO_SEEN = 0x00E5,
+        SWAMP_INTRO_SEEN = 0x00E6,
+        VOLCANO_INTRO_SEEN = 0x00E7,
+        JUNGLE_INTRO_SEEN = 0x00E8,
+        SNOWY_MOUNTAINS_INTRO_SEEN = 0x00E9,
+        TOWER_INTRO_SEEN = 0x00EA,
+        GREAT_FOREST_INTRO_SEEN = 0x00ED,
+        RECKLESS_BULLDROME_HUNTER_DEMO_SEEN = 0x0140,
+        HUNT_DOWN_THE_VELOCIDROME_DEMO_SEEN = 0x0141,
+        THE_CARNIVOROUS_LEADER_DEMO_SEEN = 0x0142,
+        JUNGLE_MENACE_DEMO_SEEN = 0x0143,
+        THE_LAND_SHARK_DEMO_SEEN = 0x0144,
+        GYPCEROS_VENOMOUS_TERROR_DEMO_SEEN = 0x0145,
+        THE_LURKING_DESERT_GIANT_DEMO_SEEN = 0x0146,
+        RAREST_OF_THE_RARE_BEASTS_DEMO_SEEN = 0x0147,
+        THE_ELDER_DRAGON_OF_WIND_DEMO_SEEN = 0x0148,
+        SHADOW_IN_THE_SNOW_DEMO_SEEN = 0x0149,
+        THE_RULER_OF_THE_SNOW_DEMO_SEEN = 0x014A,
+        WATER_WYVERN_IN_THE_DESERT_DEMO_SEEN = 0x014B,
+        COMMANDER_IN_THE_FLAMES_DEMO_SEEN = 0x014C,
+        THE_RUNAWAY_DIABLOS_DEMO_SEEN = 0x014D,
+        THE_FROZEN_DICTATOR_DEMO_SEEN = 0x014E,
+        THE_EMPRESS_S_BLAZING_THRONE_DEMO_SEEN = 0x014F,
+        EMPEROR_OF_FLAME_DEMO_SEEN = 0x0150,
+        TERROR_OF_THE_GRAVIOS_DEMO_SEEN = 0x0151,
+        OVERSEER_OF_THE_ANCIENTS_DEMO_SEEN = 0x0152,
+        THE_LEGENDARY_KIRIN_DEMO_SEEN = 0x0153,
+        BATTLE_OF_THE_BLOS_DEMO_SEEN = 0x0154,
+        THE_ELDER_DRAGON_OF_MIST_DEMO_SEEN = 0x0155,
+        THE_FINAL_INVITATION_DEMO_SEEN = 0x0156,
+        THE_LONE_BLACK_GARUGA_DEMO_SEEN = 0x0157,
+        LAOSHAN_LUNG_INTRO_SEEN = 0x0158,
+        ASHEN_LAOSHAN_LUNG_INTRO_SEEN = 0x0159,
+        SHEN_GAOREN_INTRO_SEEN = 0x015A,
+        SINKING_FEELING_DEMO_SEEN = 0x015B,
+        ABSOLUTE_POWER_DEMO_SEEN = 0x015C,
+        FATALIS_INTRO_SEEN = 0x015D,
+        CRIMSON_FATALIS_INTRO_SEEN = 0x015E,
+        WHITE_FATALIS_INTRO_SEEN = 0x015F,
+        AKANTOR_INTRO_SEEN = 0x0160,
+        YAMA_TSUKAMI_INTRO_SEEN = 0x0162,
+        UKANLOS_INTRO_SEEN = 0x0163,
+        LAVASIOTH_INTRO_SEEN = 0x0164,
+        HYPNOCATRICE_INTRO_SEEN = 0x0165,
+        NARGACUGA_INTRO_SEEN = 0x0166,
+    };
+private:
+    EventFlagId();
+};
+
 struct InventoryEntry {
     u16 itemId;
     s16 quantity;
@@ -105,6 +166,11 @@ struct Options {
     s8 bowgunShoulderCam;
 };
 
+struct NetPlayerData {
+    u8 active;
+    u8 pad_0x1[0x8C - 0x1];
+};
+
 struct GameSys : Singleton<GameSys> {
     u8 pad_0x0[0x1C];
     u16 short_0x1C;
@@ -114,7 +180,9 @@ struct GameSys : Singleton<GameSys> {
     u8 flag_0x2A;
     u8 pad_0x2B[0x2E - 0x2B];
     u8 byte_0x2E;
-    u8 pad_0x2F[0x390-0x2F];
+    u8 pad_0x2F;
+    NetPlayerData netPlayers[4];
+    u8 pad_0x260[0x390-0x260];
     InventoryEntry itemBox[32];
     u8 pad_0x410[0x422-0x410];
     bool is_demo;
@@ -129,7 +197,9 @@ struct GameSys : Singleton<GameSys> {
     u8 map_id;
     u16 mission_id;
     u32 flags_0x6AF14;
-    u8 pad_0x6AF18[0x6AF40 - 0x6AF18];
+    u8 pad_0x6AF18[0x6AF1B - 0x6AF18];
+    u8 flag_0x6AF1B;
+    u8 pad_0x6AF1C[0x6AF40 - 0x6AF1C];
 
     GameSys();
     ~GameSys();
@@ -142,6 +212,8 @@ struct GameSys : Singleton<GameSys> {
     bool Game_clear_ck(int);
     bool Event_flag_ck(u16);
     u8 em_moto_type_ck(u8);
+    void Event_flag_set(u16 event_flag_id);
+    void Event_flag_clear(u16 event_flag_id);
 
     inline bool background_load_check() {
         return GameSys::objectPtr->options.backgroundLoading && !GameSys::objectPtr->is_gallery_task;

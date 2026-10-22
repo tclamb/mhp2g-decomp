@@ -157,7 +157,7 @@ segments:
       - [0xcd454, asmtu, lib/crti] # _init
       - [0xcd45c, asm, lib/crtn] # _fini
       - [0xcd464, asmtu, arcade_task]
-      - [0xcd724, asmtu, evdemo]
+      - [0xcd724, cpp, evdemo]
       - [0xcef58, asmtu, player] # base player model
       - [0xdbe14, asmtu, player_manager] # game player state?
       - [0xdde38, asmtu, object_089b5ef4] # multiplayer models?

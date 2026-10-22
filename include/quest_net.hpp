@@ -9,3 +9,7 @@ struct QuestNet : Singleton<QuestNet> {
 
     QuestNet();
 };
+
+extern "C" {
+    void func_eboot_088AE398(QuestNet *, int, int);
+}
