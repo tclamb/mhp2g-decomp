@@ -16,10 +16,7 @@ using namespace immediate_ge;
 
 template<> DrawManager *Singleton<DrawManager>::objectPtr;
 u32 *DRAWABLE_WRITE_HEAD;
-u16 D_eboot_089C70D4[2];
-ScePspFVector3 D_eboot_089C70D8;
-float D_eboot_089C70E4;
-float D_eboot_089C70E8;
+
 
 DrawManager::DrawManager() {
     z_index_buckets[RenderGroup::GROUP_0] = NULL;

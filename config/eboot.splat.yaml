@@ -109,7 +109,7 @@ segments:
       - [0x581e8, asmtu, toast_notification]
       - [0x58f40, asmtu, start_task]
       - [0x5924c, cpp, item_manager]
-      - [0x5ade8, asmtu, equip_manager]
+      - [0x5ade8, cpp, equip_manager]
       - [0x5ddf4, cpp, joint]
       - [0x5ed14, cpp, light_manager]
       - [0x5fa88, cpp, model_base]
@@ -819,7 +819,7 @@ segments:
       - {start: 0x1c5144, type: .bss, vram: 0x089c6cbc, name: cockpit}
       - {start: 0x1c5144, type: .bss, vram: 0x089c70c0, name: cockpit2}
       - {start: 0x1c5114, type: .bss, vram: 0x089c70cc, name: draw_manager}
-      - {start: 0x1c5114, type: .bss, vram: 0x089c70ec, name: edit_task}
+      - {start: 0x1c5114, type: .bss, vram: 0x089c70d4, name: edit_task}
       - {start: 0x1c5114, type: .bss, vram: 0x089c70f0, name: file_sys}
       - {start: 0x1c5114, type: .bss, vram: 0x089c7508, name: game_sys}
       - {start: 0x1c5114, type: .bss, vram: 0x08a5dd10, name: ge}

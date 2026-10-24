@@ -7,7 +7,9 @@
 // stub for type with vtable at D_eboot_089B5E78
 struct Player : ObjBase {
     s32 buttons;
-    u8 padding_0x484[0x552 - 0x484];
+    u8 padding_0x484[0x4E8 - 0x484];
+    EquipmentSet equipment;
+    u8 padding_0x530[0x552 - 0x530];
     u8 dialog_timer;
     void *stage_unique;
     u8 padding_0x558[0x564 - 0x558];

@@ -87,6 +87,11 @@ struct EquipmentEntry {
 };
 
 struct EquipmentSet {
+    EquipmentEntry weapon;
+    EquipmentEntry armor[5];
+};
+
+struct EquipmentSetRegistration {
     u16 weaponIndex;
     u16 armorIndices[5];
     u32 armorColors[5];
@@ -110,7 +115,7 @@ struct UserData {
     u8 hairId;
     u8 unknown_0x18;
     u32 hairColor;
-    EquipmentEntry equipment[6];
+    EquipmentSet equipment;
     u16 eventMask[16];
     u16 unknown_0x88[16];
     EquipmentEntry equipmentBox[1000];
@@ -128,7 +133,7 @@ struct UserData {
     u16 smallestSizes[90];
     u16 killCounts[90];
     u32 titleMask[14];
-    EquipmentSet equipmentSets[20];
+    EquipmentSetRegistration equipmentSets[20];
     u8 padding_0x45B4[4];
     u8 guildCards[96][4216];
     u8 padding_0x672B8[0x69248 - 0x672B8];
@@ -141,7 +146,11 @@ struct UserData {
     u8 farmUpgrades[22];
     u8 padding_0x69DAE[0x6A0AA - 0x69DAE];
     RepelProgress repelProgress[5][8];
-    u8 padding_0x6A14A[0x6A7B4 - 0x6A14A];
+    u8 padding_0x6A14A[2];
+    u8 armorRecipeFlags[1100];
+    u8 weaponRecipeFlags[415];
+    u8 decorationRecipeFlags[100];
+    u8 padding_0x6A79B[0x6A7B4 - 0x6A79B];
     u32 itemMask[40];
     u8 padding_0x6A854[0x6A938 - 0x6A854];
 
@@ -208,6 +217,13 @@ struct GameSys : Singleton<GameSys> {
     int bagQuantity(u16 itemId);
     char *method_0885143C(u16);
     char *method_08851448(u16);
+    char *weaponBlademasterName(u16 id);
+    char *weaponGunnerName(u16 id);
+    char *armorHeadName(u16 id);
+    char *armorChestName(u16 id);
+    char *armorArmName(u16 id);
+    char *armorWaistName(u16 id);
+    char *armorLegName(u16 id);
     int itemBoxSize();
     bool Game_clear_ck(int);
     bool Event_flag_ck(u16);

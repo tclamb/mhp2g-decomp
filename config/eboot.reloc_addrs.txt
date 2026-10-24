@@ -7,6 +7,9 @@ rom:0x1B2978 reloc:MIPS_LO16 symbol:BLANK_BUFFER_DISPLAY_LISTS addend:0x48
 rom:0x1B297C reloc:MIPS_HI16 symbol:BLANK_BUFFER_DISPLAY_LISTS addend:0x4C
 rom:0x1B2984 reloc:MIPS_LO16 symbol:BLANK_BUFFER_DISPLAY_LISTS addend:0x4C
 
+rom:0x5B2D4 reloc:MIPS_HI16 symbol:WEAPON_TYPE_FALLBACK addend:-0x5DD
+rom:0x5B2D8 reloc:MIPS_LO16 symbol:WEAPON_TYPE_FALLBACK addend:-0x5DD
+
 rom:0x12d274 reloc:MIPS_32 symbol:world_matrix addend:0x498
 rom:0x12d278 reloc:MIPS_32 symbol:world_matrix addend:0x3A0
 rom:0x12d27c reloc:MIPS_32 symbol:world_matrix addend:0x3F4

@@ -1,5 +1,8 @@
 
 {
+    "clangd.arguments": [
+        "--config=Diagnostics: { Suppress: [typecheck_array_not_modifiable_lvalue] }",
+    ],
     "clangd.fallbackFlags": [
         "-I${workspaceFolder}/include",
         "-I${workspaceFolder}/include/pspsdk",
