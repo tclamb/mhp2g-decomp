@@ -27,6 +27,8 @@ struct Player : ObjBase {
     }
 
     bool activeSkill(u8 skillId);
+    u8 Pl_Skill_type_ck(u8 skillType);
+    bool Pl_PlateSkill_ck(u8 kitchenSkillId);
     void bagAdd(u16 itemId, s16 quantity, bool skipMask);
     bool Pl_bari_ck();
     s8 Gun_targeting_stat();

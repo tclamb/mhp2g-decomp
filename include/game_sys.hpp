@@ -103,6 +103,8 @@ struct RepelProgress {
     u8 unknown_0x3;
 };
 
+#define ITEM_BAG_CAPACITY 24
+
 struct UserData {
     u16 name[8];
     u8 unknown_0x10;
@@ -120,7 +122,7 @@ struct UserData {
     u16 unknown_0x88[16];
     EquipmentEntry equipmentBox[1000];
     InventoryEntry itemBox[1000];
-    InventoryEntry inventory[24]; // TODO rename to itemBag?
+    InventoryEntry itemBag[ITEM_BAG_CAPACITY];
     u32 missionMask[16];
     u32 playTime;
     u8 mixMask[22];
@@ -224,7 +226,7 @@ struct GameSys : Singleton<GameSys> {
     char *armorArmName(u16 id);
     char *armorWaistName(u16 id);
     char *armorLegName(u16 id);
-    int itemBoxSize();
+    s16 itemBoxSize();
     bool Game_clear_ck(int);
     bool Event_flag_ck(u16);
     u8 em_moto_type_ck(u8);

@@ -422,7 +422,7 @@ void Cockpit::method_08818098() {
     if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 0x200) == true) {
         inventory = GameSys::objectPtr->method_088567AC(0);
     } else {
-        inventory = GameSys::objectPtr->userData.inventory;
+        inventory = GameSys::objectPtr->userData.itemBag;
     }
     u32 inventoryCursorColor = 0;
     u32 inventoryFlags = 5;

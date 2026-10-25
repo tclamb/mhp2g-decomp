@@ -11,6 +11,10 @@ template<> ItemManager *Singleton<ItemManager>::objectPtr;
 #include "item_manager.item_definitions.inc.cpp"
 #include "item_manager.mix_definitions.inc.cpp"
 
+#define MIX_DEFINITION_COUNT ((int)(sizeof(MIX_DEFINITIONS) / sizeof(MIX_DEFINITIONS[0])))
+#define MIX_RATE_COUNT ((int)(sizeof(MIX_RATES) / sizeof(MIX_RATES[0])))
+#define COMBO_BOOK_COUNT ((int)(sizeof(COMBO_BOOK_IDS) / sizeof(COMBO_BOOK_IDS[0])))
+
 void ItemManager::setBagItem(u16 itemId) {
     setItemBit(itemId);
 }
@@ -23,25 +27,25 @@ u16 ItemManager::bagAdd(u16 itemId, s16 addend) {
     }
     if (bagQuantity(itemId) == 0) {
         result = 5;
-        for (s16 i = 0; i < 24; ++i) {
-            if (data.inventory[i].itemId == 0 && addend > 0) {
+        for (s16 i = 0; i < ITEM_BAG_CAPACITY; ++i) {
+            if (data.itemBag[i].itemId == ItemId::NONE && addend > 0) {
                 s16 stackSize = ITEM_DEFINITIONS[itemId].stackSize;
-                data.inventory[i].itemId = itemId;
+                data.itemBag[i].itemId = itemId;
                 if (stackSize < addend) {
                     addend = stackSize;
                 }
-                data.inventory[i].quantity = addend;
+                data.itemBag[i].quantity = addend;
                 setBagItem(itemId);
                 result = 0;
                 break;
             }
         }
     } else {
-        for (s16 i = 0; i < 24; ++i) {
-            if (data.inventory[i].itemId == itemId) {
+        for (s16 i = 0; i < ITEM_BAG_CAPACITY; ++i) {
+            if (data.itemBag[i].itemId == itemId) {
                 s16 stackSize = ITEM_DEFINITIONS[itemId].stackSize;
-                if (addend > 0 && data.inventory[i].quantity >= stackSize) {
-                    data.inventory[i].quantity = stackSize;
+                if (addend > 0 && data.itemBag[i].quantity >= stackSize) {
+                    data.itemBag[i].quantity = stackSize;
                     setBagItem(itemId);
                     result = 3;
                     break;
@@ -50,15 +54,15 @@ u16 ItemManager::bagAdd(u16 itemId, s16 addend) {
                     result = 1;
                     break;
                 }
-                data.inventory[i].quantity += addend;
-                if (data.inventory[i].quantity <= 0) {
+                data.itemBag[i].quantity += addend;
+                if (data.itemBag[i].quantity <= 0) {
                     bagRemove(i);
-                    data.inventory[i].itemId = 0;
-                    data.inventory[i].quantity = 0;
+                    data.itemBag[i].itemId = ItemId::NONE;
+                    data.itemBag[i].quantity = 0;
                     result = 4;
                 } else {
-                    if (data.inventory[i].quantity > stackSize) {
-                        data.inventory[i].quantity = stackSize;
+                    if (data.itemBag[i].quantity > stackSize) {
+                        data.itemBag[i].quantity = stackSize;
                         result = 2;
                     } else {
                         result = 1;
@@ -73,10 +77,10 @@ u16 ItemManager::bagAdd(u16 itemId, s16 addend) {
 }
 
 s16 ItemManager::bagQuantity(u16 itemId) {
-    for (s16 i = 0; i < 24; ++i) {
+    for (s16 i = 0; i < ITEM_BAG_CAPACITY; ++i) {
         UserData &userData = GameSys::objectPtr->userData;
-        if (userData.inventory[i].itemId == itemId) {
-            return userData.inventory[i].quantity;
+        if (userData.itemBag[i].itemId == itemId) {
+            return userData.itemBag[i].quantity;
         }
     }
     return 0;
@@ -86,17 +90,17 @@ s16 ItemManager::bagSpace(u16 itemId) {
     UserData &userData = GameSys::objectPtr->userData;
     s16 i;
     s16 emptySlots = 0;
-    for (i = 0; i < 24; ++i) {
-        if (userData.inventory[i].itemId == itemId) {
+    for (i = 0; i < ITEM_BAG_CAPACITY; ++i) {
+        if (userData.itemBag[i].itemId == itemId) {
             int result = ITEM_DEFINITIONS[itemId].stackSize;
             if (result == 0xFF) {
                 return 0xFF;
             } else {
-                result -= userData.inventory[i].quantity;
+                result -= userData.itemBag[i].quantity;
             }
             return result;
         }
-        if (userData.inventory[i].itemId == 0) {
+        if (userData.itemBag[i].itemId == ItemId::NONE) {
             ++emptySlots;
         }
     }
@@ -108,46 +112,46 @@ s16 ItemManager::bagSpace(u16 itemId) {
 }
 
 // result 0 = already empty, 1 = success, 2 = invalid index
-s16 ItemManager::bagRemove(s16 index) {
+s16 ItemManager::bagRemove(s16 inventoryIndex) {
     UserData &userData = GameSys::objectPtr->userData;
 
-    ASSERT(index >= 0);
-    if (index >= 24) {
+    ASSERT(inventoryIndex >= 0);
+    if (inventoryIndex >= ITEM_BAG_CAPACITY) {
         return 2;
     }
 
-    userData.inventory[index].quantity = 0;
-    if (userData.inventory[index].itemId == 0) {
+    userData.itemBag[inventoryIndex].quantity = 0;
+    if (userData.itemBag[inventoryIndex].itemId == ItemId::NONE) {
         return 0;
     }
-    userData.inventory[index].itemId = 0;
+    userData.itemBag[inventoryIndex].itemId = ItemId::NONE;
 
     return 1;
 }
 
-u16 ItemManager::knownMixCount(u8 filter) {
+u16 ItemManager::knownMixCount(u8 mixCountFilter) {
     UserData &userData = GameSys::objectPtr->userData;
 
     Player *player = PlayerManager::objectPtr->getPlayerPtr(GameSys::objectPtr->player_id);
 
-    if (!filter) {
+    if (!mixCountFilter) {
         // test for alchemy
         if (canMix(player, NULL, false) != true) {
-            filter = CombinationCountFilter::IGNORE_ALCHEMY;
+            mixCountFilter = MixCountFilter::IGNORE_ALCHEMY;
         } else {
-            filter = CombinationCountFilter::ANY;
+            mixCountFilter = MixCountFilter::ANY;
         }
     }
 
     u16 result = 0;
     MixDefinition *mix = &MIX_DEFINITIONS[0];
-    for (u32 i = 0xAC; i != 0; --i, ++mix) {
+    for (u32 i = MIX_DEFINITION_COUNT; i != 0; --i, ++mix) {
         if ((userData.mixMask[mix->id >> 3] & (1 << (mix->id & 0x7))) != 0) {
-            if (filter == CombinationCountFilter::IGNORE_ALCHEMY) {
+            if (mixCountFilter == MixCountFilter::IGNORE_ALCHEMY) {
                 if ((mix->flags & MixFlag::ALCHEMY) == 0) {
                     ++result;
                 }
-            } else if (filter == CombinationCountFilter::ONLY_ALCHEMY) {
+            } else if (mixCountFilter == MixCountFilter::ONLY_ALCHEMY) {
                 if ((mix->flags & MixFlag::ALCHEMY) == 1) {
                     ++result;
                 }
@@ -166,7 +170,7 @@ bool ItemManager::canMix(Player *player, MixDefinition *mix, bool isItemBox) {
         return true;
     } else if (GameSys::objectPtr->bagQuantity(ItemId::ALCHEMY_GUIDE) != 0) {
         return true;
-    } else if (isItemBox == true && boxFind(ItemId::ALCHEMY_GUIDE) != 0xFFFF) {
+    } else if (isItemBox == true && boxFind(ItemId::ALCHEMY_GUIDE) != ItemId::INVALID_ID) {
         return true;
     }
     return false;
@@ -210,25 +214,25 @@ s32 ItemManager::transportItemId(u16 itemId) {
     return -1;
 }
 
-bool ItemManager::isMixIngredient(s16 _itemId, bool isItemBox, int filter) {
-    int itemId = _itemId;
+bool ItemManager::isMixIngredient(s16 itemId, bool isItemBox, int mixFilter) {
+    int id = itemId;
 
     MixDefinition *mix;
     int n;
 
-    MixIndexEntry *idx = &MIX_INDEX[itemId];
+    MixIndexEntry *idx = &MIX_INDEX[id];
     if (idx->count != 0) {
         mix = &MIX_DEFINITIONS[idx->firstId];
         for (n = idx->count; n > 0; --n, ++mix) {
-            switch (filter) {
-            case 1:
+            switch (mixFilter) {
+            case MixFilter::ANY:
                 return true;
-            case 0:
+            case MixFilter::DEFAULT:
                 if (canMix(PlayerManager::objectPtr->getPlayerPtr(GameSys::objectPtr->player_id), mix, isItemBox) == true) {
                     return true;
                 }
                 break;
-            case -1:
+            case MixFilter::NO_ALCHEMY:
                 if ((mix->flags & MixFlag::ALCHEMY) == 0) {
                     return true;
                 }
@@ -237,21 +241,21 @@ bool ItemManager::isMixIngredient(s16 _itemId, bool isItemBox, int filter) {
         }
     }
 
-    for (int otherId = 0; otherId < itemId; ++otherId) {
+    for (int otherId = 0; otherId < id; ++otherId) {
         MixIndexEntry *idx = &MIX_INDEX[otherId];
         if (idx->count != 0) {
             mix = &MIX_DEFINITIONS[idx->firstId];
             for (n = idx->count; n > 0; --n, ++mix) {
-                if (mix->secondMaterialItemId == _itemId) {
-                    switch (filter) {
-                    case 1:
+                if (mix->secondMaterialItemId == itemId) {
+                    switch (mixFilter) {
+                    case MixFilter::ANY:
                         return true;
-                    case 0:
+                    case MixFilter::DEFAULT:
                         if (canMix(PlayerManager::objectPtr->getPlayerPtr(GameSys::objectPtr->player_id), mix, isItemBox) == true) {
                             return true;
                         }
                         break;
-                    case -1:
+                    case MixFilter::NO_ALCHEMY:
                         if ((mix->flags & MixFlag::ALCHEMY) == 0) {
                             return true;
                         }
@@ -264,7 +268,7 @@ bool ItemManager::isMixIngredient(s16 _itemId, bool isItemBox, int filter) {
     return false;
 }
 
-MixDefinition *ItemManager::findMix(s16 firstMaterialItemId, s16 secondMaterialItemId, int flags, bool isItemBox, int filter) {
+MixDefinition *ItemManager::findMix(s16 firstMaterialItemId, s16 secondMaterialItemId, int mixFlags, bool isItemBox, int mixFilter) {
     if (firstMaterialItemId > secondMaterialItemId) {
         s16 tmp = secondMaterialItemId;
         secondMaterialItemId = firstMaterialItemId;
@@ -277,18 +281,18 @@ MixDefinition *ItemManager::findMix(s16 firstMaterialItemId, s16 secondMaterialI
     MixDefinition *mix = MIX_DEFINITIONS + entry.firstId;
     for (int i = entry.count; i != 0; --i, mix++) {
         if (mix->secondMaterialItemId == secondMaterialItemId) {
-            if ((flags & MixFlag::ALCHEMY) != 0) {
+            if ((mixFlags & MixFlag::ALCHEMY) != 0) {
                 return mix;
             }
-            switch (filter) {
-            case 1:
+            switch (mixFilter) {
+            case MixFilter::ANY:
                 return mix;
-            case 0:
+            case MixFilter::DEFAULT:
                 if (canMix(PlayerManager::objectPtr->getPlayerPtr(GameSys::objectPtr->player_id), mix, isItemBox) == true) {
                     return mix;
                 }
                 break;
-            case -1:
+            case MixFilter::NO_ALCHEMY:
                 if ((mix->flags & MixFlag::ALCHEMY) == 0) {
                     return mix;
                 }
@@ -299,8 +303,8 @@ MixDefinition *ItemManager::findMix(s16 firstMaterialItemId, s16 secondMaterialI
     return NULL;
 }
 
-bool ItemManager::getMixBit(MixDefinition *mix, int flags, bool isItemBox) {
-    if ((flags & MixFlag::ALCHEMY) == 0) {
+bool ItemManager::getMixBit(MixDefinition *mix, int mixFlags, bool isItemBox) {
+    if ((mixFlags & MixFlag::ALCHEMY) == 0) {
         if (canMix(PlayerManager::objectPtr->getPlayerPtr(GameSys::objectPtr->player_id), mix, isItemBox) != true) {
             return false;
         }
@@ -312,7 +316,7 @@ bool ItemManager::getMixBit(MixDefinition *mix, int flags, bool isItemBox) {
 }
 
 bool ItemManager::getMixBit(s16 firstMaterialItemId, s16 secondMaterialItemId) {
-    MixDefinition *mix = findMix(firstMaterialItemId, secondMaterialItemId, 0, false, 0);
+    MixDefinition *mix = findMix(firstMaterialItemId, secondMaterialItemId, 0, false, MixFilter::DEFAULT);
     if (mix == NULL) {
         return false;
     }
@@ -323,7 +327,7 @@ bool ItemManager::getMixBit(s16 firstMaterialItemId, s16 secondMaterialItemId) {
 }
 
 s16 ItemManager::combine(u8 *quantityOut, Player *player, s16 firstMaterialItemId, s16 secondMaterialItemId, int isItemBox) {
-    MixDefinition *mix = findMix(firstMaterialItemId, secondMaterialItemId, 0, isItemBox == true, 0);
+    MixDefinition *mix = findMix(firstMaterialItemId, secondMaterialItemId, 0, isItemBox == true, MixFilter::DEFAULT);
     if (mix == NULL) {
         return ItemId::INVALID_ID;
     }
@@ -339,9 +343,12 @@ s16 ItemManager::combine(u8 *quantityOut, Player *player, s16 firstMaterialItemI
             *quantityOut = q->minimum;
             u8 *p = q->percents;
             int roll = System::objectPtr->next_index(1) % 100;
-            loop: if (roll >= *p) {
-                *quantityOut += 1; roll -= *p++;
-                goto loop;
+            while (true) {
+                if (roll < *p) {
+                    break;
+                }
+                *quantityOut += 1;
+                roll -= *p++;
             }
         }
     } else {
@@ -363,7 +370,7 @@ s16 ItemManager::boxRemove(u16 itemId, s16 quantity) {
         return 0;
     }
 
-    if (itemId == 0 || ITEM_DEFINITIONS[itemId].stackSize == 0xFF) {
+    if (itemId == ItemId::NONE || ITEM_DEFINITIONS[itemId].stackSize == 0xFF) {
         return 0;
     }
 
@@ -379,7 +386,7 @@ s16 ItemManager::boxRemove(u16 itemId, s16 quantity) {
                 userData->itemBox[i].quantity = 0;
             }
             if (userData->itemBox[i].quantity < 1) {
-                userData->itemBox[i].itemId = 0;
+                userData->itemBox[i].itemId = ItemId::NONE;
             }
             if (remaining < 1) {
                 return 0;
@@ -389,29 +396,275 @@ s16 ItemManager::boxRemove(u16 itemId, s16 quantity) {
     return remaining;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", boxRemove__11ItemManagerFUssUs);
+s16 ItemManager::boxRemove(u16 itemId, s16 quantity, u16 itemBoxIndex) {
+    UserData *userData = &GameSys::objectPtr->userData;
+    if (quantity < 0) {
+        return 0;
+    }
+    if (itemId == ItemId::NONE || ITEM_DEFINITIONS[itemId].stackSize == 0xFF) {
+        return 0;
+    }
+    s16 boxSize = GameSys::objectPtr->itemBoxSize();
+    s16 remaining = quantity;
+    if (itemBoxIndex != ItemId::INVALID_ID) {
+        if (userData->itemBox[itemBoxIndex].quantity != 0) {
+            if (userData->itemBox[itemBoxIndex].itemId == itemId) {
+                if (userData->itemBox[itemBoxIndex].quantity >= quantity) {
+                    userData->itemBox[itemBoxIndex].quantity -= quantity;
+                    remaining = 0;
+                } else {
+                    remaining -= userData->itemBox[itemBoxIndex].quantity;
+                    userData->itemBox[itemBoxIndex].quantity = 0;
+                }
+                if (userData->itemBox[itemBoxIndex].quantity < 1) {
+                    userData->itemBox[itemBoxIndex].itemId = ItemId::NONE;
+                }
+                if (remaining >= 1) {
+                    remaining = boxRemove(itemId, remaining, ItemId::INVALID_ID);
+                }
+            } else {
+                remaining = boxRemove(itemId, quantity, ItemId::INVALID_ID);
+            }
+        } else {
+            remaining = boxRemove(itemId, quantity, ItemId::INVALID_ID);
+        }
+    } else {
+        for (s16 i = boxSize - 1; i >= 0; --i) {
+            if (userData->itemBox[i].itemId != itemId) {
+                continue;
+            }
+            if (userData->itemBox[i].quantity >= remaining) {
+                userData->itemBox[i].quantity -= remaining;
+                remaining = 0;
+            } else {
+                remaining -= userData->itemBox[i].quantity;
+                userData->itemBox[i].quantity = 0;
+            }
+            if (userData->itemBox[i].quantity < 1) {
+                userData->itemBox[i].itemId = ItemId::NONE;
+            }
+            if (remaining < 1) {
+                return 0;
+            }
+        }
+    }
+    return remaining;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", boxFind__11ItemManagerFUs);
+u16 ItemManager::boxFind(u16 itemId) {
+    UserData &userData = GameSys::objectPtr->userData;
+    if (itemId != ItemId::INVALID_ID) {
+        for (int index = 0; index < GameSys::objectPtr->itemBoxSize(); ++index) {
+            if (userData.itemBox[index].itemId == itemId && userData.itemBox[index].quantity > 0) {
+                return index;
+            }
+        }
+    }
+    return ItemId::INVALID_ID;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", mixRate__11ItemManagerFssi);
+s8 ItemManager::mixRate(s16 firstMaterialItemId, s16 secondMaterialItemId, int isItemBox) {
+    MixDefinition *mix = findMix(firstMaterialItemId, secondMaterialItemId, isItemBox == true, false, MixFilter::DEFAULT);
+    if (mix == NULL) {
+        return -1;
+    }
+    return mixRate(mix, isItemBox);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", mixRate__11ItemManagerFP13MixDefinitionb);
+s8 ItemManager::mixRate(MixDefinition *mix, int isItemBox) {
+    bool isBox = isItemBox == true;
+    Player *player = PlayerManager::objectPtr->getPlayerPtr(GameSys::objectPtr->player_id);
+    u8 rate;
+    u32 n;
+    if (isBox == true) {
+        rate = 100;
+    }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", setMixBit__11ItemManagerFP13MixDefinition);
+    if (canMix(player, mix, isBox) != true) {
+        return -1;
+    }
+    if ((mix->flags & MixFlag::BOMB) != 0) {
+        if (player->activeSkill(SkillId::BOMBER) == true) {
+            return 100;
+        }
+    }
+    if ((mix->flags & MixFlag::TRAP) != 0) {
+        if (player->activeSkill(SkillId::TRAP_MASTER) == true) {
+            return 100;
+        }
+    }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", maxMixQuantity__11ItemManagerFP13MixDefinition);
+    rate = MIX_RATES[mix->rateId];
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", nextMix__11ItemManagerFPUccPUsPUsb);
+    u8 skillType = player->Pl_Skill_type_ck(SkillType::MIX_SUCCESS_RATE);
+    switch (skillType) {
+    case SkillId::COMBINE_SUCCESS_PLUS_15_PERCENT:  rate += 15; break;
+    case SkillId::COMBINE_SUCCESS_PLUS_25_PERCENT:  rate += 25; break;
+    case SkillId::COMBINE_SUCCESS_PLUS_45_PERCENT:  rate += 45; break;
+    case SkillId::COMBINE_SUCCESS_MINUS_5_PERCENT:  rate -= 5;  break;
+    case SkillId::COMBINE_SUCCESS_MINUS_10_PERCENT: rate -= 10; break;
+    case SkillId::COMBINE_SUCCESS_MINUS_15_PERCENT: rate -= 15; break;
+    }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", boxStackQuantity__11ItemManagerFUs);
+    if (player->Pl_PlateSkill_ck(KitchenSkillId::FELYNE_COMBINE_HI)) {
+        rate += 10;
+    }
+    if (player->Pl_PlateSkill_ck(KitchenSkillId::FELYNE_COMBINE_LO)) {
+        rate += 5;
+    }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", boxTotalQuantity__11ItemManagerFUs);
+    if (isItemBox == false) {
+        n = 0;
+        for (; n < COMBO_BOOK_COUNT; ++n) {
+            if (GameSys::objectPtr->bagQuantity(COMBO_BOOK_IDS[n]) == 0) {
+                break;
+            }
+        }
+        rate += COMBO_BOOK_BONUSES[n];
+    }
+    if (isItemBox == true) {
+        n = 0;
+        for (; n < COMBO_BOOK_COUNT; ++n) {
+            bool owned = false;
+            if (GameSys::objectPtr->bagQuantity(COMBO_BOOK_IDS[n]) != 0) {
+                owned = true;
+            }
+            if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) == true) {
+                if (boxFind(COMBO_BOOK_IDS[n]) != ItemId::INVALID_ID) {
+                    owned = true;
+                }
+            }
+            if (owned == false) {
+                break;
+            }
+        }
+        rate += COMBO_BOOK_BONUSES[n];
+    }
+    if (rate > 100) {
+        rate = 100;
+    }
+    return rate;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", boxTotalSpace__11ItemManagerFUs);
+void ItemManager::setMixBit(MixDefinition *mix) {
+    GameSys::objectPtr->userData.mixMask[mix->id >> 3] |= 1 << (mix->id & 0x7);
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", boxStackSpace__11ItemManagerFUs);
+u8 ItemManager::maxMixQuantity(MixDefinition *mix) {
+    return MIX_MAX_QUANTITIES[mix->quantityId];
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", bagDefinition__11ItemManagerFi);
+MixDefinition *ItemManager::nextMix(u8 *mixId, char step, u16 *firstMaterialItemId, u16 *secondMaterialItemId, int mixFlags) {
+    int n;
+    s16 id = *mixId;
+    u16 *materials;
+    if (step == 0) {
+        materials = MIX_MATERIAL_ITEM_IDS[id];
+        MixDefinition *mix = findMix(materials[0], materials[1], mixFlags, false, MixFilter::DEFAULT);
+        if (mix != NULL) {
+            *firstMaterialItemId = materials[0];
+            *secondMaterialItemId = materials[1];
+            return mix;
+        }
+        step = 1;
+    }
+    n = MIX_DEFINITION_COUNT;
+    for (; n != 0; --n) {
+        id += step;
+        if (id > MIX_DEFINITION_COUNT - 1) {
+            id = 0;
+        } else if (id < 0) {
+            id = MIX_DEFINITION_COUNT - 1;
+        }
+        materials = MIX_MATERIAL_ITEM_IDS[id];
+        MixDefinition *mix = findMix(materials[0], materials[1], mixFlags, false, MixFilter::DEFAULT);
+        if (mix != NULL) {
+            *mixId = id;
+            *firstMaterialItemId = materials[0];
+            *secondMaterialItemId = materials[1];
+            return mix;
+        }
+    }
+    return NULL;
+}
+
+int ItemManager::boxStackQuantity(u16 itemId) {
+    UserData &userData = GameSys::objectPtr->userData;
+    s16 size = GameSys::objectPtr->itemBoxSize();
+    for (int i = 0; i < size; ++i) {
+        if (userData.itemBox[i].itemId == itemId) {
+            if (ITEM_DEFINITIONS[itemId].stackSize == 0xFF) {
+                return 999;
+            }
+            return userData.itemBox[i].quantity;
+        }
+    }
+    return 0;
+}
+
+int ItemManager::boxTotalQuantity(u16 itemId) {
+    UserData &userData = GameSys::objectPtr->userData;
+    s16 size = GameSys::objectPtr->itemBoxSize();
+    int total = 0;
+    for (int i = 0; i < size; ++i) {
+        if (userData.itemBox[i].itemId == itemId) {
+            if (ITEM_DEFINITIONS[itemId].stackSize == 0xFF) {
+                return 999;
+            }
+            total += userData.itemBox[i].quantity;
+        }
+    }
+    return total;
+}
+
+int ItemManager::boxTotalSpace(u16 itemId) {
+    UserData &userData = GameSys::objectPtr->userData;
+    if (itemId == ItemId::NONE || ITEM_DEFINITIONS[itemId].stackSize == 0xFF) {
+        return 0;
+    }
+    s16 size = GameSys::objectPtr->itemBoxSize();
+    int total = 0;
+    for (int i = 0; i < size; ++i) {
+        if (userData.itemBox[i].itemId == itemId) {
+            total += 99 - userData.itemBox[i].quantity;
+        } else if (userData.itemBox[i].itemId == ItemId::NONE) {
+            total += 99;
+        }
+    }
+    return total;
+}
+
+int ItemManager::boxStackSpace(u16 itemId) {
+    UserData &userData = GameSys::objectPtr->userData;
+    if (itemId == ItemId::NONE) {
+        return -1;
+    }
+    InventoryEntry *entry;
+    int n = GameSys::objectPtr->itemBoxSize();
+    int max = ITEM_DEFINITIONS[itemId].stackSize;
+    int space = max;
+    if (max != 0xFF) {
+        max = 99;
+        space = 99;
+    }
+    entry = userData.itemBox;
+    for (; n > 0; --n, ++entry) {
+        if (entry->itemId == ItemId::NONE) {
+            return max;
+        }
+        if (entry->itemId == itemId && max != 0xFF) {
+            space -= max - entry->quantity;
+            if (space < 1) {
+                return max;
+            }
+        }
+    }
+    return max - space;
+}
+
+ItemDefinition *ItemManager::bagDefinition(int inventoryIndex) {
+    return &ITEM_DEFINITIONS[GameSys::objectPtr->method_088567AC(inventoryIndex)->itemId];
+}
 
 void ItemManager::setItemBit(u16 itemId) {
     GameSys::objectPtr->userData.setItemBit(itemId);
@@ -421,12 +674,63 @@ bool ItemManager::getItemBit(u16 itemId) {
     return GameSys::objectPtr->userData.getItemBit(itemId);
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", sort__FP14InventoryEntryUi);
+void sort(InventoryEntry *entries, u32 count) {
+    int pivot = 1;
+    while (pivot < count) {
+        pivot = pivot * 3 + 1;
+    }
+    pivot /= 3;
+    while (pivot > 0) {
+        for (u32 i = pivot; i < count; ++i) {
+            int j = i - pivot;
+            u16 itemId = entries[i].itemId;
+            s16 quantity = entries[i].quantity;
+            while (j >= 0) {
+                InventoryEntry *other = &entries[j];
+                if (other->itemId > itemId ||
+                    (itemId == other->itemId && other->quantity < quantity)) {
+                    entries[j + pivot] = *other;
+                    j -= pivot;
+                } else {
+                    break;
+                }
+            }
+            entries[j + pivot].itemId = itemId;
+            entries[j + pivot].quantity = quantity;
+        }
+        pivot /= 3;
+    }
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", isDecoration__11ItemManagerFUs);
+int ItemManager::isDecoration(u16 itemId) {
+    return ITEM_DEFINITIONS[itemId].decorationId != 0;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", mixRateColorId__FSc);
+u8 mixRateColorId(s8 mixRate) {
+    u8 colorId = 0;
+    for (; colorId < MIX_RATE_COUNT - 1; ++colorId) {
+        if (mixRate >= MIX_RATES[colorId]) {
+            break;
+        }
+    }
+    return colorId;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", search__11ItemManagerFPUsiP16ItemSearchResult);
+int ItemManager::search(u16 *itemIds, s32 itemCount, ItemSearchResult *out) {
+    int resultCount = 0;
+    for (int i = 0; i < itemCount; ++i) {
+        s16 bag = ItemManager::objectPtr->bagQuantity(itemIds[i]);
+        int box = ItemManager::objectPtr->boxTotalQuantity(itemIds[i]);
+        if (bag + box > 0) {
+            out[resultCount].itemId = itemIds[i];
+            out[resultCount].bagQuantity = bag;
+            out[resultCount].boxQuantity = box;
+            ++resultCount;
+        }
+    }
+    return resultCount;
+}
 
-INCLUDE_ASM("asm/eboot/nonmatchings/item_manager", convertMixId2nd__11ItemManagerFUs);
+u8 ItemManager::convertMixId2nd(u16 mixId) {
+    return MIX_DEFINITIONS[mixId].mixId2nd;
+}
