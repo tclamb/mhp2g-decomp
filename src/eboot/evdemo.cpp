@@ -534,7 +534,7 @@ u16 Evdemo::bgm_id() {
     return FileId::INVALID_ID;
 }
 
-u8 Evdemo::demo_type() {
+u8 Evdemo::bgm_type() {
     EvdemoData *d = &demos[slot];
     return d->definition->bgm_type;
 }

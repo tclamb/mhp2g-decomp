@@ -74,7 +74,7 @@ struct tmh {
     s8 picture_count;
     u8 unknown_0x9[7];
 
-    int compile(void *buffer, tmh_header *header, u8 index);
+    int bind(void *buffer, tmh_header *header, u8 index);
 };
 
 struct pmo_material_data {
@@ -161,7 +161,7 @@ struct pmo {
     void drawWeightMesh(Hierarchy *skeleton, tmh *tmh, int mesh);
     void draw_alpha(tmh *tmh, ScePspFMatrix4 *transform, u32 mesh, u32 blend_mode, u8 alpha);
     void draw_rgba8888(tmh *tmh, ScePspFMatrix4 *transform, u32 mesh, u32 blend_mode, u32 color);
-    int compile(void *, pmo_header *, pmo_mesh_data *);
+    int bind(void *, pmo_header *, pmo_mesh_data *);
     void set_mesh_color(u16 mesh_index, u8 r, u8 g, u8 b);
     void set_mesh_shadow_color(u16 mesh_index, u8 r, u8 g, u8 b);
     void set_mesh_alpha(u16 mesh_index, u8 a);
@@ -184,8 +184,8 @@ struct ModelBase : Draw {
     tmh model_tmh;
     Hierarchy hierarchy;
 
-    int compile_pmo(void *, pmo_header *, pmo_mesh_data *);
-    int compile_tmh(void *, tmh_header *);
+    int bind_pmo(void *, pmo_header *, pmo_mesh_data *);
+    int bind_tmh(void *, tmh_header *);
     void reset_transform();
     void get_joint_pos(ScePspFVector4 *out, s16 joint_id);
     ScePspFMatrix4 *get_joint_wmat(s16 joint_id);

@@ -171,7 +171,7 @@ struct StageBase : ModelBase {
     void drawSet();
     void emit_fog();
     void method_088CD61C();
-    void compile_environment_params(stage_environment_params *);
+    void bind_environment_params(stage_environment_params *);
     bool method_088CDC74();
     void method_088CDCAC();
     void draw_flash();

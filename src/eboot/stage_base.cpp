@@ -832,7 +832,7 @@ void StageBase::method_088CD61C() {
     }
 }
 
-void StageBase::compile_environment_params(stage_environment_params *environment) {
+void StageBase::bind_environment_params(stage_environment_params *environment) {
     unknown_0x330 = environment->type;
 
     float *in;

@@ -42,7 +42,7 @@ void StageManager::reset() {
     vram_transfer_size = 0;
     unknown_0x28A = -1;
     unknown_0xA2C8 = 0;
-    prop_list = 0;
+    set_list = 0;
     flag_0xA3E8 = 0;
     unknown_0xA3E9 = 1;
 }
@@ -54,23 +54,23 @@ void StageManager::unload() {
     vram_transfer_size = 0;
 }
 
-void StageManager::call_stage_ptmf_0x3D8() {
+void StageManager::moveStage() {
     if (stage != 0 && stage->model_pmo.header != 0) {
         stage->call_ptmf_0x3D8();
     }
 }
 
-void StageManager::register_drawable() {
+void StageManager::enqueueStage() {
     if (stage != 0 && stage->model_pmo.header != 0) {
         DrawManager::objectPtr->add(RenderGroup::STAGE, stage, true);
     }
 }
 
-void StageManager::call_prop_list_vtable_0x10() {
-    StageEffectBase *prop = prop_list;
-    while (prop != 0) {
-        prop->vtable_0x10();
-        prop = prop->next;
+void StageManager::enqueueSet() {
+    StageEffectBase *set = set_list;
+    while (set != 0) {
+        set->enqueue();
+        set = set->next;
     }
     if (stage != 0 && unknown_0xA3E9 == true) {
         stage->flag_0x3D4 = true;
@@ -78,20 +78,20 @@ void StageManager::call_prop_list_vtable_0x10() {
 }
 
 
-void StageEffectBase::vtable_0x10() {
+void StageEffectBase::enqueue() {
     // empty
 }
 
-void StageManager::call_prop_list_ptmf() {
-    StageEffectBase *prop = prop_list;
-    while (prop != 0) {
-        prop->call_ptmf();
-        StageEffectBase *next = prop->next;
-        bool alive = prop->flags & Draw::ALIVE;
+void StageManager::moveSet() {
+    StageEffectBase *set = set_list;
+    while (set != 0) {
+        set->call_ptmf();
+        StageEffectBase *next = set->next;
+        bool alive = set->flags & Draw::ALIVE;
         if (alive == false) {
-            free(prop);
+            removeSet(set);
         }
-        prop = next;
+        set = next;
     }
 }
 
@@ -102,15 +102,14 @@ void StageEffectBase::call_ptmf() {
 }
 
 
-void StageManager::destroy_prop_list() {
-    StageEffectBase *prop = prop_list;
-    while (prop != 0) {
-        StageEffectBase *next = prop->next;
-        delete prop;
-        cache.free(prop);
-        prop = next;
+void StageManager::freeSet() {
+    StageEffectBase *set = set_list;
+    while (set != 0) {
+        StageEffectBase *next = set->next;
+        cache::pushObjWork(set, this);
+        set = next;
     }
-    prop_list = 0;
+    set_list = 0;
 }
 
 StageEffectBase::~StageEffectBase() {
@@ -124,26 +123,25 @@ StageEffectBase::~StageEffectBase() {
             unknown_0x18 = id;                  \
         }                                       \
         virtual void draw();                    \
-        virtual void vtable_0x10();             \
+        virtual void enqueue();             \
         virtual void setup();                   \
         virtual void update();                  \
         virtual void vtable_0x1C();             \
     }
+DECLARE_DUMMY_SET(StageEffect00, 0x3C, 0);
+DECLARE_DUMMY_SET(StageEffect01, 0x50, 1);
+DECLARE_DUMMY_SET(StageEffect02, 0x60, 2);
+DECLARE_DUMMY_SET(StageEffect03, 0x50, 3);
 #define DECLARE_DUMMY_SET_INIT_CONSTRUCTOR(name, size, id) \
     struct name : StageEffectBase {                       \
         u8 padding[size - sizeof(StageEffectBase)];       \
         name();                                     \
         virtual void draw();                        \
-        virtual void vtable_0x10();                 \
+        virtual void enqueue();                 \
         virtual void setup();                       \
         virtual void update();                      \
         virtual void vtable_0x1C();                 \
     }
-
-DECLARE_DUMMY_SET(StageEffect00, 0x3C, 0);
-DECLARE_DUMMY_SET(StageEffect01, 0x50, 1);
-DECLARE_DUMMY_SET(StageEffect02, 0x60, 2);
-DECLARE_DUMMY_SET(StageEffect03, 0x50, 3);
 DECLARE_DUMMY_SET_INIT_CONSTRUCTOR(StageEffect04, 0x70, 4);
 DECLARE_DUMMY_SET(StageEffect05, 0x60, 5);
 DECLARE_DUMMY_SET(StageEffect06, 0x60, 6);
@@ -192,462 +190,512 @@ DECLARE_DUMMY_SET(StageEffect48, 0x70, 48);
 DECLARE_DUMMY_SET(StageEffect49, 0xA0, 49);
 
 
-extern "C" void func_game_sub_09CB54D8(StageEffect00 *prop, prop_params *params);
+extern "C" void func_game_sub_09CB54D8(StageEffect00 *set, prop_params *params);
 
 void StageManager::Set00_set(prop_params *params) {
-    StageEffect00 *prop = alloc_and_push_prop<StageEffect00>();
-    link_model(prop, true);
-    func_game_sub_09CB54D8(prop, params);
+    StageEffect00 *set = allocateStageEffect<StageEffect00>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CB54D8(set, params);
 }
 
 
-extern "C" void func_game_sub_09CB5C20(StageEffect01 *prop, prop_params *params, u32 arg3);
+extern "C" void func_game_sub_09CB5C20(StageEffect01 *set, prop_params *params, u32 arg3);
 
 void StageManager::Set01_set(prop_params *params, u32 arg3) {
-    StageEffect01 *prop = alloc_and_push_prop<StageEffect01>();
-    link_model(prop, true);
-    func_game_sub_09CB5C20(prop, params, arg3);
+    StageEffect01 *set = allocateStageEffect<StageEffect01>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CB5C20(set, params, arg3);
 }
 
 
-extern "C" void func_game_sub_09CB6468(StageEffect02 *prop, prop_params *params, u32 arg3);
+extern "C" void func_game_sub_09CB6468(StageEffect02 *set, prop_params *params, u32 arg3);
 
 void StageManager::Set02_set(prop_params *params, u32 arg3) {
-    StageEffect02 *prop = alloc_and_push_prop<StageEffect02>();
-    link_model(prop, true);
-    func_game_sub_09CB6468(prop, params, arg3);
+    StageEffect02 *set = allocateStageEffect<StageEffect02>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CB6468(set, params, arg3);
 }
 
 
-extern "C" void func_game_sub_09CB6968(StageEffect03 *prop, prop_params *params);
+extern "C" void func_game_sub_09CB6968(StageEffect03 *set, prop_params *params);
 
 void StageManager::Set03_set(prop_params *params) {
-    StageEffect03 *prop = alloc_and_push_prop<StageEffect03>();
-    link_model(prop, true);
-    func_game_sub_09CB6968(prop, params);
+    StageEffect03 *set = allocateStageEffect<StageEffect03>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CB6968(set, params);
 }
 
 
-extern "C" void func_game_sub_09CB7008(StageEffect04 *prop, prop_params *params, u32 arg3, u16 arg4, u16 arg5, u32 arg6, u16 arg7);
+extern "C" void func_game_sub_09CB7008(StageEffect04 *set, prop_params *params, u32 arg3, u16 arg4, u16 arg5, u32 arg6, u16 arg7);
 
 void StageManager::Set04_set(prop_params *params, u32 arg3, u16 arg4, u16 arg5, u32 arg6, u16 arg7) {
-    StageEffect04 *prop = alloc_prop<StageEffect04>();
-    push(prop);
-    link_model(prop, true);
-    func_game_sub_09CB7008(prop, params, arg3, arg4, arg5, arg6, arg7);
+    StageEffect04 *set = allocateStageEffect<StageEffect04>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CB7008(set, params, arg3, arg4, arg5, arg6, arg7);
 }
 
 
-extern "C" void func_game_sub_09CB76E0(StageEffect05 *prop, prop_params *params);
+extern "C" void func_game_sub_09CB76E0(StageEffect05 *set, prop_params *params);
 
 void StageManager::Set05_set(prop_params *params) {
-    StageEffect05 *prop = alloc_and_push_prop<StageEffect05>();
-    link_model(prop, true);
-    func_game_sub_09CB76E0(prop, params);
+    StageEffect05 *set = allocateStageEffect<StageEffect05>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CB76E0(set, params);
 }
 
 
-extern "C" void func_game_sub_09CB8110(StageEffect06 *prop, prop_params *params);
+extern "C" void func_game_sub_09CB8110(StageEffect06 *set, prop_params *params);
 
 void StageManager::Set06_set(prop_params *params) {
-    StageEffect06 *prop = alloc_and_push_prop<StageEffect06>();
-    link_model(prop, true);
-    func_game_sub_09CB8110(prop, params);
+    StageEffect06 *set = allocateStageEffect<StageEffect06>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CB8110(set, params);
 }
 
 
-extern "C" void func_game_sub_09CB8DF0(StageEffect07 *prop, prop_params *params, u32 arg3, u32 arg4, u8 arg5, u16 arg6, u16 arg7, u16 arg8, u32 arg9, u32 arg10);
+extern "C" void func_game_sub_09CB8DF0(StageEffect07 *set, prop_params *params, u32 arg3, u32 arg4, u8 arg5, u16 arg6, u16 arg7, u16 arg8, u32 arg9, u32 arg10);
 
 void StageManager::Set07_set(int pmo_index, prop_params *params, u32 arg3, u32 arg4, u8 arg5, u16 arg6, u16 arg7, u16 arg8, u32 arg9, u32 arg10) {
-    StageEffect07 *prop = alloc_and_push_prop<StageEffect07>();
-    link_model(prop, pmo_index);
-    func_game_sub_09CB8DF0(prop, params, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+    StageEffect07 *set = allocateStageEffect<StageEffect07>();
+    addSet(set);
+    link_model(set, pmo_index);
+    func_game_sub_09CB8DF0(set, params, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
 }
 
 
-extern "C" void func_game_sub_09CB97E8(StageEffect08 *prop, prop_params *params);
+extern "C" void func_game_sub_09CB97E8(StageEffect08 *set, prop_params *params);
 
 void StageManager::Set08_set(prop_params *params, int pmo_index) {
-    StageEffect08 *prop = alloc_and_push_prop<StageEffect08>();
-    link_model(prop, pmo_index);
-    func_game_sub_09CB97E8(prop, params);
+    StageEffect08 *set = allocateStageEffect<StageEffect08>();
+    addSet(set);
+    link_model(set, pmo_index);
+    func_game_sub_09CB97E8(set, params);
 }
 
 
-extern "C" void func_game_sub_09CB9FD8(StageEffect09 *prop, prop_params *params);
+extern "C" void func_game_sub_09CB9FD8(StageEffect09 *set, prop_params *params);
 
 void StageManager::Set09_set(prop_params *params) {
-    StageEffect09 *prop = alloc_and_push_prop<StageEffect09>();
-    link_model(prop, true);
-    func_game_sub_09CB9FD8(prop, params);
+    StageEffect09 *set = allocateStageEffect<StageEffect09>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CB9FD8(set, params);
 }
 
 
-extern "C" void func_game_sub_09CBA820(StageEffect10 *prop, prop_params *params);
+extern "C" void func_game_sub_09CBA820(StageEffect10 *set, prop_params *params);
 
 void StageManager::Set10_set(prop_params *params) {
-    StageEffect10 *prop = alloc_and_push_prop<StageEffect10>();
-    link_model(prop, true);
-    func_game_sub_09CBA820(prop, params);
+    StageEffect10 *set = allocateStageEffect<StageEffect10>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CBA820(set, params);
 }
 
 
-extern "C" void func_game_sub_09CBACF0(StageEffect11 *prop, prop_params *params);
+extern "C" void func_game_sub_09CBACF0(StageEffect11 *set, prop_params *params);
 
 void StageManager::Set11_set(prop_params *params) {
-    StageEffect11 *prop = alloc_and_push_prop<StageEffect11>();
-    link_model(prop, true);
-    func_game_sub_09CBACF0(prop, params);
+    StageEffect11 *set = allocateStageEffect<StageEffect11>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CBACF0(set, params);
 }
 
 
-extern "C" void func_game_sub_09CBB398(StageEffect12 *prop, prop_params *params, u32 arg3, u32 arg4, u32 arg5, u32 *arg6, u16 arg7, u32 arg8, u32 arg9, u32 arg10, u16 arg11);
+extern "C" void func_game_sub_09CBB398(StageEffect12 *set, prop_params *params, u32 arg3, u32 arg4, u32 arg5, u32 *arg6, u16 arg7, u32 arg8, u32 arg9, u32 arg10, u16 arg11);
 
 void StageManager::Set12_set(prop_params *params, u32 arg3, u32 arg4, u32 arg5, u32 *arg6, u16 arg7, u32 arg8, u32 arg9, u32 arg10, u16 arg11) {
-    StageEffect12 *prop = alloc_and_push_prop<StageEffect12>();
-    func_game_sub_09CBB398(prop, params, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+    StageEffect12 *set = allocateStageEffect<StageEffect12>();
+    addSet(set);
+    func_game_sub_09CBB398(set, params, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
 }
 
 
-extern "C" void func_game_sub_09CBBB48(StageEffect13 *prop, prop_params *params);
+extern "C" void func_game_sub_09CBBB48(StageEffect13 *set, prop_params *params);
 
 void StageManager::Set13_set(prop_params *params) {
-    StageEffect13 *prop = alloc_and_push_prop<StageEffect13>();
-    link_model(prop, true);
-    func_game_sub_09CBBB48(prop, params);
+    StageEffect13 *set = allocateStageEffect<StageEffect13>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CBBB48(set, params);
 }
 
 
-extern "C" void func_game_sub_09CBD1F0(StageEffect14 *prop, prop_params *params);
+extern "C" void func_game_sub_09CBD1F0(StageEffect14 *set, prop_params *params);
 
 void StageManager::Set14_set(prop_params *params) {
-    StageEffect14 *prop = alloc_and_push_prop<StageEffect14>();
-    link_model(prop, true);
-    func_game_sub_09CBD1F0(prop, params);
+    StageEffect14 *set = allocateStageEffect<StageEffect14>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CBD1F0(set, params);
 }
 
 
-extern "C" void func_game_sub_09CBD950(StageEffect15 *prop, prop_params *params);
+extern "C" void func_game_sub_09CBD950(StageEffect15 *set, prop_params *params);
 
 void StageManager::Set15_set(prop_params *params) {
-    StageEffect15 *prop = alloc_and_push_prop<StageEffect15>();
-    link_model(prop, true);
-    func_game_sub_09CBD950(prop, params);
+    StageEffect15 *set = allocateStageEffect<StageEffect15>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CBD950(set, params);
 }
 
 
-extern "C" void func_game_sub_09CBE478(StageEffect16 *prop, prop_params *params);
+extern "C" void func_game_sub_09CBE478(StageEffect16 *set, prop_params *params);
 
 void StageManager::Set16_set(prop_params *params) {
-    StageEffect16 *prop = alloc_and_push_prop<StageEffect16>();
-    link_model(prop, false);
-    func_game_sub_09CBE478(prop, params);
+    StageEffect16 *set = allocateStageEffect<StageEffect16>();
+    addSet(set);
+    link_model(set, false);
+    func_game_sub_09CBE478(set, params);
 }
 
 
-extern "C" void func_game_sub_09CBE7F8(StageEffect17 *prop, prop_params *params, u32 arg3);
+extern "C" void func_game_sub_09CBE7F8(StageEffect17 *set, prop_params *params, u32 arg3);
 
 void StageManager::Set17_set(prop_params *params, u32 arg3) {
-    StageEffect17 *prop = alloc_and_push_prop<StageEffect17>();
-    link_model(prop, true);
-    func_game_sub_09CBE7F8(prop, params, arg3);
+    StageEffect17 *set = allocateStageEffect<StageEffect17>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CBE7F8(set, params, arg3);
 }
 
 
-extern "C" void func_game_sub_09CBECB8(StageEffect18 *prop, StageEffect18Data *params);
+extern "C" void func_game_sub_09CBECB8(StageEffect18 *set, StageEffect18Data *params);
 
 void StageManager::Set18_set(StageEffect18Data *data) {
-    StageEffect18 *prop = alloc_and_push_prop<StageEffect18>();
-    link_model(prop, true);
-    func_game_sub_09CBECB8(prop, data);
+    StageEffect18 *set = allocateStageEffect<StageEffect18>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CBECB8(set, data);
 }
 
 
-extern "C" void func_game_sub_09CBF188(StageEffect19 *prop, u32 flags, ScePspFVector4 *position, u32 arg4, u32 arg5, u8 arg6, u16 arg7);
+extern "C" void func_game_sub_09CBF188(StageEffect19 *set, u32 flags, ScePspFVector4 *position, u32 arg4, u32 arg5, u8 arg6, u16 arg7);
 
 void StageManager::Set19_set(u32 flags, ScePspFVector4 *position, u32 arg4, u32 arg5, u8 arg6, u16 arg7, int pmo_index) {
-    StageEffect19 *prop = alloc_and_push_prop<StageEffect19>();
-    link_model(prop, pmo_index);
-    func_game_sub_09CBF188(prop, flags, position, arg4, arg5, arg6, arg7);
+    StageEffect19 *set = allocateStageEffect<StageEffect19>();
+    addSet(set);
+    link_model(set, pmo_index);
+    func_game_sub_09CBF188(set, flags, position, arg4, arg5, arg6, arg7);
 }
 
 
-extern "C" void func_game_sub_09CBFDF0(StageEffect20 *prop, u8 arg2);
+extern "C" void func_game_sub_09CBFDF0(StageEffect20 *set, u8 arg2);
 
 void StageManager::Set20_set(u8 arg2) {
-    StageEffect20 *prop = alloc_and_push_prop<StageEffect20>();
-    link_model(prop, true);
-    func_game_sub_09CBFDF0(prop, arg2);
+    StageEffect20 *set = allocateStageEffect<StageEffect20>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CBFDF0(set, arg2);
 }
 
 
-extern "C" void func_game_sub_09CC0890(StageEffect21 *prop, prop_params *params);
+extern "C" void func_game_sub_09CC0890(StageEffect21 *set, prop_params *params);
 
 void StageManager::Set21_set(prop_params *params) {
-    StageEffect21 *prop = alloc_and_push_prop<StageEffect21>();
-    link_model(prop, true);
-    func_game_sub_09CC0890(prop, params);
+    StageEffect21 *set = allocateStageEffect<StageEffect21>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC0890(set, params);
 }
 
 
-extern "C" void func_game_sub_09CC11F0(StageEffect22 *prop);
+extern "C" void func_game_sub_09CC11F0(StageEffect22 *set);
 
 void StageManager::Set22_set() {
-    StageEffect22 *prop = alloc_and_push_prop<StageEffect22>();
-    link_model(prop, true);
-    func_game_sub_09CC11F0(prop);
+    StageEffect22 *set = allocateStageEffect<StageEffect22>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC11F0(set);
 }
 
 
-extern "C" void func_game_sub_09CC1A90(StageEffect23 *prop, prop_params *params);
+extern "C" void func_game_sub_09CC1A90(StageEffect23 *set, prop_params *params);
 
 void StageManager::Set23_set(prop_params *params) {
-    StageEffect23 *prop = alloc_and_push_prop<StageEffect23>();
-    link_model(prop, true);
-    func_game_sub_09CC1A90(prop, params);
+    StageEffect23 *set = allocateStageEffect<StageEffect23>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC1A90(set, params);
 }
 
 
-extern "C" void func_game_sub_09CC2370(StageEffect24 *prop, prop_params *params);
+extern "C" void func_game_sub_09CC2370(StageEffect24 *set, prop_params *params);
 
 void StageManager::Set24_set(prop_params *params) {
-    StageEffect24 *prop = alloc_and_push_prop<StageEffect24>();
-    link_model(prop, true);
-    func_game_sub_09CC2370(prop, params);
+    StageEffect24 *set = allocateStageEffect<StageEffect24>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC2370(set, params);
 }
 
 
-extern "C" void func_game_sub_09CC2B88(StageEffect25 *prop, prop_params *params);
+extern "C" void func_game_sub_09CC2B88(StageEffect25 *set, prop_params *params);
 
 void StageManager::Set25_set(prop_params *params) {
-    StageEffect25 *prop = alloc_and_push_prop<StageEffect25>();
-    link_model(prop, true);
-    func_game_sub_09CC2B88(prop, params);
+    StageEffect25 *set = allocateStageEffect<StageEffect25>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC2B88(set, params);
 }
 
 
-extern "C" void func_game_sub_09CC33F8(StageEffect26 *prop, prop_params *params);
+extern "C" void func_game_sub_09CC33F8(StageEffect26 *set, prop_params *params);
 
 void StageManager::Set26_set(prop_params *params) {
-    StageEffect26 *prop = alloc_and_push_prop<StageEffect26>();
-    link_model(prop, true);
-    func_game_sub_09CC33F8(prop, params);
+    StageEffect26 *set = allocateStageEffect<StageEffect26>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC33F8(set, params);
 }
 
 
-extern "C" void func_game_sub_09CC4130(StageEffect27 *prop, prop_params *params);
+extern "C" void func_game_sub_09CC4130(StageEffect27 *set, prop_params *params);
 
 void StageManager::Set27_set(prop_params *params) {
-    StageEffect27 *prop = alloc_and_push_prop<StageEffect27>();
-    link_model(prop, true);
-    func_game_sub_09CC4130(prop, params);
+    StageEffect27 *set = allocateStageEffect<StageEffect27>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC4130(set, params);
 }
 
 
-extern "C" void func_game_sub_09CC4AA0(StageEffect28 *prop, prop_params *params);
+extern "C" void func_game_sub_09CC4AA0(StageEffect28 *set, prop_params *params);
 
 void StageManager::Set28_set(prop_params *params) {
-    StageEffect28 *prop = alloc_and_push_prop<StageEffect28>();
-    link_model(prop, true);
-    func_game_sub_09CC4AA0(prop, params);
+    StageEffect28 *set = allocateStageEffect<StageEffect28>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC4AA0(set, params);
 }
 
 
-extern "C" void func_game_sub_09CC5088(StageEffect29 *prop, prop_params *params, u16 arg3, u16 arg4);
+extern "C" void func_game_sub_09CC5088(StageEffect29 *set, prop_params *params, u16 arg3, u16 arg4);
 
 void StageManager::Set29_set(prop_params *params, u16 arg3, u16 arg4) {
-    StageEffect29 *prop = alloc_and_push_prop<StageEffect29>();
-    link_model(prop, true);
-    func_game_sub_09CC5088(prop, params, arg3, arg4);
+    StageEffect29 *set = allocateStageEffect<StageEffect29>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC5088(set, params, arg3, arg4);
 }
 
 
-extern "C" void func_game_sub_09CC5530(StageEffect30 *prop, prop_params *params);
+extern "C" void func_game_sub_09CC5530(StageEffect30 *set, prop_params *params);
 
 void StageManager::Set30_set(prop_params *params) {
-    StageEffect30 *prop = alloc_and_push_prop<StageEffect30>();
-    link_model(prop, true);
-    func_game_sub_09CC5530(prop, params);
+    StageEffect30 *set = allocateStageEffect<StageEffect30>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC5530(set, params);
 }
 
 
-extern "C" void func_lobby_task_09AF2C38(StageEffect31 *prop, prop_params *params);
+extern "C" void func_lobby_task_09AF2C38(StageEffect31 *set, prop_params *params);
 
 void StageManager::Set31_set(prop_params *params) {
-    StageEffect31 *prop = alloc_and_push_prop<StageEffect31>();
-    link_model(prop, true);
-    func_lobby_task_09AF2C38(prop, params);
+    StageEffect31 *set = allocateStageEffect<StageEffect31>();
+    addSet(set);
+    link_model(set, true);
+    func_lobby_task_09AF2C38(set, params);
 }
 
 
-extern "C" void func_game_sub_09CC5D10(StageEffect32 *prop, prop_params *params);
+extern "C" void func_game_sub_09CC5D10(StageEffect32 *set, prop_params *params);
 
 void StageManager::Set32_set(prop_params *params) {
-    StageEffect32 *prop = alloc_and_push_prop<StageEffect32>();
-    link_model(prop, true);
-    func_game_sub_09CC5D10(prop, params);
+    StageEffect32 *set = allocateStageEffect<StageEffect32>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC5D10(set, params);
 }
 
 
 extern "C" void func_game_sub_09CC6950(StageEffect33 *, u32, s16, ScePspFVector4 *, ScePspFVector4 *);
 
 void StageManager::Set33_set(u32 bug_flags, s16 bug_mesh_index, ScePspFVector4 *spawn_center, ScePspFVector4 *spawn_box) {
-    StageEffect33 *prop = alloc_and_push_prop<StageEffect33>();
-    link_model(prop, true);
-    func_game_sub_09CC6950(prop, bug_flags, bug_mesh_index, spawn_center, spawn_box);
+    StageEffect33 *set = allocateStageEffect<StageEffect33>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC6950(set, bug_flags, bug_mesh_index, spawn_center, spawn_box);
 }
 
 
-extern "C" void func_lobby_task_09AF3160(StageEffect34 *prop, prop_params *params, u32 arg3);
+extern "C" void func_lobby_task_09AF3160(StageEffect34 *set, prop_params *params, u32 arg3);
 
 void StageManager::Set34_set(prop_params *params, u32 arg3) {
-    StageEffect34 *prop = alloc_and_push_prop<StageEffect34>();
-    link_model(prop, true);
-    func_lobby_task_09AF3160(prop, params, arg3);
+    StageEffect34 *set = allocateStageEffect<StageEffect34>();
+    addSet(set);
+    link_model(set, true);
+    func_lobby_task_09AF3160(set, params, arg3);
 }
 
 
-extern "C" void func_game_sub_09CC7180(StageEffect35 *prop, prop_params *params);
+extern "C" void func_game_sub_09CC7180(StageEffect35 *set, prop_params *params);
 
 void StageManager::Set35_set(prop_params *params) {
-    StageEffect35 *prop = alloc_and_push_prop<StageEffect35>();
-    link_model(prop, true);
-    func_game_sub_09CC7180(prop, params);
+    StageEffect35 *set = allocateStageEffect<StageEffect35>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC7180(set, params);
 }
 
 
-extern "C" void func_lobby_task_09AF3F58(StageEffect36 *prop);
+extern "C" void func_lobby_task_09AF3F58(StageEffect36 *set);
 
 void StageManager::Set36_set() {
-    StageEffect36 *prop = alloc_and_push_prop<StageEffect36>();
-    link_model(prop, true);
-    func_lobby_task_09AF3F58(prop);
+    StageEffect36 *set = allocateStageEffect<StageEffect36>();
+    addSet(set);
+    link_model(set, true);
+    func_lobby_task_09AF3F58(set);
 }
 
 
-extern "C" void func_lobby_task_09AF5580(StageEffect37 *prop, u8 arg2, prop_params *params, u16 arg4, u32 *arg5, u32 *arg6);
+extern "C" void func_lobby_task_09AF5580(StageEffect37 *set, u8 arg2, prop_params *params, u16 arg4, u32 *arg5, u32 *arg6);
 
 void StageManager::Set37_set(u8 arg2, prop_params *params, u16 arg4, u32 *arg5, u32 *arg6) {
-    StageEffect37 *prop = alloc_and_push_prop<StageEffect37>();
-    link_model(prop, true);
-    func_lobby_task_09AF5580(prop, arg2, params, arg4, arg5, arg6);
+    StageEffect37 *set = allocateStageEffect<StageEffect37>();
+    addSet(set);
+    link_model(set, true);
+    func_lobby_task_09AF5580(set, arg2, params, arg4, arg5, arg6);
 }
 
 
-extern "C" void func_lobby_task_09AF6B20(StageEffect38 *prop, prop_params *params);
+extern "C" void func_lobby_task_09AF6B20(StageEffect38 *set, prop_params *params);
 
 void StageManager::Set38_set(prop_params *params) {
-    StageEffect38 *prop = alloc_and_push_prop<StageEffect38>();
-    link_model(prop, true);
-    func_lobby_task_09AF6B20(prop, params);
+    StageEffect38 *set = allocateStageEffect<StageEffect38>();
+    addSet(set);
+    link_model(set, true);
+    func_lobby_task_09AF6B20(set, params);
 }
 
 
-extern "C" void func_lobby_task_09AF7260(StageEffect39 *prop, prop_params *params);
+extern "C" void func_lobby_task_09AF7260(StageEffect39 *set, prop_params *params);
 
 void StageManager::Set39_set(prop_params *params) {
-    StageEffect39 *prop = alloc_and_push_prop<StageEffect39>();
-    link_model(prop, true);
-    func_lobby_task_09AF7260(prop, params);
+    StageEffect39 *set = allocateStageEffect<StageEffect39>();
+    addSet(set);
+    link_model(set, true);
+    func_lobby_task_09AF7260(set, params);
 }
 
 
-extern "C" void func_lobby_task_09AF78B8(StageEffect40 *prop, u8 arg2, prop_params *params, u16 arg4, u16 arg5, u32 *arg6, u32 *arg7);
+extern "C" void func_lobby_task_09AF78B8(StageEffect40 *set, u8 arg2, prop_params *params, u16 arg4, u16 arg5, u32 *arg6, u32 *arg7);
 
 void StageManager::Set40_set(u8 arg2, prop_params *params, u16 arg4, u16 arg5, u32 *arg6, u32 *arg7) {
-    StageEffect40 *prop = alloc_and_push_prop<StageEffect40>();
-    link_model(prop, true);
-    func_lobby_task_09AF78B8(prop, arg2, params, arg4, arg5, arg6, arg7);
+    StageEffect40 *set = allocateStageEffect<StageEffect40>();
+    addSet(set);
+    link_model(set, true);
+    func_lobby_task_09AF78B8(set, arg2, params, arg4, arg5, arg6, arg7);
 }
 
 
-extern "C" void func_lobby_task_09AF8C18(StageEffect41 *prop, u8 arg2, u32 arg3, u16 arg4);
+extern "C" void func_lobby_task_09AF8C18(StageEffect41 *set, u8 arg2, u32 arg3, u16 arg4);
 
 void StageManager::Set41_set(u8 arg2, u32 arg3, u16 arg4) {
-    StageEffect41 *prop = alloc_and_push_prop<StageEffect41>();
-    link_model(prop, true);
-    func_lobby_task_09AF8C18(prop, arg2, arg3, arg4);
+    StageEffect41 *set = allocateStageEffect<StageEffect41>();
+    addSet(set);
+    link_model(set, true);
+    func_lobby_task_09AF8C18(set, arg2, arg3, arg4);
 }
 
 
-extern "C" void func_lobby_task_09AF9B38(StageEffect42 *prop, u8 arg2, u32 arg3, u8 arg4, u32 *arg5, u32 *arg6);
+extern "C" void func_lobby_task_09AF9B38(StageEffect42 *set, u8 arg2, u32 arg3, u8 arg4, u32 *arg5, u32 *arg6);
 
 void StageManager::Set42_set(u8 arg2, u32 arg3, u8 arg4, u32 *arg5, u32 *arg6) {
-    StageEffect42 *prop = alloc_and_push_prop<StageEffect42>();
-    link_model(prop, true);
-    func_lobby_task_09AF9B38(prop, arg2, arg3, arg4, arg5, arg6);
+    StageEffect42 *set = allocateStageEffect<StageEffect42>();
+    addSet(set);
+    link_model(set, true);
+    func_lobby_task_09AF9B38(set, arg2, arg3, arg4, arg5, arg6);
 }
 
 
-extern "C" void func_lobby_task_09AFB708(StageEffect43 *prop, u32 arg2, u8 arg3, float arg4, u32 arg5);
+extern "C" void func_lobby_task_09AFB708(StageEffect43 *set, u32 arg2, u8 arg3, float arg4, u32 arg5);
 
 void StageManager::Set43_set(u32 arg2, u8 arg3, float arg4, u32 arg5) {
-    StageEffect43 *prop = alloc_and_push_prop<StageEffect43>();
-    link_model(prop, true);
-    func_lobby_task_09AFB708(prop, arg2, arg3, arg4, arg5);
+    StageEffect43 *set = allocateStageEffect<StageEffect43>();
+    addSet(set);
+    link_model(set, true);
+    func_lobby_task_09AFB708(set, arg2, arg3, arg4, arg5);
 }
 
 
-extern "C" void func_lobby_task_09AFB7C8(StageEffect43 *prop, u32 *arg2);
+extern "C" void func_lobby_task_09AFB7C8(StageEffect43 *set, u32 *arg2);
 
 void StageManager::Set43_set(u32 *arg2) {
-    StageEffect43 *prop = alloc_and_push_prop<StageEffect43>();
-    link_model(prop, true);
-    func_lobby_task_09AFB7C8(prop, arg2);
+    StageEffect43 *set = allocateStageEffect<StageEffect43>();
+    addSet(set);
+    link_model(set, true);
+    func_lobby_task_09AFB7C8(set, arg2);
 }
 
 
-extern "C" void func_game_sub_09CC7DD8(StageEffect44 *prop);
+extern "C" void func_game_sub_09CC7DD8(StageEffect44 *set);
 
 void StageManager::Set44_set() {
-    StageEffect44 *prop = alloc_and_push_prop<StageEffect44>();
-    link_model(prop, true);
-    func_game_sub_09CC7DD8(prop);
+    StageEffect44 *set = allocateStageEffect<StageEffect44>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC7DD8(set);
 }
 
 
-extern "C" void func_game_sub_09CC8378(StageEffect45 *prop, prop_params *params);
+extern "C" void func_game_sub_09CC8378(StageEffect45 *set, prop_params *params);
 
 void StageManager::Set45_set(prop_params *params) {
-    StageEffect45 *prop = alloc_and_push_prop<StageEffect45>();
-    link_model(prop, true);
-    func_game_sub_09CC8378(prop, params);
+    StageEffect45 *set = allocateStageEffect<StageEffect45>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC8378(set, params);
 }
 
 
-extern "C" void func_stage210_09D5E510(StageEffect46 *prop);
+extern "C" void func_stage210_09D5E510(StageEffect46 *set);
 
 void StageManager::Set46_set() {
-    StageEffect46 *prop = alloc_and_push_prop<StageEffect46>();
-    link_model(prop, true);
-    func_stage210_09D5E510(prop);
+    StageEffect46 *set = allocateStageEffect<StageEffect46>();
+    addSet(set);
+    link_model(set, true);
+    func_stage210_09D5E510(set);
 }
 
 
-extern "C" void func_game_sub_09CC8730(StageEffect47 *prop, prop_params *params);
+extern "C" void func_game_sub_09CC8730(StageEffect47 *set, prop_params *params);
 
 void StageManager::Set47_set(prop_params *params, int pmo_index) {
-    StageEffect47 *prop = alloc_and_push_prop<StageEffect47>();
-    link_model(prop, pmo_index);
-    func_game_sub_09CC8730(prop, params);
+    StageEffect47 *set = allocateStageEffect<StageEffect47>();
+    addSet(set);
+    link_model(set, pmo_index);
+    func_game_sub_09CC8730(set, params);
 }
 
 
-extern "C" void func_game_sub_09CC8C60(StageEffect48 *prop, prop_params *params);
+extern "C" void func_game_sub_09CC8C60(StageEffect48 *set, prop_params *params);
 
 void StageManager::Set48_set(prop_params *params) {
-    StageEffect48 *prop = alloc_and_push_prop<StageEffect48>();
-    link_model(prop, true);
-    func_game_sub_09CC8C60(prop, params);
+    StageEffect48 *set = allocateStageEffect<StageEffect48>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC8C60(set, params);
 }
 
 
-extern "C" void func_game_sub_09CC9850(StageEffect49 *prop, StageEffect49Data *data);
+extern "C" void func_game_sub_09CC9850(StageEffect49 *set, StageEffect49Data *data);
 
 void StageManager::Set49_set(StageEffect49Data *data) {
-    StageEffect49 *prop = alloc_and_push_prop<StageEffect49>();
-    link_model(prop, true);
-    func_game_sub_09CC9850(prop, data);
+    StageEffect49 *set = allocateStageEffect<StageEffect49>();
+    addSet(set);
+    link_model(set, true);
+    func_game_sub_09CC9850(set, data);
 }
 
 
@@ -737,7 +785,7 @@ inline u32 header_mesh_data_size(pmo_header *header) {
     return header->mesh_data_size();
 }
 
-void StageManager::compile_pac(pac_header *pac, bool load_all) {
+void StageManager::bindStageData(pac_header *pac, bool load_all) {
     cache.reset(slab, sizeof(slab));
     vram_transfer_size = 0;
 
@@ -755,18 +803,18 @@ void StageManager::compile_pac(pac_header *pac, bool load_all) {
         pmo_mesh_data *mesh_data = model_header->mesh_data();
         sceDmacMemcpy(vram_block, mesh_data, mesh_data_size);
 
-        stage->model_pmo.compile(buffer, model_header, vram_block);
+        stage->model_pmo.bind(buffer, model_header, vram_block);
     }
 
     tmh_header *tmh = (tmh_header *)pac->data(1);
     if (tmh != 0) {
         u32 *texture_buffer = (u32 *)cache.alloc(tmh->picture_count * 0x20, 0x10);
-        stage->model_tmh.compile(texture_buffer, tmh, 0);
+        stage->model_tmh.bind(texture_buffer, tmh, 0);
     }
 
     stage_environment_params *environment = (stage_environment_params *)pac->data(3);
     if (environment != 0) {
-        stage->compile_environment_params(environment);
+        stage->bind_environment_params(environment);
     }
 
     pmo_header *prop_header = (pmo_header *)pac->data(2);
@@ -782,7 +830,7 @@ void StageManager::compile_pac(pac_header *pac, bool load_all) {
         pmo_mesh_data *mesh_data = prop_header->mesh_data();
         sceDmacMemcpy(vram_block, mesh_data, mesh_data_size);
 
-        stage->prop_pmo.compile(buffer, prop_header, vram_block);
+        stage->prop_pmo.bind(buffer, prop_header, vram_block);
     }
 
     if (load_all == true) {
@@ -821,36 +869,35 @@ u8 *StageManager::vram_alloc(s32 size) {
     return block;
 }
 
-void StageManager::push(StageEffectBase *prop) {
-    if (!prop_list) {
-        prop_list = prop;
-        prop->prev = 0;
-        prop->next = 0;
+void StageManager::addSet(StageEffectBase *set) {
+    if (!set_list) {
+        set_list = set;
+        set->prev = 0;
+        set->next = 0;
     } else {
-        prop_list->prev = prop;
-        prop->next = prop_list;
-        prop->prev = 0;
-        prop_list = prop;
+        set_list->prev = set;
+        set->next = set_list;
+        set->prev = 0;
+        set_list = set;
     }
 }
 
-void StageManager::free(StageEffectBase *prop) {
-    StageEffectBase *next = prop->next;
-    if (prop_list == prop) {
-        prop_list = next;
+void StageManager::removeSet(StageEffectBase *set) {
+    StageEffectBase *next = set->next;
+    if (set_list == set) {
+        set_list = next;
         if (next != 0) {
             next->prev = 0;
         }
     } else {
         if (next == 0) {
-            prop->prev->next = next;
+            set->prev->next = next;
         } else {
-            prop->prev->next = next;
-            prop->next->prev = prop->prev;
+            set->prev->next = next;
+            set->next->prev = set->prev;
         }
     }
-    delete prop;
-    cache.free(prop);
+    cache::pushObjWork(set, this);
 }
 
 u16 StageManager::find_map_stage_index(int map_id, u16 stage_id) {

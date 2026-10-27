@@ -199,6 +199,15 @@ private:
     MixFilter();
 };
 
+struct InventoryType {
+    enum {
+        BAG,
+        BOX,
+    };
+private:
+    InventoryType();
+};
+
 struct MixQuantity {
     u8 minimum;
     u8 percents[3];
@@ -219,12 +228,12 @@ struct ItemManager : Singleton<ItemManager> {
     MixDefinition *findMix(s16 firstMaterialItemId, s16 secondMaterialItemId, int mixFlags, bool isItemBox, int mixFilter);
     bool getMixBit(MixDefinition *mix, int mixFlags, bool isItemBox);
     bool getMixBit(s16 firstMaterialItemId, s16 secondMaterialItemId);
-    s16 combine(u8 *quantityOut, Player *player, s16 firstMaterialItemId, s16 secondMaterialItemId, int isItemBox);
+    s16 combine(u8 *quantityOut, Player *player, s16 firstMaterialItemId, s16 secondMaterialItemId, int inventoryType);
     s16 boxRemove(u16 itemId, s16 quantity);
     s16 boxRemove(u16 itemId, s16 quantity, u16 itemBoxIndex);
     u16 boxFind(u16 itemId);
-    s8 mixRate(s16 firstMaterialItemId, s16 secondMaterialItemId, int isItemBox);
-    s8 mixRate(MixDefinition *mix, int isItemBox);
+    s8 mixRate(s16 firstMaterialItemId, s16 secondMaterialItemId, int inventoryType);
+    s8 mixRate(MixDefinition *mix, int inventoryType);
     void setMixBit(MixDefinition *mix);
     u8 maxMixQuantity(MixDefinition *mix);
     MixDefinition *nextMix(u8 *mixId, char step, u16 *firstMaterialItemId, u16 *secondMaterialItemId, int mixFlags);

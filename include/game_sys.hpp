@@ -183,6 +183,10 @@ struct NetPlayerData {
 };
 
 struct GameSys : Singleton<GameSys> {
+    enum {
+        LOBBY_TASK = 1 << 0,
+    };
+
     u8 pad_0x0[0x1C];
     u16 short_0x1C;
     u8 pad_0x1E[0x28 - 0x1E];
@@ -235,6 +239,10 @@ struct GameSys : Singleton<GameSys> {
 
     inline bool background_load_check() {
         return GameSys::objectPtr->options.backgroundLoading && !GameSys::objectPtr->is_gallery_task;
+    }
+
+    inline bool isLobby() {
+        return (flags_0x6AF14 & LOBBY_TASK) != 0;
     }
 };
 

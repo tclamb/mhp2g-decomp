@@ -172,7 +172,7 @@ void emit_world_model(ScePspFMatrix4 *transform, ScePspFVector4 *scale) {
 
 #ifdef BUILD_NONMATCHING
 // 65/7700, one regswap remaining
-int pmo::compile(void *buffer, pmo_header *header, pmo_mesh_data *mesh_data) {
+int pmo::bind(void *buffer, pmo_header *header, pmo_mesh_data *mesh_data) {
     int i;
 
     this->header = header;
@@ -206,14 +206,14 @@ int pmo::compile(void *buffer, pmo_header *header, pmo_mesh_data *mesh_data) {
     return 1;
 }
 #else
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", compile__3pmoFPvP10pmo_headerP13pmo_mesh_data);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", bind__3pmoFPvP10pmo_headerP13pmo_mesh_data);
 #endif
 
-int ModelBase::compile_pmo(void *buffer, pmo_header *header, pmo_mesh_data *mesh_data) {
-    return model_pmo.compile(buffer, header, mesh_data);
+int ModelBase::bind_pmo(void *buffer, pmo_header *header, pmo_mesh_data *mesh_data) {
+    return model_pmo.bind(buffer, header, mesh_data);
 }
 
-int tmh::compile(void *buffer, tmh_header *header, u8 index) {
+int tmh::bind(void *buffer, tmh_header *header, u8 index) {
     GeTexture t;
     if (this != 0) {
         this->fragments = (tmh_fragment*)buffer;
@@ -248,8 +248,8 @@ int tmh::compile(void *buffer, tmh_header *header, u8 index) {
     return 0;
 }
 
-int ModelBase::compile_tmh(void *buffer, tmh_header *header) {
-    return model_tmh.compile(buffer, header, 0);
+int ModelBase::bind_tmh(void *buffer, tmh_header *header) {
+    return model_tmh.bind(buffer, header, 0);
 }
 
 void ModelBase::operator delete(void *p) {

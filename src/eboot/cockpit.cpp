@@ -496,7 +496,7 @@ void Cockpit::method_08818098() {
             SystemFont::objectPtr->setFontColor(FontColor::WHITE);
             char *resultName = ITEM_NAME(mix->successItemId);
             xyprintf(D_eboot_08935AE4.textLeft, D_eboot_08935AE4.textTop + D_eboot_08935AE4.textLineSpacing, D_eboot_08935AB8, resultName);
-            s8 mixRate = ItemManager::objectPtr->mixRate(mix, false);
+            s8 mixRate = ItemManager::objectPtr->mixRate(mix, InventoryType::BAG);
             SystemFont::objectPtr->setFontColor(D_eboot_08938474[mixRateColorId(mixRate)]);
             xyprintf(resultIndent, D_eboot_08935AE4.textTop + (D_eboot_08935AE4.textLineSpacing * 2), UI_STRING(D_eboot_089A9834[4]), mixRate);
             SystemFont::objectPtr->setFontColor(FontColor::WHITE);
