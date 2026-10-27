@@ -56,14 +56,12 @@ void ObjManager::clear() {
         ObjBase *objPtr = objListHeads[i];
         if (objPtr) {
             ObjBase *next = objPtr->nextObj;
-            delete objPtr;
-            cache.free(objPtr);
+            cache::pushObjWork(objPtr, this);
             objPtr = next;
 
             while (objPtr) {
                 next = objPtr->nextObj;
-                delete objPtr;
-                cache.free(objPtr);
+                cache::pushObjWork(objPtr, this);
                 objPtr = next;
             }
         }

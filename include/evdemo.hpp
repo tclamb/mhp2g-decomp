@@ -108,7 +108,7 @@ struct Evdemo : Singleton<Evdemo> {
     bool demo_skip_chk();
     void start_next_demo();
     u16 bgm_id();
-    u8 demo_type();
+    u8 bgm_type();
     int event_flag_id();
     bool Em_demo_chk();
     int em_demo_ready_chk();

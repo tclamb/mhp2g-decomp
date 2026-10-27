@@ -26,5 +26,31 @@ struct cache {
     u8 *alloc(u32 size, u32 align);
     void free(void* buf);
 
+    template <typename T, typename R, typename M>
+    static inline R *pullObjWork(M *manager) {
+        T *memory = (T *)manager->cache.alloc(sizeof(T), alignof(ScePspFVector4));
+        if (memory != 0) {
+            memset(memory, 0, sizeof(T));
+            T *obj = new (memory) T();
+            R *result = obj;
+            if (result == 0) {
+                manager->cache.free(memory);
+            }
+            return result;
+        }
+        return 0;
+    }
+
+    template <typename T, typename M>
+    static inline T *pullObjWork(M *manager) {
+        return pullObjWork<T, T, M>(manager);
+    }
+
+    template <typename T, typename M>
+    static inline void pushObjWork(T *set, M *manager) {
+        delete set;
+        manager->cache.free(set);
+    }
+
     ~cache() {}
 };

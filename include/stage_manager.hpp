@@ -24,7 +24,7 @@ struct StageEffectBase : Draw {
     }
     virtual ~StageEffectBase();
     virtual void draw() = 0;
-    virtual void vtable_0x10();
+    virtual void enqueue();
     virtual void setup() = 0;
     virtual void update() = 0;
     virtual void call_ptmf();
@@ -76,7 +76,7 @@ struct StageManager : Singleton<StageManager> {
     u8 unknown_0xA2C4[4];
     u8 unknown_0xA2C8;
     ScePspFVector4 unknown_0xA2D0;
-    StageEffectBase *prop_list;
+    StageEffectBase *set_list;
     pac_header *stage_pac;
     u8 unknown_0xA2E8[0x100];
     u8 flag_0xA3E8;
@@ -86,12 +86,12 @@ struct StageManager : Singleton<StageManager> {
     ~StageManager();
     void reset();
     void unload();
-    void call_stage_ptmf_0x3D8();
-    void register_drawable();
+    void moveStage();
+    void enqueueStage();
 
-    void call_prop_list_vtable_0x10();
-    void call_prop_list_ptmf();
-    void destroy_prop_list();
+    void enqueueSet();
+    void moveSet();
+    void freeSet();
 
     void Set00_set(prop_params *params);
     void Set01_set(prop_params *params, u32 arg3);
@@ -154,11 +154,11 @@ struct StageManager : Singleton<StageManager> {
     void unknown_0xA2E8_clear();
     u32 register_sound(u32 arg2, u32 arg3, u32 arg4, u32 arg5, u32 arg6, ScePspFVector4 *arg7, u32 arg8);
     void register_lobby_sounds();
-    void compile_pac(pac_header *pac, bool load_all);
+    void bindStageData(pac_header *pac, bool load_all);
     void vram_clear();
     u8 *vram_alloc(s32 size);
-    void push(StageEffectBase *prop);
-    void free(StageEffectBase *prop);
+    void addSet(StageEffectBase *set);
+    void removeSet(StageEffectBase *set);
     u16 find_map_stage_index(int map_id, u16 stage_id);
     stage_exit *stage_exits();
     s8 stage_exit_count();
@@ -170,40 +170,25 @@ struct StageManager : Singleton<StageManager> {
 
 private:
     template<typename T>
-    inline T *alloc_prop() {
-        void *memory = cache.alloc(sizeof(T), 0x10);
-        if (memory != 0) {
-            memset(memory, 0, sizeof(T));
-            void *prop = new (memory) T();
-            if (!prop) {
-                cache.free(memory);
-            }
-            return (T *)prop;
-        }
-        return 0;
+    inline T *allocateStageEffect() {
+        T *set = (T *)cache::pullObjWork<T, StageEffectBase>(this);
+        return set;
     }
 
-    template<typename T>
-    inline T *alloc_and_push_prop() {
-        T *prop = alloc_prop<T>();
-        push(prop);
-        return prop;
-    }
-
-    inline void link_model(StageEffectBase *prop, int pmo_index) {
+    inline void link_model(StageEffectBase *set, int pmo_index) {
         if (pmo_index == 0) {
             StageBase *st = stage;
-            prop->prop_pmo = &st->model_pmo;
-            prop->prop_tmh = &st->model_tmh;
+            set->prop_pmo = &st->model_pmo;
+            set->prop_tmh = &st->model_tmh;
         } else if (pmo_index == 1) {
             StageBase *st = stage;
-            prop->prop_pmo = &st->prop_pmo;
-            prop->prop_tmh = &st->model_tmh;
+            set->prop_pmo = &st->prop_pmo;
+            set->prop_tmh = &st->model_tmh;
         }
     }
 
     template<pmo StageBase::*P>
-    inline void compile_stage_pmo(pmo_header *header);
+    inline void bind_stage_pmo(pmo_header *header);
 
     // distance of point P to rectangle in the XZ plane with center (A+B)/2, width |AB|, and height |2t|
     float distance_point_rectangle(ScePspFVector4 *P, ScePspFVector4 *A, ScePspFVector4 *B, float t);
