@@ -523,8 +523,8 @@ void StageBase::vtable_0x88(pmo *pmo, void *data) {
 }
 
 extern "C" {
-    // vfpu trunc?? effectively: return (float)(u32)x;
-    float func_eboot_08899DF8(float x);
+    // vf2id (toward -inf) then vi2f, i.e. floor(x); used below to wrap the texture u offset into [0, 1)
+    float sceVfpuScalarFloor(float x);
 }
 
 void StageBase::vtable_0x8C(pmo *pmo, void *data, u8 mesh_index) {
@@ -532,7 +532,7 @@ void StageBase::vtable_0x8C(pmo *pmo, void *data, u8 mesh_index) {
 
     ScePspUnion32 u_offset;
     u_offset.f = 0.033333335f * ((360.0f * unknown_0x1C2) / 65536.0f);
-    u_offset.f -= func_eboot_08899DF8(u_offset.f);
+    u_offset.f -= sceVfpuScalarFloor(u_offset.f);
     ge::texoffsetu(u_offset);
 
     u16 v_period = args->v_period;
