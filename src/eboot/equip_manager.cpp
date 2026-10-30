@@ -291,8 +291,8 @@ s16 EquipManager::equipmentValue(Player *player, u8 attribute, u8 usePlayer) {
     EquipmentSet equip;
     GameSys *gs = GameSys::objectPtr;
 
-    if ((bool)(gs->flags_0x6AF14 & 4) == true ||
-        (bool)(gs->flags_0x6AF14 & 8) == true ||
+    if ((bool)(gs->gameSysFlags & GameSysFlag::TRAINING_SCHOOL) == true ||
+        (bool)(gs->gameSysFlags & GameSysFlag::ARCADE_TASK) == true ||
         player->Pl_master_ck() == false ||
         usePlayer == 1) {
         copyEquipmentEntry(&equip.weapon, &player->equipment.weapon);

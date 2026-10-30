@@ -6,36 +6,6 @@
 #include "draw.hpp"
 #include "common.h"
 
-struct Hierarchy {
-    inline Hierarchy() {
-        for (int i = 0; i < 4; ++i) {
-            roots[i] = 0;
-        }
-        for (int i = 0; i < 4; ++i) {
-            unknown_0x128[i] = 0;
-            unknown_0x130[i] = 0;
-            unknown_0x138[i] = 0;
-        }
-        root_count = 0;
-        chain_count = 0;
-    }
-    virtual ~Hierarchy() {}
-
-    u8 unknown_0x4[0x10C];
-    Joint *roots[4];
-    u16 root_count;
-    u16 chain_count; // ??
-    u32 joint_count;
-    u8 unknown_0x128[4];
-    u32 *motion_table;
-    u16 unknown_0x130[4];
-    u16 unknown_0x138[4];
-};
-
-extern "C" {
-    void func_eboot_088641B8(Hierarchy *);
-}
-
 struct tmh_block_header {
     u32 size;
     u32 type;

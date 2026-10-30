@@ -209,10 +209,10 @@ int Evdemo::map_demo_chk() {
     if ((bool)(System::objectPtr->wirelessIsOn & 1) == true) {
         return 0;
     }
-    if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 0x100) == true) {
+    if ((bool)(GameSys::objectPtr->gameSysFlags & GameSysFlag::BEGINNER_EXERCISES) == true) {
         return 0;
     }
-    if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 4) == true) {
+    if ((bool)(GameSys::objectPtr->gameSysFlags & GameSysFlag::TRAINING_SCHOOL) == true) {
         return 0;
     }
     Quest *quest = Quest::objectPtr;
@@ -354,12 +354,7 @@ int Evdemo::event000(EvdemoData *data) {
         if (GameSys::objectPtr->is_gallery_task != false) {
             break;
         }
-        void *buffer;
-        if ((DataManager::objectPtr->entries[0x2A].flags & 2) != 0) {
-            buffer = DataManager::objectPtr->entries[0x2A].buffer;
-        } else {
-            buffer = NULL;
-        }
+        void *buffer = DataManager::objectPtr->getAdrs(BGM);
         if (buffer != NULL) {
             load_demo_bgm();
             data->uc.state++;
@@ -382,8 +377,8 @@ int Evdemo::event000(EvdemoData *data) {
     }
     if (GameSys::objectPtr->is_gallery_task == false && is_dragon_demo != false && is_bgm_loading != false && !FileSys::objectPtr->is_loading()) {
         u16 file_id;
-        if ((DataManager::objectPtr->entries[0x2A].flags & 3) != 0) {
-            file_id = DataManager::objectPtr->entries[0x2A].file_id;
+        if ((DataManager::objectPtr->entries[BGM].status & (DataManager::LOADING | DataManager::ENABLE)) != 0) {
+            file_id = DataManager::objectPtr->entries[BGM].file_id;
         } else {
             file_id = FileId::INVALID_ID;
         }
@@ -396,10 +391,10 @@ int Evdemo::event000(EvdemoData *data) {
                 demo_id = DemoId::NONE;
             }
             if (demo_id == DemoId::YAMA_TSUKAMI_INTRO) {
-                DataManager::objectPtr->load(0x2A, FileId::MT_CP121_AT3, 0);
+                DataManager::objectPtr->load(BGM, FileId::MT_CP121_AT3, 0);
             } else {
                 int fight_bgm_file_id = func_game_task_09A5FBF0(BgmServer::objectPtr);
-                DataManager::objectPtr->load(0x2A, fight_bgm_file_id, 0);
+                DataManager::objectPtr->load(BGM, fight_bgm_file_id, 0);
             }
         }
     }
@@ -430,12 +425,7 @@ int Evdemo::demo_finish(EvdemoData *data) {
         if (is_skipping == 0) {
             func_eboot_08882C5C(Sound::objectPtr, 0);
             if (GameSys::objectPtr->is_gallery_task == false) {
-                u8 *buffer;
-                if ((DataManager::objectPtr->entries[0x2A].flags & 2) != 0) {
-                    buffer = DataManager::objectPtr->entries[0x2A].buffer;
-                } else {
-                    buffer = 0;
-                }
+                u8 *buffer = DataManager::objectPtr->getAdrs(BGM);
                 if (buffer != 0) {
                     load_demo_bgm();
                 }
@@ -450,7 +440,7 @@ int Evdemo::demo_finish(EvdemoData *data) {
     default:
         break;
     }
-    func_eboot_088DF734(PlayerManager::objectPtr);
+    PlayerManager::objectPtr->demoOff();
     return 0;
 }
 
@@ -465,7 +455,7 @@ void Evdemo::evdemo_camera_request(EvdemoDefinition *definition) {
         if (enemy == NULL) {
             continue;
         }
-        if ((bool)(enemy->flags & Draw::ALIVE) != false
+        if ((bool)(enemy->drawFlags & DrawFlag::ACTIVE) != false
             && GameSys::objectPtr->em_moto_type_ck(enemy->pl_type) == definition->em_type) {
             Camera::objectPtr->DemoCameraCancel();
             Camera::objectPtr->DemoCameraRequest(definition->demo_id, enemy, false);
@@ -494,7 +484,7 @@ bool Evdemo::demo_skip_chk() {
             }
             result = true;
             for (int i = 0; i < 4; i++) {
-                if ((bool)GameSys::objectPtr->netPlayers[(u8)i].active != false) {
+                if ((bool)GameSys::objectPtr->playerModels[(u8)i].active != false) {
                     if ((pl_skip_mask & (1 << i)) == 0) {
                         result = false;
                     }
@@ -580,9 +570,9 @@ void Evdemo::load_demo_bgm() {
     func_eboot_08882620(Sound::objectPtr, 2);
     u32 size2 = FileSys::objectPtr->file_size((u16)bgm);
     func_eboot_0888633C(Stream::objectPtr, 0x12, (u16)bgm, size2);
-    u32 p = func_eboot_08886368(Stream::objectPtr, 0x12);
-    DataManager::objectPtr->copy((void *)p, 0x2A, -1);
-    DataManager::objectPtr->free(0x2A);
+    void *p = func_eboot_08886368(Stream::objectPtr, 0x12);
+    DataManager::objectPtr->copy(p, BGM, -1);
+    DataManager::objectPtr->free(BGM);
     is_bgm_loading = 0;
 }
 

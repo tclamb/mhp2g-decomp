@@ -119,6 +119,7 @@ s16 ItemManager::bagSpace(u16 itemId) {
 s16 ItemManager::bagRemove(s16 inventoryIndex) {
     UserData &userData = GameSys::objectPtr->userData;
 
+    ASSERT(inventoryIndex >= 0);
     if (inventoryIndex >= ITEM_BAG_CAPACITY) {
         return 2;
     }

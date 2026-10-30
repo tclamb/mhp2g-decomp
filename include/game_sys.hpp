@@ -177,18 +177,91 @@ struct Options {
     s8 bowgunShoulderCam;
 };
 
+struct SexId {
+    enum {
+        MALE,
+        FEMALE,
+        COUNT,
+    };
+private:
+    SexId();
+};
+
+struct BodyModelType {
+    enum {
+        LEG,
+        FACE,
+        HEAD,
+        CHEST,
+        ARM,
+        WAIST,
+        COUNT,
+    };
+private:
+    BodyModelType();
+};
+
+struct MaterialMask {
+    enum {
+        HIDE_MATERIAL_0 = 1 << 1,
+        HIDE_MATERIAL_1 = 1 << 2,
+        HIDE_ALL = 1 << 3,
+    };
+private:
+    MaterialMask();
+};
+
+struct EquipmentColor {
+    u8 id;
+    u8 r;
+    u8 g;
+    u8 b;
+
+    u32 rainbow();
+};
+
+struct NetPlayerDefinition {
+    u8 sexId;
+    u8 voiceId;
+    u8 clothingId;
+    u8 faceId;
+    u8 hairId;
+    EquipmentColor equipmentColors[5];
+    u32 hairColor;
+    EquipmentSet equipment;
+    u8 hunterRank;
+    u8 kitchenSkills[5];
+    u8 titleIds[3];
+    u8 guid[8];
+};
+
 struct NetPlayerData {
     u8 active;
-    u8 pad_0x1[0x8C - 0x1];
+    u8 pad_0x1[0xF];
+    NetPlayerDefinition definition;
+};
+
+struct GameSysFlag {
+    enum {
+        LOBBY_TASK = 1 << 0,
+        CASTLE_SCHRADE = 1 << 1,
+        TRAINING_SCHOOL = 1 << 2,
+        ARCADE_TASK = 1 << 3,
+        CONT_TASK = 1 << 5,
+        EDIT_TASK = 1 << 6,
+        GROUP_EXERCISES = 1 << 7,
+        BEGINNER_EXERCISES = 1 << 8,
+        GAME_TASK = 1 << 9,
+    };
+private:
+    GameSysFlag();
 };
 
 struct GameSys : Singleton<GameSys> {
-    enum {
-        LOBBY_TASK = 1 << 0,
-    };
+    enum { PLAYER_MODEL_COUNT = 4 };
 
     u8 pad_0x0[0x1C];
-    u16 short_0x1C;
+    u16 frame_counter;
     u8 pad_0x1E[0x28 - 0x1E];
     u8 player_id;
     u8 pad_0x29;
@@ -196,7 +269,7 @@ struct GameSys : Singleton<GameSys> {
     u8 pad_0x2B[0x2E - 0x2B];
     u8 byte_0x2E;
     u8 pad_0x2F;
-    NetPlayerData netPlayers[4];
+    NetPlayerData playerModels[PLAYER_MODEL_COUNT];
     u8 pad_0x260[0x390-0x260];
     InventoryEntry itemBox[32];
     u8 pad_0x410[0x422-0x410];
@@ -211,7 +284,7 @@ struct GameSys : Singleton<GameSys> {
     u16 stage_id;
     u8 map_id;
     u16 mission_id;
-    u32 flags_0x6AF14;
+    u32 gameSysFlags;
     u8 pad_0x6AF18[0x6AF1B - 0x6AF18];
     u8 flag_0x6AF1B;
     u8 pad_0x6AF1C[0x6AF40 - 0x6AF1C];
@@ -241,8 +314,25 @@ struct GameSys : Singleton<GameSys> {
         return GameSys::objectPtr->options.backgroundLoading && !GameSys::objectPtr->is_gallery_task;
     }
 
+    u32 playerBodyModelId(int playerId, int bodyModelType);
+    u32 playerSkinId(int playerId);
+    u32 playerClothingId(int playerId);
+    u32 playerHasArmorModel(int playerId, int bodyModelType);
+    u32 GetWeaponModelID(int playerId);
     inline bool isLobby() {
-        return (flags_0x6AF14 & LOBBY_TASK) != 0;
+        return (gameSysFlags & GameSysFlag::LOBBY_TASK) != 0;
+    }
+
+    inline bool isArcade() {
+        return (gameSysFlags & GameSysFlag::ARCADE_TASK) != 0;
+    }
+
+    inline bool isCont() {
+        return (gameSysFlags & GameSysFlag::CONT_TASK) != 0;
+    }
+
+    inline bool isEdit() {
+        return (gameSysFlags & GameSysFlag::EDIT_TASK) != 0;
     }
 };
 

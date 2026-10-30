@@ -87,8 +87,8 @@ void StageManager::moveSet() {
     while (set != 0) {
         set->call_ptmf();
         StageEffectBase *next = set->next;
-        bool alive = set->flags & Draw::ALIVE;
-        if (alive == false) {
+        bool active = set->drawFlags & DrawFlag::ACTIVE;
+        if (active == false) {
             removeSet(set);
         }
         set = next;
@@ -776,11 +776,6 @@ void StageManager::register_lobby_sounds() {
     }
 }
 
-extern "C" {
-    int sceDmacMemcpy(void *, const void *, u32);
-    void sceKernelDcacheWritebackInvalidateAll();
-}
-
 inline u32 header_mesh_data_size(pmo_header *header) {
     return header->mesh_data_size();
 }
@@ -851,7 +846,7 @@ void StageManager::vram_clear() {
     vram_transfer_size = 0;
     unknown_0xA2B8 = 0;
     if (stage != 0) {
-        stage->flags &= ~Draw::VISIBLE;
+        stage->drawFlags &= ~DrawFlag::DRAW_QUEUED;
     }
     flag_0xA3E8 = false;
 }

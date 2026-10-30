@@ -24,5 +24,5 @@ struct Stream : Singleton<Stream> {
 extern "C" {
     void func_eboot_08886350(Stream *, int);
     void func_eboot_0888633C(Stream *, int, u16, u32);
-    u32 func_eboot_08886368(Stream *, int);
+    void *func_eboot_08886368(Stream *, int);
 }

@@ -10,17 +10,12 @@
 
 #include <pspsdk/pspthreadman.h>
 #include <pspsdk/pspsuspend.h>
-extern "C" {
-    void sceKernelDcacheWritebackInvalidateAll();
-    #include <pspsdk/pspdmac.h>
-}
-
 #pragma opt_unroll_loops on
 
 template<> DataManager *Singleton<DataManager>::objectPtr;
 
-void DataManager::entry::reset() {
-    flags = 0;
+void DataManager::DataSlot::reset() {
+    status = 0;
     file_id = -1;
     buffer = 0;
 }
@@ -61,8 +56,8 @@ inline void DataManager::reset_pointers() {
 
 
 inline void DataManager::clear_entries() {
-    entry *e = &entries[0];
-    for (int i = 0; i < NUM_ENTRIES; ++i, ++e) {
+    DataSlot *e = &entries[0];
+    for (int i = 0; i < ID_COUNT; ++i, ++e) {
         e->reset();
     }
     reset_pointers();
@@ -78,8 +73,8 @@ inline void DataManager::clear_pacs_inner() {
     remaining_bytes = volatile_memory_size;
     write_head = volatile_memory;
 
-    for (int i = 0x15; i <= NUM_ENTRIES - 1; ++i) {
-        entries[i].flags &= ~READY;
+    for (int i = 0x15; i <= ID_COUNT - 1; ++i) {
+        entries[i].status &= ~ENABLE;
     }
 
     FileSys::objectPtr->update_ringbuf(1);
@@ -104,16 +99,16 @@ void DataManager::update() {
             }
         }
     }
-    for (int i = 0; i < NUM_ENTRIES; ++i) {
-        u16 flags = entries[i].flags;
-        if (((flags & LOADING) != 0)
-          && ((flags & READY) == 0)
+    for (int i = 0; i < ID_COUNT; ++i) {
+        u16 status = entries[i].status;
+        if (((status & LOADING) != 0)
+          && ((status & ENABLE) == 0)
           && !FileSys::objectPtr->is_loading(entries[i].file_id)) {
             if (entries[i].was_cancelled != 1) {
-                entries[i].flags &= ~LOADING;
-                entries[i].flags |= READY;
+                entries[i].status &= ~LOADING;
+                entries[i].status |= ENABLE;
             } else {
-                entries[i].flags = 0;
+                entries[i].status = 0;
             }
         }
     }
@@ -124,7 +119,8 @@ void DataManager::load(s32 index, s32 file_id, u32 size) {
     if (size != 0) {
         load_size = size;
     }
-    entry &e = entries[index];
+    DataSlot &e = entries[index];
+    ASSERT(!(e.status & (LOADING | ENABLE)));
     bool notify_on_cancel;
     if (index >= 0x15 && 0x2a >= index) {
         u8 *buf;
@@ -146,26 +142,31 @@ void DataManager::load(s32 index, s32 file_id, u32 size) {
     }
     e.was_cancelled = false;
     FileSys::objectPtr->load_file_async(file_id, e.buffer, -1, notify_on_cancel, &e.was_cancelled, true);
-    e.flags |= LOADING;
+    e.status |= LOADING;
     e.file_id = file_id;
 }
 
 void DataManager::duplicate(s32 destination_index, s32 source_index) {
-    entry &destination = entries[destination_index];
-    entry &source = entries[source_index];
+    DataSlot &destination = entries[destination_index];
+    DataSlot &source = entries[source_index];
+    ASSERT(!(destination.status & (LOADING | ENABLE)));
+    ASSERT(source.status & ENABLE);
 
     u32 size = FileSys::objectPtr->file_size(source.file_id);
     destination.buffer = ResourceManager::objectPtr->alloc(0x14, size);
+    ASSERT(destination.buffer != NULL);
 
     sceKernelDcacheWritebackInvalidateAll();
     sceDmacMemcpy(destination.buffer, source.buffer, size);
 
-    destination.flags |= READY;
+    destination.status |= ENABLE;
     destination.file_id = source.file_id;
 }
 
 u32 DataManager::copy(void *dst, s32 source_index, u32 size) {
-    entry &source = entries[source_index];
+    ASSERT(source_index >= 0 && source_index < ID_COUNT);
+    DataSlot &source = entries[source_index];
+    ASSERT(source.buffer != NULL);
     if (size == -1) {
         size = FileSys::objectPtr->file_size(source.file_id);
     }
@@ -177,12 +178,12 @@ u32 DataManager::copy(void *dst, s32 source_index, u32 size) {
 inline s32 DataManager::next_emmodel_index() {
     s32 offset;
 
-    Quest &global = *Singleton<Quest>::objectPtr;
+    Quest &global = *Quest::objectPtr;
     int target_0_count = global.targets[0].count_0x1e;
 
-    entry *e = &entries[global.largeEnemyCount(target_0_count) + 9];
+    DataSlot *e = &entries[global.largeEnemyCount(target_0_count) + 9];
     for (offset = global.largeEnemyCount(target_0_count); offset < 4; ++offset) {
-        if ((e->flags & (LOADING | READY)) == 0) {
+        if ((e->status & (LOADING | ENABLE)) == 0) {
             break;
         }
         e++;
@@ -191,11 +192,11 @@ inline s32 DataManager::next_emmodel_index() {
 }
 
 inline s32 DataManager::next_pac_index() {
-    Quest &global = *Singleton<Quest>::objectPtr;
+    Quest &global = *Quest::objectPtr;
     int target_0_count = global.targets[0].count_0x1e;
-    entry *e = &entries[global.largeEnemyCount(target_0_count) + 9];
+    DataSlot *e = &entries[global.largeEnemyCount(target_0_count) + 9];
     for (s32 offset = global.largeEnemyCount(target_0_count); offset < 4; ++offset) {
-        if ((e->flags & (LOADING | READY)) == 0) {
+        if ((e->status & (LOADING | ENABLE)) == 0) {
             return offset;
         }
         e++;
@@ -204,11 +205,11 @@ inline s32 DataManager::next_pac_index() {
 }
 
 void DataManager::cache_emmodel(u8 em_type) {
-    entry* src = &entries[0x16];
+    DataSlot* src = &entries[0x16];
     int src_offset = 0;
     for (; src_offset < 4; ++src_offset) {
         u16 file_id = 0x17AB + em_type;
-        if ((src->flags & READY) != 0 && (src->file_id == file_id)) {
+        if ((src->status & ENABLE) != 0 && (src->file_id == file_id)) {
             break;
         }
         src++;
@@ -219,21 +220,21 @@ void DataManager::cache_emmodel(u8 em_type) {
 }
 
 bool DataManager::is_loading(s32 index) {
-    u16 flags = entries[index].flags;
-    return flags & LOADING && !(flags & READY);
+    u16 status = entries[index].status;
+    return status & LOADING && !(status & ENABLE);
 }
 
 void DataManager::free(s32 index) {
-    entry &e = entries[index];
+    DataSlot &e = entries[index];
     ResourceManager::objectPtr->free(e.buffer);
     e.reset();
 }
 
 u8 *DataManager::emmodel_pac(u8 em_type) {
-    entry *e = &entries[9];
+    DataSlot *e = &entries[9];
     for (int i = 0; i < 4; ++i) {
         u16 file_id = 0x17AB + em_type;
-        if (e->flags & READY && e->file_id == file_id) {
+        if (e->status & ENABLE && e->file_id == file_id) {
             return e->buffer;
         }
         ++e;
@@ -246,9 +247,9 @@ bool DataManager::is_pac_cached(u8 em_type) {
 }
 
 s32 DataManager::find_pac(u16 file_id) {
-    entry *e = &entries[0x15];
-    for (s32 i = 0x15; i <= NUM_ENTRIES - 1; ++i) {
-        if ((e->flags & READY) != 0 && e->file_id == file_id) {
+    DataSlot *e = &entries[0x15];
+    for (s32 i = 0x15; i <= ID_COUNT - 1; ++i) {
+        if ((e->status & ENABLE) != 0 && e->file_id == file_id) {
             return i;
         }
         ++e;
@@ -257,10 +258,10 @@ s32 DataManager::find_pac(u16 file_id) {
 }
 
 s8 DataManager::find_emmodel(u8 em_type) {
-    entry *e = &entries[9];
+    DataSlot *e = &entries[9];
     for (s8 i = 0; i < 4; ++i) {
         u16 file_id = 0x17AB + em_type;
-        if ((e->flags & READY) != 0 && e->file_id == file_id) {
+        if ((e->status & ENABLE) != 0 && e->file_id == file_id) {
             return i;
         }
         ++e;
@@ -271,11 +272,11 @@ s8 DataManager::find_emmodel(u8 em_type) {
 void DataManager::load_emmodel(u8 em_type, u32 size, s32 index) {
     if (index == -1) {
         if (emmodel_pac(em_type) == 0) {
-            Quest &global = *Singleton<Quest>::objectPtr;
+            Quest &global = *Quest::objectPtr;
             int target_0_count = global.targets[0].count_0x1e;
-            entry *e = &entries[global.largeEnemyCount(target_0_count) + 9];
+            DataSlot *e = &entries[global.largeEnemyCount(target_0_count) + 9];
             for (s32 offset = global.largeEnemyCount(target_0_count); offset < 4; ++offset) {
-                if ((e->flags & (LOADING | READY)) == 0) {
+                if ((e->status & (LOADING | ENABLE)) == 0) {
                     u16 file_id = em_type + 0x17AB;
                     load(offset + 9, file_id, size);
                     return;
@@ -284,8 +285,8 @@ void DataManager::load_emmodel(u8 em_type, u32 size, s32 index) {
             }
         }
     } else {
-        entry *e = &entries[index + 9];
-        if ((e->flags & READY) != 0) {
+        DataSlot *e = &entries[index + 9];
+        if ((e->status & ENABLE) != 0) {
             u16 file_id = em_type + 0x17AB;
             if (e->file_id == file_id) {
                 return;
@@ -317,12 +318,12 @@ void DataManager::load_emmodel(u8 em_type) {
     u8 *pac = emmodel_pac(em_type);
     if (pac == 0) {
 
-        Quest &global = *Singleton<Quest>::objectPtr;
+        Quest &global = *Quest::objectPtr;
         int target_0_count = global.targets[0].count_0x1e;
 
-        entry *e = &entries[global.largeEnemyCount(target_0_count) + 0x16];
+        DataSlot *e = &entries[global.largeEnemyCount(target_0_count) + 0x16];
         for (s32 offset = global.largeEnemyCount(target_0_count); offset < 4; ++offset) {
-            if ((e->flags & (LOADING | READY)) == 0) {
+            if ((e->status & (LOADING | ENABLE)) == 0) {
                 u16 file_id = em_type + 0x17AB;
                 load(offset + 0x16, file_id, 0);
                 return;
@@ -341,9 +342,9 @@ struct implicit_converter {
 };
 
 void DataManager::free_emmodel(u8 em_type) {
-    entry *e = &entries[9];
+    DataSlot *e = &entries[9];
     for (int i = 0; i < 4; ++i) {
-        if ((e->flags & (LOADING | READY)) != 0 && implicit_converter(em_type + 0x17AB) == e->file_id) {
+        if ((e->status & (LOADING | ENABLE)) != 0 && implicit_converter(em_type + 0x17AB) == e->file_id) {
             free(i + 9);
         }
         ++e;
@@ -351,9 +352,9 @@ void DataManager::free_emmodel(u8 em_type) {
 }
 
 void DataManager::free_all_emmodels() {
-    entry *e = &entries[9];
+    DataSlot *e = &entries[9];
     for (int i = 0; i < 4; ++i) {
-        if (e->flags & (LOADING | READY)) {
+        if (e->status & (LOADING | ENABLE)) {
             free(i + 9);
         }
         ++e;

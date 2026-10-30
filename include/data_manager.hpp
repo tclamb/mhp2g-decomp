@@ -25,15 +25,21 @@ struct PowerEventType {
     private: PowerEventType() {}
 };
 
+enum DataSlotId {
+    PLAYER_MOTION_SLOT = 1,
+    CAT_PAC_SLOT = 8,
+    BGM = 0x2A,
+};
+
 struct DataManager : Singleton<DataManager> {
     enum {
         LOADING = 1,
-        READY = 2,
-        NUM_ENTRIES = 0x2B,
+        ENABLE = 2,
+        ID_COUNT = 0x2B,
     };
 
-    struct entry {
-        u16 flags;
+    struct DataSlot {
+        u16 status;
         u16 file_id;
         u8 *buffer;
         u32 was_cancelled;
@@ -41,7 +47,7 @@ struct DataManager : Singleton<DataManager> {
         void reset();
     };
 
-    entry entries[NUM_ENTRIES];
+    DataSlot entries[ID_COUNT];
     int volatile_memory_size;
     u8 *volatile_memory;
     u8 *write_head;
@@ -63,6 +69,12 @@ struct DataManager : Singleton<DataManager> {
     u32 copy(void *dst, s32 src_slot, u32 size);
     void cache_emmodel(u8 em_type);
     bool is_loading(s32 index);
+
+    inline u8 *getAdrs(s32 id) {
+        ASSERT(id >= 0 && id < ID_COUNT);
+        return (entries[id].status & ENABLE) != 0 ? entries[id].buffer : NULL;
+    }
+
     void free(s32 index);
     u8 *emmodel_pac(u8 em_type);
     bool is_pac_cached(u8 em_type);

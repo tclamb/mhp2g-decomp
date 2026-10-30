@@ -2,9 +2,26 @@
 
 #include "model_base.hpp"
 
+struct ObjFlag {
+    enum {
+        WALL_COLLISION_ENABLED = 1 << 0,
+        NECK_LOOK_AT_OVERRIDE = 1 << 1,
+        ACTION_UPDATE_PENDING = 1 << 2,
+        WEAPON_DRAWN = 1 << 3,
+        DASHING = 1 << 4,
+        IN_WATER = 1 << 5,
+        ON_SOFT_GROUND = 1 << 6,
+        WALL_HIT_REQUEST = 1 << 7,
+        LARGE_ENEMY_NEAR = 1 << 8,
+        HAIR_YURE = 1 << 9,
+    };
+private:
+    ObjFlag();
+};
+
 // stub for type with vtable at D_eboot_089B5C10
 struct ObjBase : ModelBase {
-    typedef void (ObjBase::*MemFn)();
+    typedef void (ObjBase::*mem_fn)();
 
     ObjBase();
     virtual ~ObjBase();
@@ -38,7 +55,7 @@ struct ObjBase : ModelBase {
     void method_08865D7C();
     int rate_g_calc(s16);
 
-    u32 unknown_0x1C0;
+    u32 objListId;
     ObjBase *nextObj;
     ObjBase *prevObj;
     u8 padding_0x1C[8];
@@ -49,7 +66,7 @@ struct ObjBase : ModelBase {
     u16 unknown_0x1D8;
     ScePspFVector4 (*diffuse_light_color_override)[3];
     u32 unknown_0x1E0;
-    u8 unknown_0x1E4;
+    u8 index;
     u16 pl_id;
     u8 pl_type;
     u8 kind;
@@ -63,7 +80,8 @@ struct ObjBase : ModelBase {
     ScePspFVector4 world_position;
     float unknown_0x270;
     s16 unknown_0x274;
-    u8 padding_0x276[6];
+    u8 demo_on_timer;
+    u8 padding_0x277[5];
     u16 wall_bit;
     u8 padding_0x27E[2];
     u8 posture;
@@ -77,7 +95,9 @@ struct ObjBase : ModelBase {
     u8 action_id;
     u16 stageId;
     u8 em_ride_state;
-    u8 padding_0x29D[0x2AC - 0x29D];
+    u8 padding_0x29D[0x2A4 - 0x29D];
+    u8 stageTransitionType;
+    u8 padding_0x2A5[0x2AC - 0x2A5];
     ScePspUnion32 diffuse_light_colors[3];
     u8 padding_0x2B8[2];
     u16 unknown_0x2BA;
@@ -95,15 +115,15 @@ struct ObjBase : ModelBase {
     u8 padding_0x33D[0x396 - 0x33D];
     u8 unknown_0x396;
     u8 padding_0x397[0x3FC - 0x397];
-    MemFn memFn;
+    mem_fn memFn;
     u32 unknown_0x408;
     u32 unknown_0x40C;
-    u32 flags_0x410;
+    u32 objFlags;
     u32 unknown_0x414;
     u8 padding_0x418[0x480 - 0x418];
 
 protected:
-    inline void setMemFn(MemFn f) {
+    inline void setMemFn(mem_fn f) {
         if (f != 0) {
             memFn = f;
         }

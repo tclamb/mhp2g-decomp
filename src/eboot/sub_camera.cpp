@@ -157,7 +157,7 @@ void SubCamera::cam_sub_std() {
     }
 
     StdCameraData *d = &data.std;
-    if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1 /* LOBBY_TASK */) == true) {
+    if (GameSys::objectPtr->isLobby() == true) {
         copy_q(&current_position, &d->position);
         copy_q(&current_target, &d->target);
         current_roll = d->roll;
@@ -311,10 +311,10 @@ void SubCamera::cam_sub_std() {
         tmp.z = 400.0f;
         d->goal_target.y = pl->position.y + 100.0f;
     } else if (pl->em_ride_state != 0
-            || pl->act_ck(0 /* NORMAL */, 17 /* HANG_1 */)
-            || pl->act_ck(0 /* NORMAL */, 27 /* HANG_2 */)
-            || pl->act_ck(0 /* NORMAL */, 30 /* FINISH_CLIMB_FROM_HANG */)
-            || pl->act_ck(0 /* NORMAL */, 58 /* CLIMB_FROM_HANG */)) {
+            || pl->act_ck(PlActionType::NORMAL, 17 /* HANG_1 */)
+            || pl->act_ck(PlActionType::NORMAL, 27 /* HANG_2 */)
+            || pl->act_ck(PlActionType::NORMAL, 30 /* FINISH_CLIMB_FROM_HANG */)
+            || pl->act_ck(PlActionType::NORMAL, 58 /* CLIMB_FROM_HANG */)) {
         tmp.y = 20.0f;
         tmp.z = d->cnf_chs_entry->z_offset;
         d->goal_target.y = pl->position.y + 30.0f;
@@ -940,7 +940,7 @@ void SubCamera::cam_sub_pchngr() {
     PchngrCameraData *d = &data.pchngr;
     Player *pl = c->player;
     isActive = false;
-    if ((bool)(pl->attributes & 0x1000 /* SCOPE_CAM */) == false) {
+    if ((bool)(pl->plFlags & PlFlag::SCOPE_CAM) == false) {
         cam_sub_mode.word = 0;
         return;
     }
@@ -1002,15 +1002,15 @@ void SubCamera::cam_sub_pchngr() {
         }
         switch (d->pachi_type) {
         case PachiType::BOWGUN:
-            if (((GamePlayer *)pl)->pch_lock_chk() == false) {
+            if (((PlayerQuest *)pl)->pch_lock_chk() == false) {
                 copy_q(&d->player_position, &pl->position);
                 ScePspFMatrix4 *wmat = pl->get_joint_wmat(PlJointId::LEFT_HAND);
                 flmatCopy(&d->mat, wmat);
                 d->mat.w.y += 20.0f;
             } else {
                 copy_q(&d->player_position, &pl->position);
-                ScePspFMatrix4 *aim = ((GamePlayer *)pl)->pch_aim_mat();
-                ScePspFMatrix4 *wmat = pl->get_joint_wmat(PlJointId::FLOOR);
+                ScePspFMatrix4 *aim = ((PlayerQuest *)pl)->pch_aim_mat();
+                ScePspFMatrix4 *wmat = pl->get_joint_wmat(PlJointId::ROOT);
                 vmmul_q(&d->mat, aim, wmat);
                 d->mat.w.y += 20.0f;
             }
@@ -2074,9 +2074,9 @@ int SubCamera::ex_ev_camera() {
         d->pc = NULL;
         for (int i = 0; D_eboot_08935A7C[i].demo_id != 0xFFFF; ++i) {
             if (d->demo_id == D_eboot_08935A7C[i].demo_id) {
-                DataManager::entry *stage = &DataManager::objectPtr->entries[0];
+                DataManager::DataSlot *stage = &DataManager::objectPtr->entries[0];
                 pac_header *pac;
-                if ((stage->flags & 2) != 0) {
+                if ((stage->status & DataManager::ENABLE) != 0) {
                     pac = (pac_header *)stage->buffer;
                 } else {
                     pac = NULL;
@@ -2340,7 +2340,7 @@ bool SubCamera::Manual_cam_chk() {
     if (Cockpit::objectPtr->Cockpit_menu_chk() == true) {
         return false;
     }
-    if ((bool)(pl->attributes & 2 /* SUPPLY_BOX_OPEN */) == true) {
+    if ((bool)(pl->plFlags & PlFlag::SUPPLY_BOX_OPEN) == true) {
         return false;
     }
     if ((bool)pl->scope_aim_increment == true) {
@@ -2350,7 +2350,7 @@ bool SubCamera::Manual_cam_chk() {
         return false;
     }
     if (pl->pl_type == PlType::HEAVY_BOWGUN || pl->pl_type == PlType::LIGHT_BOWGUN) {
-       if ((bool)(pl->flags_0x410 & 8 /* WEAPON_DRAWN */) != false && (bool)(pl->attributes & 0x8000 /* SHOULDER_CAM */) == true) {            return false;
+       if ((bool)(pl->objFlags & ObjFlag::WEAPON_DRAWN) != false && (bool)(pl->plFlags & PlFlag::SHOULDER_CAM) == true) {            return false;
         }
     }
     return data.std.gun_targeting_state < 0;
@@ -2363,7 +2363,7 @@ bool SubCamera::Fishing_cam_chk() {
 bool SubCamera::pl_falldown_status() {
     StdCameraData *d = &data.std;
     Player *pl = Camera::objectPtr->player;
-    if (pl->action_type == 2 /* DAMAGE */) {
+    if (pl->action_type == PlActionType::DAMAGE) {
         d->is_falldown = false;
         return false;
     }
@@ -2405,11 +2405,11 @@ bool SubCamera::pl_falldown_status() {
 
 u8 SubCamera::PachiTypeCheck() {
     Player *pl = Camera::objectPtr->player;
-    if (pl->act_ck(0 /* NORMAL */, 101 /* USE_BINOCULARS */) == true || pl->act_ck(0 /* NORMAL */, 102 /* USE_BINOCULARS_CROUCHING */) == true) {
+    if (pl->act_ck(PlActionType::NORMAL, 101 /* USE_BINOCULARS */) == true || pl->act_ck(PlActionType::NORMAL, 102 /* USE_BINOCULARS_CROUCHING */) == true) {
         return PachiType::BINOCULARS;
     } else if (pl->Pl_bari_ck() == true) {
         return PachiType::BALLISTA;
-    } else if (pl->act_ck(8 /* LOBBY? */, 15 /* NET_LAUNCHER */) == true) {
+    } else if (pl->act_ck(PlActionType::FARM, 15 /* NET_LAUNCHER */) == true) {
         return PachiType::NET_LAUNCHER;
     } else if (pl->pl_type == PlType::HEAVY_BOWGUN|| pl->pl_type == PlType::LIGHT_BOWGUN) {
         return PachiType::BOWGUN;
@@ -2711,9 +2711,9 @@ bool SubCamera::Cam_senkai_chk() {
     if (pl->pl_type == PlType::BOW
         && (d->rising_edge & Ctrl::R_TRIGGER)
         && (pl->buttons & Ctrl::R_TRIGGER)
-        && (bool)(pl->flags_0x410 & 8 /* WEAPON_DRAWN */) != false
-        && pl->action_type != 2 /* DAMAGE */
-        && pl->action_type != 6 /* CHAT? */) {
+        && (bool)(pl->objFlags & ObjFlag::WEAPON_DRAWN) != false
+        && pl->action_type != PlActionType::DAMAGE
+        && pl->action_type != PlActionType::CHAT) {
         return true;
     }
     return false;
@@ -3151,9 +3151,9 @@ void SubCamera::sdc_flag_set() {
 
     d->sdc_flag = false;
 
-    if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1 /* LOBBY_TASK */) == false) {
+    if (GameSys::objectPtr->isLobby() == false) {
         bool flung;
-        if (pl->action_type != 2 /* DAMAGE */) {
+        if (pl->action_type != PlActionType::DAMAGE) {
             flung = false;
         } else {
             switch (pl->action_id) {

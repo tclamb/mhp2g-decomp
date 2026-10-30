@@ -153,7 +153,7 @@ void Camera::CameraMove() {
     View_move();
 }
 
-u8 D_eboot_089310D4[3] = {PlJointId::FLOOR, PlJointId::HIPS, PlJointId::HEAD};
+u8 D_eboot_089310D4[3] = {PlJointId::ROOT, PlJointId::HIPS, PlJointId::HEAD};
 s16 D_eboot_089310D8[8] = {10, 20, 30, 40, 50, 60, 70, 80};
 float D_eboot_089310E8[3] = {2000, 3000, 4000};
 

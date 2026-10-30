@@ -419,7 +419,7 @@ INCLUDE_ASM("asm/eboot/nonmatchings/cockpit", func_eboot_08817CE4);
 
 void Cockpit::method_08818098() {
     InventoryEntry *inventory;
-    if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 0x200) == true) {
+    if ((bool)(GameSys::objectPtr->gameSysFlags & GameSysFlag::GAME_TASK) == true) {
         inventory = GameSys::objectPtr->method_088567AC(0);
     } else {
         inventory = GameSys::objectPtr->userData.itemBag;

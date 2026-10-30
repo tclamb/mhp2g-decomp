@@ -178,10 +178,9 @@ struct StageBase : ModelBase {
     void method_088CEA2C();
     stage_definitions_0x28_t *method_088CEDC0();
     stage_definitions_0x2C_t *method_088CEDF0();
-    float *compile_fog_params(float *);
-    float *compile_lights(float *);
-    float *compile_sky_gradient(float *);
-
+    float *bind_fog_params(float *);
+    float *bind_lights(float *);
+    float *bind_sky_gradient(float *);
 
 protected:
     inline void set_ptmf_0x3D8(ptmf x) {

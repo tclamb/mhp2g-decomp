@@ -20,7 +20,7 @@
 using namespace immediate_ge;
 
 StageBase::StageBase() {
-
+    // empty
 }
 
 StageBase::~StageBase() {
@@ -640,7 +640,7 @@ void StageBase::clear() {
     reset_transform();
     unknown_0x330 = 0; // environment_params->type
     flag_0x3D4 = false;
-    flags &= ~Draw::VISIBLE;
+    drawFlags &= ~DrawFlag::DRAW_QUEUED;
     unknown_0x1C0 = 0; // animation timer?
     unknown_0x1C2 = 0;
     method_088CDCAC();
@@ -651,7 +651,7 @@ void StageBase::vtable_0x1C() {
     int i;
     stage_sound *sound = vtable_0xB0();
     for (i = 0; i < vtable_0xAC(); ++i, ++sound) {
-        if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) == false && GameSys::objectPtr->Game_clear_ck(0) == true) {
+        if (GameSys::objectPtr->isLobby() == false && GameSys::objectPtr->Game_clear_ck(0) == true) {
             func_eboot_08885198(Sound::objectPtr, sound->unknown_0x4, 0xC0, i + 1, 0);
         } else {
             if (Evdemo::objectPtr->stage_se_mute_chk(sound->unknown_0x8, 0) != false) {
@@ -675,7 +675,7 @@ stage_sound *StageBase::vtable_0xB0() {
 }
 
 void StageBase::vtable_0x20() {
-    if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) != true) {
+    if (GameSys::objectPtr->isLobby() != true) {
         int i;
         u16 *shorts = StageManager::objectPtr->stage->definitions()->unknown_0x10;
         for (i = 0; i < (int)StageManager::objectPtr->stage->definitions()->unknown_0x3E; ++i, shorts += 12) {
@@ -683,7 +683,7 @@ void StageBase::vtable_0x20() {
             if (shorts[1] == 0x17 && shorts[11] == 0) {
                 ScePspFVector4 *position = vtable_0x44();
                 if (position != NULL) {
-                    if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) == false) {
+                    if (GameSys::objectPtr->isLobby() == false) {
                         u8 byte_0x2E = GameSys::objectPtr->byte_0x2E;
                         switch (byte_0x2E) {
                         default:
@@ -709,7 +709,7 @@ void StageBase::vtable_0x20() {
     }
     stage_sound *sound = vtable_0xB0();
     for (int i = 0; i < vtable_0xAC(); ++i, ++sound) {
-        if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) == false &&
+        if (GameSys::objectPtr->isLobby() == false &&
             GameSys::objectPtr->Game_clear_ck(0) == true) {
             if (func_eboot_088852C8(Sound::objectPtr, sound->unknown_0x4, 0xC0, i + 1) != 0) {
                 func_eboot_08885198(Sound::objectPtr, sound->unknown_0x4, 0xC0, i + 1, 0);
@@ -718,7 +718,7 @@ void StageBase::vtable_0x20() {
             if (sound->unknown_0x0 == 0) {
                 StageManager::objectPtr->register_sound(sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC);
             } else {
-                if (GameSys::objectPtr->short_0x1C % sound->unknown_0x0 == 0) {
+                if (GameSys::objectPtr->frame_counter % sound->unknown_0x0 == 0) {
                     func_eboot_08883858(Sound::objectPtr, sound->unknown_0x4, sound->unknown_0x8, 0, 0xC0, i + 1, &sound->position, sound->unknown_0xC, 0, 0, false);
                 }
             }
@@ -839,14 +839,14 @@ void StageBase::bind_environment_params(stage_environment_params *environment) {
     switch (unknown_0x330) {
     case 1:
         in = (float *)environment->data;
-        in = compile_fog_params(in);
-        compile_lights(in);
+        in = bind_fog_params(in);
+        bind_lights(in);
         break;
     case 2:
         in = (float *)environment->data;
-        in = compile_fog_params(in);
-        in = compile_lights(in);
-        compile_sky_gradient(in);
+        in = bind_fog_params(in);
+        in = bind_lights(in);
+        bind_sky_gradient(in);
         break;
     default:
         unknown_0x330 = 0;
@@ -867,7 +867,7 @@ void StageBase::vtable_0x4C() {
     sky_gradient_vdata[1].z = 0;
     sky_gradient_vdata[2].z = 0;
     sky_gradient_vdata[0].z = 0;
-    flags |= Draw::VISIBLE;
+    drawFlags |= DrawFlag::DRAW_QUEUED;
     vtable_0x1C();
     method_088CDCAC();
     set_ptmf_0x3D8(&StageBase::vtable_0x50);
@@ -902,7 +902,7 @@ void StageBase::vtable_0x50() {
         }
     }
     ResourceNode *node = NULL;
-    if ((bool)(GameSys::objectPtr->flags_0x6AF14 & 1) != true) {
+    if (GameSys::objectPtr->isLobby() != true) {
         node = func_eboot_08869568(Quest::objectPtr, GameSys::objectPtr->stage_id);
     }
     if (node) {
@@ -1115,14 +1115,14 @@ extern "C" {
 }
 
 
-float *StageBase::compile_fog_params(float *in) {
+float *StageBase::bind_fog_params(float *in) {
     memcpy(&fog.color, in++, sizeof(fog.color));
     memcpy(&fog.begin, in++, sizeof(fog.begin));
     memcpy(&fog.end, in++, sizeof(fog.end));
     return in;
 }
 
-float *StageBase::compile_lights(float *in) {
+float *StageBase::bind_lights(float *in) {
     u32 size = sizeof(lights[0].position);
     u32 stride = size / sizeof(*in);
     memcpy(&lights[0].position, in + 0 * stride, size);
@@ -1141,7 +1141,7 @@ inline u32 from_bgra8888(ScePspUnion32 &x) {
     return (x.uc[3] << 24) | (x.uc[0] << 16) |  (x.uc[1] << 8) | x.uc[2];
 }
 
-float *StageBase::compile_sky_gradient(float *in) {
+float *StageBase::bind_sky_gradient(float *in) {
     memcpy(&sky_gradient_origin, in, 0xC);
     memcpy(&sky_gradient_top, in + 3, 4);
     ScePspUnion32 x;

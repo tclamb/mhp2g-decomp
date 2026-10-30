@@ -5,6 +5,8 @@
 
 #define ext(x, pos, size) (((x) >> (pos)) & ((1 << (size)) - 1))
 
+#define ASSERT(...)
+
 #define DEGREES_TO_VFPU(degrees) ((degrees) / 90.0f)
 #define PI 3.14159265358979323846264338327950288
 #define DEGREES_TO_RADIANS(degrees) ((degrees) * PI / 180.0f)
@@ -38,6 +40,8 @@ typedef unsigned long uint64_t;
 extern "C" {
     int memcmp(const void*, const void*, long unsigned int);
     void *memset(void*, int,  long unsigned int);
+    int sceDmacMemcpy(void *dst, const void *src, unsigned int size);
+    void sceKernelDcacheWritebackInvalidateAll(void);
     void sceKernelDcacheWritebackRange(const void *p, unsigned int size);
     void sceKernelDcacheWritebackInvalidateRange(const void *p, unsigned int size);
     void sceKernelDcacheInvalidateRange(const void *p, unsigned int size);

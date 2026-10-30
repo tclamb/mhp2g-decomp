@@ -2,17 +2,21 @@
 
 #include "common.h"
 
+struct DrawFlag {
+    enum {
+        ACTIVE = 0x1,
+        DRAW_QUEUED = 0x2,
+        SKIP_DRAW = 0x4,
+    };
+private:
+    DrawFlag();
+};
+
 struct Draw {
     virtual ~Draw() {}
     virtual void draw() = 0;
 
-    enum {
-        ALIVE = 0x1,
-        VISIBLE = 0x2,
-        REGISTERED = 0x4,
-    };
-
-    u32 flags;
+    u32 drawFlags;
     Draw *next;
     float zindex;
 

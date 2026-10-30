@@ -257,7 +257,7 @@ void ModelBase::operator delete(void *p) {
 }
 
 void ModelBase::reset_transform() {
-    flags = Draw::VISIBLE | Draw::ALIVE;
+    drawFlags = DrawFlag::DRAW_QUEUED | DrawFlag::ACTIVE;
     next = 0;
     zindex = 0.0f;
     vmidt_q(&transform);
@@ -502,15 +502,15 @@ INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863DEC);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08863E68);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088640F0);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", method_088640F0__9HierarchyFifff);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088641B8);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", method_088641B8__9HierarchyFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08864214);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08864234);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_088642F4);
+INCLUDE_ASM("asm/eboot/nonmatchings/model_base", method_088642F4__9HierarchyFv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/model_base", func_eboot_08864340);
 

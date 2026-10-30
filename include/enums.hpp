@@ -26,6 +26,22 @@ private:
     RenderGroup();
 };
 
+struct HuntingHornNoteId {
+    enum {
+        NONE = 0,
+        WHITE = 1,
+        PURPLE = 2,
+        BLUE = 3,
+        YELLOW = 4,
+        RED = 5,
+        GREEN = 6,
+        SKY_BLUE = 7,
+        STOP = 0x80,
+    };
+private:
+    HuntingHornNoteId();
+};
+
 struct StageId {
     enum {
         NONE,
@@ -7055,6 +7071,7 @@ struct SkillType {
         SHORT_CHARGE,
         AUTO_RELOAD,
         SKILL_TYPE_COUNT,
+        INVALID_SKILL_TYPE = 0xFF,
     };
 private:
     SkillType();
@@ -8631,8 +8648,8 @@ struct PlType {
         HUNTING_HORN, // B_HAMMER2
         GUNLANCE, // B_LANCE2
         BOW, // B_BOW
-        UNKNOWN,
-        COMRADE,
+        UNDEFINED,
+        COUNT,
     };
 private:
     PlType();
@@ -8640,8 +8657,8 @@ private:
 
 struct PlJointId {
     enum {
-        FLOOR,
-        UNKNOWN_1,
+        ROOT,
+        BASE,
         HIPS,
         LEFT_THIGH,
         LEFT_LEG,
@@ -8664,6 +8681,17 @@ struct PlJointId {
     };
 private:
     PlJointId();
+};
+
+struct StageTransitionType {
+    enum {
+        NONE,
+        STAGE_EXIT,
+        MAP_START,
+        SPECIAL_START,
+    };
+private:
+    StageTransitionType();
 };
 
 struct NpcType {

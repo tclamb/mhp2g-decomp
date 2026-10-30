@@ -17,7 +17,7 @@ ObjManager::ObjManager() {
         objListHeads[i] = 0;
         objListTails[i] = 0;
     }
-    unknown_0x800A0 = 0;
+    objCount = 0;
     memset(resourceAddresses, 0, sizeof(resourceAddresses));
     memset(resourceSizes, 0, sizeof(resourceSizes));
     memset(resourceState, 0, sizeof(resourceState));
@@ -47,7 +47,7 @@ void ObjManager::reset() {
         objListHeads[i] = 0;
         objListTails[i] = 0;
     }
-    unknown_0x800A0 = 0;
+    objCount = 0;
     cache.reset(slab, sizeof(slab));
 }
 
@@ -68,7 +68,7 @@ void ObjManager::clear() {
         objListHeads[i] = 0;
         objListTails[i] = 0;
     }
-    unknown_0x800A0 = 0;
+    objCount = 0;
     cache.reset(slab, sizeof(slab));
 }
 
@@ -83,8 +83,8 @@ void ObjManager::call_vtable_0x14(int index) {
 void ObjManager::registerObjDraw(int index) {
     ObjBase *objPtr = objListHeads[index];
     while (objPtr) {
-        if ((bool)(objPtr->flags & Draw::ALIVE) == true) {
-            if ((bool)(objPtr->flags & Draw::REGISTERED) == false) {
+        if ((bool)(objPtr->drawFlags & DrawFlag::ACTIVE) == true) {
+            if ((bool)(objPtr->drawFlags & DrawFlag::SKIP_DRAW) == false) {
                 DrawManager::objectPtr->addObj(RenderGroup::GROUP_5, objPtr, false);
             }
         }
@@ -254,17 +254,17 @@ bool ObjManager::isEditPlayerModelLoaded(u8 mapId, u8 sex) {
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", isEditPlayerModelLoaded__10ObjManagerFUcUc);
 #endif
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08866E08);
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", acquirePlayerModel__10ObjManagerFUcUcUcUsUcii);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08866F64);
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", acquirePlayerWeapon__10ObjManagerFUcUs);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08866FA8);
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", acquirePlayerSkin__10ObjManagerFUciUs);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08867000);
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", releasePlayerModel__10ObjManagerFUci);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08867018);
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", releasePlayerSkin__10ObjManagerFUc);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_0886702C);
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", releasePlayerWeapon__10ObjManagerFUc);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08867040);
 
@@ -324,17 +324,17 @@ INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08867B2C);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08867D08);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08867EC0);
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", bindPlayerModels__10ObjManagerFP6PlayerUc);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08867F2C);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_0886822C);
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", bindPlayerWeapon__10ObjManagerFP6PlayerUc);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08868490);
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", clearModel__10ObjManagerFP6Player);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08868670);
 
-INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08868678);
+INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", clearWeapon__10ObjManagerFP6Player);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/obj_manager", func_eboot_08868770);
 

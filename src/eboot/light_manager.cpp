@@ -130,7 +130,7 @@ void LightManager::method_08860B1C(Player *p) {
         case 0xE:
         case 0x1C:
         case 0x1E:
-            if ((bool)(p->attributes & 0x4000) == true) {
+            if ((bool)(p->plFlags & PlFlag::LIGHT_COLOR_OVERRIDE) == true) {
                 light->diffuse.x = D_eboot_089A2CB4[i].x;
                 light->diffuse.y = D_eboot_089A2CB4[i].y;
                 light->diffuse.z = D_eboot_089A2CB4[i].z;

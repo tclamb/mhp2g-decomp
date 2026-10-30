@@ -14,12 +14,12 @@ ObjBase::ObjBase() {
     state_0x1D4 = 0;
     unknown_0x414 = 0;
     kind = 3;
-    flags_0x410 = 0;
+    objFlags = 0;
     setMemFn(&ObjBase::vtable_0x10);
 }
 
 ObjBase::~ObjBase() {
-
+    // empty
 }
 
 void *ObjBase::operator new(u32, void *p) {
@@ -51,7 +51,7 @@ void ObjBase::vtable_0x10() {
 void ObjBase::vtable_0x14() {
     if (memFn != 0) {
         (this->*memFn)();
-        if ((bool)(flags & Draw::ALIVE) != false) {
+        if ((bool)(drawFlags & DrawFlag::ACTIVE) != false) {
             vtable_0x18();
             vtable_0x1C();
         }
@@ -67,7 +67,7 @@ void ObjBase::vtable_0x1C() {
 }
 
 void ObjBase::draw() {
-    func_eboot_088641B8(&hierarchy);
+    hierarchy.method_088641B8();
     model_pmo.drawWeight(&hierarchy, &model_tmh, &transform);
 }
 
@@ -214,7 +214,7 @@ void ObjBase::em_wall_bit_set() {
 }
 
 void ObjBase::method_08865D7C() {
-    flags &= ~Draw::ALIVE;
+    drawFlags &= ~DrawFlag::ACTIVE;
     memFn = 0;
 }
 

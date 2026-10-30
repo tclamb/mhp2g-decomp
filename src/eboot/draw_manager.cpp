@@ -350,7 +350,7 @@ inline float max(float x, float y) {
 }
 
 void DrawManager::addObj(u8 group, ObjBase *character, bool no_culling) {
-    character->flags &= ~Draw::VISIBLE;
+    character->drawFlags &= ~DrawFlag::DRAW_QUEUED;
     if (no_culling == false) {
         float s = character->scale.x;
         s = max(s, character->scale.y);
@@ -372,16 +372,16 @@ void DrawManager::addObj(u8 group, ObjBase *character, bool no_culling) {
         group = RenderGroup::GROUP_7;
     }
     if (add(group, (Draw*)character, &character->position, no_culling) == true) {
-        character->flags |= Draw::VISIBLE;
+        character->drawFlags |= DrawFlag::DRAW_QUEUED;
     }
 }
 
 void DrawManager::add(u8 group, ModelBase *model, bool no_culling) {
-    model->flags &= ~Draw::VISIBLE;
+    model->drawFlags &= ~DrawFlag::DRAW_QUEUED;
     if (no_culling != false ||
         Camera::objectPtr->clip_check(&model->transform.w, model->model_pmo.header->clipping_distance) != false) {
         if (add(group, model, &model->transform.w, no_culling) == true) {
-            model->flags |= Draw::VISIBLE;
+            model->drawFlags |= DrawFlag::DRAW_QUEUED;
         }
     }
 }

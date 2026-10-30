@@ -70,9 +70,9 @@ void Joint::func_eboot_0885FFB4(ScePspFVector4 *arg1, s32 arg2, float arg3, floa
         pafVar2 = &alt_bind;
     }
     new_var3 = &f0x120;
-    func_eboot_088633C4(&pafVar2->transform, new_var3, &s.c, &s.a, &pafVar2->f0x64[4], arg3);
+    func_eboot_088633C4(&pafVar2->transform, new_var3, &s.c, &s.a, &pafVar2->f0x68[2], arg3);
     new_var3 = &f0x120;
-    func_eboot_088633C4(&pafVar2->transform, new_var3, &s.c, &s.b, &pafVar2->f0x64[4], arg4);
+    func_eboot_088633C4(&pafVar2->transform, new_var3, &s.c, &s.b, &pafVar2->f0x68[2], arg4);
 
     new_var2 = &s.b.w;
     new_var = &s.a.w;
@@ -81,7 +81,7 @@ void Joint::func_eboot_0885FFB4(ScePspFVector4 *arg1, s32 arg2, float arg3, floa
     arg1->w = 0.0f;
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_08860054);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", flGetHierarchyData2__5JointFPv);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_08860254);
 
@@ -112,7 +112,7 @@ void Joint::update(ScePspFMatrix4 *parentGlobalPose, ScePspFMatrix4 *parentLocal
     }
 }
 
-INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_08860534);
+INCLUDE_ASM("asm/eboot/nonmatchings/joint", flInitPostureHierarchySISub__5JointFP14ScePspFMatrix4);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_08860640);
 
@@ -122,7 +122,9 @@ INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_088606D8);
 
 INCLUDE_ASM("asm/eboot/nonmatchings/joint", func_eboot_08860700);
 
-Joint::~Joint() {}
+Joint::~Joint() {
+    // empty
+}
 
 void *Joint::operator new(u32 size, void *p) {
     return p;
