@@ -439,15 +439,12 @@ HairYureLookupEntry D_eboot_089B1E2C[132] = {
     {0x138, D_eboot_089B196C},
 {-1}};
 
-HairYureLookupEntry *HAIR_YURE_LOOKUP_BASE[SexId::COUNT] = {
-    D_eboot_089B1A8C, D_eboot_089B1DA4,
+HairYureLookupEntry *hair_move_tbl[2][SexId::COUNT] = {
+    {D_eboot_089B1A8C, D_eboot_089B1DA4},
+    {D_eboot_089B1ADC, D_eboot_089B1E2C},
 };
 
-HairYureLookupEntry *HAIR_YURE_LOOKUP_ARMOR[SexId::COUNT] = {
-    D_eboot_089B1ADC, D_eboot_089B1E2C,
-};
-
-u16 HAIR_YURE_BONE_RANGES[8][2] = {
+HairJointIds hair_id_tbl[8] = {
     {4, 6},
     {4, 5},
     {6, 7},
@@ -458,11 +455,11 @@ u16 HAIR_YURE_BONE_RANGES[8][2] = {
     {0, 2},
 };
 
-float HAIR_YURE_Z_OFFSETS[3] = {
+float hair_g_tbl[3] = {
     -0.2f, -1.0f, -1.5f,
 };
 
-ScePspFVector4 HAIR_YURE_REST_OFFSETS[14] = {
+ScePspFVector4 hair_dir_tbl[14] = {
     {0.0f, -0.5f, 0.0f},
     {0.0f, 0.0f, -1.0f},
     {0.0f, -0.4f, -0.2f},
@@ -479,7 +476,7 @@ ScePspFVector4 HAIR_YURE_REST_OFFSETS[14] = {
     {0.0f, -0.2f, -0.4f},
 };
 
-ScePspFVector2 HAIR_YURE_CHEST_OFFSETS[6] = {
+ScePspFVector2 hair_sphr_tbl[6] = {
     {8.0f, 13.0f},
     {10.5f, 11.0f},
     {6.0f, 0.0f},
@@ -488,14 +485,14 @@ ScePspFVector2 HAIR_YURE_CHEST_OFFSETS[6] = {
     {11.0f, 11.0f},
 };
 
-ScePspFVector4 HAIR_YURE_CHEST_NORMALS[4] = {
+ScePspFVector4 hair_wall_tbl[4] = {
     {0.0f, -0.3f, -1.0f},
     {0.0f, -0.2f, -1.0f},
     {0.0f, 0.0f, -1.0f},
     {0.0f, 0.0f, 1.0f},
 };
 
-YureBoundingBox HAIR_YURE_BOUNDING_BOXES[16] = {
+YureBoundingBox hair_border_tbl[16] = {
     {-0.01f, 0.01f, 0.1f, 100.0f, -0.05f, 100.0f},
     {-100.0f, 0.2f, -0.8f, 100.0f, -100.0f, 0.01f},
     {-0.2f, 100.0f, -0.8f, 100.0f, -100.0f, 0.01f},
@@ -514,15 +511,15 @@ YureBoundingBox HAIR_YURE_BOUNDING_BOXES[16] = {
     {-0.1f, 100.0f, 0.1f, 100.0f, -100.0f, 100.0f},
 };
 
-float HAIR_YURE_DAMPING[3] = {
+float hair_damp_tbl[3] = {
     0.8f, 0.9f, 0.6f,
 };
 
-float HAIR_YURE_POSE_BLENDS[4] = {
+float hair_adjust_tbl[4] = {
     0.5f, 1.0f, 0.3f, 2.0f,
 };
 
-HairYureDefinition HAIR_YURE_DEFINITIONS[62] = {
+HairYureDefinition hair_type_tbl[62] = {
     {0, 0, 1, 2, 0, 0, -1, 0, 0},
     {0, 1, 1, 0, 1, 2, 3, 0, 2},
     {1, 0, 1, 2, 3, 2, 0, 0, 0},

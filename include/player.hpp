@@ -13,23 +13,26 @@ struct YureBoundingBox {
     float zMax;
 };
 
+struct HairJointIds {
+    s16 start;
+    u16 end;
+};
+
 struct HairYureDefinition {
-    u16 boneRangeIndex;
-    u16 unknown_0x2;
-
-    s16 zOffsetIndex;
-    s16 restOffsetIndex;
-    s16 chestOffsetIndex;
-    s16 chestVectorIndex;
-    s16 boundingBoxIndex;
-
-    s16 dampingIndex;
-    s16 poseBlendIndex;
+    u16 jointIds;
+    u16 flags;
+    s16 gravity;
+    s16 restDir;
+    s16 planeBase;
+    s16 wallDir;
+    s16 border;
+    s16 damping;
+    s16 adjust;
 };
 
 struct HairYureLookupEntry {
     u32 modelId;
-    s16 *definitionIndices;
+    s16 *row;
 };
 
 struct SkillThreshold {
